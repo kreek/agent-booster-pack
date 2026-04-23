@@ -1,6 +1,7 @@
 # Smart Commit
 
-Analyse uncommitted changes and group them into logical, well-structured commits.
+Analyse uncommitted changes and group them into logical, well-structured
+commits.
 
 ## Instructions
 
@@ -14,7 +15,8 @@ git diff --cached --stat
 git log --oneline -10
 ```
 
-Stop if the repo is mid-merge, mid-rebase, or has conflict markers (`git status --short` shows `UU`/`AA`/`DD`). Report and ask how to proceed.
+Stop if the repo is mid-merge, mid-rebase, or has conflict markers
+(`git status --short` shows `UU`/`AA`/`DD`). Report and ask how to proceed.
 
 ### Step 2: Analyse and group changes
 
@@ -26,10 +28,14 @@ git diff --cached -- <staged-path>
 ```
 
 Group by meaning, not file type:
+
 - Keep code, tests, and docs together when they describe one change.
-- Split mechanical renames, formatting, generated output, or vendor churn into separate commits.
-- Respect already-staged changes as user intent; commit that set first when it is coherent.
-- Prefer whole-file groups. If one file mixes multiple logical changes, flag it and ask.
+- Split mechanical renames, formatting, generated output, or vendor churn into
+  separate commits.
+- Respect already-staged changes as user intent; commit that set first when it
+  is coherent.
+- Prefer whole-file groups. If one file mixes multiple logical changes, flag it
+  and ask.
 
 ### Step 3: Present proposal
 

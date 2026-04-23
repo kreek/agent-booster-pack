@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# Run after `stow agents` to wire cross-agent skill symlinks.
+# Run after `stow agents` to wire cross-agent skill and command symlinks.
 set -euo pipefail
 
 AGENTS_SKILLS="$HOME/.agents/skills"
+AGENTS_COMMANDS="$HOME/.agents/commands"
 
 # Claude Code: symlink the whole skills dir
 CLAUDE_SKILLS="$HOME/.claude/skills"
@@ -34,5 +35,35 @@ for skill_dir in "$AGENTS_SKILLS"/*/; do
     echo "Linked ~/.codex/skills/$skill_name → ~/.agents/skills/$skill_name"
   fi
 done
+
+# Commands: fan out each command file to every agent's expected location.
+# Claude Code → ~/.claude/commands/<name>.md
+# Codex CLI   → ~/.codex/prompts/<name>.md
+declare -a COMMAND_TARGETS=(
+  "$HOME/.claude/commands"
+  "$HOME/.codex/prompts"
+)
+
+for dir in "${COMMAND_TARGETS[@]}"; do
+  mkdir -p "$dir"
+done
+
+if [ -d "$AGENTS_COMMANDS" ]; then
+  for cmd_file in "$AGENTS_COMMANDS"/*.md; do
+    [ -e "$cmd_file" ] || continue
+    cmd_name=$(basename "$cmd_file")
+    for dir in "${COMMAND_TARGETS[@]}"; do
+      target="$dir/$cmd_name"
+      if [ -L "$target" ]; then
+        echo "${target/#$HOME/~} already symlinked, skipping"
+      elif [ -e "$target" ]; then
+        echo "WARNING: $target exists as a real file. Move or remove it, then re-run."
+      else
+        ln -s "$cmd_file" "$target"
+        echo "Linked ${target/#$HOME/~} → ~/.agents/commands/$cmd_name"
+      fi
+    done
+  done
+fi
 
 echo "Done."
