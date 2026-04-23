@@ -1,6 +1,10 @@
 ---
 name: smart-commit
-description: Use when asked to organise a messy working tree into clean commits, review uncommitted changes and propose a logical grouping, or create concise commit messages for staged changes. Also use when the user says "commit this", "clean up my commits", or asks to split changes into separate commits.
+description:
+  Use when asked to organise a messy working tree into clean commits, review
+  uncommitted changes and propose a logical grouping, or create concise commit
+  messages for staged changes. Also use when the user says "commit this", "clean
+  up my commits", or asks to split changes into separate commits.
 ---
 
 # Smart Commit
@@ -18,8 +22,11 @@ git log --oneline -10
 ```
 
 **Stop and ask** if:
-- The repo is mid-merge, mid-rebase, or has conflict markers in `git status --short` (`UU`, `AA`, `DD`)
-- Unrelated changes are mixed inside the same file and cannot be separated safely with whole-file staging
+
+- The repo is mid-merge, mid-rebase, or has conflict markers in
+  `git status --short` (`UU`, `AA`, `DD`)
+- Unrelated changes are mixed inside the same file and cannot be separated
+  safely with whole-file staging
 - The user asked only for a review — present the plan and stop; do not commit
 
 ---
@@ -38,9 +45,12 @@ git diff --cached -- path/to/file # staged changes
 ## Step 3: Group by Meaning
 
 - Keep code, tests, and docs **together** when they describe one change.
-- **Split** mechanical renames, formatting, generated output, and vendor churn into separate commits — they obscure behavioural changes.
-- **Respect existing staged changes** as user intent. If already-staged changes form a coherent set, commit them first.
-- Prefer whole-file groups. If one file mixes multiple logical changes, flag it and ask how to proceed.
+- **Split** mechanical renames, formatting, generated output, and vendor churn
+  into separate commits — they obscure behavioural changes.
+- **Respect existing staged changes** as user intent. If already-staged changes
+  form a coherent set, commit them first.
+- Prefer whole-file groups. If one file mixes multiple logical changes, flag it
+  and ask how to proceed.
 
 ---
 

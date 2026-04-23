@@ -17,18 +17,14 @@ git rebase -i HEAD~N
 git rebase -i $(git merge-base HEAD main)
 ```
 
-**Commands in the rebase todo list:**
-| Command | Action |
-|---|---|
-| `pick` | Keep commit as-is |
-| `reword` | Keep changes, edit message |
-| `edit` | Pause to amend the commit |
-| `squash` | Meld into previous commit, combine messages |
-| `fixup` | Meld into previous commit, discard this message |
-| `drop` | Remove the commit entirely |
-| `exec` | Run a shell command after this commit |
+**Commands in the rebase todo list:** | Command | Action | |---|---| | `pick` |
+Keep commit as-is | | `reword` | Keep changes, edit message | | `edit` | Pause
+to amend the commit | | `squash` | Meld into previous commit, combine messages |
+| `fixup` | Meld into previous commit, discard this message | | `drop` | Remove
+the commit entirely | | `exec` | Run a shell command after this commit |
 
 **Squash a PR branch to a clean history:**
+
 ```bash
 git rebase -i $(git merge-base HEAD main)
 # Mark all commits after the first as 'fixup'
@@ -75,6 +71,7 @@ git bisect reset  # return to HEAD
 ```
 
 **Automate with a test script:**
+
 ```bash
 git bisect start
 git bisect bad HEAD
@@ -83,20 +80,25 @@ git bisect run ./scripts/test-regression.sh
 # Script must exit 0 for good, non-zero for bad
 ```
 
-For flaky tests, use `git bisect skip` to skip commits where the test result is unreliable.
+For flaky tests, use `git bisect skip` to skip commits where the test result is
+unreliable.
 
 ---
 
 ## Conflict Resolution
 
 **Use rerere (reuse recorded resolution):**
+
 ```bash
 git config --global rerere.enabled true
 ```
 
-Once enabled, git records how you resolved a conflict. If the same conflict appears again (e.g. during rebase onto an updated main), git replays the resolution automatically.
+Once enabled, git records how you resolved a conflict. If the same conflict
+appears again (e.g. during rebase onto an updated main), git replays the
+resolution automatically.
 
 **Resolving conflicts:**
+
 ```bash
 git mergetool           # opens a configured 3-way merge tool
 # or edit files manually, then:
@@ -105,12 +107,14 @@ git rebase --continue   # or git merge --continue
 ```
 
 **Abort if stuck:**
+
 ```bash
 git rebase --abort      # returns to pre-rebase state
 git merge --abort       # returns to pre-merge state
 ```
 
 **Understanding conflict markers:**
+
 ```
 <<<<<<< HEAD (your changes)
 the_current_version()
@@ -119,13 +123,15 @@ the_incoming_version()
 >>>>>>> feature-branch
 ```
 
-Middle section (`=======` down) is what's coming in. Top section is your current state. You keep one, the other, or combine them, then remove all markers.
+Middle section (`=======` down) is what's coming in. Top section is your current
+state. You keep one, the other, or combine them, then remove all markers.
 
 ---
 
 ## Recovering with Reflog
 
-The reflog records every position HEAD has been at. It's your safety net for "I just destroyed my work."
+The reflog records every position HEAD has been at. It's your safety net for "I
+just destroyed my work."
 
 ```bash
 git reflog            # show recent HEAD history
@@ -138,7 +144,9 @@ git checkout -b recovery <sha-from-reflog>
 git reset --hard <sha-from-reflog>
 ```
 
-The reflog is local only and expires after 90 days (default). Objects that no longer have any reference are garbage collected. Use `git fsck --lost-found` to find truly orphaned objects.
+The reflog is local only and expires after 90 days (default). Objects that no
+longer have any reference are garbage collected. Use `git fsck --lost-found` to
+find truly orphaned objects.
 
 ---
 
@@ -150,9 +158,11 @@ Never `git push --force` to a shared branch. Use `--force-with-lease`:
 git push --force-with-lease origin feature-branch
 ```
 
-`--force-with-lease` refuses the push if someone else has pushed to the branch since your last fetch. It's the only safe way to push a rewritten history.
+`--force-with-lease` refuses the push if someone else has pushed to the branch
+since your last fetch. It's the only safe way to push a rewritten history.
 
-To be extra safe, combine with `--force-if-includes` (Git 2.30+), which verifies the remote tip is in your reflog.
+To be extra safe, combine with `--force-if-includes` (Git 2.30+), which verifies
+the remote tip is in your reflog.
 
 ---
 
@@ -162,18 +172,26 @@ A good PR description answers three questions: what, why, and how to verify.
 
 ```markdown
 ## What
-One paragraph summarising the change. Not a list of files changed — explain what the system can now do that it couldn't before.
+
+One paragraph summarising the change. Not a list of files changed — explain what
+the system can now do that it couldn't before.
 
 ## Why
-The motivation: bug that was occurring, feature requested, tech debt that was slowing things down, compliance requirement.
+
+The motivation: bug that was occurring, feature requested, tech debt that was
+slowing things down, compliance requirement.
 
 ## How to test
+
 - [ ] Run `make test` — all tests pass
-- [ ] Hit `POST /orders` with the example payload in `docs/examples/order.json` — returns 201
+- [ ] Hit `POST /orders` with the example payload in `docs/examples/order.json`
+      — returns 201
 - [ ] Check the `orders` table for the new row
 
 ## Rollback
-`git revert <sha>` is safe — no schema changes. Or redeploy the previous image tag.
+
+`git revert <sha>` is safe — no schema changes. Or redeploy the previous image
+tag.
 ```
 
 ---
@@ -182,16 +200,17 @@ The motivation: bug that was occurring, feature requested, tech debt that was sl
 
 Use labels to signal the weight of feedback, reducing misunderstandings:
 
-| Label | Meaning |
-|---|---|
-| `nitpick:` | Minor style issue; take it or leave it |
-| `suggestion:` | Improvement idea, not blocking |
-| `question:` | Genuinely asking, not criticism |
-| `issue:` | Problem that should be fixed before merging |
-| `blocker:` | Must be addressed before this can merge |
-| `praise:` | Good work, call it out explicitly |
+| Label         | Meaning                                     |
+| ------------- | ------------------------------------------- |
+| `nitpick:`    | Minor style issue; take it or leave it      |
+| `suggestion:` | Improvement idea, not blocking              |
+| `question:`   | Genuinely asking, not criticism             |
+| `issue:`      | Problem that should be fixed before merging |
+| `blocker:`    | Must be addressed before this can merge     |
+| `praise:`     | Good work, call it out explicitly           |
 
-Example: `suggestion: consider extracting this into a helper — it appears three times.`
+Example:
+`suggestion: consider extracting this into a helper — it appears three times.`
 
 ---
 
