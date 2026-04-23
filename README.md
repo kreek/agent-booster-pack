@@ -1,16 +1,21 @@
 # agent-config
 
-Public dotfiles for agent instruction files and skills. Managed with [GNU Stow](https://www.gnu.org/software/stow/).
+Public dotfiles for agent instruction files and skills. Managed with
+[GNU Stow](https://www.gnu.org/software/stow/).
 
-Pairs with [dotfiles](https://github.com/alastair/dotfiles) for editor and terminal config.
+Pairs with [dotfiles](https://github.com/alastair/dotfiles) for editor and
+terminal config.
 
 ## What's here
 
-- `agents/AGENTS.md` — cross-agent global instructions (source of truth)
-- `agents/.claude/CLAUDE.md` — thin Claude Code wrapper (`@../AGENTS.md` + Claude-specific extensions)
-- `agents/.codex/AGENTS.md` — thin Codex wrapper
-- `agents/.claude/commands/smart-commit.md` — Claude Code `/smart-commit` slash command
-- `agents/.agents/skills/` — 16 portable skills (Claude Code, Codex, Pi, OpenCode)
+- `agents/AGENTS.md` — cross-agent global instructions (source of truth; read by
+  Codex and Claude Code)
+- `agents/.claude/CLAUDE.md` — thin Claude Code wrapper (`@../AGENTS.md` +
+  Claude-specific extensions)
+- `agents/.agents/commands/` — cross-agent slash commands (fanned out to each
+  agent by `setup.sh`)
+- `agents/.agents/skills/` — 17 portable skills (Claude Code, Codex, Pi,
+  OpenCode)
 
 ## Install
 
@@ -23,15 +28,17 @@ stow agents
 ```
 
 `stow agents` creates:
-- `~/AGENTS.md` → this repo
-- `~/.claude/CLAUDE.md` → this repo
-- `~/.codex/AGENTS.md` → this repo
-- `~/.claude/commands/smart-commit.md` → this repo
-- `~/.agents/skills/` → this repo
 
-`setup.sh` then links skills into Claude Code and Codex:
-- `~/.claude/skills/` → `~/.agents/skills/`
+- `~/AGENTS.md` → this repo (read by Codex and Claude Code)
+- `~/.claude/CLAUDE.md` → this repo (Claude-specific extensions)
+- `~/.agents/skills/` → this repo
+- `~/.agents/commands/` → this repo
+
+`setup.sh` then fans out skills and commands to each agent:
+
+- `~/.claude/skills/` → `~/.agents/skills/` (whole-directory symlink)
 - Per-skill symlinks inside `~/.codex/skills/` (preserves marketplace skills)
+- Per-command symlinks into `~/.claude/commands/` and `~/.codex/prompts/`
 
 ## Remove
 
@@ -39,28 +46,30 @@ stow agents
 stow -D agents
 ```
 
-Manual cleanup of `~/.claude/skills/` and `~/.codex/skills/` symlinks may be needed.
+Manual cleanup of `~/.claude/skills/`, `~/.codex/skills/`,
+`~/.claude/commands/*`, and `~/.codex/prompts/*` symlinks may be needed.
 
 ## Skills
 
-| Skill | Tier | Trigger |
-|---|---|---|
-| `data-first-design` | 1 | data modelling, immutability, parse-don't-validate, illegal states |
-| `observability-for-services` | 1 | logging, metrics, traces, SLOs, OTel |
-| `api-design-backend` | 1 | REST, gRPC, OpenAPI, versioning, webhooks |
-| `distributed-systems-resilience` | 1 | retries, timeouts, circuit breakers, sagas, outbox |
-| `database-safety` | 1 | migrations, EXPLAIN, isolation levels, N+1, soft delete |
-| `security-review` | 1 | auth, crypto, OWASP, secrets, supply chain |
-| `testing-strategy` | 1 | mocks vs fakes, mutation testing, property-based testing |
-| `git-workflow-depth` | 1 | rebase, bisect, split commits, PR descriptions |
-| `error-handling-patterns` | 2 | Result/Either, error types, retry vs fail |
-| `caching-strategies` | 2 | cache-aside, stampede prevention, invalidation |
-| `concurrency-patterns` | 2 | locks, backpressure, actors, async traps |
-| `performance-profiling` | 2 | flame graphs, Amdahl, p99, micro-benchmark traps |
-| `debugging-methodology` | 2 | minimal repro, bisect, heisenbug, post-mortem |
-| `refactoring-safely` | 3 | characterization tests, Mikado, strangler fig |
-| `deployment-and-cicd` | 3 | pipelines, canary, feature flags, migration ordering |
-| `smart-commit` | — | organizing dirty worktrees into clean commits |
+| Skill                            | Tier | Trigger                                                            |
+| -------------------------------- | ---- | ------------------------------------------------------------------ |
+| `data-first-design`              | 1    | data modelling, immutability, parse-don't-validate, illegal states |
+| `observability-for-services`     | 1    | logging, metrics, traces, SLOs, OTel                               |
+| `api-design-backend`             | 1    | REST, gRPC, OpenAPI, versioning, webhooks                          |
+| `distributed-systems-resilience` | 1    | retries, timeouts, circuit breakers, sagas, outbox                 |
+| `database-safety`                | 1    | migrations, EXPLAIN, isolation levels, N+1, soft delete            |
+| `security-review`                | 1    | auth, crypto, OWASP, secrets, supply chain                         |
+| `testing-strategy`               | 1    | mocks vs fakes, mutation testing, property-based testing           |
+| `git-workflow-depth`             | 1    | rebase, bisect, split commits, PR descriptions                     |
+| `documentation`                  | 1    | READMEs, ADRs, runbooks, Diátaxis, doc rot, code comments          |
+| `error-handling-patterns`        | 2    | Result/Either, error types, retry vs fail                          |
+| `caching-strategies`             | 2    | cache-aside, stampede prevention, invalidation                     |
+| `concurrency-patterns`           | 2    | locks, backpressure, actors, async traps                           |
+| `performance-profiling`          | 2    | flame graphs, Amdahl, p99, micro-benchmark traps                   |
+| `debugging-methodology`          | 2    | minimal repro, bisect, heisenbug, post-mortem                      |
+| `refactoring-safely`             | 3    | characterization tests, Mikado, strangler fig                      |
+| `deployment-and-cicd`            | 3    | pipelines, canary, feature flags, migration ordering               |
+| `smart-commit`                   | —    | organizing dirty worktrees into clean commits                      |
 
 ## Adding a new skill
 
@@ -81,4 +90,7 @@ stow agents   # picks up the new directory
 
 ## Cross-agent compatibility
 
-Skills use the [Agent Skills open standard](https://agentskills.io) (Dec 2025). The YAML frontmatter works across Claude Code, Codex CLI, Pi, Cursor, Gemini CLI, Windsurf, and OpenCode. Claude-specific fields (`allowed-tools`, `when_to_use`, `paths`) are ignored by other agents per spec.
+Skills use the [Agent Skills open standard](https://agentskills.io) (Dec 2025).
+The YAML frontmatter works across Claude Code, Codex CLI, Pi, Cursor, Gemini
+CLI, Windsurf, and OpenCode. Claude-specific fields (`allowed-tools`,
+`when_to_use`, `paths`) are ignored by other agents per spec.
