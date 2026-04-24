@@ -69,8 +69,8 @@ the text worth reading.
 - Prefer typefaces with real italics, useful weights, clear punctuation, open
   apertures, distinguishable `I/l/1` and `O/0`, and reliable rendering at UI
   sizes.
-- Avoid browser-synthesized bold, italic, or small caps when quality matters.
-  If the font does not include the style, choose another treatment.
+- Avoid browser-synthesized bold, italic, or small caps when quality matters. If
+  the font does not include the style, choose another treatment.
 - Use variable fonts and optical sizing when they improve rendering across size
   ranges, but do not expose axes as decoration.
 - Traditional serif choices are legitimate for reading surfaces, but they must

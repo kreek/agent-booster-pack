@@ -90,15 +90,15 @@ Design quality comes from priority, restraint, and verification, not decoration.
 5. If no official or existing product design system applies to a generic
    product/tool UI, use Carbon and IBM Plex as the visual baseline before
    inventing custom tokens.
-6. Define typography early: type families, scale, measure, line-height,
-   vertical rhythm, and tabular/proportional numeral behavior.
+6. Define typography early: type families, scale, measure, line-height, vertical
+   rhythm, and tabular/proportional numeral behavior.
 7. Define hierarchy, layout, states, empty/error/loading behavior, and
    responsive rules.
 8. For collection UIs, design the populated state first, then
    empty/loading/error states. Empty states must disappear when items exist.
 9. Apply tokens consistently; avoid stray one-off values.
-10. Verify with real rendering, keyboard navigation, contrast, and reduced-motion
-   behavior.
+10. Verify with real rendering, keyboard navigation, contrast, and
+    reduced-motion behavior.
 11. Remove elements that do not change comprehension, trust, or actionability.
 
 ## Verification
