@@ -6,27 +6,29 @@
 
 A portable set of high-leverage skills for leveling up coding agents.
 
-This is my brain dump of 25+ years of software development: the habits,
-standards, and hard-won lessons I have accumulated while working in a startup
-environments through giant private and public sector organizations. It reflects
-the full gamut: doing everything at a startup (REST API in the morning, and Android
-SDK in the afternoon...) through API governance and leading an SRE team that guided
-40-odd teams toward better engineering practices.
+This is my brain dump of over 25 years of software development: the habits,
+standards, and hard-won lessons I accumulated working in startup environments
+through large private and public sector organizations. It reflects the full
+gamut: doing everything under the sun at a startup, through focused API
+governance, to leading SRE teams at large organizations and guiding multiple
+teams toward better engineering practices.
 
 This is my source of truth for how coding agents should reason, change code,
 prove correctness, and package work across Codex, Claude Code, and other agents
 that understand the Agent Skills layout. Since skills were introduced, I have
-documented and categorized each recurring correction I made to a model, turning
-those interventions into guidance for how agents should approach the next
-similar task. I also audited the skills libraries I could find and did not find
-many that focused on increasing the engineering maturity or code quality of what
+documented and categorized each recurring correction I made to a model and
+turned those interventions into guidance for how agents should approach the next
+similar task. I also audited the skills libraries I found and did not find many
+that focused on increasing the engineering maturity or code quality of what
 agents produced, so I made my own.
 
-Complexity is death for any software project. Rich Hickey's _Simple Made Easy_
-is the best talk I have ever heard on software engineering, and it is the
-baseline for this set of skills. From experience, agents produce their best
-results when they are pushed toward simplicity and required to prove their work
-rather than merely claim completion. In practice, that means:
+Complexity is death for any software project. Rich Hickey's “Simple Made Easy”
+is the best talk I have heard on software engineering, and its philosophy, along
+with other data-first functional best practices (even if working in ostensibly
+OOP languages), is the baseline for this set of skills. I have also learned from
+experience and research that agents produce their best results when pushed
+toward simplicity and required to prove their work rather than just claim
+completion. In practice, that means:
 
 - Model values, states, invariants, and effects before picking abstractions.
 - Turn every meaningful engineering claim into evidence.
@@ -50,8 +52,7 @@ rather than merely claim completion. In practice, that means:
 Prerequisites:
 
 - Git.
-- GNU Stow. `setup.sh` does not install Stow; it assumes `stow agents` has
-  already created the shared links.
+- GNU Stow.
 
 Install Stow if needed:
 
