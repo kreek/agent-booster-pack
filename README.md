@@ -47,10 +47,51 @@ rather than merely claim completion. In practice, that means:
 
 ## Install
 
+Prerequisites:
+
+- Git.
+- GNU Stow. `setup.sh` does not install Stow; it assumes `stow agents` has
+  already created the shared links.
+
+Install Stow if needed:
+
 ```sh
+# macOS
+brew install stow
+
+# Debian / Ubuntu
+sudo apt install stow
+
+# Fedora
+sudo dnf install stow
+```
+
+Fresh checkout and install:
+
+```sh
+git clone https://github.com/kreek/agent-booster-pack.git
+cd agent-booster-pack
 stow agents
 ./setup.sh
 ```
+
+`stow agents` is the main install step. It links the repo's `agents/` package
+into your home directory:
+
+- `~/AGENTS.md`
+- `~/.agents/skills/`
+- `~/.agents/commands/`
+- `~/.claude/CLAUDE.md`
+
+`./setup.sh` is the compatibility step. It does not install Stow, clone the
+repo, or merge instruction files. It adds tool-specific symlinks for agents that
+do not rely only on `~/.agents/skills/`:
+
+- `~/.claude/skills/` points at `~/.agents/skills/`
+- `~/.codex/skills/<name>/` links each portable skill individually
+- `~/.codeium/windsurf/skills/<name>/` links each skill when Windsurf is present
+- `~/.claude/commands/<name>.md` links command prompts
+- `~/.codex/prompts/<name>.md` is kept for legacy Codex prompt-command support
 
 `stow agents` does not merge files. If `~/AGENTS.md` already exists as a real
 file, Stow will report a conflict instead of appending the Agent Booster Pack
@@ -64,23 +105,11 @@ For an existing personal `~/AGENTS.md`, merge deliberately:
 3. Preserve the ABP rule that local project `AGENTS.md` files are additive and
    more specific, but must not weaken safety, proof, validation, or
    user-change-preservation requirements.
-4. Run `./setup.sh` so skills and command prompts are still linked even if
-   `~/AGENTS.md` is maintained manually.
-
-`stow agents` links the shared instruction and skill roots:
-
-- `~/AGENTS.md`
-- `~/.agents/skills/`
-- `~/.agents/commands/`
-- `~/.claude/CLAUDE.md`
-
-`setup.sh` adds tool-specific compatibility links:
-
-- `~/.claude/skills/` points at `~/.agents/skills/`
-- `~/.codex/skills/<name>/` links each portable skill individually
-- `~/.codeium/windsurf/skills/<name>/` links each skill when Windsurf is present
-- `~/.claude/commands/<name>.md` links command prompts
-- `~/.codex/prompts/<name>.md` is kept for legacy Codex prompt-command support
+4. Run `stow --ignore='^AGENTS\.md$' agents` so `~/.agents/skills/`,
+   `~/.agents/commands/`, and `~/.claude/CLAUDE.md` are still linked while your
+   existing `~/AGENTS.md` remains manually maintained.
+5. Run `./setup.sh` so tool-specific compatibility links are created from those
+   shared `~/.agents` links.
 
 Codex now discovers skills directly from `.agents/skills` / `~/.agents/skills`;
 do not rely on `~/.codex/prompts` for slash commands in current Codex CLI.
