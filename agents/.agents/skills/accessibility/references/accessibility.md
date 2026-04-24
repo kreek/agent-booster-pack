@@ -1,4 +1,4 @@
-# Accessibility — frontend-design
+# Accessibility
 
 WCAG 2.2 AA is the floor. Depth reference for the rules summarised in
 `SKILL.md`.
@@ -7,7 +7,7 @@ WCAG 2.2 AA is the floor. Depth reference for the rules summarised in
 
 ## POUR principles
 
-W3C Recommendation 5 October 2023. Also ISO/IEC 40500:2025. Quoted verbatim from
+W3C Recommendation; also published as ISO/IEC 40500. Quoted verbatim from
 https://www.w3.org/TR/WCAG22/ :
 
 > **Perceivable** — Information and user interface components must be
@@ -58,9 +58,9 @@ criterion.
 
 ## WCAG 3.0 status
 
-Still a Working Draft. Retitled _W3C Accessibility Guidelines_ (same acronym).
-Candidate Recommendation anticipated Q4 2027. Final Recommendation no earlier
-than 2028. **Do not use for compliance in 2026.**
+A Working Draft, retitled _W3C Accessibility Guidelines_ (same acronym). **Do
+not use for compliance until it reaches W3C Recommendation status** — check the
+W3C status page before relying on it.
 
 Preview of structural changes:
 

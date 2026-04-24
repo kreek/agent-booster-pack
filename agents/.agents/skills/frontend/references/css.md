@@ -1,8 +1,8 @@
 # Modern CSS — frontend-design
 
-Feature guidance as of April 2026. Browser support is a moving target: treat MDN
-Baseline and the linked browser-compat tables as the source of truth before
-shipping production code that depends on a newer feature.
+Browser support is a moving target: treat MDN Baseline and the linked
+browser-compat tables as the source of truth before shipping production code
+that depends on a newer feature.
 
 ---
 
@@ -140,9 +140,8 @@ Ref: https://developer.chrome.com/docs/web-platform/view-transitions/
 
 - **Motion** — https://motion.dev/ — Matt Perry's successor to Framer Motion /
   Motion One. WAAPI where possible, JS fallback. React, Vue, vanilla bindings.
-- **GSAP** — https://gsap.com/ — 100% free including all former Club plugins
-  since 30 April 2025 (Webflow acquired GreenSock Oct 2024). Use for timeline
-  orchestration, scroll choreography, SVG / canvas.
+- **GSAP** — https://gsap.com/ — 100% free including all former Club plugins.
+  Use for timeline orchestration, scroll choreography, SVG / canvas.
 - **Svelte transitions** — shipped in the framework. No install.
 - **Lottie** — https://airbnb.io/lottie/ — illustrative After Effects exports.
   Overkill for UI.

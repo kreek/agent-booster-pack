@@ -135,15 +135,18 @@ Vox-ATypI classification:
 - **Inter** (Rasmus Andersson, 2017, SIL OFL) — era-defining UI typeface. Tall
   x-height, open apertures, ink-traps, variable weight 100–900, optical sizing,
   tabular numbers, slashed zero. https://rsms.me/inter/
-- **Geist** / **Geist Mono** (Vercel × Basement Studio, 2023; Geist Pixel 2026).
-  Free. Swiss-descended; draws from Univers, SF Mono, SF Pro, Inter, Suisse
-  International. https://vercel.com/font
+- **Geist** / **Geist Mono** (Vercel × Basement Studio). Free. Swiss-descended;
+  draws from Univers, SF Mono, SF Pro, Inter, Suisse International.
+  https://vercel.com/font
 - **Söhne** / **Söhne Mono** (Kris Sowersby, Klim Type Foundry, 2019).
   Commercial. "The memory of Akzidenz-Grotesk framed through the reality of
-  Helvetica." Dominant in 2020s high-craft brands.
+  Helvetica." Common across high-craft brand systems.
   https://klim.co.nz/retail-fonts/soehne/
-- **IBM Plex** (Mike Abbink, 2017, open-source). The corporate superfamily.
-  https://www.ibm.com/plex/
+- **IBM Plex** (Mike Abbink, 2017, open-source). Preferred neutral superfamily
+  for generic ABP product/tool UI when no stronger brand, platform, or
+  jurisdictional type system applies. Use Plex Sans for interface text, Plex
+  Mono for code/technical values, and Plex Serif for editorial or long-form
+  explanation. https://www.ibm.com/plex/
 - **SF Pro** (Apple, 2015) — Apple platform default.
   https://developer.apple.com/fonts/
 
