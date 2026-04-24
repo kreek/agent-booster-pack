@@ -4,8 +4,8 @@ description:
   Use when adding logging, metrics, traces, health checks, dashboards, or
   alerts; when discussing SLOs, SLIs, error budgets, RED, USE, or Four Golden
   Signals; when instrumenting with OpenTelemetry; when diagnosing production
-  incidents; or when the user mentions structured logging, cardinality,
-  exemplars, or multi-window burn-rate alerting.
+  incidents; or when the user mentions structured logging, semantic logging, log
+  levels, cardinality, exemplars, or multi-window burn-rate alerting.
 ---
 
 # Observability
@@ -32,13 +32,16 @@ healthy, slow, failing, or saturated.
 ## Core Ideas
 
 1. Instrument behavior customers depend on, not just process internals.
-2. Use stable structured events with correlation/trace IDs.
-3. Metrics need bounded labels; cardinality is a production cost and reliability
+2. Logs are structured events with stable names, typed fields, severity,
+   outcome, and trace/correlation IDs. JSON alone is not enough.
+3. Use OpenTelemetry semantic conventions where they exist before inventing
+   custom field names.
+4. Metrics need bounded labels; cardinality is a production cost and reliability
    risk.
-4. Traces show cross-boundary causality; logs explain decisions.
-5. Alerts are SLO-backed and actionable, with runbooks and escalation.
-6. Health checks separate liveness from readiness.
-7. Sensitive data is redacted at source; collector filtering is defense in
+5. Traces show cross-boundary causality; logs explain decisions.
+6. Alerts are SLO-backed and actionable, with runbooks and escalation.
+7. Health checks separate liveness from readiness.
+8. Sensitive data is redacted at source; collector filtering is defense in
    depth.
 
 ## Workflow
@@ -46,18 +49,27 @@ healthy, slow, failing, or saturated.
 1. Identify the user-facing path, dependency, queue, or resource being observed.
 2. Choose RED for request paths and USE for resources.
 3. Add structured logs, metrics, and spans using the project's conventions.
-4. Bound labels and redact sensitive fields.
-5. Add dashboards that answer "is it broken?" and "where?" quickly.
-6. Add alerts only when action is clear and a runbook exists.
+4. For logging changes, read `references/logging.md` and define event names,
+   required fields, level policy, and safe payload rules.
+5. Bound labels and high-cardinality log fields; redact sensitive fields at the
+   source.
+6. Add dashboards that answer "is it broken?" and "where?" quickly.
+7. Add alerts only when action is clear and a runbook exists.
 
 ## Verification
 
 - [ ] New user-reachable paths emit request/error/duration or equivalent RED
       signal.
-- [ ] Logs carry stable keys and trace/correlation ID.
+- [ ] Logs are structured with stable event names, typed fields, severity,
+      outcome, and trace/correlation ID.
+- [ ] Log levels distinguish expected user/client failures from service
+      degradation and operator-actionable errors.
 - [ ] Traces cover important inbound and outbound boundaries.
 - [ ] Metric labels are bounded and do not include per-user/entity IDs.
-- [ ] No secrets, raw PII, or payment data appears in logs, metrics, or spans.
+- [ ] High-cardinality log attributes are intentional and not indexed by default
+      without a reason.
+- [ ] No secrets, tokens, raw PII, payment data, or unreviewed payload bodies
+      appear in logs, metrics, or spans.
 - [ ] Liveness does not depend on external systems; readiness does.
 - [ ] Alerts link to runbooks with immediate action and escalation.
 - [ ] Dashboards answer health, latency, errors, saturation, and dependency
@@ -70,12 +82,15 @@ Before real users, promote the path to the full checklist.
 
 ## Handoffs
 
-- Use `documentation` for runbook shape.
+- Use `docs` for runbook shape.
+- Use `realtime` for stream lag, fanout, replay, consumer group, and delivery
+  semantics before instrumenting them.
 - Use `deployment` for rollout gates and production verification.
 - Use `resilience` for remote dependency failure behavior.
 
 ## References
 
+- `references/logging.md`: structured and semantic logging rules.
 - OpenTelemetry: <https://opentelemetry.io/>
 - Google SRE Workbook, alerting on SLOs:
   <https://sre.google/workbook/alerting-on-slos/>
