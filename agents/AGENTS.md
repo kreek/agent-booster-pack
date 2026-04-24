@@ -32,8 +32,9 @@
 - Start with the happy path. Add edge cases when the requirement names them,
   they are security- or data-loss-relevant, or they are needed for a real
   boundary such as network, filesystem, database, or concurrency.
-- Preserve backwards compatibility only when required or clearly valuable;
-  otherwise surface the tradeoff before adding shims.
+- Preserve backwards compatibility only when required or clearly valuable. If
+  compatibility expectations are unclear, ask before adding shims or making a
+  breaking change.
 
 ## Skills
 
@@ -77,6 +78,8 @@ failures.
 Use these broadly when changing behavior or structure. They keep code provable,
 recoverable, and understandable.
 
+- `proof-driven-engineering`: use when engineering claims need explicit proof
+  obligations: data invariant, boundary, executable check, and evidence.
 - `behavior-testing`: use when adding, reviewing, or fixing tests; deciding what
   to mock; proving caller-visible behavior; addressing flakes or overspecified
   tests.
@@ -129,6 +132,10 @@ organized, not what the code should do.
   splitting/squashing commits, recovering history, or cleaning branch history.
 - `smart-commit`: use when grouping a messy working tree, proposing commit
   splits, writing commit messages, or committing approved changes.
+
+Proof obligations override style, aesthetics, and weak local conventions. If a
+behavior, invariant, contract, root-cause, or refactor-safety claim cannot be
+proven, say it is unproven rather than complete.
 
 ## Code and Data
 
@@ -206,8 +213,9 @@ tests. Test-first is optional; test-at-all is not.
 
 ## Git
 
-- Branch per change: never commit directly to `main`/`master`. One branch per
-  feature, fix, or refactor — even small ones.
+- Branch per change when the workflow supports it or the user asks. Never commit
+  directly to `main`/`master`; if branch creation is outside the agent's current
+  authority, keep changes uncommitted and say so.
 - Branch names use a type prefix: `feature/`, `fix/`, `refactor/`, `chore/`
   (e.g. `fix/null-on-login`).
 - One logical change per commit; keep commits atomic. If the subject needs
@@ -248,6 +256,11 @@ tests. Test-first is optional; test-at-all is not.
   introduction first, then build knowledge from there.
 - For new code and edits: explain why the change makes the software better and
   what it enables.
+- If you cannot explain how the change improves the system and what it enables
+  next, treat that as an AI-coding-agent smell: pause and consider a simpler or
+  better-scoped solution.
+- When materially different approaches are viable, present the options and
+  tradeoffs before choosing.
 - State assumptions when they affect the outcome.
 - Surface risks, tradeoffs, and blockers directly and early.
 - Justify non-obvious choices in one sentence; do not over-explain.

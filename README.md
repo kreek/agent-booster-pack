@@ -1,57 +1,123 @@
-# agent-config
+# Coding Agent Booster Pack
 
-Public dotfiles for agent instruction files and skills. Managed with
-[GNU Stow](https://www.gnu.org/software/stow/).
+A portable set of high-leverage skills for leveling up coding agents.
 
-Pairs with [dotfiles](https://github.com/alastair/dotfiles) for editor and
-terminal config.
+This is the source of truth for how coding agents should reason, change code,
+prove correctness, and package work across Codex, Claude Code, and other agents
+that understand the Agent Skills layout. Each skill is opened only when the task
+calls for it; the right draw gives the agent a sharper rule, workflow, and proof
+check for the work in front of it.
 
-## What's here
+The core philosophy is:
 
-- `agents/AGENTS.md` — cross-agent global instructions (source of truth; read by
-  Codex and Claude Code)
-- `agents/.claude/CLAUDE.md` — thin Claude Code wrapper (`@../AGENTS.md` +
-  Claude-specific extensions)
-- `agents/.agents/commands/` — cross-agent slash commands (fanned out to each
-  agent by `setup.sh`)
-- `agents/.agents/skills/` — 19 portable skills, auto-discovered by every coding
-  agent that honours the [agentskills.io](https://agentskills.io) open standard
+- data first: design values, states, invariants, and effects before abstractions
+- proof first: every meaningful engineering claim needs evidence
+- behavior first: tests enter through the boundary a caller actually uses
+- safety first: security, data loss, deploy risk, and production reliability
+  outrank style and local habit
+- small changes: one root cause, one logical behavior, one clean commit
+
+## Repository Shape
+
+- `agents/AGENTS.md` is the global instruction file and skill index.
+- `agents/.agents/skills/` contains portable skills for engineering judgment,
+  proof obligations, testing, safety, production quality, UX, and workflow.
+- `agents/.agents/commands/` contains cross-agent command prompts where a tool
+  still supports command fan-out.
+- `agents/.claude/CLAUDE.md` is a thin Claude Code wrapper around `AGENTS.md`.
+- `setup.sh` wires skills and commands into tool-specific locations.
 
 ## Install
 
 ```sh
-# From this repo root
 stow agents
-
-# Then run setup to wire cross-agent symlinks
 ./setup.sh
 ```
 
-`stow agents` creates:
+`stow agents` links the shared instruction and skill roots:
 
-- `~/AGENTS.md` → this repo (read by Codex and Claude Code)
-- `~/.claude/CLAUDE.md` → this repo (Claude-specific extensions)
-- `~/.agents/skills/` → this repo
-- `~/.agents/commands/` → this repo
+- `~/AGENTS.md`
+- `~/.agents/skills/`
+- `~/.agents/commands/`
+- `~/.claude/CLAUDE.md`
 
-`setup.sh` then fans out skills and commands to each agent. Two classes:
+`setup.sh` adds tool-specific compatibility links:
 
-**Needs per-tool symlinks** (tool looks in its own home dir, not `~/.agents/`):
+- `~/.claude/skills/` points at `~/.agents/skills/`
+- `~/.codex/skills/<name>/` links each portable skill individually
+- `~/.codeium/windsurf/skills/<name>/` links each skill when Windsurf is present
+- `~/.claude/commands/<name>.md` links command prompts
+- `~/.codex/prompts/<name>.md` is kept for legacy Codex prompt-command support
 
-- `~/.claude/skills/` → `~/.agents/skills/` (whole-directory symlink)
-- `~/.codex/skills/<name>/` — per-skill symlinks (preserves marketplace skills)
-- `~/.codeium/windsurf/skills/<name>/` — per-skill, wired only if Windsurf is
-  installed
+Codex now discovers skills directly from `.agents/skills` / `~/.agents/skills`;
+do not rely on `~/.codex/prompts` for slash commands in current Codex CLI.
 
-**Auto-discovers from `~/.agents/skills/`** (no extra wiring — stow alone is
-enough):
+## Skill System
 
-- Pi (`pi-mono`) — reads `~/.agents/skills/` natively
-- Cursor — reads `~/.agents/skills/` natively
-- Gemini CLI — reads `~/.agents/skills/` natively
-- OpenCode — reads `~/.agents/skills/` natively
+Skills are progressive context. Agents see only `name` and `description` until a
+skill triggers, then load the matching `SKILL.md`, and only read references or
+run scripts when the skill asks for them.
 
-Commands fan out to `~/.claude/commands/` and `~/.codex/prompts/`.
+The skill pack is deliberately not a checklist library. It is a set of
+discipline-enforcing lenses:
+
+| Area                      | Skills                                                                                              |
+| ------------------------- | --------------------------------------------------------------------------------------------------- |
+| Foundational design       | `data-first-design`, `proof-driven-engineering`                                                     |
+| Correctness and change    | `behavior-testing`, `debugging-methodology`, `refactoring-safely`, `error-handling-patterns`        |
+| Safety gates              | `security-review`, `database-safety`, `deployment-and-cicd`, `distributed-systems-resilience`       |
+| Production quality        | `observability-for-services`, `concurrency-patterns`, `performance-profiling`, `caching-strategies` |
+| Public/user surfaces      | `api-design`, `documentation`, `frontend-design`                                                    |
+| Project and repo workflow | `scaffolding`, `git-workflow-depth`, `smart-commit`                                                 |
+
+The most important addition is `proof-driven-engineering`: if an agent asserts a
+behavior, invariant, contract, root cause, or refactor-safety claim, it must
+name the proof obligation and evidence. Missing evidence is reported as
+unproven, not complete.
+
+## Authoring Rules
+
+Every skill should be short, directive, portable, and hard to skip:
+
+- Use portable frontmatter: `name` plus a trigger-focused `description`.
+- Put discriminating trigger words in the description; the body loads only after
+  the skill triggers.
+- State one Iron Law near the top when the skill has a non-negotiable rule.
+- Include `When to Use` and `When NOT to Use` so neighboring skills do not blur
+  together.
+- Use imperative workflow steps; do not write background essays.
+- Require evidence in `Verification`; unchecked proof obligations mean the work
+  is reported as unproven.
+- Use `Handoffs` to route to neighboring skills instead of duplicating their
+  bodies.
+- Put deterministic or fragile checks in `scripts/` so agents run them instead
+  of re-deriving them.
+- Put deeper reference material in `references/`; keep each referenced file one
+  hop from `SKILL.md`.
+- Delete stale or duplicative prose instead of preserving it as "context."
+
+## Maintenance
+
+After adding or renaming a skill:
+
+```sh
+./setup.sh
+```
+
+Then update:
+
+- `agents/AGENTS.md` so agents can route to it
+- this README so humans understand the pack
+- any neighboring skills' handoffs when routing changes
+
+Run the markdown check before publishing broad doc updates:
+
+```sh
+pnpm format:check
+```
+
+Use `pnpm format` only when you intend to rewrite all markdown formatting in the
+repo.
 
 ## Remove
 
@@ -59,61 +125,6 @@ Commands fan out to `~/.claude/commands/` and `~/.codex/prompts/`.
 stow -D agents
 ```
 
-Manual cleanup of `~/.claude/skills/`, `~/.codex/skills/`,
-`~/.codeium/windsurf/skills/`, `~/.claude/commands/*`, and `~/.codex/prompts/*`
-symlinks may be needed.
-
-## Skills
-
-| Skill                            | Tier | Trigger                                                                              |
-| -------------------------------- | ---- | ------------------------------------------------------------------------------------ |
-| `data-first-design`              | 1    | data modelling, immutability, parse-don't-validate, illegal states                   |
-| `observability-for-services`     | 1    | logging, metrics, traces, SLOs, OTel                                                 |
-| `api-design`                     | 1    | REST, OpenAPI, versioning, errors, pagination, idempotency, auth                     |
-| `distributed-systems-resilience` | 1    | retries, timeouts, circuit breakers, sagas, outbox                                   |
-| `database-safety`                | 1    | migrations, EXPLAIN, isolation levels, N+1, soft delete                              |
-| `security-review`                | 1    | auth, crypto, OWASP, secrets, supply chain                                           |
-| `behavior-testing`               | 1    | describe/context/it, what not to test, mock at edges, spec-style                     |
-| `git-workflow-depth`             | 1    | rebase, bisect, split commits, PR descriptions                                       |
-| `documentation`                  | 1    | READMEs, ADRs, runbooks, Diátaxis, doc rot, code comments                            |
-| `error-handling-patterns`        | 2    | Result/Either, error types, retry vs fail                                            |
-| `caching-strategies`             | 2    | cache-aside, stampede prevention, invalidation                                       |
-| `concurrency-patterns`           | 2    | locks, backpressure, actors, async traps                                             |
-| `performance-profiling`          | 2    | flame graphs, Amdahl, p99, micro-benchmark traps                                     |
-| `debugging-methodology`          | 2    | minimal repro, bisect, heisenbug, post-mortem                                        |
-| `refactoring-safely`             | 3    | characterization tests, Mikado, strangler fig                                        |
-| `deployment-and-cicd`            | 3    | pipelines, canary, feature flags, migration ordering                                 |
-| `frontend-design`                | 3    | Swiss/Bauhaus/Rams, OKLCH, WCAG 2.2, motion, design tokens, AI-look antidotes        |
-| `scaffolding`                    | —    | greenfield baseline — package manager, linter, formatter, typecheck, tests, coverage |
-| `smart-commit`                   | —    | organizing dirty worktrees into clean commits                                        |
-
-## Adding a new skill
-
-```sh
-mkdir agents/.agents/skills/my-skill
-cat > agents/.agents/skills/my-skill/SKILL.md << 'EOF'
----
-name: my-skill
-description: Use when [trigger]. [What it does]. [Key capabilities].
----
-
-# My Skill
-EOF
-
-stow agents   # picks up the new directory
-./setup.sh    # links it into ~/.codex/skills/ and any other per-tool paths
-```
-
-## Cross-agent compatibility
-
-Skills use the [Agent Skills open standard](https://agentskills.io) (Dec 2025).
-The YAML frontmatter works across Claude Code, Codex CLI, Pi, Cursor, Gemini
-CLI, Windsurf, and OpenCode. Claude-specific fields (`allowed-tools`,
-`when_to_use`, `paths`) are ignored by other agents per spec.
-
-### Skill authoring
-
-See [`SKILLS_BEST_PRACTICES.md`](SKILLS_BEST_PRACTICES.md) for the authoring
-checklist — frontmatter shape, description trigger quality, progressive
-disclosure via `references/`, directive-body style, and the pre-ship
-verification list.
+Manual cleanup may still be needed for tool-specific symlinks under
+`~/.claude/skills/`, `~/.codex/skills/`, `~/.codeium/windsurf/skills/`,
+`~/.claude/commands/`, and `~/.codex/prompts/`.
