@@ -1,7 +1,8 @@
-# Online DDL — Postgres and MySQL specifics
+# Online DDL
 
-Deep reference for the `database-safety` skill. When you reach for these is when
-the migration has to ship while the DB keeps serving traffic.
+Deep reference for the `database` skill. When you reach for these is when the
+migration has to ship while the DB keeps serving traffic. The supported defaults
+are SQLite and Postgres.
 
 ## Postgres
 
@@ -40,21 +41,23 @@ the migration has to ship while the DB keeps serving traffic.
 - `TRUNCATE` acquires `AccessExclusiveLock`. Cheap on empty tables, lethal on
   large ones if anything is reading.
 
-## MySQL / MariaDB
+## SQLite
 
-- `ALTER TABLE ... ALGORITHM=INPLACE, LOCK=NONE` for supported operations (add
-  column, add index, modify default). Check the docs per operation; not
-  everything supports `LOCK=NONE`.
-- Check `information_schema.INNODB_TRX` before any DDL — long-running
-  transactions will block the schema change indefinitely.
-- For large-table rewrites, pick by constraint:
-  - **gh-ost** — write-heavy MySQL 5.7+ on row-based replication. Triggerless,
-    binlog-tailing, pauseable, throttles on replication lag. Best default.
-  - **pt-online-schema-change** — when foreign keys or Galera/PXC are in play.
-    Triggers handle them; gh-ost does not.
-- Native online DDL in MySQL 8.0 handles many `ALTER` operations in-place with
-  minimal locking. Verify the specific operation supports `ALGORITHM=INSTANT` or
-  `INPLACE` before trusting it.
+- SQLite is the right default for embedded, local-first, small, or operationally
+  simple apps. Do not treat it like a horizontally scaled server database.
+- Keep migrations short. DDL takes database-level locks; large rewrites should
+  happen during a maintenance window or be moved to Postgres.
+- Simple `ALTER TABLE ... ADD COLUMN` changes are usually fine. Complex shape
+  changes often require the shadow-table pattern: create the new table, copy in
+  bounded batches, recreate indexes/triggers, verify, then swap.
+- Enable WAL for applications with concurrent readers:
+  ```sql
+  PRAGMA journal_mode = WAL;
+  ```
+- Set a busy timeout through the driver or:
+  ```sql
+  PRAGMA busy_timeout = 5000;
+  ```
 
 ## Tooling that enforces these rules
 
@@ -84,5 +87,6 @@ Every migration must be rehearsed against a production-sized copy:
 - Run the full migration; record wall-clock time.
 - If the migration took >5 min on a table you care about, it is
   production-hostile — redesign it.
-- Capture `pg_stat_activity` / `information_schema.INNODB_TRX` during the run to
-  confirm lock behaviour matches expectation.
+- Capture `pg_stat_activity` during Postgres migrations, and rehearse SQLite
+  migrations against a copy of the real database file to confirm lock behaviour
+  matches expectation.

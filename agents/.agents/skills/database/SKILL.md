@@ -29,14 +29,25 @@ that first makes application code depend on the new shape.
 
 ## Core Ideas
 
-1. Expand, migrate, verify, switch, then contract in separate deployable steps.
-2. Review SQL and lock behavior, not just ORM code.
-3. Backfills are batched, resumable, observable, and rollback-aware.
-4. New indexes and constraints must be online or staged for the target database.
-5. Query changes need plans on production-shaped data.
-6. Isolation level is a design decision; retries are part of serializable
+1. Default to SQLite or Postgres. SQLite is for embedded, local-first, small, or
+   operationally simple apps; Postgres is the server database default.
+2. Use Postgres until you can prove it is the wrong tool. It is solid,
+   well-understood, and covers many storage shapes through extensions and native
+   features: JSONB/document-like data, full-text search, geospatial data,
+   vectors, time-series patterns, constraints, indexes, and transactional SQL.
+3. Do not introduce a document store just because the payload is JSON. Use a
+   document store only when the project needs its unique benefits: native
+   document API semantics, partitioned/global scale, offline sync model, change
+   streams, or an operational platform the team explicitly wants.
+4. Expand, migrate, verify, switch, then contract in separate deployable steps.
+5. Review SQL and lock behavior, not just ORM code.
+6. Backfills are batched, resumable, observable, and rollback-aware.
+7. New indexes and constraints must be online or staged for the target database.
+8. Query changes need plans on production-shaped data.
+9. Isolation level is a design decision; retries are part of serializable
    correctness.
-7. Data recovery is part of the change: backup/PITR must cover the blast radius.
+10. Data recovery is part of the change: backup/PITR must cover the blast
+    radius.
 
 ## Workflow
 

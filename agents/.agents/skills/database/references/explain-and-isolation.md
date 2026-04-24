@@ -1,7 +1,8 @@
-# EXPLAIN and transaction isolation — depth reference
+# EXPLAIN and transaction isolation
 
-Deep reference for the `database-safety` skill. How to read a query plan and how
-isolation levels actually differ.
+Deep reference for the `database` skill. How to read a query plan and how
+isolation levels actually differ for the supported defaults: SQLite and
+Postgres.
 
 ## Reading Postgres EXPLAIN
 
@@ -89,20 +90,20 @@ Zero-scan indexes cost write throughput. If stats are fresh (no recent
   True serializability. Transactions may abort with
   `SQLSTATE 40001 serialization_failure`. **Callers MUST retry.**
 
-### MySQL InnoDB
+### SQLite (what you actually get)
 
-- **Repeatable Read** (default) — uses **gap locks** to prevent phantoms.
-  Different shape from PG: range queries hold gap locks that can deadlock with
-  concurrent inserts. Different tuning implications.
-- **Serialisable** — converts SELECTs to `SELECT ... LOCK IN SHARE MODE`.
-  Everything takes locks; prone to contention.
-
-### SQL Server
-
-- Default is **Read Committed** with locking semantics. Readers block writers
-  and vice versa.
-- Turn on `READ_COMMITTED_SNAPSHOT` at the DB level to get MVCC semantics (like
-  Postgres). Strongly recommended for any new workload.
+- SQLite is an excellent embedded/local database, but it has a single-writer
+  concurrency model. Treat write contention as a design constraint, not an
+  afterthought.
+- Prefer WAL mode for apps with concurrent readers and a writer:
+  `PRAGMA journal_mode = WAL;`.
+- Use `PRAGMA busy_timeout = ...;` or equivalent driver configuration so brief
+  writer contention waits instead of failing immediately.
+- `BEGIN DEFERRED` is the default; use `BEGIN IMMEDIATE` when the operation is
+  definitely going to write and should acquire the write lock up front.
+- For server apps with multiple independent writers, background jobs, reporting,
+  or operational scaling needs, move to Postgres rather than fighting SQLite's
+  concurrency model.
 
 ### Write skew, concretely
 
@@ -131,3 +132,5 @@ Under **Repeatable Read** both commit. Under **Serialisable** one aborts with
 - Need invariants enforced across transactions: **Serialisable** + retry loop.
 - Want specific locks: `SELECT ... FOR UPDATE` / `SELECT ... FOR SHARE`,
   regardless of level.
+- SQLite default: keep writes short, enable WAL for concurrent readers, and use
+  `BEGIN IMMEDIATE` when write-lock acquisition must be explicit.
