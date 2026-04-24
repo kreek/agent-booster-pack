@@ -27,6 +27,8 @@ under load.
 ## When NOT to Use
 
 - Remote-call resilience; use `resilience`.
+- External event streams, brokers, subscriptions, offsets, lag, replay, or
+  consumer groups; use `realtime`.
 - Performance measurement without concurrency design changes; use `performance`.
 - Database transaction isolation; use `database`.
 
@@ -66,6 +68,8 @@ under load.
 ## Handoffs
 
 - Use `data` to remove shared mutable state from the core design.
+- Use `realtime` for external stream/broker topology, delivery semantics,
+  offsets, replay, and lag.
 - Use `observability` when concurrency failure needs metrics, traces, or
   saturation dashboards.
 - Use `debugging` for existing races or deadlocks before changing code.

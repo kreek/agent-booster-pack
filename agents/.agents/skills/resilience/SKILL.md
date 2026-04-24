@@ -3,8 +3,10 @@ name: resilience
 description:
   Use when writing code that makes remote calls, when designing retries or
   timeouts, when discussing idempotency, circuit breakers, sagas, outbox
-  patterns, event ordering, or consistency models; when the user mentions CAP,
-  PACELC, exactly-once, message brokers, Temporal, or eventual consistency.
+  patterns, or consistency models; when the user mentions CAP, PACELC, Temporal,
+  or eventual consistency. Use realtime for event stream shape, broker choice,
+  delivery guarantees, ordering, offsets, replay, lag, and consumer-group
+  design.
 ---
 
 # Resilience
@@ -26,6 +28,8 @@ into a larger outage.
 
 - In-process concurrency only; use `concurrency`.
 - HTTP surface design only; use `api`.
+- Event stream transport, ordering, fanout, replay, lag, offsets, or broker
+  selection; use `realtime`.
 - Deployment rollout mechanics; use `deployment`.
 
 ## Core Ideas
@@ -67,6 +71,8 @@ into a larger outage.
 ## Handoffs
 
 - Use `errors` for propagation, wrapping, and user-facing failure shape.
+- Use `realtime` for event stream shape, broker choice, delivery semantics,
+  partitioning, offsets, replay, lag, and fanout.
 - Use `observability` for dependency metrics, traces, alerts, and runbooks.
 - Use `api` for public idempotency-key and error-response contracts.
 

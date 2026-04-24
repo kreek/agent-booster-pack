@@ -6,10 +6,10 @@ description:
   editing an OpenAPI spec, deciding on URI structure or HTTP verbs, shaping JSON
   request/response bodies, handling error responses and status codes, versioning
   an API, adding pagination, choosing between API keys and OAuth, designing
-  webhooks, implementing idempotency keys, rate limiting, or reviewing API code
-  for consistency. Trigger even when the user does not say "best practices",
-  especially when they mention RFC 9457, Problem Details, cursor pagination,
-  Sunset header, or Idempotency-Key.
+  webhooks, implementing idempotency keys, rate limiting, designing SSE or
+  subscription endpoints, or reviewing API code for consistency. Trigger even
+  when the user does not say "best practices", especially when they mention RFC
+  9457, Problem Details, cursor pagination, Sunset header, or Idempotency-Key.
 ---
 
 # API
@@ -81,10 +81,12 @@ a new version or a documented deprecation window with a successor path.
 
 - Use `proof` when API claims need explicit proof obligations.
 - Use `security` for authn/authz, input trust, SSRF, secrets, and data exposure.
+- Use `realtime` for SSE/subscription transport, event stream semantics,
+  ordering, replay, and delivery guarantees.
 - Use `resilience` for remote-call retries, idempotent consumers, and delivery
   guarantees.
-- Use `documentation` when deciding where API docs live; generated contract
-  reference is the source of truth.
+- Use `docs` when deciding where API docs live; generated contract reference is
+  the source of truth.
 
 ## References
 
