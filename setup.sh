@@ -5,6 +5,37 @@ set -euo pipefail
 AGENTS_SKILLS="$HOME/.agents/skills"
 AGENTS_COMMANDS="$HOME/.agents/commands"
 
+if [ ! -d "$AGENTS_SKILLS" ]; then
+  echo "ERROR: $AGENTS_SKILLS is missing. Run 'stow agents' from the repo root first." >&2
+  exit 1
+fi
+
+AGENTS_SKILLS_REAL=$(cd "$AGENTS_SKILLS" && pwd -P)
+
+points_into_agents_skills() {
+  case "$1" in
+    "$AGENTS_SKILLS"/* | "$AGENTS_SKILLS_REAL"/*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+prune_stale_skill_links() {
+  local label="$1"
+  local target_dir="$2"
+  local target link_target
+
+  for target in "$target_dir"/*; do
+    [ -e "$target" ] || [ -L "$target" ] || continue
+    [ -L "$target" ] || continue
+
+    link_target=$(readlink "$target")
+    if points_into_agents_skills "$link_target" && [ ! -e "$target" ]; then
+      rm "$target"
+      echo "$label: removed stale skill link $(basename "$target")"
+    fi
+  done
+}
+
 # Claude Code: symlink the whole skills dir
 CLAUDE_SKILLS="$HOME/.claude/skills"
 if [ -L "$CLAUDE_SKILLS" ]; then
@@ -29,12 +60,26 @@ link_skills_per_agent() {
     return
   fi
   mkdir -p "$target_dir"
+  prune_stale_skill_links "$label" "$target_dir"
   for skill_dir in "$AGENTS_SKILLS"/*/; do
     local skill_name
+    local expected_target
+    local expected_real_target
+    local current_target
     skill_name=$(basename "$skill_dir")
     local target="$target_dir/$skill_name"
+    expected_target="${skill_dir%/}/"
+    expected_real_target="$AGENTS_SKILLS_REAL/$skill_name/"
     if [ -L "$target" ]; then
-      echo "$label: $skill_name already symlinked, skipping"
+      current_target=$(readlink "$target")
+      if [ "$current_target" = "$expected_target" ] \
+        || [ "$current_target" = "${expected_target%/}" ] \
+        || [ "$current_target" = "$expected_real_target" ] \
+        || [ "$current_target" = "${expected_real_target%/}" ]; then
+        echo "$label: $skill_name already symlinked, skipping"
+      else
+        echo "WARNING: $target is a symlink to $current_target. Expected $expected_target. Skipping."
+      fi
     elif [ -d "$target" ]; then
       echo "WARNING: $target exists as a real directory. Skipping."
     else
