@@ -122,6 +122,9 @@ hard to maintain.
 Use these for repository mechanics and change packaging. They govern how work is
 organized, not what the code should do.
 
+- `scaffolding`: use when bootstrapping a new project, adding baseline tooling
+  (linter, formatter, type check, test runner, coverage) to a project that lacks
+  it, or setting up initial CI config.
 - `git-workflow-depth`: use when rebasing, bisecting, resolving conflicts,
   splitting/squashing commits, recovering history, or cleaning branch history.
 - `smart-commit`: use when grouping a messy working tree, proposing commit
@@ -180,6 +183,26 @@ not.
 - Run the narrowest relevant validation first, then broaden only if needed.
 - Use the project's existing test, lint, and build commands.
 - If validation cannot be run, say so and explain why.
+
+## Done means proven
+
+A feature is not complete until its user-observable behaviors are exercised by
+tests. Test-first is optional; test-at-all is not.
+
+- Identify the outermost boundary the user reaches — HTTP endpoint, UI
+  interaction, CLI invocation, public API. That is where tests enter.
+- Write at least one `when X, Y happens` test per user-visible behavior. A
+  feature with three endpoints and five distinct behaviors across them needs
+  five tests, not one.
+- Internal helpers and persistence modules do not need their own tests when
+  outer-boundary tests exercise them. They do need tests when the logic is
+  non-trivial in isolation — parsers, state machines, pure algorithms.
+- Load the `behavior-testing` skill before authoring tests. Do not skip it.
+- When starting a new project or adding quality tooling to one that lacks it,
+  load the `scaffolding` skill so linter, formatter, type check, test runner,
+  and coverage are all in place before feature work begins.
+- If you cannot run the tests in the sandbox (missing deps, no DB, no network),
+  say so and name what would be needed. Do not quietly ship untested code.
 
 ## Git
 

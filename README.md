@@ -14,7 +14,7 @@ terminal config.
   Claude-specific extensions)
 - `agents/.agents/commands/` — cross-agent slash commands (fanned out to each
   agent by `setup.sh`)
-- `agents/.agents/skills/` — 18 portable skills, auto-discovered by every coding
+- `agents/.agents/skills/` — 19 portable skills, auto-discovered by every coding
   agent that honours the [agentskills.io](https://agentskills.io) open standard
 
 ## Install
@@ -65,26 +65,27 @@ symlinks may be needed.
 
 ## Skills
 
-| Skill                            | Tier | Trigger                                                                       |
-| -------------------------------- | ---- | ----------------------------------------------------------------------------- |
-| `data-first-design`              | 1    | data modelling, immutability, parse-don't-validate, illegal states            |
-| `observability-for-services`     | 1    | logging, metrics, traces, SLOs, OTel                                          |
-| `api-design`                     | 1    | REST, OpenAPI, versioning, errors, pagination, idempotency, auth              |
-| `distributed-systems-resilience` | 1    | retries, timeouts, circuit breakers, sagas, outbox                            |
-| `database-safety`                | 1    | migrations, EXPLAIN, isolation levels, N+1, soft delete                       |
-| `security-review`                | 1    | auth, crypto, OWASP, secrets, supply chain                                    |
-| `behavior-testing`               | 1    | describe/context/it, what not to test, mock at edges, spec-style              |
-| `git-workflow-depth`             | 1    | rebase, bisect, split commits, PR descriptions                                |
-| `documentation`                  | 1    | READMEs, ADRs, runbooks, Diátaxis, doc rot, code comments                     |
-| `error-handling-patterns`        | 2    | Result/Either, error types, retry vs fail                                     |
-| `caching-strategies`             | 2    | cache-aside, stampede prevention, invalidation                                |
-| `concurrency-patterns`           | 2    | locks, backpressure, actors, async traps                                      |
-| `performance-profiling`          | 2    | flame graphs, Amdahl, p99, micro-benchmark traps                              |
-| `debugging-methodology`          | 2    | minimal repro, bisect, heisenbug, post-mortem                                 |
-| `refactoring-safely`             | 3    | characterization tests, Mikado, strangler fig                                 |
-| `deployment-and-cicd`            | 3    | pipelines, canary, feature flags, migration ordering                          |
-| `frontend-design`                | 3    | Swiss/Bauhaus/Rams, OKLCH, WCAG 2.2, motion, design tokens, AI-look antidotes |
-| `smart-commit`                   | —    | organizing dirty worktrees into clean commits                                 |
+| Skill                            | Tier | Trigger                                                                              |
+| -------------------------------- | ---- | ------------------------------------------------------------------------------------ |
+| `data-first-design`              | 1    | data modelling, immutability, parse-don't-validate, illegal states                   |
+| `observability-for-services`     | 1    | logging, metrics, traces, SLOs, OTel                                                 |
+| `api-design`                     | 1    | REST, OpenAPI, versioning, errors, pagination, idempotency, auth                     |
+| `distributed-systems-resilience` | 1    | retries, timeouts, circuit breakers, sagas, outbox                                   |
+| `database-safety`                | 1    | migrations, EXPLAIN, isolation levels, N+1, soft delete                              |
+| `security-review`                | 1    | auth, crypto, OWASP, secrets, supply chain                                           |
+| `behavior-testing`               | 1    | describe/context/it, what not to test, mock at edges, spec-style                     |
+| `git-workflow-depth`             | 1    | rebase, bisect, split commits, PR descriptions                                       |
+| `documentation`                  | 1    | READMEs, ADRs, runbooks, Diátaxis, doc rot, code comments                            |
+| `error-handling-patterns`        | 2    | Result/Either, error types, retry vs fail                                            |
+| `caching-strategies`             | 2    | cache-aside, stampede prevention, invalidation                                       |
+| `concurrency-patterns`           | 2    | locks, backpressure, actors, async traps                                             |
+| `performance-profiling`          | 2    | flame graphs, Amdahl, p99, micro-benchmark traps                                     |
+| `debugging-methodology`          | 2    | minimal repro, bisect, heisenbug, post-mortem                                        |
+| `refactoring-safely`             | 3    | characterization tests, Mikado, strangler fig                                        |
+| `deployment-and-cicd`            | 3    | pipelines, canary, feature flags, migration ordering                                 |
+| `frontend-design`                | 3    | Swiss/Bauhaus/Rams, OKLCH, WCAG 2.2, motion, design tokens, AI-look antidotes        |
+| `scaffolding`                    | —    | greenfield baseline — package manager, linter, formatter, typecheck, tests, coverage |
+| `smart-commit`                   | —    | organizing dirty worktrees into clean commits                                        |
 
 ## Adding a new skill
 
