@@ -77,6 +77,34 @@ Quick examples of tests that should not exist:
 A test earns its place when it proves behavior that is specific to your feature
 and would plausibly break if someone refactored.
 
+## Enter at the outermost observable boundary
+
+When a feature is reachable from outside the process, its user lives outside the
+process. Test at that boundary, not at an internal seam. A passing
+`normalizeUrl()` unit test does not prove `POST /api/links` returns 201 with a
+short URL.
+
+Pick the entry point by app shape:
+
+| App shape                     | Test through                                                                                                                 |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| HTTP service / REST / GraphQL | Send real requests through the framework's test client (SvelteKit adapter, supertest, `httpx.AsyncClient`, Rack::Test, etc.) |
+| Web UI (SSR or SPA)           | Render via a component-testing library; interact via role-based queries                                                      |
+| CLI                           | Spawn the binary with argv and stdin; assert on stdout, stderr, and exit code                                                |
+| Library                       | Call the public API; assert on return values and emitted effects                                                             |
+| Background worker             | Enqueue a real message; assert on downstream state changes                                                                   |
+| Stream processor              | Feed input records; assert on output records                                                                                 |
+
+Rule: **pick the outermost boundary you own, and test through it.** Tests below
+that boundary only earn their place when the logic they cover is non-trivial in
+isolation — a pure algorithm, a parser, a complex state machine. A thin
+persistence layer whose only job is to wrap SQL does not need unit tests; the
+endpoint tests cover it.
+
+Common miss for web apps: the agent writes unit tests for a `db.ts` or
+`service.ts` module and stops, leaving the HTTP handlers, form actions, and
+redirects untested. Those are where the feature lives. Test them.
+
 ## The three blocks
 
 Most spec-style frameworks give you three nesting blocks. They mean different
