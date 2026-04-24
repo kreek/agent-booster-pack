@@ -20,9 +20,12 @@
   incorrect, brittle, overcomplicated, or hostile to readability.
 - Introduce no new dependencies, formatters, or build tools unless the task
   clearly requires them.
-- Node package manager: match the repo's lockfile — `pnpm-lock.yaml` → pnpm,
-  `package-lock.json` → npm, `yarn.lock` → yarn. If none exists, default to
-  `pnpm`. Never mix managers in one repo.
+- Package managers: match the repo's existing lockfile or manifest. When
+  starting fresh, default to the modern preferred tool for the ecosystem:
+  **pnpm** (Node), **uv** (Python), **bundler** (Ruby), **cargo** (Rust), **go
+  modules** (Go), **composer** (PHP), **gradle** (Java/Kotlin, unless the
+  project is locked to Maven), **SwiftPM** (Swift), **dotnet/NuGet** (.NET),
+  **mix** (Elixir). Never mix managers in one repo.
 - For non-trivial, ambiguous, or risky changes, state the short plan,
   assumptions, and tradeoffs before editing. Ask only when the answer changes
   the implementation or risk.
