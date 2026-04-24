@@ -9,8 +9,8 @@ A portable set of high-leverage skills for leveling up coding agents.
 This is my brain dump of 25+ years of software development: the habits,
 standards, and hard-won lessons I have accumulated while working in a startup
 environments through giant private and public sector organizations. It reflects
-the full gamut: doing everything at a startup – API in the morning, and Android
-SDK in the afternoon – through API governance and leading an SRE team that guided
+the full gamut: doing everything at a startup (REST API in the morning, and Android
+SDK in the afternoon...) through API governance and leading an SRE team that guided
 40-odd teams toward better engineering practices.
 
 This is my source of truth for how coding agents should reason, change code,
