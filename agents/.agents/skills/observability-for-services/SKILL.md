@@ -34,6 +34,46 @@ logger.info("payment processed",
     amount_cents=order.total_cents)
 ```
 
+**Semantic conventions:** use stable OTel attribute names
+(`http.request.method`, `server.address`, `url.path`). Do not invent custom keys
+when a stable semconv exists. Set `OTEL_SEMCONV_STABILITY_OPT_IN=http` during
+migration from legacy `net.*` attributes.
+
+---
+
+## Tracer-Bullet Instrumentation
+
+Before tuning any signal, ship one request end-to-end that emits all three:
+
+1. A trace span for the request.
+2. A structured log line carrying `trace_id`.
+3. A RED metric increment.
+
+If any of the three is missing, the service is flying blind — fix before adding
+features. When diagnosing a slow path, pull a trace with exemplars first. No
+trace → add one → then diagnose. Don't guess.
+
+---
+
+## Wide Events vs Three Pillars
+
+For new services, prefer one wide structured event per request (all fields on
+the root span) over scattering context across logs + metrics + traces. Derive
+metrics from events where the backend supports it. Keep metrics as a separate
+signal only for cheap long-retention SLO/burn-rate math.
+
+---
+
+## Instrumentation Coverage Checklist
+
+Every service exposes:
+
+1. RED metrics on every inbound endpoint.
+2. A root span per request.
+3. Span events for retries, timeouts, circuit-breaker trips.
+4. `/health/live` and `/health/ready`.
+5. A build-info metric with `service.version` and `git.sha`.
+
 ---
 
 ## Which Signal Framework to Apply
@@ -42,7 +82,7 @@ logger.info("payment processed",
 | ------------------------------------------- | -------------------------------------------- | --------------------------------------- |
 | **RED** (Rate / Errors / Duration)          | Request-driven services (HTTP, gRPC, queues) | req/s, error rate, p99 latency          |
 | **USE** (Utilisation / Saturation / Errors) | Infrastructure resources (CPU, DB, queues)   | utilisation %, queue depth, error count |
-| **Four Golden Signals** (Google SRE)        | Superset of RED + Saturation                 | latency, traffic, errors, saturation    |
+| **Four Golden Signals**                     | Superset of RED + Saturation                 | latency, traffic, errors, saturation    |
 
 Start with RED for any service that handles requests. Add USE metrics for the
 resources that service depends on.
@@ -56,16 +96,41 @@ resources that service depends on.
    breaks dashboards, alerts, and log parsers.
 3. **ISO-8601 UTC** for all timestamps. `2026-04-23T11:00:00.000Z`, not epoch
    seconds, not local time.
-4. **Log levels with discipline:**
-   - `ERROR` — something is broken and needs attention now.
-   - `WARN` — something is wrong but the system is handling it. Review
-     periodically.
-   - `INFO` — key lifecycle events (service start, request complete, job
-     finished).
-   - `DEBUG` — verbose context useful during development. Off in production.
+4. **Four levels only:**
+   - `ERROR` — page-worthy. Something is broken.
+   - `WARN` — recurring = ticket. System is handling it but review it.
+   - `INFO` — key lifecycle events. When unsure between WARN and INFO, pick INFO
+     and add a structured `severity` field for query-time filtering.
+   - `DEBUG` — verbose context. Off in production.
 5. **No secrets in logs.** Mask tokens, passwords, PII before logging.
 6. **Log the outcome, not the intent.** `payment_succeeded` not
    `attempting_payment`.
+7. **Write for the 3am on-call human.** Every line names the entity
+   (`order_id=…`), the outcome (`payment_succeeded=true`), and one causal hint
+   (`reason=insufficient_funds`). Narrate the incident in the order a human
+   would tell it.
+
+---
+
+## Sampling
+
+- Head-sample traces at 1–10% for baseline load.
+- Tail-sample (collector-side) to keep 100% of errors and p99 traces.
+- Never sample out logs that carry a non-2xx status.
+
+---
+
+## PII and Redaction
+
+Minimise telemetry at the source. Applications choose safe event fields and
+redact, tokenize, or HMAC sensitive values before logs, spans, or metrics leave
+the process. The OTel Collector's attributes/redaction processors are
+defense-in-depth and central policy enforcement, not the primary control.
+
+Wide events still obey this rule: rich context is useful only after secrets, raw
+PII, payment data, and raw payload bodies have been excluded. If incident replay
+needs raw data, store it as an encrypted short-retention artifact with audited
+access, never in logs/traces/metrics.
 
 ---
 
@@ -74,26 +139,26 @@ resources that service depends on.
 An alert should mean: "a human needs to act now." Everything else is a
 dashboard.
 
-**Alerting on SLOs (not raw metrics):**
-
 Define an SLO as: "99.9% of requests succeed within 500ms over a 30-day window."
+Derive an error budget: 30 days × 0.1% = 43.2 minutes.
 
-Derive an error budget: 30 days × 0.1% = 43.2 minutes of allowable bad minutes.
+Alert on budget burn using **multi-window multi-burn-rate**. Short window = long
+window / 12.
 
-Alert when you're burning the budget too fast, using **multi-window
-multi-burn-rate** (Google SRE Workbook):
+| Long window | Short window | Burn rate | Alert type           |
+| ----------- | ------------ | --------- | -------------------- |
+| 1h          | 5m           | 14.4×     | Page (critical)      |
+| 6h          | 30m          | 6×        | Page (high)          |
+| 3d          | 2h           | 1×        | Ticket (low urgency) |
 
-| Window   | Burn rate | Alert type           |
-| -------- | --------- | -------------------- |
-| 1h + 5m  | 14×       | Page (critical)      |
-| 6h + 30m | 6×        | Page (high)          |
-| 3d + 6h  | 1×        | Ticket (low urgency) |
+Thresholds: 2% budget in 1h pages, 5% in 6h pages, 10% in 3d tickets.
 
-This avoids both alert fatigue (pure threshold alerts) and slow detection
-(single-window).
+**Every alert links to a runbook** covering: what it means, immediate action,
+escalation path.
 
-**Every alert links to a runbook.** The runbook answers: what does this mean,
-what's the immediate action, what's the escalation path.
+**Error-budget policy, not just a number.** Every SLO ships with a written
+policy specifying what happens at 50% and 100% burn (e.g. slow releases →
+feature freeze → exec escalation). Without a policy the SLO is decoration.
 
 ---
 
@@ -135,15 +200,15 @@ is slow" directly to an example slow trace.
 
 ## Dashboard Design
 
-A dashboard should answer one question: **is it broken right now?**
+One dashboard per audience (on-call / dev / exec). The **on-call dashboard
+answers one question: is it broken right now?**
 
-- Top row: RED metrics for the service (rate, error rate, p99 latency).
+- Top row: RED metrics (rate, error rate, p99 latency).
 - Second row: SLO burn rate and error budget remaining.
-- Third row: dependency health (DB query time, downstream service errors).
+- Third row: dependency health (DB query time, downstream errors).
 - Bottom: resource utilisation (CPU, memory, connection pool).
 
-Avoid dashboards with >20 panels. If you need more, split by audience (ops vs
-dev vs exec).
+Everything else is exploratory — do it in the trace UI, not a dashboard.
 
 ---
 
@@ -159,3 +224,24 @@ Expose two endpoints:
 
 Never block `/health/live` on slow external dependencies — that causes
 unnecessary restarts. Keep liveness checks fast and local.
+
+---
+
+## Canon
+
+- [The Pragmatic Programmer — Tracer Bullets (Topic 12)](https://www.oreilly.com/library/view/the-pragmatic-programmer/9780135956977/f_0030.xhtml)
+- [Google SRE Workbook — Alerting on SLOs](https://sre.google/workbook/alerting-on-slos/)
+- [Google SRE Book — Monitoring Distributed Systems](https://sre.google/sre-book/monitoring-distributed-systems/)
+- [Implementing Service Level Objectives (Hidalgo)](https://www.oreilly.com/library/view/implementing-service-level/9781492076803/)
+- [Distributed Systems Observability (Sridharan)](https://www.oreilly.com/library/view/distributed-systems-observability/9781492033431/)
+- [OTel semantic conventions](https://opentelemetry.io/docs/specs/semconv/)
+- [OTel HTTP metrics semconv](https://opentelemetry.io/docs/specs/semconv/http/http-metrics/)
+- [OTel logs concepts](https://opentelemetry.io/docs/concepts/signals/logs/)
+- [OTel sampling](https://opentelemetry.io/docs/concepts/sampling/)
+- [OTel Collector](https://opentelemetry.io/docs/collector/)
+- [Honeycomb — observability 1.0 vs 2.0](https://www.honeycomb.io/blog/one-key-difference-observability1dot0-2dot0)
+- [charity.wtf — observability 2.0](https://charity.wtf/tag/observability-2-0/)
+- [Grafana — multi-window multi-burn-rate implementation](https://grafana.com/blog/how-to-implement-multi-window-multi-burn-rate-alerts-with-grafana-cloud/)
+- [Datadog — burn rate is a better error rate](https://www.datadoghq.com/blog/burn-rate-is-better-error-rate/)
+- [Prometheus naming best practices](https://prometheus.io/docs/practices/naming/)
+- [Kubernetes liveness/readiness probes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)

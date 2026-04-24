@@ -23,8 +23,43 @@ Effective debugging is hypothesis-driven, not intuition-driven.
 5. **Update:** if confirmed, you've found it. If refuted, eliminate this
    hypothesis and repeat.
 
+- **Fix the problem, not the blame.** Whose code it is does not matter.
+- **Fix the root cause, not the symptom.** If you cannot explain _why_ the fix
+  works, you've hidden the bug, not found it.
+
 **Common mistake:** making multiple changes at once. You lose the ability to
 know which change fixed it, and you may introduce new bugs.
+
+---
+
+## Prove, Don't Assume
+
+Every bug hunt fails at an unverified assumption.
+
+- Suspect your own code first. OS, compiler, stdlib, and popular libraries are
+  almost never broken.
+- Read the actual stack trace and error; don't paraphrase in your head.
+- Verify each assumption with a command or assertion, not inspection: "X is
+  non-null" → log/assert. "Branch runs" → counter. "Row looks like Y" → `SELECT`
+  it, don't trust the ORM.
+- If an assumption can't be verified cheaply, treat it as unknown.
+
+---
+
+## Rubber-Duck Before Escalating
+
+Trigger: stuck >15 minutes, about to ask a human, or about to open a new file
+unrelated to the current hypothesis. Write (don't just think) a line-by-line
+explanation of what the suspect code is supposed to do and what you observe.
+Name every assumption. The bug usually falls out mid-sentence.
+
+---
+
+## Keep a Debug Log
+
+For investigations longer than ~3 experiments, keep a running log
+(`| # | Hypothesis | Experiment | Result | Eliminates? |`) so you don't re-run
+experiments or lose track of what's left to try.
 
 ---
 
@@ -48,6 +83,16 @@ Why it matters:
 Reduction process: start from the failing case. Remove pieces one at a time. If
 removing a piece makes it pass, it was necessary — put it back. Repeat until you
 cannot remove anything without making it pass.
+
+When manual reduction is slow or the input is large, automate:
+
+- Input: `creduce` (C/C++), `shrinkray`, Hypothesis `@given` shrinker, or a
+  hand-rolled `ddmin`.
+- History: `git bisect run <script>`.
+- Config: bisect feature flags / env vars the same way.
+
+Stop when further removal makes the failure disappear — that's the 1-minimal
+case.
 
 ---
 
@@ -102,14 +147,15 @@ more useful than "email not sent."
 
 ## printf Debugging vs Debugger — When to Use Which
 
-| Situation                                | Prefer                                           |
-| ---------------------------------------- | ------------------------------------------------ |
-| Fast-moving loop or recursive function   | printf/logging (debugger pauses are too slow)    |
-| Production system, can't attach debugger | Structured logging with trace_id                 |
-| Timing-sensitive bug (races, timing)     | Logging (debugger changes timing, hides the bug) |
-| Complex object state to inspect          | Debugger (interactive exploration is faster)     |
-| Single-threaded, can reproduce locally   | Debugger                                         |
-| Third-party library call failing         | Debugger (step into the library)                 |
+| Situation                                    | Prefer                                           |
+| -------------------------------------------- | ------------------------------------------------ |
+| Fast-moving loop or recursive function       | printf/logging (debugger pauses are too slow)    |
+| Production system, can't attach debugger     | Structured logging with trace_id                 |
+| Timing-sensitive bug (races, timing)         | Logging (debugger changes timing, hides the bug) |
+| Complex object state to inspect              | Debugger (interactive exploration is faster)     |
+| Single-threaded, can reproduce locally       | Debugger                                         |
+| Third-party library call failing             | Debugger (step into the library)                 |
+| Bug depends on past state you no longer have | `rr` + `reverse-continue`                        |
 
 **Rule:** if adding print statements changes whether the bug occurs, you have a
 Heisenbug (see below). Switch to a non-invasive observation method.
@@ -129,6 +175,10 @@ timing.
 - Use `Pernosco` (cloud-hosted rr for collaborative debugging).
 - Use sanitisers: ThreadSanitizer (TSan) for race conditions, AddressSanitizer
   (ASan) for memory errors, MemorySanitizer (MSan) for uninitialised reads.
+
+**`rr` workflow for corruption/state bugs:** `rr record` → `rr replay` →
+watchpoint on the bad value → `reverse-continue` to the write that caused it.
+For flaky races: `rr record --chaos`.
 
 **Resource contention:** the extra observation code changes allocation or GC
 behaviour.
@@ -167,7 +217,8 @@ resolved.
 
 **Root cause(s):** "5 Whys" analysis. Not "the server crashed" but "the server
 crashed because the memory limit was reached because..." Trace back to the
-proximate cause and the contributing systemic causes.
+proximate cause and contributing systemic causes. 5 Whys anchors on one chain;
+with multiple contributing factors, add a fishbone diagram or fault tree.
 
 **Impact:** quantified. Users affected, requests failed, revenue lost, SLO burn.
 
@@ -200,3 +251,17 @@ For a bug in a layered system, eliminate layers from the bottom up:
 
 Once you know which layer is wrong, focus investigation there. Do not debug the
 frontend if the API is returning wrong data.
+
+---
+
+## Canon
+
+- Kernighan & Pike, _The Practice of Programming_, Ch. 5 —
+  https://www.cs.princeton.edu/~bwk/tpop.webpage/debugging.html
+- Hunt & Thomas, _The Pragmatic Programmer_ tips — https://pragprog.com/tips/
+- Delta debugging / `ddmin` — https://en.wikipedia.org/wiki/Delta_debugging ·
+  Evans, _A debugging manifesto_ —
+  https://jvns.ca/blog/2022/12/08/a-debugging-manifesto/
+- `rr` — https://rr-project.org/ · Rubber-duck debugging —
+  https://rubberduckdebugging.com/ · Google SRE Workbook _Postmortem Culture_ —
+  https://sre.google/workbook/postmortem-culture/

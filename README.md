@@ -55,11 +55,11 @@ Manual cleanup of `~/.claude/skills/`, `~/.codex/skills/`,
 | -------------------------------- | ---- | ------------------------------------------------------------------ |
 | `data-first-design`              | 1    | data modelling, immutability, parse-don't-validate, illegal states |
 | `observability-for-services`     | 1    | logging, metrics, traces, SLOs, OTel                               |
-| `api-design-backend`             | 1    | REST, gRPC, OpenAPI, versioning, webhooks                          |
+| `api-design`                     | 1    | REST, OpenAPI, versioning, errors, pagination, idempotency, auth   |
 | `distributed-systems-resilience` | 1    | retries, timeouts, circuit breakers, sagas, outbox                 |
 | `database-safety`                | 1    | migrations, EXPLAIN, isolation levels, N+1, soft delete            |
 | `security-review`                | 1    | auth, crypto, OWASP, secrets, supply chain                         |
-| `testing-strategy`               | 1    | mocks vs fakes, mutation testing, property-based testing           |
+| `behavior-testing`               | 1    | describe/context/it, what not to test, mock at edges, spec-style   |
 | `git-workflow-depth`             | 1    | rebase, bisect, split commits, PR descriptions                     |
 | `documentation`                  | 1    | READMEs, ADRs, runbooks, Diátaxis, doc rot, code comments          |
 | `error-handling-patterns`        | 2    | Result/Either, error types, retry vs fail                          |

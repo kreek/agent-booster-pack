@@ -23,9 +23,12 @@ response = requests.get("https://api.example.com/data", timeout=(3.05, 10))
 # (connect_timeout, read_timeout) — different concerns, configure separately
 ```
 
-**Timeout budget propagation:** use deadline propagation (gRPC `deadline`, HTTP
-`Request-Timeout` header, context with deadline). A parent call with a 200ms
-budget should not spawn child calls each with their own 200ms timeout.
+**Derive timeouts from data:** set timeout ≈ downstream p99.9 + margin (~0.1%
+false-timeout rate). Re-tune when latency shifts; static timeouts rot. Split
+connect vs read timeouts.
+
+**Propagate deadlines** (gRPC `deadline`, HTTP `Request-Timeout`, context):
+child deadline = parent deadline − time already spent. Never reset.
 
 ---
 
@@ -49,12 +52,21 @@ def retry_with_jitter(fn, max_attempts=5, base_delay=0.1, max_delay=30.0):
             time.sleep(sleep)
 ```
 
-**Full jitter** (AWS formula): `sleep = random(0, min(cap, base * 2^attempt))`.
-This spreads retries uniformly and is strictly better than equal jitter or
-decorrelated jitter for avoiding coordinated retry storms.
+**Full jitter:** `sleep = random(0, min(cap, base * 2^attempt))`. Spreads
+retries uniformly; strictly better than equal/decorrelated jitter against retry
+storms.
 
-**Only retry idempotent operations or operations with idempotency keys.** Never
-blindly retry POST without an idempotency key.
+**Only retry idempotent operations, or POSTs with an idempotency key.**
+
+---
+
+## Retry Budgets — Cap the Amplification
+
+- Retry at one layer only. Stacked retries (client → gateway → service) multiply
+  load.
+- Wrap retries in a token bucket per endpoint. Empty bucket → fail fast.
+- Budget rule: max retries ≤ ~10% of steady-state call rate.
+- Never retry `4xx` except `408`/`429`.
 
 ---
 
@@ -71,7 +83,11 @@ States:
 - **Half-open** — probe with a small number of calls; if they succeed, close; if
   not, reopen.
 
-Thresholds: open after N failures in a window, or after error rate exceeds X%.
+**Use with care:** open on sustained error rate or latency spike, not single
+failures. Pair every breaker with a retry budget — breakers alone introduce
+modal behaviour that's hard to test and lengthens recovery. Half-open probes few
+(1–3) and rate-limited. Prefer adaptive concurrency / load shedding when you
+control the caller.
 
 **Bulkhead:** isolate dependency calls into separate thread pools / semaphores.
 Prevents one slow dependency from starving threads for all other dependencies.
@@ -89,12 +105,12 @@ threads remain available.
 
 ## Consistency Models: PACELC over CAP
 
-**CAP theorem** (Brewer): in the presence of a network Partition, choose either
+**CAP theorem:** in the presence of a network Partition, choose either
 Consistency or Availability. But partitions are rare — what matters day-to-day
 is the **latency/consistency tradeoff in normal operation**.
 
-**PACELC** (Abadi): if Partition → (C or A); Else → (L or C). Latency or
-consistency, even when healthy.
+**PACELC:** if Partition → (C or A); Else → (L or C). Latency or consistency,
+even when healthy.
 
 | System                           | P→  | E→  | Notes                       |
 | -------------------------------- | --- | --- | --------------------------- |
@@ -134,29 +150,22 @@ Use a deduplicated events table with a unique constraint on `event_id`. The
 
 ---
 
-## Sagas: Orchestrated over Choreographed
+## Sagas: Decision Rule
 
-**Sagas** coordinate multi-step transactions across services without distributed
-2PC (which is fragile and slow).
+**Sagas** coordinate multi-step transactions across services without 2PC.
 
-**Choreography** (event-based): each service listens for events and emits its
-own. Simple to start; becomes a tangled web at scale. Hard to trace, hard to
-reason about failure.
+| Flow shape                              | Choose                   |
+| --------------------------------------- | ------------------------ |
+| 2–3 steps, no ordering                  | Choreography (events)    |
+| Ordered steps, non-trivial compensation | Orchestration            |
+| Long-running, human-in-the-loop         | Durable execution engine |
 
-**Orchestration** (coordinator-based): one orchestrator drives the workflow,
-calling each step explicitly and handling compensation. Prefer this for complex
-flows.
+- Choreography: services react to events. Simple to start; tangles at scale.
+- Orchestration: one coordinator drives steps + compensation.
 
-```
-Orchestrator → reserve inventory
-            → charge payment
-            → schedule shipment
-            (if any step fails → compensate previous steps)
-```
-
-**Compensation** (rollback) must be designed upfront for each step. Not every
-operation is reversible — "send email" cannot be unsent; compensate with a
-follow-up email.
+**Compensation** is designed per step before the happy path. Non-reversible
+steps ("send email", "charge external card") → compensate forward with a
+follow-up action, never rollback.
 
 ---
 
@@ -210,3 +219,80 @@ durable execution engine instead of hand-rolling saga orchestration:
 These handle retry logic, timeout tracking, workflow versioning, and
 compensation automatically. The tradeoff is operational complexity of running
 the platform.
+
+**Determinism is load-bearing:** workflow code must be deterministic on replay —
+no `now()`, `random()`, direct I/O, or unstable map iteration; route through
+activities. Version every breaking change (Patches / Worker Versioning); never
+mutate live workflow code silently. Retain old versions until in-flight
+executions drain.
+
+---
+
+## Fail Fast, Crash Clean
+
+- Validate at the trust boundary; reject early, reject loudly.
+- On invariant violation, crash the process. Corrupt state is worse than
+  downtime.
+- Never swallow remote-call errors. Log with correlation ID, then propagate or
+  compensate.
+
+---
+
+## Load Shedding and Backpressure
+
+- Under overload, shed lowest-priority traffic first; serve health checks and
+  retries last.
+- Queues must be bounded. Unbounded queues convert latency spikes into OOMs.
+- Producers observe consumer lag and slow down or drop.
+- Return `429`/`503` with `Retry-After` so clients back off.
+
+---
+
+## Consumer Hygiene — Poison Pills and DLQs
+
+- Every consumer has a DLQ. After N failed attempts, message goes to DLQ — never
+  block the partition.
+- Idempotency key = producer's aggregate ID + event ID, not a consume-time UUID.
+- Dedup via `INSERT ... ON CONFLICT DO NOTHING` on a processed-events table, in
+  the same transaction as the side effect.
+- DLQs need reprocessing tooling and an alert. A silent DLQ is data loss.
+
+---
+
+## Verify Consistency Claims; Fault-Inject
+
+- Vendor labels ("serializable", "strong", "exactly-once") are claims, not
+  proofs. Check the latest independent analysis for your store/version. Pick
+  isolation from observed behaviour.
+- Broker "exactly-once" is at-least-once + idempotence dressed up.
+- Inject timeouts, dropped messages, clock skew, and dependency failure in
+  staging. Exercise breakers, retry budgets, and DLQ paths on purpose — they rot
+  silently.
+
+---
+
+## Canon
+
+- Designing Data-Intensive Applications (Kleppmann) —
+  <https://dataintensive.net/>
+- Release It! 2e — Stability Patterns —
+  <https://www.oreilly.com/library/view/release-it-2nd/9781680504552/f_0047.xhtml>
+- AWS Builders' Library — Timeouts, retries, and backoff with jitter —
+  <https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/>
+- AWS Architecture Blog — Exponential Backoff And Jitter —
+  <https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/>
+- AWS Well-Architected REL05-BP03 — Control and limit retry calls —
+  <https://docs.aws.amazon.com/wellarchitected/latest/framework/rel_mitigate_interaction_failure_limit_retries.html>
+- Brooker — Fixing retries with token buckets and circuit breakers —
+  <https://brooker.co.za/blog/2022/02/28/retries.html>
+- Brooker — Will circuit breakers solve my problems? —
+  <https://brooker.co.za/blog/2022/02/16/circuit-breakers.html>
+- Jepsen — consistency reference — <https://jepsen.io/consistency>
+- Jepsen — analyses index — <https://jepsen.io/analyses>
+- microservices.io — Transactional Outbox —
+  <https://microservices.io/patterns/data/transactional-outbox.html>
+- ByteByteGo — Saga Pattern Demystified —
+  <https://blog.bytebytego.com/p/saga-pattern-demystified-orchestration>
+- Morling — On Idempotency Keys —
+  <https://www.morling.dev/blog/on-idempotency-keys/>
+- Temporal docs — Versioning — <https://docs.temporal.io/develop/go/versioning>

@@ -9,13 +9,29 @@ description:
 
 # Database Safety
 
-## Schema First, ORM Second
+## Pick the Simplest DB That Works
 
-Define the schema explicitly. Do not let the ORM generate your schema without
-review — ORMs choose defaults that are rarely optimal for your access patterns.
+- Default order: **SQLite → MySQL → Postgres**. Move up only when a concrete
+  constraint forces it.
+- SQLite is production-viable for most single-writer apps when paired with
+  streaming replication (Litestream) for backup to object storage.
+- Vertical-first: scale the single writer and add read replicas before you reach
+  for sharding or multi-region. Resist distributed complexity until the
+  single-writer model demonstrably fails.
+- For Rails 8: prefer the Solid stack (Solid Queue / Solid Cache / Solid Cable)
+  over introducing Redis/Memcached unless measurement says otherwise.
 
-Review the generated migration before running it. Know what SQL your ORM is
-producing.
+---
+
+## Review the SQL, Not the ORM
+
+- Define the schema explicitly. Review the generated migration SQL before
+  running it — know what your ORM is producing.
+- Well-understood ORM idioms (`add_reference`, `change_column_null` with a
+  validated check constraint, `add_index ... algorithm: :concurrently`) are
+  fine. The rule is _review the SQL_, not _avoid the ORM_.
+- ORM defaults are rarely optimal for your access patterns — override explicitly
+  when they matter.
 
 ---
 
@@ -51,6 +67,10 @@ ALTER TABLE orders DROP COLUMN status;
 Never combine phases in one deploy. The gap between phases is the rollback
 window.
 
+**Large online data migrations:** dual-write to old and new, then verify with a
+Scientist-style read comparison (return old, log mismatches) before cutting
+reads over. Don't trust the backfill — prove it.
+
 ---
 
 ## Online DDL Rules
@@ -62,16 +82,26 @@ window.
 - Never `CREATE INDEX` (without `CONCURRENTLY`) on a live table with traffic.
 - Always set `lock_timeout` before schema changes: `SET lock_timeout = '2s';` to
   prevent runaway lock waits.
-- `ALTER TABLE ... ADD COLUMN` with a non-volatile default is instant in PG 11+.
-- `ALTER TABLE ... ADD COLUMN` with a `NOT NULL DEFAULT` requires a table
-  rewrite in older Postgres — use `pg_repack` or add nullable first.
+- **Retry, don't just timeout.** A bare `lock_timeout` fails loudly. Wrap DDL in
+  a retry loop with a small lock window (e.g. GitLab's `with_lock_retries`) so
+  the DB keeps serving traffic between attempts.
+- `ALTER TABLE ... ADD COLUMN` with a non-volatile default is metadata-only in
+  PG 11+ (the modern baseline).
+- Volatile defaults (e.g. `gen_random_uuid()`, `now()`) still rewrite the table
+  — add the column nullable, backfill in batches, then set the default.
+- On PG <11, `NOT NULL DEFAULT` rewrites — add nullable first, backfill, then
+  add the `NOT NULL` constraint via `NOT VALID` + `VALIDATE CONSTRAINT`.
 
 **MySQL/MariaDB:**
 
 - `ALTER TABLE ... ALGORITHM=INPLACE, LOCK=NONE` for supported operations.
 - Check `information_schema.INNODB_TRX` before migration — long-running
   transactions will block DDL.
-- Use `pt-online-schema-change` or `gh-ost` for large table migrations.
+- For large-table rewrites pick the tool by constraint:
+  - **gh-ost** for write-heavy MySQL 5.7+ on row-based replication: triggerless,
+    binlog-tailing, pauseable.
+  - **pt-online-schema-change** when foreign keys or Galera/PXC are in play —
+    triggers handle them; gh-ost does not.
 
 **General:** always test migrations on a production-sized dataset before running
 on prod.
@@ -161,48 +191,92 @@ users = {u.id: u for u in User.objects.filter(id__in=user_ids)}
 
 ---
 
-## Soft Delete Is Usually a Smell
+## Soft Delete: Trade-off, Not Default
 
-Common reasons teams use soft delete:
+Soft delete is a design choice with real costs. Reach for these first:
 
-- "We need audit history" → Use an append-only events/audit log table instead.
-- "We might need to restore data" → Point-in-time recovery or a separate archive
-  table.
-- "Cascades are hard" → Fix the cascade design.
+- "We need audit history" → append-only events/audit log table.
+- "We might need to restore data" → point-in-time recovery or an archive table.
+- "Cascades are hard" → fix the cascade design.
 
-Problems with soft delete:
+Costs to price in before choosing it:
 
 - Every query needs `WHERE deleted_at IS NULL` — easy to forget, causes bugs.
 - Unique constraints break (can't have two "deleted" users with the same email).
-- GDPR requires hard deletion of PII — soft delete doesn't comply.
-- Performance degrades as the table fills with dead rows.
+- GDPR requires hard deletion of PII — soft delete alone doesn't comply.
+- Performance degrades as the table fills with tombstoned rows.
 
-If you need soft delete: use a partial index (`WHERE deleted_at IS NULL`) for
-the unique constraint and put all domain queries through a base query that
-includes the filter.
+If you pick it:
+
+- Use **explicit scopes** (`.kept` / `.discarded`) — don't override `destroy` or
+  lean on `default_scope`-style hijacking.
+- Use a **partial unique index** (`WHERE deleted_at IS NULL`) for uniqueness.
+- Route all domain queries through a base scope that applies the filter.
 
 ---
 
 ## Connection Pool Sizing
 
-The optimal pool size is smaller than you think. A pool that's too large causes
-context-switching overhead and resource contention on the DB server.
+Measure, don't calculate. The old `cores*2 + spindles` formula predates SSDs and
+assumes a workload profile you probably don't have.
 
-**Formula (from PgBouncer docs / Percona):**
+- **Start at 20–30 connections per DB instance** and tune from observation.
+- **Too small** → app threads wait for connections: `cl_waiting` > 0 in
+  PgBouncer, timeouts on acquisition, non-zero `pool.waitcount`.
+- **Too large** → context-switching overhead, DB CPU climbs, query latency
+  rises, `pg_stat_activity` / `sv_idle` fills with idle connections.
 
-```
-pool_size = (core_count * 2) + effective_spindle_count
-```
+**PgBouncer (transaction mode) in front of Postgres** when you have many app
+instances — the default for shared pooling. Sharp edges:
 
-For a 4-core DB server with SSDs (effective_spindle_count ≈ 1): pool ≈ 9
-connections per application instance.
+- **Disable server-side prepared statements in the driver** (e.g.
+  `prepared_statements: false` on Rails/Rails-like, `prepareThreshold=0` on
+  JDBC). Transaction pooling rotates backends between statements and prepared
+  statements won't survive the switch.
+- Session-scoped features (`SET LOCAL`, advisory locks, `LISTEN/NOTIFY`) only
+  work reliably in session pooling — not transaction mode.
+- Watch `cl_waiting` (pool too small) and `sv_idle` (pool too large) as the
+  tuning signals.
 
-Signs the pool is too large: DB CPU is high under load, query times are
-increasing, `pg_stat_activity` shows many idle connections.
+---
 
-Signs the pool is too small: application threads are waiting for connections
-(`pool.waitcount` metric is non-zero), timeouts on connection acquisition.
+## Backup and PITR
 
-Use **PgBouncer** (transaction mode) in front of Postgres when you have many
-application instances — each instance can have its own pool without overwhelming
-the DB.
+Backups are a feature, not an afterthought. If you can't restore, you don't have
+backups.
+
+- **Continuous archiving** for Postgres: WAL-G or pgBackRest shipping WAL to
+  object storage. For SQLite: Litestream.
+- **Test restores on a schedule.** A backup you haven't restored from is a
+  hypothesis. Run a periodic drill that restores to a scratch environment and
+  verifies row counts / checksums against production.
+- Know your RPO (how much data can you lose?) and RTO (how long to recover?)
+  before an incident, not during one.
+- Keep at least one backup copy off the primary cloud account/region.
+
+---
+
+## Canon
+
+- strong_migrations (Rails) — https://github.com/ankane/strong_migrations
+- GitLab migration style guide (`with_lock_retries`) —
+  https://docs.gitlab.com/development/migration_style_guide/
+- Stripe, "Online migrations at scale" —
+  https://stripe.com/blog/online-migrations
+- postgres.ai, zero-downtime schema migrations —
+  https://postgres.ai/blog/20210923-zero-downtime-postgres-schema-migrations-lock-timeout-and-retries
+- PG 11 `ADD COLUMN` default improvements —
+  https://dataegret.com/2018/03/waiting-for-postgresql-11-pain-free-add-column-with-non-null-defaults/
+- safe-pg-migrations (Doctolib) — https://github.com/doctolib/safe-pg-migrations
+- gh-ost — https://github.com/github/gh-ost
+- gh-ost vs pt-online-schema-change —
+  https://www.bytebase.com/blog/gh-ost-vs-pt-online-schema-change/
+- PgBouncer features & pooling modes — https://www.pgbouncer.org/features.html
+- Heroku PgBouncer best practices —
+  https://devcenter.heroku.com/articles/best-practices-pgbouncer-configuration
+- PlanetScale, scaling Postgres connections —
+  https://planetscale.com/blog/scaling-postgres-connections-with-pgbouncer
+- Discard (explicit-scope soft delete) — https://github.com/jhawthorn/discard
+- Solid Queue (Rails 8 DB-backed queue) — https://github.com/rails/solid_queue
+- SQLite in production (Rails 8 / Litestream) —
+  https://fractaledmind.com/2023/12/23/rubyconftw/

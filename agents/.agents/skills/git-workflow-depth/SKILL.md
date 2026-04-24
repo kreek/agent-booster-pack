@@ -5,6 +5,20 @@ description: Use when doing non-trivial git work: interactive rebase, conflict r
 
 # Git Workflow Depth
 
+## Rewrite or preserve history?
+
+| Situation                                                      | Action                                                      |
+| -------------------------------------------------------------- | ----------------------------------------------------------- |
+| Branch is local, never pushed                                  | Rewrite freely (`rebase -i`, amend)                         |
+| Pushed to your own PR branch, no other collaborators           | Rewrite, push with `--force-with-lease --force-if-includes` |
+| Shared branch (`main`, release, anything others branched from) | Never rewrite. Use `git revert`                             |
+| Published tag                                                  | Never move. Cut a new tag                                   |
+
+Golden rule: never rewrite commits that exist outside your local repo or have
+been pulled by others.
+
+---
+
 ## Interactive Rebase
 
 Interactive rebase lets you rewrite history before it's shared.
@@ -17,11 +31,22 @@ git rebase -i HEAD~N
 git rebase -i $(git merge-base HEAD main)
 ```
 
-**Commands in the rebase todo list:** | Command | Action | |---|---| | `pick` |
-Keep commit as-is | | `reword` | Keep changes, edit message | | `edit` | Pause
-to amend the commit | | `squash` | Meld into previous commit, combine messages |
-| `fixup` | Meld into previous commit, discard this message | | `drop` | Remove
-the commit entirely | | `exec` | Run a shell command after this commit |
+**Commands in the rebase todo list:**
+
+| Command      | Action                                          |
+| ------------ | ----------------------------------------------- |
+| `pick`       | Keep commit as-is                               |
+| `reword`     | Keep changes, edit message                      |
+| `edit`       | Pause to amend the commit                       |
+| `squash`     | Meld into previous commit, combine messages     |
+| `fixup`      | Meld into previous commit, discard this message |
+| `drop`       | Remove the commit entirely                      |
+| `exec`       | Run a shell command after this commit           |
+| `break`      | Stop here so you can inspect or run commands    |
+| `label`      | Mark current HEAD with a name                   |
+| `reset`      | Reset HEAD to a named label                     |
+| `merge`      | Recreate a merge commit                         |
+| `update-ref` | Update a ref to point at this commit            |
 
 **Squash a PR branch to a clean history:**
 
@@ -31,6 +56,32 @@ git rebase -i $(git merge-base HEAD main)
 ```
 
 **Reorder commits:** just reorder the lines in the todo list.
+
+---
+
+## Modern PR-cleanup flow (autosquash)
+
+One-time config: `rebase.autoSquash true`, `rebase.autoStash true`,
+`push.useForceIfIncludes true`.
+
+```bash
+git commit --fixup=<sha>                  # or --squash / --fixup=reword:<sha>
+git rebase -i $(git merge-base HEAD main) # autosquash reorders for you
+git range-diff @{upstream}...HEAD         # verify intent preserved
+git push --force-with-lease --force-if-includes
+```
+
+---
+
+## Commit message rules
+
+- Subject ≤50 chars, imperative ("Fix …", not "Fixed …"), no trailing dot.
+- Blank line, then body wrapped at 72.
+- Body answers _why_ and _what-was-wrong-before_, not _what-the-diff-shows_.
+- If the project uses Conventional Commits: `type(scope): subject`; types
+  `feat|fix|refactor|perf|docs|test|chore`; breaking change goes in footer as
+  `BREAKING CHANGE: <description>`. Default to Conventional Commits unless the
+  project says otherwise.
 
 ---
 
@@ -83,6 +134,10 @@ git bisect run ./scripts/test-regression.sh
 For flaky tests, use `git bisect skip` to skip commits where the test result is
 unreliable.
 
+**Preconditions before `bisect start`:** the repro script must exit 0/non-zero
+deterministically, the suspect range must build cleanly, and use `bisect skip`
+for commits that can't build.
+
 ---
 
 ## Conflict Resolution
@@ -95,7 +150,8 @@ git config --global rerere.enabled true
 
 Once enabled, git records how you resolved a conflict. If the same conflict
 appears again (e.g. during rebase onto an updated main), git replays the
-resolution automatically.
+resolution automatically. Verify replayed resolutions with `git diff` before
+continuing — rerere matches on conflict text, not semantics.
 
 **Resolving conflicts:**
 
@@ -130,23 +186,44 @@ state. You keep one, the other, or combine them, then remove all markers.
 
 ## Recovering with Reflog
 
-The reflog records every position HEAD has been at. It's your safety net for "I
-just destroyed my work."
+The reflog records every position HEAD has been at — your safety net for "I just
+destroyed my work." `git reflog` shows recent HEAD history;
+`git reflog show <branch>` scopes to a branch. See the Undo table below for
+concrete recipes.
+
+Reflog is local only and expires after 90 days (default). Unreferenced objects
+get garbage-collected. Use `git fsck --lost-found` to find truly orphaned
+objects.
+
+---
+
+## "Undo X" quick reference
+
+| Goal                                    | Command                                     |
+| --------------------------------------- | ------------------------------------------- |
+| Undo last commit, keep changes staged   | `git reset --soft HEAD~1`                   |
+| Undo last commit, keep changes unstaged | `git reset --mixed HEAD~1`                  |
+| Discard last commit and its diff        | `git reset --hard HEAD~1` _(destructive)_   |
+| Undo a pushed commit safely             | `git revert <sha>`                          |
+| Recover dropped commit                  | `git reflog` → `git switch -c rescue <sha>` |
+| Undo a bad merge, keep it in history    | `git revert -m 1 <merge-sha>`               |
+| Undo a bad merge, not yet pushed        | `git reset --hard ORIG_HEAD`                |
+| Recover after `reset --hard`            | `git reset --hard HEAD@{1}`                 |
+| Restore one file to HEAD                | `git restore <path>`                        |
+| Restore one file to a specific sha      | `git restore --source=<sha> <path>`         |
+
+---
+
+## Worktrees for parallel work
+
+Trigger: hotfix while mid-feature, or running review/tests without stashing.
+Keep ≤2–3 live.
 
 ```bash
-git reflog            # show recent HEAD history
-git reflog show main  # show history for a specific branch
-
-# Recover a dropped commit
-git checkout -b recovery <sha-from-reflog>
-
-# Recover after a bad reset --hard
-git reset --hard <sha-from-reflog>
+git worktree add ../repo-hotfix main
+git worktree list
+git worktree remove ../repo-hotfix
 ```
-
-The reflog is local only and expires after 90 days (default). Objects that no
-longer have any reference are garbage collected. Use `git fsck --lost-found` to
-find truly orphaned objects.
 
 ---
 
@@ -229,12 +306,33 @@ git branch -a --sort=-committerdate
 # Temporarily stash only staged changes
 git stash push --staged -m "stash: staged work"
 
-# Undo the last commit but keep the changes staged
-git reset --soft HEAD~1
-
-# Completely discard last commit and its changes (destructive!)
-git reset --hard HEAD~1
-
 # Cherry-pick a range of commits
 git cherry-pick A^..B
 ```
+
+---
+
+## Canon
+
+- git-scm docs: [rebase](https://git-scm.com/docs/git-rebase),
+  [bisect](https://git-scm.com/docs/git-bisect),
+  [range-diff](https://git-scm.com/docs/git-range-diff),
+  [worktree](https://git-scm.com/docs/git-worktree),
+  [switch](https://git-scm.com/docs/git-switch),
+  [restore](https://git-scm.com/docs/git-restore),
+  [rerere](https://git-scm.com/docs/git-rerere)
+- Pro Git:
+  [§3.6 Rebasing](https://git-scm.com/book/en/v2/Git-Branching-Rebasing),
+  [§7.10 Reset Demystified](https://git-scm.com/book/en/v2/Git-Tools-Reset-Demystified),
+  [§2.4 Undoing Things](https://git-scm.com/book/en/v2/Git-Basics-Undoing-Things)
+- [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/)
+  and [Conventional Comments](https://conventionalcomments.org/)
+- Commit-message style:
+  [tpope](https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html),
+  [cbea.ms seven rules](https://cbea.ms/git-commit/)
+- Workflow:
+  [Atlassian merging-vs-rebasing](https://www.atlassian.com/git/tutorials/merging-vs-rebasing),
+  [Atlassian force-with-lease](https://www.atlassian.com/blog/it-teams/force-with-lease),
+  [adamj.eu force push safely](https://adamj.eu/tech/2023/10/31/git-force-push-safely/),
+  [thoughtbot autosquash](https://thoughtbot.com/blog/autosquashing-git-commits),
+  [trunkbaseddevelopment.com](https://trunkbaseddevelopment.com/)

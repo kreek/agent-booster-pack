@@ -15,10 +15,23 @@ The single highest-leverage architectural frame for backend systems. Get the
 data shapes right and the code almost writes itself; get them wrong and every
 layer fights you.
 
+> Not to be confused with Acton-style data-oriented design (cache locality,
+> struct-of-arrays) — different tradition, aimed at hot loops, not domain
+> modelling.
+
+## Simple vs Easy
+
+- **Simple** = one role, one concept, one task. Objective. Un-braided.
+- **Easy** = familiar, near-to-hand. Subjective.
+- **Complect** = to braid together. The defect.
+- **Incidental complexity** = complexity you added. **Problem complexity** =
+  complexity the domain forced on you. Only the second is unavoidable.
+- Data-first is a simplicity move, not a style preference. Pick simple even when
+  unfamiliar.
+
 ## The Three-Way Split: Data / Calculations / Actions
 
-From _Grokking Simplicity_ (Normand, 2021). Every piece of code is one of three
-things:
+Every piece of code is one of three things:
 
 **Data** — inert values. Facts about the world. Records, strings, numbers,
 lists. No behaviour. Cannot be "wrong" by themselves.
@@ -64,6 +77,11 @@ A **place** is a variable, field, or reference that can be updated. Every
 mutation is a potential source of bugs — concurrent writes, unexpected aliasing,
 debugging state that changes over time.
 
+**Epochal-time model:** values succeed one another. _Identity_ is a sequence of
+values over time, not a mutable cell. State transitions are pure functions
+`(oldValue, event) -> newValue`. The search term for the anti-pattern is
+"place-oriented programming".
+
 **Default to values.** Mutate only when:
 
 - Performance profiling shows immutable copies are a measured bottleneck, OR
@@ -84,11 +102,12 @@ def __init__(self, items: list):
 Copy on exit too when returning mutable internals. Or better: return a new
 immutable value.
 
+In languages with persistent data structures (Clojure, Scala, Kotlin immutable
+collections, Immer in TS), this copy is free and the hazard disappears.
+
 ---
 
 ## Parse, Don't Validate
-
-_From Alexis King's 2019 essay._
 
 **Validation** checks a value and returns bool/error, leaving the original type
 unchanged. The caller must remember to re-validate everywhere the value is used.
@@ -116,6 +135,15 @@ edge; pass typed values everywhere inside.
 
 **Corollary:** never re-validate what you already parsed. If you hold an
 `Email`, it's valid — checking again is noise and signals unclear ownership.
+
+### Absence vs `Maybe`/`Option`
+
+Wrapping every optional value in `Option`/`Maybe` forces every caller to unwrap
+and couples producers to consumers: you can't relax a required field to optional
+without breaking downstream. At external boundaries (API payloads, events,
+queues), prefer open maps with optional keys where _absence = not present_.
+Reserve `Option`/`Maybe` for internal domain values where the caller genuinely
+must handle both cases.
 
 ---
 
@@ -185,11 +213,25 @@ class UserId:
 # Now "empty user id" cannot reach domain logic
 ```
 
+**Cost:** every new consumer couples to the wrapper. Use wrappers only for
+domain invariants that can't be expressed in plain data (e.g. "this string was
+cryptographically verified", "this id was authenticated"). Don't wrap every
+stringly-typed field reflexively.
+
+### Open data vs closed types — when to use which
+
+| Where                               | Prefer                                  | Why                                                    |
+| ----------------------------------- | --------------------------------------- | ------------------------------------------------------ |
+| Domain core (internal)              | Closed sum types / discriminated unions | Compile-time exhaustiveness; forces change propagation |
+| System seams (HTTP, queues, events) | Open maps/records + descriptive schema  | Tolerates added/missing fields; evolvable contracts    |
+
+Closed types give guarantees; open maps give composability and evolution. At
+boundaries where producers and consumers evolve independently, closed types turn
+into coupling. Inside a bounded core, they turn into safety.
+
 ---
 
 ## Functional Core / Imperative Shell
-
-_Popularised by Gary Bernhardt._
 
 Structure every system as two concentric layers:
 
@@ -223,13 +265,14 @@ pass in data.
 
 ---
 
-## Stratified Design (Parnas / Normand)
+## Stratified Design
 
-Organise code into layers where each layer depends only on the layer below it.
-Each layer hides a single **secret** — the design decision that only that layer
-knows.
+Each module hides a **design decision likely to change** — that's the secret.
+Layers are one expression of this, not the definition. Two modules at the same
+layer can each hide a different secret. The point is change-locality: when a
+decision changes, only its owning module changes.
 
-Typical backend service layers:
+Typical backend service layers (one common expression):
 
 ```
 HTTP / CLI handlers           ← secret: transport protocol
@@ -241,9 +284,9 @@ Infrastructure (DB, queues)   ← secret: storage and messaging technology
 Violation symptoms: domain logic in HTTP handlers; database queries in domain
 models; business rules in SQL migrations.
 
-**Parnas's test:** if you change the technology at one layer (swap Postgres for
-MySQL, REST for gRPC), how many other layers must change? The answer should be:
-only the layer that owns that secret.
+**Change-locality test:** if you change the technology at one layer (swap
+Postgres for MySQL, REST for gRPC), how many other modules must change? The
+answer should be: only the module that owns that secret.
 
 ---
 
@@ -261,9 +304,9 @@ call stack is infected — it can no longer be a pure calculation.
 4. Inject effects as parameters — pass the clock, the DB client, the mailer — so
    the core stays testable and the shell stays thin.
 
-**Haskell's lesson:** if the type signature doesn't mention `IO`, the function
-is provably pure. Adopt this discipline as a code-review standard even in
-languages that don't enforce it.
+**Signature discipline:** if the type signature doesn't mention `IO`/`async`/
+`Result`, the function should be provably pure. Enforce this at review time even
+in languages that don't check it.
 
 ---
 
@@ -276,19 +319,40 @@ languages that don't enforce it.
 | Should I mutate in place or return a new value? | Return a new value unless profiling says otherwise                      |
 | Where does validation live?                     | At the boundary; return a typed result, not a bool                      |
 | Is this function testable without mocks?        | If not, it's an action — try to extract a calculation                   |
+| Am I about to start typing new types?           | Spend time with the data first — sketch example values before shapes    |
 
 ---
 
 ## Canon
 
-- **Rich Hickey** — "Value of Values", "Simple Made Easy" (InfoQ). Core insight:
-  values are simple; mutable places create incidental complexity.
-- **Eric Normand** — _Grokking Simplicity_ (Manning, 2021). The
-  data/calculations/actions framework made practical with worked examples.
-- **David Parnas** — "On the Criteria To Be Used in Decomposing Systems into
-  Modules" (CACM 1972). Information hiding and module secrets.
-- **Alexis King** — "Parse, don't validate" (lexi-lambda.github.io, 2019).
-- **Scott Wlaschin** — _Domain Modeling Made Functional_ (Pragmatic, 2018).
-  Applying these ideas with sum types and railway-oriented programming.
-- **Gary Bernhardt** — "Functional Core, Imperative Shell" (Destroy All Software
-  screencasts, 2012).
+- Hickey, "Simple Made Easy" — simple (un-braided) vs easy (familiar); the
+  defining frame for incidental complexity.
+  https://www.infoq.com/presentations/Simple-Made-Easy/
+- Hickey, "The Value of Values" — why values beat mutable places.
+  https://www.infoq.com/presentations/Value-Values/
+- Hickey, "Are We There Yet?" — epochal time, persistent data structures.
+  https://github.com/matthiasn/talk-transcripts/blob/master/Hickey_Rich/AreWeThereYet.md
+- Hickey, "Effective Programs" — open data, generic maps, the case against
+  closed types at system seams.
+  https://github.com/matthiasn/talk-transcripts/blob/master/Hickey_Rich/EffectivePrograms.md
+- Hickey, "Maybe Not" — the critique of `Option`/`Maybe` and requirement
+  relaxation. https://www.youtube.com/watch?v=YR5WdGrpoug
+- Hickey, "Hammock Driven Development" — think before you type; understand the
+  data first.
+  https://github.com/matthiasn/talk-transcripts/blob/master/Hickey_Rich/HammockDrivenDev.md
+- Normand, _Grokking Simplicity_ (Manning, 2021) — data / calculations / actions
+  made practical with worked examples.
+  https://www.manning.com/books/grokking-simplicity
+- Bernhardt, "Boundaries" — functional core, imperative shell.
+  https://www.destroyallsoftware.com/talks/boundaries
+- Parnas, "On the Criteria To Be Used in Decomposing Systems into Modules"
+  (CACM 1972) — information hiding is hiding decisions likely to change.
+  https://www.win.tue.nl/~wstomv/edu/2ip30/references/criteria_for_modularization.pdf
+- King, "Parse, don't validate" — parsing produces evidence in the type.
+  https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/
+- Wlaschin, _Domain Modeling Made Functional_ (Pragmatic, 2018) — sum types,
+  railway-oriented programming, DDD in F#.
+  https://pragprog.com/titles/swdddf/domain-modeling-made-functional/
+- Acton, "Data-Oriented Design and C++" (CppCon 2014) — the _other_
+  data-oriented tradition (cache locality); cited here only for disambiguation.
+  https://www.youtube.com/watch?v=rX0ItVEVjHc

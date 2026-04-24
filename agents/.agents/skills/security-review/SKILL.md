@@ -10,34 +10,50 @@ description:
 
 # Security Review
 
-## OWASP Top 10:2025
+## Default Stance (every review)
 
-The 2025 edition (released Nov 2025) has two new entries and reorganises several
-categories. Know what changed.
-
-| #   | Category                                   | Key change vs 2021                                                  |
-| --- | ------------------------------------------ | ------------------------------------------------------------------- |
-| A01 | Broken Access Control                      | Unchanged; still #1                                                 |
-| A02 | Cryptographic Failures                     | Unchanged                                                           |
-| A03 | **Software and Data Integrity Failures**   | Expanded to include **Supply Chain Failures** (was A08:2021)        |
-| A04 | Insecure Design                            | Unchanged                                                           |
-| A05 | Security Misconfiguration                  | Unchanged                                                           |
-| A06 | Vulnerable and Outdated Components         | Unchanged                                                           |
-| A07 | Identification and Authentication Failures | Unchanged                                                           |
-| A08 | **Server-Side Request Forgery (SSRF)**     | SSRF merged in from standalone (was A10:2021)                       |
-| A09 | Security Logging and Monitoring Failures   | Unchanged                                                           |
-| A10 | **Mishandling of Exceptional Conditions**  | NEW — improper error handling that leaks state or bypasses controls |
-
-**New focus areas to add to reviews:**
-
-- Supply chain: are third-party packages pinned and verified?
-- SSRF: does any user input control a URL that the server fetches?
-- Error handling: do error responses leak stack traces, internal paths, or auth
-  enumeration signals?
+- Assume input is hostile until validated at the boundary.
+- Assume every dependency is compromised until pinned and provenance-verified.
+- On detected invariant violation → crash, never continue.
+- Fail closed on auth, authz, or crypto errors; never silently degrade.
+- Never roll your own crypto, hash, MAC, or token format.
+- Constant-time compare for any secret equality check.
 
 ---
 
-## STRIDE Threat Modelling (30-minute version)
+## OWASP Top 10:2025
+
+Know the list, not just the top three.
+
+| #   | Category                               |
+| --- | -------------------------------------- |
+| A01 | Broken Access Control                  |
+| A02 | Security Misconfiguration              |
+| A03 | Software Supply Chain Failures         |
+| A04 | Cryptographic Failures                 |
+| A05 | Injection                              |
+| A06 | Insecure Design                        |
+| A07 | Authentication Failures                |
+| A08 | Software or Data Integrity Failures    |
+| A09 | Security Logging and Alerting Failures |
+| A10 | Mishandling of Exceptional Conditions  |
+
+**New focus areas vs 2021:**
+
+- Supply chain (A03): are third-party packages pinned and provenance-verified?
+- Exception handling (A10): do error responses leak stack traces, internal
+  paths, or auth enumeration signals?
+
+---
+
+## Threat Modelling: 4 Questions + STRIDE
+
+Before STRIDE, answer:
+
+1. What are we building? (data-flow diagram, trust boundaries)
+2. What can go wrong? (STRIDE per element)
+3. What are we doing about it? (mitigate / accept / transfer)
+4. Did we do a good job? (re-review after changes)
 
 Run STRIDE against any new API endpoint, auth flow, or data pipeline:
 
@@ -52,6 +68,17 @@ Run STRIDE against any new API endpoint, auth flow, or data pipeline:
 
 For each threat: identify the attack surface, rate likelihood × impact, decide
 to mitigate/accept/transfer.
+
+---
+
+## Authorisation (A01 — the #1 risk)
+
+Every protected endpoint:
+
+- Authz check in the handler, not only the router.
+- Check ownership of referenced object IDs (IDOR).
+- Deny by default; allowlist roles/scopes.
+- Test with unauth, wrong-tenant, and wrong-role callers.
 
 ---
 
@@ -85,27 +112,51 @@ rotation. Rotation should be a non-event, not a crisis.
 
 ---
 
-## Auth: PASETO over JWT for New Systems
+## Auth: Tokens
 
 **JWT problems:** algorithm confusion attacks (`alg: none`, RS256 → HS256
 confusion), header injection, weak key validation. Libraries frequently have
 CVEs.
 
 **PASETO** (Platform-Agnostic Security Tokens): fixed algorithms per version, no
-algorithm field to confuse, simpler to use correctly.
+algorithm field to confuse, simpler to use correctly. Default to PASETO; keep
+JWT only where a federated protocol (OIDC/SSO) requires it.
 
 - `v4.local` — symmetric encryption (use when issuer = verifier)
 - `v4.public` — asymmetric signatures (use when tokens cross trust boundaries)
 
 If you must use JWT:
 
-- Always specify `algorithms=["RS256"]` explicitly in verification — never allow
-  the token to choose.
+- Pin allowed algorithms from trusted configuration or issuer metadata
+  (OIDC/JWKS), and verify the key type matches the algorithm. Never let the
+  untrusted token header decide verification policy.
 - Use short expiry (15min access tokens) + refresh tokens.
 - Validate `iss`, `aud`, `exp` claims.
 - Never put sensitive data in the payload — it's base64-encoded, not encrypted.
 
 **OAuth2 + OIDC** for federated identity. Never roll your own auth protocol.
+
+---
+
+## Auth: Passwords, MFA, Sessions
+
+**Passwords:**
+
+- Min length 15; max ≥64; allow all printable Unicode + spaces.
+- No composition rules. No forced periodic rotation.
+- Check candidates against a breached-password list on set/change.
+- Store with a memory-hard KDF (argon2id, scrypt, or bcrypt cost ≥12).
+
+**MFA:**
+
+- Require a phishing-resistant factor (WebAuthn/passkeys, FIDO2) for any admin
+  or privileged role.
+- SMS OTP is a fallback only, never the sole factor.
+
+**Sessions:**
+
+- Rotate session ID on login and privilege change.
+- Short idle timeout for privileged sessions.
 
 ---
 
@@ -131,23 +182,43 @@ queue messages, DB rows from external systems.
 
 ---
 
+## Logging & Alerting (A09)
+
+**Log, but not secrets:**
+
+- Log authn success/failure, authz denials, admin actions, input validation
+  rejections at the boundary.
+- Never log: passwords, tokens, session IDs, raw PII, full payment data.
+- Alert on: failed-login spikes, privilege escalations, new admin creation,
+  unexpected outbound connections.
+
+---
+
+## Exception Handling (A10)
+
+**Error responses:**
+
+- Generic message to caller; detail only in server-side log with request ID.
+- No stack traces, SQL fragments, or file paths over the wire.
+- Same shape and timing for "user not found" and "wrong password" (avoid
+  enumeration).
+- Catch broadly at the outer boundary only; rethrow inside business logic.
+
+---
+
 ## Supply Chain Security
 
-**Dependency pinning:** pin to exact versions in production manifests
-(`requirements.txt`, `package-lock.json`, `Cargo.lock`). Review and test
-upgrades explicitly.
+**On dependency change:**
 
-**Signing and provenance with Sigstore:**
+- Pin to exact version in lockfile.
+- Run `npm audit` / `pip-audit` / `cargo audit` / `govulncheck`.
+- Review diff for new transitive deps; reject unexpected additions.
+- Patch-level auto-merge allowed only if build is reproducible and
+  signature-verified; minor/major require human review.
 
-```bash
-# Sign a container image (keyless, uses OIDC)
-cosign sign ghcr.io/myorg/myapp:v1.2.3
-
-# Verify
-cosign verify --certificate-identity-regexp=".*" \
-  --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \
-  ghcr.io/myorg/myapp:v1.2.3
-```
+**Signing and provenance:** use Sigstore keyless signing (OIDC-backed) for
+artifacts; verify signatures on pull. Agents can look up `cosign` syntax as
+needed.
 
 **SLSA Level 2+** for critical services: build provenance attests what source
 was built, by what build system, with what inputs. Consumers can verify the
@@ -163,20 +234,12 @@ reducing scanner noise.
 
 ---
 
-## mTLS and Service Identity
+## Service Identity (mTLS, SPIFFE)
 
-In microservice architectures, service-to-service calls should use mutual TLS
-(mTLS). Both sides present certificates; both verify the other's identity.
-
-**SPIFFE/SPIRE** provides a workload identity standard:
-
-- Each workload gets a SPIFFE Verifiable Identity Document (SVID).
-- SVIDs are X.509 certificates or JWTs, automatically rotated.
-- Service mesh proxies (Istio, Linkerd) implement mTLS transparently when SPIRE
-  is the CA.
-
-Without a service mesh: use a library like HashiCorp Vault PKI to issue and
-rotate short-lived certificates per service.
+- Service-to-service calls use mTLS; both sides present and verify certificates.
+- Prefer SPIFFE/SPIRE-issued SVIDs (X.509 or JWT, auto-rotated) or service mesh
+  (Istio, Linkerd). Without a mesh, use Vault PKI for short-lived per-service
+  certs.
 
 ---
 
@@ -189,8 +252,31 @@ Before approving any PR touching auth, data handling, or external interfaces:
 - [ ] Auth checks on every protected endpoint (not just the router)
 - [ ] No direct object references without ownership check (IDOR)
 - [ ] Error responses don't reveal internal state or enumerate valid users/IDs
+- [ ] Same shape and timing on authn failure paths
+- [ ] Logs, metrics, and traces are source-redacted; collector redaction is
+      defense-in-depth
 - [ ] User-controlled data not used in SQL without parameterisation
 - [ ] User-controlled data not rendered in HTML without escaping
-- [ ] Dependencies reviewed for CVEs (run `npm audit`, `pip-audit`,
-      `cargo audit`)
+- [ ] Dependencies pinned; `npm audit` / `pip-audit` / `cargo audit` /
+      `govulncheck` clean
 - [ ] SSRF: user-supplied URLs pass through an allowlist
+- [ ] Constant-time comparison on secret equality checks
+- [ ] Fail-closed on auth/authz/crypto errors
+
+---
+
+## Canon
+
+- OWASP Top 10:2025 — <https://owasp.org/Top10/2025/>
+- OWASP Proactive Controls 2024 — <https://top10proactive.owasp.org/>
+- NIST SSDF (SP 800-218) — <https://csrc.nist.gov/pubs/sp/800/218/final>
+- NIST SP 800-63B rev 4 (Digital Identity / Authenticators) —
+  <https://pages.nist.gov/800-63-4/sp800-63b.html>
+- Shostack, 4-Question Threat Modelling Frame —
+  <https://shostack.org/resources/threat-modeling>
+- SLSA v1.0 Levels — <https://slsa.dev/spec/v1.0/levels>
+- Sigstore / cosign — <https://docs.sigstore.dev/cosign/signing/overview/>
+- OpenSSF on Sigstore rollout —
+  <https://openssf.org/blog/2024/02/16/scaling-up-supply-chain-security-implementing-sigstore-for-seamless-container-image-signing/>
+- Hunt & Thomas, _The Pragmatic Programmer_ (20th Anniversary Ed.), ch. 4
+  "Pragmatic Paranoia" — <https://pragprog.com/titles/tpp20/>

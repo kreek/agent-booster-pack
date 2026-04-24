@@ -1,8 +1,5 @@
 # AGENTS.md
 
-Global defaults for work under `~/`. Per-project `AGENTS.md` files override this
-one.
-
 ## Core Principles
 
 - Simplicity first: the most direct solution that meets the requirement beats
@@ -17,26 +14,118 @@ one.
 
 ## Working Style
 
-- Keep changes minimal and targeted; match the existing codebase's conventions.
-- Fix root causes rather than adding narrow patches.
+- Keep changes scoped to the request and fix the root cause in the touched area.
+  Do not start broad cleanup without being asked.
+- Respect useful local conventions, but do not copy patterns that are unsafe,
+  incorrect, brittle, overcomplicated, or hostile to readability.
 - Introduce no new dependencies, formatters, or build tools unless the task
   clearly requires them.
-- Prefer the project's existing scripts and conventions.
-- For non-trivial changes, propose a short plan and wait for confirmation before
-  executing.
-- For tasks touching more than ~5 files, prefer a subagent for investigation.
-- Ask when requirements are ambiguous; surface risks and tradeoffs before
-  acting, not after.
-- Start with the happy path. Only handle edge cases up-front when they're
-  security-relevant or the requirement names them.
-- Break large problems into incremental steps; ship and validate each before
-  layering the next.
-- When trade-offs exist, offer the alternatives briefly with their costs — don't
-  silently pick one.
-- Ask about backwards compatibility rather than assuming; compatibility shims
-  add code that may not be wanted.
+- For non-trivial, ambiguous, or risky changes, state the short plan,
+  assumptions, and tradeoffs before editing. Ask only when the answer changes
+  the implementation or risk.
+- Start with the happy path. Add edge cases when the requirement names them,
+  they are security- or data-loss-relevant, or they are needed for a real
+  boundary such as network, filesystem, database, or concurrency.
+- Preserve backwards compatibility only when required or clearly valuable;
+  otherwise surface the tradeoff before adding shims.
+
+## Skills
+
+Skills are progressive context. Use this file as the index; load the relevant
+`SKILL.md` before applying a skill, and do not duplicate skill bodies here.
+
+When multiple skills apply, load the smallest useful set. If skills conflict,
+resolve in this order: security/privacy/data-loss prevention, correctness and
+domain invariants, production safety, performance, maintainability/readability,
+existing project conventions, style/aesthetics. Project conventions are evidence
+of local intent, not proof of quality; follow them only when they do not weaken
+the higher-priority concerns.
+
+### Foundational Design
+
+Use these before choosing abstractions or control flow for non-trivial code.
+They shape the problem, not just the implementation.
+
+- `data-first-design`: use when designing state, data models, inputs,
+  invariants, effects, or module boundaries.
+
+### Safety Gates
+
+Use these as mandatory review lenses when triggered. They can block an otherwise
+good solution because mistakes here cause data loss, incidents, or security
+failures.
+
+- `security-review`: use when touching auth, authorisation, secrets, crypto,
+  input validation, dependency trust, logging of sensitive data, or any trust
+  boundary.
+- `database-safety`: use when changing schemas, migrations, indexes, queries,
+  transactions, connection pools, deletion semantics, or production data access.
+- `deployment-and-cicd`: use when changing pipelines, release steps, rollout
+  strategy, rollback paths, feature flags, or deploy-time database coordination.
+- `distributed-systems-resilience`: use when making remote calls or designing
+  timeouts, retries, idempotency, sagas, outbox, queues, event ordering, or
+  consistency.
+
+### Correctness And Change Control
+
+Use these broadly when changing behavior or structure. They keep code provable,
+recoverable, and understandable.
+
+- `behavior-testing`: use when adding, reviewing, or fixing tests; deciding what
+  to mock; proving caller-visible behavior; addressing flakes or overspecified
+  tests.
+- `error-handling-patterns`: use when designing error types, propagation,
+  retries, crash boundaries, user-facing messages, or recovery behavior.
+- `debugging-methodology`: use when investigating bugs, flakes, regressions,
+  production symptoms, or any problem where the cause is not yet proven.
+- `refactoring-safely`: use when reshaping existing code, extracting modules,
+  renaming broadly, migrating frameworks, or changing structure without changing
+  behavior.
+
+### Production Quality
+
+Use these when their technical domain appears in the work. They improve
+operability, scalability, and performance after the core model is sound.
+
+- `observability-for-services`: use when adding or reviewing logs, metrics,
+  traces, health checks, dashboards, SLOs, alerts, or telemetry redaction.
+- `concurrency-patterns`: use when writing async, threaded, actor, channel,
+  lock, queue, cancellation, or backpressure-sensitive code.
+- `performance-profiling`: use when optimising or diagnosing latency,
+  throughput, p99s, CPU, memory, allocations, I/O, or resource saturation.
+- `caching-strategies`: use when adding caches, choosing TTL/invalidation,
+  preventing stampedes, using Redis/Memcached/CDNs, or debugging stale data.
+- `api-design`: use when designing REST/HTTP APIs, OpenAPI, status codes,
+  pagination, idempotency keys, rate limits, versioning, or webhooks.
+
+### Communication And UX
+
+Use these when the user-facing or maintainer-facing surface is part of the work.
+They should not override correctness or safety. They may override weak project
+conventions when the existing surface is inaccessible, confusing, misleading, or
+hard to maintain.
+
+- `documentation`: use when writing or reviewing READMEs, ADRs, runbooks, API
+  docs, reference docs, tutorials, or explanatory comments.
+- `frontend-design`: use when building or materially changing frontend pages,
+  components, interaction flows, responsive layout, accessibility, or visual
+  design.
+
+### Workflow
+
+Use these for repository mechanics and change packaging. They govern how work is
+organized, not what the code should do.
+
+- `git-workflow-depth`: use when rebasing, bisecting, resolving conflicts,
+  splitting/squashing commits, recovering history, or cleaning branch history.
+- `smart-commit`: use when grouping a messy working tree, proposing commit
+  splits, writing commit messages, or committing approved changes.
 
 ## Code and Data
+
+Programs are transformations over data before they are object hierarchies.
+Design data shapes and invariants first; then write transformations and isolate
+effects at the boundary.
 
 - Separate data from logic from I/O. Pure functions must not produce side
   effects.
@@ -45,8 +134,8 @@ one.
 - Make illegal states unrepresentable — prefer sum types over stringly-typed
   flags.
 - Default to immutability; mutate only where the performance case is clear.
-- See the `data-first-design` skill for the full canon (Hickey, Normand, Parnas,
-  Wlaschin).
+- Use the `data-first-design` skill for the full canon on modelling state,
+  values, effects, and invariants.
 
 ## Code Structure
 
@@ -78,6 +167,9 @@ one.
   precedence.
 
 ## Validation
+
+Tests prove behavior and document the contract. Timing is tactical; the proof is
+not.
 
 - Run the narrowest relevant validation first, then broaden only if needed.
 - Use the project's existing test, lint, and build commands.

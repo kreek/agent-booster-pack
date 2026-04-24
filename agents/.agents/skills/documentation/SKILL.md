@@ -11,26 +11,38 @@ description:
 
 # Documentation
 
-Docs that pay rent: they answer a question the reader actually has, stay true as
-the system changes, and are cheaper to read than the code they describe.
-Everything below is in service of those three tests.
+## Before writing any doc
 
-## Progressive Disclosure
+| Reader's question             | Artefact              | Where                            |
+| ----------------------------- | --------------------- | -------------------------------- |
+| "How do I start from zero?"   | Tutorial              | `docs/tutorials/`                |
+| "How do I do X?"              | How-to                | `docs/how-to/` or README         |
+| "What are the exact fields?"  | Reference (generated) | OpenAPI / docstrings             |
+| "Why is it built this way?"   | Explanation / ADR     | `docs/explanation/`, `docs/adr/` |
+| "It's on fire, what do I do?" | Runbook               | next to the service              |
 
-Structure every document so a reader who bails early still leaves with something
-useful.
+If the answer exists in code/schema/tests, link it. Do not restate.
 
-- **First sentence** — the gist. What is this, in one line.
-- **First paragraph** — why the reader should care and when to use it.
-- **Body** — how it works, edge cases, detail.
-- **End** — pointers to the next thing.
+---
 
-Treat each heading the same way: its first line should stand alone. A reader
-scanning only the first line under every heading should still understand the
-doc's shape.
+## Doc change ships in the PR that changes the behaviour
 
-Symptom of failure: the reader has to scroll to paragraph three before learning
-whether the doc is even relevant to them.
+- Behaviour changed → update the doc in the same PR. No "docs follow-up" issues.
+- If you cannot update it now, delete the stale section and open an issue to
+  rewrite.
+- A reviewer who sees a behaviour diff with no doc diff must block the PR.
+
+---
+
+## Progressive disclosure
+
+- Line 1: what this is.
+- Paragraph 1: who it's for and when to use it.
+- Body: mechanics, edge cases.
+- End: next link.
+
+Scan test: reading only the first line under each heading must reveal the doc's
+shape. Lead with a concrete example; derive the rule.
 
 ---
 
@@ -46,16 +58,14 @@ don't duplicate.
 - Cross-references: link to the authoritative file in the repo, not a prose
   summary.
 
-When duplication is unavoidable (e.g. a conceptual overview that paraphrases a
-spec), state explicitly which source is authoritative so readers know where to
-go when the two disagree.
+When duplication is unavoidable, state explicitly which source is authoritative.
 
 ---
 
 ## The Four Modes (Diátaxis)
 
-From Daniele Procida. Every doc serves exactly one of these purposes. Mixing
-them produces prose that fails at all four.
+Classify before writing: learning / doing / looking-up / understanding. One
+purpose per doc. If you need two, write two.
 
 | Mode             | Reader's situation                   | Shape                                            |
 | ---------------- | ------------------------------------ | ------------------------------------------------ |
@@ -64,23 +74,36 @@ them produces prose that fails at all four.
 | **Reference**    | Working, needs a fact fast           | Accurate, exhaustive, no narrative               |
 | **Explanation**  | Trying to understand                 | Discursive, covers _why_ and trade-offs          |
 
-**Test:** what does the reader want to _do_ with this page?
-
-- "I want to learn" → Tutorial
-- "I want to accomplish X" → How-to
-- "I want to look up X" → Reference
-- "I want to understand X" → Explanation
-
-Common failure: a "getting started" page that mixes tutorial steps with
-reference tables and design rationale. Split it into three documents, each doing
-one job well.
+Failure mode: a "getting started" page that mixes tutorial steps with reference
+tables and design rationale. Split it into three.
 
 ---
 
-## Write for the Reader's Question
+## Reference is generated
 
-Phrase titles and headings as the goal the reader brought to the page, not the
-author's taxonomy.
+- API fields → OpenAPI / JSON Schema / protobuf. Render; don't retype.
+- CLI flags → `--help` via a generator.
+- Config keys → the schema file.
+- Types & signatures → the source. Docstrings carry contract + why, not
+  mechanics.
+
+When you catch yourself retyping a signature in prose, delete the prose.
+
+---
+
+## README (keep it short; link out)
+
+1. One-line description (what + who for).
+2. Install / run: copy-pasteable commands.
+3. Minimal working example with expected output.
+4. Link to: full docs, CONTRIBUTING, LICENSE, CHANGELOG.
+
+Out of scope in the README: design rationale (→ ADR), full reference (→
+generated), runbooks.
+
+---
+
+## Titles are the reader's question, not your taxonomy
 
 ```
 Author-first (bad):         Reader-first (good):
@@ -89,73 +112,49 @@ Author-first (bad):         Reader-first (good):
   "Authentication"            "How does login work?"
 ```
 
-Reverse-engineer the search query that landed them here. If the doc doesn't
-answer that question in the first 30 seconds, the title is wrong or the doc is
-wrong.
+If the doc doesn't answer the title question in the first 30 seconds, the title
+is wrong or the doc is wrong.
 
 ---
 
-## Concrete Before Abstract
-
-A worked example sticks faster than the rule it demonstrates. Lead with the
-example; derive the rule.
-
-```
-Abstract-first (bad):
-  "The API supports resource retrieval via HTTP GET with a path
-  parameter identifying the resource instance."
-
-Concrete-first (good):
-  GET /users/42
-  → 200 OK
-  → { "id": 42, "email": "..." }
-
-  Retrieve any user by ID. 404 if the user doesn't exist.
-```
-
-Even for explanation-mode docs, open with a scenario. "Imagine you're processing
-10 000 orders a minute" lands better than "Under high throughput…".
-
----
-
-## Co-locate Docs with Code
-
-A document maintained away from the thing it describes will drift. Keep docs
-close enough that they're reviewed in the same PR as the change.
+## Co-locate docs with code
 
 - Module README → inside the module directory.
 - ADRs → `docs/adr/` in the same repo as the code.
 - API reference → generated from the source (docstrings, OpenAPI annotations).
-- Runbooks → either in the service repo or a single ops repo _per team_, never
-  in a detached wiki.
+- Runbooks → service repo or a single ops repo _per team_, never a detached
+  wiki.
 
-Wikis drift. Confluence drifts. A doc in the same repo as the code gets reviewed
-by reviewers who'd notice a lie.
-
----
-
-## Prefer Executable Proofs Over Prose
-
-Prose rots silently; types, schemas, and tests fail loudly. Let the executable
-artifact carry the invariant; let prose carry the intent.
-
-- A type signature declares the contract better than English. Use prose to
-  explain _why_ the contract has that shape.
-- A contract test pins the API. Use prose to explain _what_ a consumer is
-  expected to do.
-- A schema validates the config. Use prose to explain _which key to tune for
-  which symptom_.
-
-Rule of thumb: if you find yourself writing "this function returns an `Order` if
-the cart is non-empty, otherwise `None`", that sentence is redundant with the
-signature — delete it and document the _reason_ for the invariant instead.
+Wikis drift. A doc in the same repo gets reviewed by reviewers who'd notice a
+lie.
 
 ---
 
-## ADRs (Architecture Decision Records)
+## Prefer executable proofs over prose
 
-Record significant decisions in a lightweight, durable format. Michael Nygard's
-structure:
+Prose rots silently; types, schemas, and tests fail loudly.
+
+- Type signature declares the contract. Prose explains _why_ the contract has
+  that shape.
+- Contract test pins the API. Prose explains _what_ a consumer must do.
+- Schema validates config. Prose explains _which key to tune for which symptom_.
+
+If you're writing "returns an `Order` if the cart is non-empty, otherwise
+`None`" — delete it; document the reason for the invariant instead.
+
+---
+
+## ADR rules
+
+- One decision per ADR. If the title needs "and", split it.
+- Sections: Status, Date, Context, Decision, Consequences (list positive,
+  negative, neutral).
+- Immutable after Accepted. Supersede with a new ADR; set old
+  `Status: Superseded by ADR-NNNN`.
+- Sequential numbers, never reused. Store in `docs/adr/`.
+- Write at decision time, not from memory.
+
+Trigger: if a future engineer might ask "why X and not Y?", write the ADR now.
 
 ```markdown
 # ADR-0007: Use Postgres for the order ledger
@@ -164,7 +163,7 @@ Status: Accepted Date: 2026-02-14
 
 ## Context
 
-[The forces at play: constraints, requirements, options considered.]
+[Forces at play: constraints, requirements, options considered.]
 
 ## Decision
 
@@ -172,27 +171,19 @@ Status: Accepted Date: 2026-02-14
 
 ## Consequences
 
-[What becomes easier, what becomes harder, what is now locked in.]
+[Positive, negative, neutral. What becomes easier, what becomes harder, what is
+now locked in.]
 ```
-
-Rules:
-
-- **One decision per ADR.** If you're writing "and", split it.
-- **Immutable once accepted.** Don't edit an ADR to reflect a later change —
-  write a new ADR that supersedes it (`Status: Superseded by ADR-0023`).
-- **Number sequentially.** ADR-0001, ADR-0002, etc. Never reuse a number.
-- **Write it when the decision is made**, not months later from memory.
-
-An ADR's value is the _why_ and the _alternatives considered_. If a future
-engineer asks "why did we use X instead of Y?" and no ADR answers them, the ADR
-shouldn't have been skipped.
 
 ---
 
-## Runbooks
+## Runbook sections (in order, always)
 
-A runbook is a doc the on-call engineer reads at 3am while an alert is firing.
-Optimise for that reader.
+Symptom → Diagnosis → Remediation → Verification → Escalation.
+
+- Every diagnosis step links a dashboard or query.
+- Every remediation step is a command or a named playbook.
+- Untested runbook = fiction. Exercise in a drill within 30 days of writing.
 
 ```markdown
 # Runbook: order-processor high latency
@@ -204,15 +195,15 @@ p99 of `order_processor_latency_seconds` > 2s for 5 minutes. Triggers the
 
 ## Diagnosis
 
-1. Check DB connection pool saturation: [dashboard link]
-2. Check downstream payment-gateway latency: [dashboard link]
-3. Check for hot-partition lock contention on `orders` table.
+1. DB connection pool saturation: [dashboard link]
+2. Downstream payment-gateway latency: [dashboard link]
+3. Hot-partition lock contention on `orders` table.
 
 ## Remediation
 
-- If DB pool saturated: scale processor replicas (`kubectl scale ...`).
-- If payment-gateway slow: page payments on-call (#payments-oncall).
-- If lock contention: apply the known mitigation (link to playbook).
+- DB pool saturated: scale processor replicas (`kubectl scale ...`).
+- Payment-gateway slow: page payments on-call (#payments-oncall).
+- Lock contention: apply known mitigation (link to playbook).
 
 ## Verification
 
@@ -220,53 +211,46 @@ Latency returns below 500ms within 5 minutes of remediation.
 
 ## Escalation
 
-If unresolved in 15 minutes, page the platform lead.
+Unresolved in 15 minutes → page the platform lead.
 ```
-
-Test runbooks in drills. A runbook that's never been exercised is speculative
-fiction.
 
 ---
 
-## Delete Aggressively
+## Delete or rewrite when
 
-A stale doc is worse than no doc because readers trust it. Audit regularly and
-delete anything you can't commit to maintaining.
+- Code referenced by the doc was renamed, moved, or deleted.
+- Feature behaviour changed and the doc was not updated in that PR.
+- No one on the team can confirm it's still accurate.
+- Last-reviewed date older than last behaviour change.
 
-Delete when:
-
-- The feature it describes has been removed or significantly changed.
-- The "last reviewed" date is older than the feature's current behaviour.
-- No one on the team can confirm whether it's still accurate.
-
-Prefer a short, correct doc over a long, speculative one. "We don't document X
-yet" is a legitimate answer.
-
-When deleting, leave a breadcrumb: a redirect, a note in the changelog, or a
-link in the adjacent docs that used to reference it.
+A stale doc is worse than no doc — readers trust it. Leave a breadcrumb on
+delete: redirect, changelog note, or link from adjacent docs.
 
 ---
 
 ## Signposting
 
-Tell the reader what's coming, what's out of scope, and where to go next.
-
 - **Scope sentence near the top:** "This guide covers deploying to staging. For
   production, see [link]."
-- **Prerequisites:** list what the reader must already know or have set up.
-- **Non-goals:** list related topics this doc deliberately doesn't cover.
-- **Next steps:** end every doc with pointers. Where do they go after reading
-  this?
+- **Prerequisites:** what the reader must already know or have set up.
+- **Non-goals:** related topics this doc deliberately doesn't cover.
+- **Next steps:** end every doc with pointers.
 
-A reader should never wonder "wait, is this the right page for my situation?"
-after five minutes of reading.
+A reader should never wonder "is this the right page?" five minutes in.
 
 ---
 
-## Comments: the _Why_ is Load-Bearing
+## Comments
 
-Reinforces the AGENTS.md rule with the test: remove the comment — would a future
-reader be surprised or misled?
+Rule: comment the _why_ (intent, constraint, non-obvious reason). Never the
+_what_.
+
+Test: remove the comment — would the next engineer be surprised or misled? If
+no, delete it.
+
+Docstring scope: modules and exported functions. Not every internal helper.
+Document the contract (inputs, outputs, invariants, failure modes), not the
+mechanics.
 
 **Delete these — they narrate what the code says:**
 
@@ -296,25 +280,43 @@ with raw_http_client() as client:
 return fetch(start, end + 1)
 ```
 
-Rule of thumb: if the comment is a restatement of the code, delete it. If
-removing it would cause the next engineer to "fix" something that shouldn't be
-changed, keep it.
+---
 
-Docstrings follow the same rule: document the contract (inputs, outputs,
-invariants, failure modes), not the mechanics.
+## Tiebreaker
+
+When sources disagree: _The Pragmatic Programmer_ (20th ed.). Docs are code:
+plain text, version-controlled, DRY, why-not-what, built-in not bolted-on.
 
 ---
 
 ## Canon
 
-- **Daniele Procida** — _Diátaxis: A systematic approach to technical
-  documentation_ (diataxis.fr). The four-modes framework.
-- **Michael Nygard** — "Documenting Architecture Decisions" (cognitect.com,
-  2011). Originated the ADR format.
-- **Google** — _Developer Documentation Style Guide_
-  (developers.google.com/style). Practical conventions for reader-first prose.
-- **Write the Docs** — _writethedocs.org_. Community for documentation
-  practitioners; useful talks on doc rot, audience analysis, and information
-  architecture.
-- **Julia Evans** — on concrete examples and teaching by showing, not telling.
-  Her zines are a masterclass in progressive disclosure.
+- _The Pragmatic Programmer_, 20th Anniversary Edition —
+  [pragprog.com](https://pragprog.com/titles/tpp20/the-pragmatic-programmer-20th-anniversary-edition/);
+  [Tips](https://pragprog.com/tips/);
+  [DRY chapter extract (PDF)](https://media.pragprog.com/titles/tpp20/dry.pdf).
+- _Diátaxis: A systematic approach to technical documentation_ —
+  [diataxis.fr](https://diataxis.fr/);
+  [start here](https://diataxis.fr/start-here/).
+- _Documenting Architecture Decisions_ (2011) —
+  [cognitect.com](https://www.cognitect.com/blog/2011/11/15/documenting-architecture-decisions);
+  templates at [adr.github.io](https://adr.github.io/);
+  [Red Hat overview](https://www.redhat.com/en/blog/architecture-decision-records).
+- _Google Developer Documentation Style Guide_ —
+  [highlights](https://developers.google.com/style/highlights);
+  [second person](https://developers.google.com/style/person);
+  [prescriptive documentation](https://developers.google.com/style/prescriptive-documentation).
+- _GitLab Handbook — Shared Reality / SSOT_ —
+  [handbook.gitlab.com](https://handbook.gitlab.com/teamops/shared-reality/);
+  [style guide](https://docs.gitlab.com/development/documentation/styleguide/).
+- _Docs-as-Code_ —
+  [TechTarget](https://www.techtarget.com/searchapparchitecture/tip/Docs-as-Code-explained-Benefits-tools-and-best-practices);
+  [Kong](https://konghq.com/blog/learning-center/what-is-docs-as-code);
+  [Hyperlint](https://hyperlint.com/blog/5-critical-documentation-best-practices-for-docs-as-code/).
+- _Runbooks / SRE_ —
+  [Google SRE Workbook: On-Call](https://sre.google/workbook/on-call/);
+  [SRE Book: Being On-Call](https://sre.google/sre-book/being-on-call/);
+  [ACM Queue: Why SRE Documents Matter](https://queue.acm.org/detail.cfm?id=3283589).
+- _READMEs_ — [makeareadme.com](https://www.makeareadme.com/);
+  [freeCodeCamp: How to Structure Your README](https://www.freecodecamp.org/news/how-to-structure-your-readme-file/).
+- _Write the Docs_ — [writethedocs.org](https://www.writethedocs.org/).

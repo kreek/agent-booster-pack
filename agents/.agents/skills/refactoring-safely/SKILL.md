@@ -9,21 +9,51 @@ description:
 
 # Refactoring Safely
 
-## Boy-Scout Rule
+## When to Refactor
 
-Leave every module you touch slightly better than you found it. Not a full
-rewrite — one small improvement per visit.
+| Situation                                   | Action                                                   |
+| ------------------------------------------- | -------------------------------------------------------- |
+| About to add a feature to messy code        | Tidy the affected area first, in a separate commit.      |
+| Just fixed a bug, see why it happened       | Rename/extract so the shape makes the bug obvious.       |
+| Code smell noticed in passing, not blocking | Fix it now if < 5 min; else open a ticket.               |
+| Large rewrite tempting                      | Don't. Pick a strangler fig / BBA path instead.          |
+| Mid-feature, tests red                      | Stop. Finish the feature. Refactor after green.          |
+| No tests on the target code                 | Write characterisation tests before any structural edit. |
 
-Acceptable as part of any PR:
+---
 
-- Rename a confusing variable or function.
-- Extract a long function into two named pieces.
-- Remove dead code.
-- Add a missing test for a branch you just changed.
+## Structural vs Behavioural Commits
 
-Not acceptable: use refactoring as cover for a behaviour change, or use a PR as
-an excuse for a whole-module rewrite when the task was a one-line fix. Keep
-refactoring and behaviour changes in separate commits.
+- One commit = one kind of change. Never mix a rename with a bug fix.
+- Structural commits (rename, extract, inline, move) must be behaviour-
+  preserving and pass the same tests they started with.
+- Behavioural commits change outputs; they may add tests but must not reshape
+  unrelated code.
+- If a behaviour change is hard, stop and do structural tidying first, in its
+  own commit. Then do the behaviour change.
+- Reviewers and `git bisect` depend on this separation. Do not break it for
+  convenience.
+
+---
+
+## Reversibility
+
+- Prefer the refactoring step you can revert in one command.
+- If a step cannot be cheaply reverted, split it.
+- The system must be shippable after every commit, not just at the end.
+- Feature-flag irreversible-looking changes so runtime rollback exists.
+- A long-lived refactor branch is a smell — integrate via parallel change or
+  branch by abstraction instead.
+
+---
+
+## Leave It Better
+
+- Every PR that touches a file may include one small improvement: rename,
+  extract, delete dead code, add a missing test.
+- One improvement per visit, not a rewrite.
+- Never disguise a behaviour change as a refactor. Separate commits.
+- If you see rot you can't fix in-PR, open a ticket now, not "someday".
 
 ---
 
@@ -39,19 +69,43 @@ def test_current_behaviour_of_calculate_price():
     assert result == 47.50  # whatever it returns today
 ```
 
-Characterisation tests are a safety net, not a specification. They exist to tell
-you when your refactoring changes something. If a characterisation test fails,
-you changed behaviour — intentionally or not.
+- Characterisation tests pin behaviour, they do not assert correctness.
+- A failing characterisation test means behaviour changed — intentionally or
+  not.
+- Write them before you understand the code. Writing the pin _is_ the reading.
+- Freeze clocks, seeds, and I/O before recording outputs.
+- If output is huge, snapshot and diff; pin the hash, not a hand-written
+  expectation.
+- Re-run the test against unchanged code at least twice before trusting it.
 
-Write them before you understand the code. The act of writing them teaches you
-the code.
+---
+
+## Choosing the Pattern
+
+| Scope of change                               | Pattern                      |
+| --------------------------------------------- | ---------------------------- |
+| Function/method signature                     | Parallel Change              |
+| Module, library, framework inside one process | Branch by Abstraction        |
+| Subsystem, service, or whole application      | Strangler Fig                |
+| Many tangled prerequisites, unknown order     | Mikado (on top of above)     |
+| Untested legacy anywhere in the above         | Characterisation tests first |
+
+---
+
+## Validate the Target Shape First
+
+- Before refactoring broadly, wire one end-to-end slice through the new shape
+  (one call site, one caller, one test).
+- If the new shape doesn't survive the slice, the wider refactor would have been
+  wasted work. Revise the target.
+- Only expand the refactor after the slice is green and reviewed.
 
 ---
 
 ## Mikado Method
 
-For large refactors with many tangled dependencies, the Mikado method helps you
-sequence the work without getting stuck:
+For large refactors with many tangled dependencies, the Mikado method sequences
+the work without getting stuck:
 
 1. Write down the goal (the final desired state).
 2. Try to make the change naively. When it fails or breaks something, write down
@@ -61,11 +115,10 @@ sequence the work without getting stuck:
 5. Continue building the prerequisite graph.
 6. Once a leaf prerequisite is complete, move up the tree.
 
-The Mikado graph tells you what to do next and why. It's a living document, not
-a big plan upfront.
-
-**Key discipline:** always revert after discovering a dependency. Never leave
-the codebase in a broken state while exploring. Short feedback loops.
+- Always revert after discovering a dependency. Never leave the codebase in a
+  broken state while exploring.
+- The Mikado graph is a living document, not an up-front plan.
+- Short feedback loops.
 
 ---
 
@@ -133,12 +186,17 @@ Steps:
 4. Repeat until the old system handles nothing.
 5. Remove the old system.
 
-**The strangler fig wins because:** it's always shippable, rollback is always
-possible (re-route to old system), and you learn from real traffic.
+**Why strangler fig wins:**
 
-**Big-bang rewrites fail because:** you can't ship until everything is done, you
-discover requirements you didn't know existed, and the old system is still being
-changed while you rewrite it.
+- Always shippable.
+- Rollback is always possible (re-route to old system).
+- You learn from real traffic.
+
+**Why big-bang rewrites fail:**
+
+- You can't ship until everything is done.
+- You discover requirements you didn't know existed.
+- The old system keeps changing while you rewrite it.
 
 ---
 
@@ -176,3 +234,20 @@ Workflow:
 
 If you can't get tests to pass after a refactoring step, revert and split the
 step into smaller pieces. Staying green is more important than making progress.
+
+---
+
+## Canon
+
+- [Hunt & Thomas, _The Pragmatic Programmer_ 20th Anniversary Edition](https://pragprog.com/titles/tpp20/the-pragmatic-programmer-20th-anniversary-edition/)
+- [Pragmatic Programmer Tips](https://pragprog.com/tips/)
+- [Fowler, _Refactoring_ 2nd ed.](https://martinfowler.com/books/refactoring.html)
+- [Beck, _Tidy First?_](https://www.amazon.com/Tidy-First-Personal-Exercise-Empirical/dp/1098151240)
+- [Feathers, _Working Effectively with Legacy Code_](https://bssw.io/items/working-effectively-with-legacy-code)
+- [Ellnestam & Brolund, _The Mikado Method_](https://www.manning.com/books/the-mikado-method)
+- [Fowler, Branch by Abstraction](https://martinfowler.com/bliki/BranchByAbstraction.html)
+- [Hammant, Introducing Branch by Abstraction](https://paulhammant.com/blog/branch_by_abstraction)
+- [Fowler, Strangler Fig Application](https://martinfowler.com/bliki/StranglerFigApplication.html)
+- [Fowler, Rewriting Strangler Fig (2024)](https://martinfowler.com/articles/2024-strangler-fig-rewrite.html)
+- [Fowler, Parallel Change](https://martinfowler.com/bliki/ParallelChange.html)
+- [Fowler, Legacy Seam](https://martinfowler.com/bliki/LegacySeam.html)
