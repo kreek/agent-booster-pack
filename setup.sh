@@ -16,25 +16,58 @@ else
   echo "Linked ~/.claude/skills → ~/.agents/skills"
 fi
 
-# Codex: add per-skill symlinks inside existing ~/.codex/skills/
-# This preserves marketplace skills (codex-primary-runtime, etc.)
-CODEX_SKILLS="$HOME/.codex/skills"
-if [ ! -d "$CODEX_SKILLS" ]; then
-  mkdir -p "$CODEX_SKILLS"
-fi
+# Per-agent per-skill symlinks. Per-skill (not whole-dir) preserves any
+# marketplace or user-added skills already in each agent's skills directory.
+#
+# Windsurf is conditional because it stores under ~/.codeium/windsurf/, which
+# only exists if Windsurf is installed.
+link_skills_per_agent() {
+  local label="$1"
+  local target_dir="$2"
+  if [ ! -d "$(dirname "$target_dir")" ]; then
+    echo "$label not installed — skipping (no $(dirname "$target_dir"))"
+    return
+  fi
+  mkdir -p "$target_dir"
+  for skill_dir in "$AGENTS_SKILLS"/*/; do
+    local skill_name
+    skill_name=$(basename "$skill_dir")
+    local target="$target_dir/$skill_name"
+    if [ -L "$target" ]; then
+      echo "$label: $skill_name already symlinked, skipping"
+    elif [ -d "$target" ]; then
+      echo "WARNING: $target exists as a real directory. Skipping."
+    else
+      ln -s "$skill_dir" "$target"
+      echo "Linked ${target/#$HOME/~} → ~/.agents/skills/$skill_name"
+    fi
+  done
+}
 
-for skill_dir in "$AGENTS_SKILLS"/*/; do
-  skill_name=$(basename "$skill_dir")
-  target="$CODEX_SKILLS/$skill_name"
-  if [ -L "$target" ]; then
-    echo "~/.codex/skills/$skill_name already symlinked, skipping"
-  elif [ -d "$target" ]; then
-    echo "WARNING: ~/.codex/skills/$skill_name exists as a real directory. Skipping."
+# Codex CLI: ~/.codex/skills/
+link_skills_per_agent "Codex" "$HOME/.codex/skills"
+
+# Windsurf (Codeium Cascade): ~/.codeium/windsurf/skills/
+link_skills_per_agent "Windsurf" "$HOME/.codeium/windsurf/skills"
+
+# Pi, Cursor, Gemini CLI, and OpenCode read ~/.agents/skills/ directly per the
+# agentskills.io de-facto convention — no per-tool symlinks needed.
+echo ""
+echo "Auto-discovered via ~/.agents/skills/ (no extra wiring needed):"
+for tool in pi cursor gemini opencode; do
+  case "$tool" in
+    pi)       home_dir="$HOME/.pi" ;;
+    cursor)   home_dir="$HOME/.cursor" ;;
+    gemini)   home_dir="$HOME/.gemini" ;;
+    opencode) home_dir="$HOME/.config/opencode" ;;
+  esac
+  if [ -d "$home_dir" ]; then
+    echo "  - $tool ($home_dir exists)"
   else
-    ln -s "$skill_dir" "$target"
-    echo "Linked ~/.codex/skills/$skill_name → ~/.agents/skills/$skill_name"
+    echo "  - $tool (not installed, will auto-discover if added)"
   fi
 done
+echo ""
 
 # Commands: fan out each command file to every agent's expected location.
 # Claude Code → ~/.claude/commands/<name>.md
