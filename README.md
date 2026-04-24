@@ -22,13 +22,14 @@ similar task. I also audited the skills libraries I found and did not find many
 that focused on increasing the engineering maturity or code quality of what
 agents produced, so I made my own.
 
-Complexity is death for any software project. Rich Hickey's “Simple Made Easy”
-is the best talk I have heard on software engineering, and its philosophy, along
-with other [data-first functional best practices][skill-data] (even when working
-in OOP-heavy languages), is the baseline for this set of skills. I have also
-learned from experience and research that agents produce their best results when
-pushed toward simplicity and required to prove their work rather than just claim
-completion. In practice, that means:
+Complexity is death for any software project. Rich Hickey's [“Simple Made
+Easy”][simple-made-easy] is the best talk I have heard on software engineering,
+and its philosophy, along with other [data-first functional best
+practices][skill-data] (even when working in OOP-heavy languages), is the
+baseline for this set of skills. I have also learned from experience and
+research that agents produce their best results when pushed toward simplicity
+and required to prove their work rather than just claim completion. In practice,
+that means:
 
 - Model values, states, invariants, and effects before picking abstractions.
 - Turn every meaningful engineering claim into evidence.
@@ -183,6 +184,7 @@ against current official/community guidance before serious project work.
 [skill-scaffolding]: agents/.agents/skills/scaffolding/SKILL.md
 [skill-security]: agents/.agents/skills/security/SKILL.md
 [skill-tests]: agents/.agents/skills/tests/SKILL.md
+[simple-made-easy]: https://www.youtube.com/watch?v=SxdOUGdseq4
 
 ## Authoring Rules
 

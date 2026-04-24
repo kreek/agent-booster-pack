@@ -85,8 +85,7 @@ will construct it.
 
 ## References
 
-- Rich Hickey, "Simple Made Easy":
-  <https://www.infoq.com/presentations/Simple-Made-Easy/>
+- Rich Hickey, "Simple Made Easy": <https://www.youtube.com/watch?v=SxdOUGdseq4>
 - Rich Hickey, "The Value of Values":
   <https://www.infoq.com/presentations/Value-Values/>
 - Eric Normand, _Grokking Simplicity_:
