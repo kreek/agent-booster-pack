@@ -1,14 +1,32 @@
+<p align="center">
+  <img src="assets/ABP_logo.png" alt="Agent Booster Pack logo" width="280">
+</p>
+
 # Agent Booster Pack
 
 A portable set of high-leverage skills for leveling up coding agents.
 
-This is the source of truth for how coding agents should reason, change code,
-prove correctness, and package work across Codex, Claude Code, and other agents
-that understand the Agent Skills layout. Each skill is opened only when the task
-calls for it; the right draw gives the agent a sharper rule, workflow, and proof
-check for the work in front of it.
+This is my brain dump of 25+ years of software development: the habits,
+standards, and hard-won lessons I have accumulated while working in startup
+environments through giant private and public sector organizations. It reflects
+the full gamut: doing everything at a startup, API in the morning and Android
+SDK in the afternoon, through API governance and leading an SRE team that guided
+hundreds of teams toward better engineering practices.
 
-The core philosophy is: **data first, proof before done.**
+This is my source of truth for how coding agents should reason, change code,
+prove correctness, and package work across Codex, Claude Code, and other agents
+that understand the Agent Skills layout. Since skills were introduced, I have
+documented and categorized each recurring correction I made to a model, turning
+those interventions into guidance for how agents should approach the next
+similar task. I also audited the skills libraries I could find and did not find
+many that focused on increasing the engineering maturity or code quality of what
+agents produced, so I made my own.
+
+Complexity is death for any software project. Rich Hickey's _Simple Made Easy_
+is the best talk I have ever heard on software engineering, and it is the
+baseline for this set of skills. From experience, agents produce their best
+results when they are pushed toward simplicity and required to prove their work
+rather than merely claim completion. In practice, that means:
 
 - Model values, states, invariants, and effects before picking abstractions.
 - Turn every meaningful engineering claim into evidence.
@@ -79,6 +97,9 @@ registered twice. For project-scoped Copilot skills, drop a `.github/skills/`,
 Skills are progressive context. Agents see only `name` and `description` until a
 skill triggers, then load the matching `SKILL.md`, and only read references or
 run scripts when the skill asks for them.
+
+Each skill is opened only when the task calls for it; the right draw gives the
+agent a sharper rule, workflow, and proof check for the work in front of it.
 
 The skill pack is deliberately not a checklist library. It is a set of
 discipline-enforcing lenses:
