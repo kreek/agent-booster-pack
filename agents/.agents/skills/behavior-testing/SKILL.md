@@ -37,8 +37,7 @@ sees happen.
 
 A behavior test answers one question:
 
-> When [some condition holds] and [some action is taken], does [a specific >
-> observable outcome] occur?
+> When [condition] and [action], does [specific observable outcome] occur?
 
 Concrete examples of behaviors worth proving:
 
