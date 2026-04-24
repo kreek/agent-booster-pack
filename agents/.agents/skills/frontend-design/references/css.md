@@ -1,6 +1,8 @@
 # Modern CSS — frontend-design
 
-Features, engine support, and architectures as of April 2026.
+Feature guidance as of April 2026. Browser support is a moving target: treat
+MDN Baseline and the linked browser-compat tables as the source of truth before
+shipping production code that depends on a newer feature.
 
 ---
 
@@ -13,7 +15,7 @@ Features, engine support, and architectures as of April 2026.
   `cqi` / `cqw` / `cqh`.
 - **`:has()`** — relational selector.
 - **Subgrid**.
-- **View Transitions Level 1** — same-document SPA, across all three engines.
+- **View Transitions Level 1** — same-document SPA transitions.
 - **`color-mix()`**.
 - **OKLCH** and **oklab**.
 - **`light-dark()`** with `color-scheme`.
@@ -27,16 +29,19 @@ Features, engine support, and architectures as of April 2026.
 
 ---
 
-## Use with `@supports` (near-universal, not baseline yet)
+## Use with `@supports` or progressive enhancement
 
-| Feature                            | Status                                                                                                                |
-| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| View Transitions Level 2 (MPA)     | Chrome 126+, Safari 18.5+, Firefox 146+ partial                                                                       |
-| CSS Anchor Positioning             | All three engines by January 2026. Replaces Floating UI for many cases                                                |
-| Scroll-driven animations           | `animation-timeline: scroll() \| view()` — Chrome 115+, Safari 26, Firefox behind flag                                |
-| `interpolate-size: allow-keywords` | Chromium only                                                                                                         |
-| `@scope`                           | Chromium + Safari                                                                                                     |
-| `display: grid-lanes` (masonry)    | CSSWG resolved Nov 2025 on the name. Safari 26 ships. Chromium / Firefox experimenting. **Do not use in production.** |
+Verify these features against the linked source before relying on them. Prefer
+semantic fallback markup and small `@supports` blocks over browser sniffing.
+
+| Feature                            | Production posture                                                                                              | Source anchor |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------- | ------------- |
+| View Transitions Level 2 (MPA)     | Progressive enhancement only; same-document transitions are safer as a default.                                 | https://developer.chrome.com/docs/web-platform/view-transitions/ |
+| CSS Anchor Positioning             | Useful for popovers/tooltips, but check each property/function because Baseline status can differ by subfeature. | https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/anchor |
+| Scroll-driven animations           | Use for non-essential motion only; provide a static layout and honor `prefers-reduced-motion`.                  | https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_scroll-driven_animations |
+| `interpolate-size: allow-keywords` | Enhancement for smoother intrinsic-size animation; do not make layout depend on it.                             | https://developer.mozilla.org/en-US/docs/Web/CSS/interpolate-size |
+| `@scope`                           | Good for local cascade control; verify support and remember inheritance still crosses scope boundaries.          | https://developer.mozilla.org/en-US/docs/Web/CSS/%40scope |
+| `display: grid-lanes` (masonry)    | Experimental/early-adopter feature; do not use for critical production layout without a robust fallback.         | https://webkit.org/blog/17862/webkit-features-for-safari-26-4/ |
 
 ---
 

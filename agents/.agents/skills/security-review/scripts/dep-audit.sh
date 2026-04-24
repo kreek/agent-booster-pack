@@ -23,9 +23,28 @@ run_self_test() {
   echo '{"lockfileVersion":3}' > "$tmp/package-lock.json"
   out=$("$0" --dir "$tmp" 2>&1) || true
   case "$out" in
-    *npm*|*"no auditor"*) echo "self-test ok"; exit 0 ;;
+    *npm*|*"no auditor"*) ;;
     *) echo "self-test failed: $out" >&2; exit 1 ;;
   esac
+
+  cargo_tmp="$tmp/cargo-project"
+  bin_tmp="$tmp/bin"
+  mkdir "$cargo_tmp" "$bin_tmp"
+  echo '# lock' > "$cargo_tmp/Cargo.lock"
+  cat > "$bin_tmp/cargo" <<'EOF'
+#!/usr/bin/env bash
+exit 101
+EOF
+  chmod +x "$bin_tmp/cargo"
+  PATH="$bin_tmp:/usr/bin:/bin" "$0" --dir "$cargo_tmp" >/dev/null 2>&1
+  status=$?
+  if [ "$status" -ne 2 ]; then
+    echo "self-test failed: missing cargo-audit should exit 2, got $status" >&2
+    exit 1
+  fi
+
+  echo "self-test ok"
+  exit 0
 }
 
 [ "$self_test" -eq 1 ] && run_self_test
@@ -63,7 +82,13 @@ elif [ -f uv.lock ] || [ -f pyproject.toml ] || [ -f requirements.txt ] || [ -f 
   fi
 elif [ -f Cargo.lock ]; then
   echo "== cargo audit =="
-  have cargo-audit || have cargo && cargo audit || findings=1
+  if have cargo-audit; then
+    cargo-audit || findings=1
+  elif have cargo && cargo audit --version >/dev/null 2>&1; then
+    cargo audit || findings=1
+  else
+    echo "cargo-audit not installed (try 'cargo install cargo-audit')" >&2; exit 2
+  fi
 elif [ -f Gemfile.lock ]; then
   echo "== bundler-audit =="
   have bundle || { echo "bundler not installed" >&2; exit 2; }

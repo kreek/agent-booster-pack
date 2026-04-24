@@ -31,26 +31,30 @@ hooks or bundles unrelated changes cannot be trusted.
 ## Core Ideas
 
 1. Inspect before touching: status, staged state, diff stats, and recent log.
-2. Read the actual diffs before grouping.
-3. Group by meaning, not by file type or convenience.
-4. Keep code, tests, and docs together when they describe one behavior.
-5. Split refactors, formatting, generated output, and behavior changes.
-6. Ask for approval before staging or committing groups.
-7. Name files explicitly; never `git add .` or `git add -A` in a messy tree.
+2. Never commit on `main` or `master`; create or switch to a topic branch first.
+3. Read the actual diffs before grouping.
+4. Group by meaning, not by file type or convenience.
+5. Keep code, tests, and docs together when they describe one behavior.
+6. Split refactors, formatting, generated output, and behavior changes.
+7. Ask for approval before staging or committing groups.
+8. Name files explicitly; never `git add .` or `git add -A` in a messy tree.
 
 ## Workflow
 
-1. Run status and diff/stat inspection.
-2. Read diffs for staged and unstaged changes.
-3. Detect hazards: conflicts, secrets, generated churn, mixed changes in one
+1. Run status, branch/upstream, and diff/stat inspection.
+2. Stop if the current branch is `main` or `master`; ask for or create a topic
+   branch before staging or committing.
+3. Read diffs for staged and unstaged changes.
+4. Detect hazards: conflicts, secrets, generated churn, mixed changes in one
    file, unrelated staged work.
-4. Propose commits with subject, files, and why.
-5. After approval, stage named files and commit one group at a time.
-6. Verify log, status, and file membership after each commit.
+5. Propose commits with subject, files, and why.
+6. After approval, stage named files and commit one group at a time.
+7. Verify log, status, branch, and file membership after each commit.
 
 ## Verification
 
 - [ ] `git status --short` is clean or only contains explicitly deferred work.
+- [ ] Commits were made on a topic branch, not `main` or `master`.
 - [ ] Every commit subject completes "When applied, this commit will \_\_\_".
 - [ ] No commit bundles unrelated behavior, refactor, formatting, generated
       output, or vendor churn.

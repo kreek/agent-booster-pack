@@ -44,7 +44,13 @@ test('eventually', async () => {
 })
 EOF
 
-  out=$("$0" "$tmp" 2>&1) || true
+  out=$("$0" "$tmp" 2>&1)
+  status=$?
+  if [ "$status" -ne 1 ]; then
+    printf 'self-test failed: expected findings exit 1, got %s\n' "$status" >&2
+    printf '%s\n' "$out" >&2
+    exit 1
+  fi
   for expect in "class under test" "internal collaborator" "call-count assertion" "private method" "arbitrary wait"; do
     case "$out" in
       *"$expect"*) ;;
@@ -53,6 +59,24 @@ EOF
          exit 1 ;;
     esac
   done
+  count_tmp=$(mktemp -d)
+  count_only="$count_tmp/call-count-only.test.ts"
+  cat >"$count_only" <<'EOF'
+test('calls callback', () => {
+  const spy = vi.fn()
+  doThing(spy)
+  expect(spy).toHaveBeenCalledTimes(1)
+})
+EOF
+  out=$("$0" "$count_tmp" 2>&1)
+  status=$?
+  if [ "$status" -ne 1 ] || ! printf '%s' "$out" | grep -q "call-count assertion"; then
+    printf 'self-test failed: isolated call-count finding did not fail\n' >&2
+    printf '%s\n' "$out" >&2
+    exit 1
+  fi
+  rm -rf "$count_tmp"
+
   echo "self-test ok"
   exit 0
 }
@@ -106,22 +130,24 @@ rm -f /tmp/sniff-mocks.$$
 # 3. Call-count assertion without behaviour assertion in the same test.
 # Heuristic: toHaveBeenCalledTimes / toHaveBeenCalled present,
 # and no toBe/toEqual/toHaveProperty/toMatch within the same 'test(' / 'it('.
-find "$dir" -type f \( -name '*.test.*' -o -name '*.spec.*' \) -not -path '*/node_modules/*' | while read -r f; do
-  awk '
-    /^[[:space:]]*(test|it)[[:space:]]*\(/ { in_test=1; body=""; start=NR; next }
-    in_test { body = body "\n" $0 }
-    in_test && /^[[:space:]]*\}\)[[:space:]]*;?[[:space:]]*$/ {
-      has_count = (body ~ /toHaveBeenCalledTimes|toHaveBeenCalled|calledWith/)
-      has_other = (body ~ /toBe\(|toEqual\(|toStrictEqual\(|toMatch\(|toHaveProperty\(|toContain\(|toThrow\(/)
-      if (has_count && !has_other) {
-        printf "%s:%d\n", FILENAME, start
-      }
-      in_test=0
-    }
-  ' "$f"
-done | while read -r hit; do
+while IFS= read -r hit; do
   [ -n "$hit" ] && report MEDIUM "call-count assertion" "$hit — no behaviour assertion in the same test"
-done
+done < <(
+  find "$dir" -type f \( -name '*.test.*' -o -name '*.spec.*' \) -not -path '*/node_modules/*' | while read -r f; do
+    awk '
+      /^[[:space:]]*(test|it)[[:space:]]*\(/ { in_test=1; body=""; start=NR; next }
+      in_test { body = body "\n" $0 }
+      in_test && /^[[:space:]]*\}\)[[:space:]]*;?[[:space:]]*$/ {
+        has_count = (body ~ /toHaveBeenCalledTimes|toHaveBeenCalled|calledWith/)
+        has_other = (body ~ /toBe\(|toEqual\(|toStrictEqual\(|toMatch\(|toHaveProperty\(|toContain\(|toThrow\(/)
+        if (has_count && !has_other) {
+          printf "%s:%d\n", FILENAME, start
+        }
+        in_test=0
+      }
+    ' "$f"
+  done
+)
 
 # 4. Private-method access via `(x as any)._name(` or `(x as any).#name`.
 while IFS= read -r line; do
