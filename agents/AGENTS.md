@@ -20,6 +20,9 @@
   incorrect, brittle, overcomplicated, or hostile to readability.
 - Introduce no new dependencies, formatters, or build tools unless the task
   clearly requires them.
+- Node package manager: match the repo's lockfile — `pnpm-lock.yaml` → pnpm,
+  `package-lock.json` → npm, `yarn.lock` → yarn. If none exists, default to
+  `pnpm`. Never mix managers in one repo.
 - For non-trivial, ambiguous, or risky changes, state the short plan,
   assumptions, and tradeoffs before editing. Ask only when the answer changes
   the implementation or risk.
