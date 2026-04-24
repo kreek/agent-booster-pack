@@ -24,10 +24,10 @@ agents produced, so I made my own.
 
 Complexity is death for any software project. Rich Hickey's “Simple Made Easy”
 is the best talk I have heard on software engineering, and its philosophy, along
-with other data-first functional best practices (even if working in ostensibly
-OOP languages), is the baseline for this set of skills. I have also learned from
-experience and research that agents produce their best results when pushed
-toward simplicity and required to prove their work rather than just claim
+with other [data-first functional best practices][skill-data] (even when working
+in OOP-heavy languages), is the baseline for this set of skills. I have also
+learned from experience and research that agents produce their best results when
+pushed toward simplicity and required to prove their work rather than just claim
 completion. In practice, that means:
 
 - Model values, states, invariants, and effects before picking abstractions.
@@ -134,27 +134,55 @@ agent a sharper rule, workflow, and proof check for the work in front of it.
 The skill pack is deliberately not a checklist library. It is a set of
 discipline-enforcing lenses:
 
-| Area                      | Skills                                                             |
-| ------------------------- | ------------------------------------------------------------------ |
-| Foundational design       | `data`, `proof`                                                    |
-| Correctness and change    | `tests`, `debugging`, `refactoring`, `errors`                      |
-| Safety gates              | `security`, `database`, `deployment`, `resilience`                 |
-| Production quality        | `observability`, `realtime`, `concurrency`, `performance`, `cache` |
-| Public/user surfaces      | `api`, `docs`, `frontend`, `accessibility`                         |
-| Project and repo workflow | `scaffolding`, `git`, `commit`                                     |
+- Foundational design: [`data`][skill-data], [`proof`][skill-proof].
+- Correctness and change: [`tests`][skill-tests],
+  [`debugging`][skill-debugging], [`refactoring`][skill-refactoring],
+  [`errors`][skill-errors].
+- Safety gates: [`security`][skill-security], [`database`][skill-database],
+  [`deployment`][skill-deployment], [`resilience`][skill-resilience].
+- Production quality: [`observability`][skill-observability],
+  [`realtime`][skill-realtime], [`concurrency`][skill-concurrency],
+  [`performance`][skill-performance], [`cache`][skill-cache].
+- Public/user surfaces: [`api`][skill-api], [`docs`][skill-docs],
+  [`frontend`][skill-frontend], [`accessibility`][skill-accessibility].
+- Project and repo workflow: [`scaffolding`][skill-scaffolding],
+  [`git`][skill-git], [`commit`][skill-commit].
 
-The most important addition is `proof`: if an agent asserts a behavior,
-invariant, contract, root cause, or refactor-safety claim, it must name the
-proof obligation and evidence. Missing evidence is reported as unproven, not
-complete.
+The most important addition is [`proof`][skill-proof]: if an agent asserts a
+behavior, invariant, contract, root cause, or refactor-safety claim, it must
+name the proof obligation and evidence. Missing evidence is reported as
+unproven, not complete.
 
-The `scaffolding` skill includes ecosystem references for broad coverage and
-makes some intentionally opinionated framework calls, such as Hono, SvelteKit,
-FastAPI, Fiber, and Axum as defaults in their lanes. Node / TypeScript, Python,
-Ruby, JVM, Rust, and frontend defaults reflect stronger day-to-day preferences.
-PHP, Elixir, .NET, Go, and Swift references are included for agent coverage
-rather than daily personal practice; verify those choices against current
-official/community guidance before serious project work.
+The [`scaffolding`][skill-scaffolding] skill includes ecosystem references for
+broad coverage and makes some intentionally opinionated framework calls, such as
+Hono, SvelteKit, FastAPI, Fiber, and Axum as defaults in their lanes. Node /
+TypeScript, Python, Ruby, JVM, Rust, and frontend defaults reflect stronger
+day-to-day preferences. PHP, Elixir, .NET, Go, and Swift references are included
+for agent coverage rather than daily personal practice; verify those choices
+against current official/community guidance before serious project work.
+
+[skill-accessibility]: agents/.agents/skills/accessibility/SKILL.md
+[skill-api]: agents/.agents/skills/api/SKILL.md
+[skill-cache]: agents/.agents/skills/cache/SKILL.md
+[skill-commit]: agents/.agents/skills/commit/SKILL.md
+[skill-concurrency]: agents/.agents/skills/concurrency/SKILL.md
+[skill-data]: agents/.agents/skills/data/SKILL.md
+[skill-database]: agents/.agents/skills/database/SKILL.md
+[skill-debugging]: agents/.agents/skills/debugging/SKILL.md
+[skill-deployment]: agents/.agents/skills/deployment/SKILL.md
+[skill-docs]: agents/.agents/skills/docs/SKILL.md
+[skill-errors]: agents/.agents/skills/errors/SKILL.md
+[skill-frontend]: agents/.agents/skills/frontend/SKILL.md
+[skill-git]: agents/.agents/skills/git/SKILL.md
+[skill-observability]: agents/.agents/skills/observability/SKILL.md
+[skill-performance]: agents/.agents/skills/performance/SKILL.md
+[skill-proof]: agents/.agents/skills/proof/SKILL.md
+[skill-realtime]: agents/.agents/skills/realtime/SKILL.md
+[skill-refactoring]: agents/.agents/skills/refactoring/SKILL.md
+[skill-resilience]: agents/.agents/skills/resilience/SKILL.md
+[skill-scaffolding]: agents/.agents/skills/scaffolding/SKILL.md
+[skill-security]: agents/.agents/skills/security/SKILL.md
+[skill-tests]: agents/.agents/skills/tests/SKILL.md
 
 ## Authoring Rules
 
