@@ -1,0 +1,4 @@
+interface:
+  display_name: "ABP: Errors"
+  short_description: "Design explicit error flows"
+  default_prompt: "Use $errors to review this error propagation and user-facing failure shape."

@@ -6,8 +6,10 @@ description:
   linter, formatter, type or syntax checker, test runner, code coverage — to a
   project that lacks it. Also use when setting up initial CI, defining standard
   package scripts (test, lint, format, typecheck), or picking defaults for a
-  greenfield project. Covers Node, Python, Rust, Go, Ruby, Java/Kotlin, Swift,
-  .NET, Elixir, and PHP.
+  greenfield project. Also use when the current directory is empty or lacks a
+  recognizable project manifest, test runner, package/build configuration, or
+  baseline quality commands. Covers Node, Python, Rust, Go, Ruby, Java/Kotlin,
+  Swift, .NET, Elixir, and PHP.
 ---
 
 # Scaffolding
@@ -27,9 +29,9 @@ baseline without local knowledge.
 ## When NOT to Use
 
 - Adding a feature to an already healthy project; use the domain skill plus
-  `behavior-testing`.
-- Deployment pipeline beyond baseline CI; use `deployment-and-cicd`.
-- Framework-specific UI design choices; use `frontend-design`.
+  `tests`.
+- Deployment pipeline beyond baseline CI; use `deployment`.
+- Framework-specific UI design choices; use `frontend`.
 
 ## Core Ideas
 
@@ -73,7 +75,7 @@ Before production or collaboration, promote the scaffold to the full checklist.
 
 ## Handoffs
 
-- Use `behavior-testing` for the first real feature test.
-- Use `deployment-and-cicd` when CI becomes release/deploy automation.
-- Use `security-review` when adding dependency audits, secret scanning, signing,
-  or supply-chain gates.
+- Use `tests` for the first real feature test.
+- Use `deployment` when CI becomes release/deploy automation.
+- Use `security` when adding dependency audits, secret scanning, signing, or
+  supply-chain gates.

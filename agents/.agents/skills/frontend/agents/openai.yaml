@@ -1,0 +1,4 @@
+interface:
+  display_name: "ABP: Frontend"
+  short_description: "Design usable frontend UI"
+  default_prompt: "Use $frontend to improve this interface layout, states, and accessibility."

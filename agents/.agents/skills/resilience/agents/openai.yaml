@@ -1,0 +1,4 @@
+interface:
+  display_name: "ABP: Resilience"
+  short_description: "Design resilient remote calls"
+  default_prompt: "Use $resilience to review timeouts, retries, and idempotency."

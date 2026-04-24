@@ -1,0 +1,4 @@
+interface:
+  display_name: "ABP: Deployment"
+  short_description: "Design safe CI/CD rollouts"
+  default_prompt: "Use $deployment to design the rollout, gates, and rollback path."

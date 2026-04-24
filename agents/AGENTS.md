@@ -2,6 +2,9 @@
 
 ## Core Principles
 
+- These instructions are binding defaults, not suggestions. Follow them unless a
+  more specific project instruction or an explicit user request overrides them
+  without weakening safety, correctness, data integrity, or proof requirements.
 - Simplicity first: the most direct solution that meets the requirement beats
   the clever one.
 - Complexity is the enemy. Mutable state and tangled control flow are its
@@ -11,6 +14,22 @@
 - Write explicit code. Avoid clever one-liners; optimise for the next reader.
 - Reason before coding. For anything non-obvious, show the logic before the
   implementation.
+
+## Priority Rules
+
+- Safety, privacy, data integrity, and destructive-action controls are
+  non-negotiable. Do not bypass them to satisfy speed, style, convenience, or a
+  weak local convention.
+- Proof requirements are non-negotiable for behavior, invariant, contract,
+  root-cause, and refactor-safety claims. If evidence is missing, say the claim
+  is unproven.
+- Local project instructions may narrow or specialize this file. They may not
+  silently weaken safety gates, validation, proof obligations, or user-change
+  preservation. When local instructions conflict with these rules, follow the
+  stricter rule and call out the conflict.
+- User instructions override preferences and style guidance. They do not
+  authorize unsafe destruction, secret exposure, data loss, or false claims of
+  validation.
 
 ## Working Style
 
@@ -39,7 +58,8 @@
 ## Skills
 
 Skills are progressive context. Use this file as the index; load the relevant
-`SKILL.md` before applying a skill, and do not duplicate skill bodies here.
+`SKILL.md` before applying a skill, and do not duplicate skill bodies here. When
+a task matches a skill trigger, loading that skill is mandatory, not optional.
 
 When multiple skills apply, load the smallest useful set. If skills conflict,
 resolve in this order: security/privacy/data-loss prevention, correctness and
@@ -53,8 +73,8 @@ the higher-priority concerns.
 Use these before choosing abstractions or control flow for non-trivial code.
 They shape the problem, not just the implementation.
 
-- `data-first-design`: use when designing state, data models, inputs,
-  invariants, effects, or module boundaries.
+- `data`: use when designing state, data models, inputs, invariants, effects, or
+  module boundaries.
 
 ### Safety Gates
 
@@ -62,33 +82,31 @@ Use these as mandatory review lenses when triggered. They can block an otherwise
 good solution because mistakes here cause data loss, incidents, or security
 failures.
 
-- `security-review`: use when touching auth, authorisation, secrets, crypto,
-  input validation, dependency trust, logging of sensitive data, or any trust
+- `security`: use when touching auth, authorisation, secrets, crypto, input
+  validation, dependency trust, logging of sensitive data, or any trust
   boundary.
-- `database-safety`: use when changing schemas, migrations, indexes, queries,
+- `database`: use when changing schemas, migrations, indexes, queries,
   transactions, connection pools, deletion semantics, or production data access.
-- `deployment-and-cicd`: use when changing pipelines, release steps, rollout
-  strategy, rollback paths, feature flags, or deploy-time database coordination.
-- `distributed-systems-resilience`: use when making remote calls or designing
-  timeouts, retries, idempotency, sagas, outbox, queues, event ordering, or
-  consistency.
+- `deployment`: use when changing pipelines, release steps, rollout strategy,
+  rollback paths, feature flags, or deploy-time database coordination.
+- `resilience`: use when making remote calls or designing timeouts, retries,
+  idempotency, sagas, outbox, queues, event ordering, or consistency.
 
 ### Correctness And Change Control
 
 Use these broadly when changing behavior or structure. They keep code provable,
 recoverable, and understandable.
 
-- `proof-driven-engineering`: use when engineering claims need explicit proof
-  obligations: data invariant, boundary, executable check, and evidence.
-- `behavior-testing`: use when adding, reviewing, or fixing tests; deciding what
-  to mock; proving caller-visible behavior; addressing flakes or overspecified
-  tests.
-- `error-handling-patterns`: use when designing error types, propagation,
-  retries, crash boundaries, user-facing messages, or recovery behavior.
-- `debugging-methodology`: use when investigating bugs, flakes, regressions,
-  production symptoms, or any problem where the cause is not yet proven.
-- `refactoring-safely`: use when reshaping existing code, extracting modules,
-  renaming broadly, migrating frameworks, or changing structure without changing
+- `proof`: use when engineering claims need explicit proof obligations: data
+  invariant, boundary, executable check, and evidence.
+- `tests`: use when adding, reviewing, or fixing tests; deciding what to mock;
+  proving caller-visible behavior; addressing flakes or overspecified tests.
+- `errors`: use when designing error types, propagation, retries, crash
+  boundaries, user-facing messages, or recovery behavior.
+- `debugging`: use when investigating bugs, flakes, regressions, production
+  symptoms, or any problem where the cause is not yet proven.
+- `refactoring`: use when reshaping existing code, extracting modules, renaming
+  broadly, migrating frameworks, or changing structure without changing
   behavior.
 
 ### Production Quality
@@ -96,16 +114,16 @@ recoverable, and understandable.
 Use these when their technical domain appears in the work. They improve
 operability, scalability, and performance after the core model is sound.
 
-- `observability-for-services`: use when adding or reviewing logs, metrics,
-  traces, health checks, dashboards, SLOs, alerts, or telemetry redaction.
-- `concurrency-patterns`: use when writing async, threaded, actor, channel,
-  lock, queue, cancellation, or backpressure-sensitive code.
-- `performance-profiling`: use when optimising or diagnosing latency,
-  throughput, p99s, CPU, memory, allocations, I/O, or resource saturation.
-- `caching-strategies`: use when adding caches, choosing TTL/invalidation,
-  preventing stampedes, using Redis/Memcached/CDNs, or debugging stale data.
-- `api-design`: use when designing REST/HTTP APIs, OpenAPI, status codes,
-  pagination, idempotency keys, rate limits, versioning, or webhooks.
+- `observability`: use when adding or reviewing logs, metrics, traces, health
+  checks, dashboards, SLOs, alerts, or telemetry redaction.
+- `concurrency`: use when writing async, threaded, actor, channel, lock, queue,
+  cancellation, or backpressure-sensitive code.
+- `performance`: use when optimising or diagnosing latency, throughput, p99s,
+  CPU, memory, allocations, I/O, or resource saturation.
+- `cache`: use when adding caches, choosing TTL/invalidation, preventing
+  stampedes, using Redis/Memcached/CDNs, or debugging stale data.
+- `api`: use when designing REST/HTTP APIs, OpenAPI, status codes, pagination,
+  idempotency keys, rate limits, versioning, or webhooks.
 
 ### Communication And UX
 
@@ -114,9 +132,9 @@ They should not override correctness or safety. They may override weak project
 conventions when the existing surface is inaccessible, confusing, misleading, or
 hard to maintain.
 
-- `documentation`: use when writing or reviewing READMEs, ADRs, runbooks, API
-  docs, reference docs, tutorials, or explanatory comments.
-- `frontend-design`: use when building or materially changing frontend pages,
+- `docs`: use when writing or reviewing READMEs, ADRs, runbooks, API docs,
+  reference docs, tutorials, or explanatory comments.
+- `frontend`: use when building or materially changing frontend pages,
   components, interaction flows, responsive layout, accessibility, or visual
   design.
 
@@ -128,10 +146,10 @@ organized, not what the code should do.
 - `scaffolding`: use when bootstrapping a new project, adding baseline tooling
   (linter, formatter, type check, test runner, coverage) to a project that lacks
   it, or setting up initial CI config.
-- `git-workflow-depth`: use when rebasing, bisecting, resolving conflicts,
-  splitting/squashing commits, recovering history, or cleaning branch history.
-- `smart-commit`: use when grouping a messy working tree, proposing commit
-  splits, writing commit messages, or committing approved changes.
+- `git`: use when rebasing, bisecting, resolving conflicts, splitting/squashing
+  commits, recovering history, or cleaning branch history.
+- `commit`: use when grouping a messy working tree, proposing commit splits,
+  writing commit messages, or committing approved changes.
 
 Proof obligations override style, aesthetics, and weak local conventions. If a
 behavior, invariant, contract, root-cause, or refactor-safety claim cannot be
@@ -150,8 +168,8 @@ effects at the boundary.
 - Make illegal states unrepresentable — prefer sum types over stringly-typed
   flags.
 - Default to immutability; mutate only where the performance case is clear.
-- Use the `data-first-design` skill for the full canon on modelling state,
-  values, effects, and invariants.
+- Use the `data` skill for the full canon on modelling state, values, effects,
+  and invariants.
 
 ## Code Structure
 
@@ -179,13 +197,15 @@ effects at the boundary.
 
 - Use `rg` for text search and `rg --files` for file discovery.
 - Read the smallest relevant set of files before editing.
-- When a project has its own `AGENTS.md`, the more specific file takes
-  precedence.
+- When a project has its own `AGENTS.md`, treat it as additive and more
+  specific. It controls project conventions and local commands, but it does not
+  erase these global safety, proof, validation, and user-change-preservation
+  rules.
 
 ## Validation
 
-Tests prove behavior and document the contract. Timing is tactical; the proof is
-not.
+Validation is part of the work. A change is not complete until the relevant
+checks have run, or the exact blocker is reported.
 
 - Run the narrowest relevant validation first, then broaden only if needed.
 - Use the project's existing test, lint, and build commands.
@@ -204,7 +224,9 @@ tests. Test-first is optional; test-at-all is not.
 - Internal helpers and persistence modules do not need their own tests when
   outer-boundary tests exercise them. They do need tests when the logic is
   non-trivial in isolation — parsers, state machines, pure algorithms.
-- Load the `behavior-testing` skill before authoring tests. Do not skip it.
+- Load the `tests` skill before authoring tests. Do not skip it.
+- If the working directory is empty, lacks a project manifest, or has no
+  test/lint/typecheck baseline, load `scaffolding` before creating feature code.
 - When starting a new project or adding quality tooling to one that lacks it,
   load the `scaffolding` skill so linter, formatter, type check, test runner,
   and coverage are all in place before feature work begins.

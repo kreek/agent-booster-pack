@@ -1,0 +1,4 @@
+interface:
+  display_name: "ABP: Observability"
+  short_description: "Instrument services and alerts"
+  default_prompt: "Use $observability to add logs, metrics, traces, and alert guidance."

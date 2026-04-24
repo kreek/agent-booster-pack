@@ -1,0 +1,4 @@
+interface:
+  display_name: "ABP: Database"
+  short_description: "Review migrations and queries"
+  default_prompt: "Use $database to review this migration for locking, rollout, and rollback risk."

@@ -1,4 +1,4 @@
-# Coding Agent Booster Pack
+# Agent Booster Pack
 
 A portable set of high-leverage skills for leveling up coding agents.
 
@@ -8,14 +8,14 @@ that understand the Agent Skills layout. Each skill is opened only when the task
 calls for it; the right draw gives the agent a sharper rule, workflow, and proof
 check for the work in front of it.
 
-The core philosophy is:
+The core philosophy is: **data first, proof before done.**
 
-- data first: design values, states, invariants, and effects before abstractions
-- proof first: every meaningful engineering claim needs evidence
-- behavior first: tests enter through the boundary a caller actually uses
-- safety first: security, data loss, deploy risk, and production reliability
-  outrank style and local habit
-- small changes: one root cause, one logical behavior, one clean commit
+- Model values, states, invariants, and effects before picking abstractions.
+- Turn every meaningful engineering claim into evidence.
+- Prove behavior through the boundary a real caller uses.
+- Let security, data loss, deploy risk, and production reliability outrank style
+  and local habit.
+- Keep changes small: one root cause, one logical behavior, one clean commit.
 
 ## Repository Shape
 
@@ -33,6 +33,21 @@ The core philosophy is:
 stow agents
 ./setup.sh
 ```
+
+`stow agents` does not merge files. If `~/AGENTS.md` already exists as a real
+file, Stow will report a conflict instead of appending the Agent Booster Pack
+instructions. Do not use `stow --adopt` unless you intentionally want Stow to
+take ownership of that file.
+
+For an existing personal `~/AGENTS.md`, merge deliberately:
+
+1. Keep any personal or workplace-specific rules that are still current.
+2. Add the skill index and priority rules from `agents/AGENTS.md`.
+3. Preserve the ABP rule that local project `AGENTS.md` files are additive and
+   more specific, but must not weaken safety, proof, validation, or
+   user-change-preservation requirements.
+4. Run `./setup.sh` so skills and command prompts are still linked even if
+   `~/AGENTS.md` is maintained manually.
 
 `stow agents` links the shared instruction and skill roots:
 
@@ -61,19 +76,19 @@ run scripts when the skill asks for them.
 The skill pack is deliberately not a checklist library. It is a set of
 discipline-enforcing lenses:
 
-| Area                      | Skills                                                                                              |
-| ------------------------- | --------------------------------------------------------------------------------------------------- |
-| Foundational design       | `data-first-design`, `proof-driven-engineering`                                                     |
-| Correctness and change    | `behavior-testing`, `debugging-methodology`, `refactoring-safely`, `error-handling-patterns`        |
-| Safety gates              | `security-review`, `database-safety`, `deployment-and-cicd`, `distributed-systems-resilience`       |
-| Production quality        | `observability-for-services`, `concurrency-patterns`, `performance-profiling`, `caching-strategies` |
-| Public/user surfaces      | `api-design`, `documentation`, `frontend-design`                                                    |
-| Project and repo workflow | `scaffolding`, `git-workflow-depth`, `smart-commit`                                                 |
+| Area                      | Skills                                                 |
+| ------------------------- | ------------------------------------------------------ |
+| Foundational design       | `data`, `proof`                                        |
+| Correctness and change    | `tests`, `debugging`, `refactoring`, `errors`          |
+| Safety gates              | `security`, `database`, `deployment`, `resilience`     |
+| Production quality        | `observability`, `concurrency`, `performance`, `cache` |
+| Public/user surfaces      | `api`, `docs`, `frontend`                              |
+| Project and repo workflow | `scaffolding`, `git`, `commit`                         |
 
-The most important addition is `proof-driven-engineering`: if an agent asserts a
-behavior, invariant, contract, root cause, or refactor-safety claim, it must
-name the proof obligation and evidence. Missing evidence is reported as
-unproven, not complete.
+The most important addition is `proof`: if an agent asserts a behavior,
+invariant, contract, root cause, or refactor-safety claim, it must name the
+proof obligation and evidence. Missing evidence is reported as unproven, not
+complete.
 
 ## Authoring Rules
 
