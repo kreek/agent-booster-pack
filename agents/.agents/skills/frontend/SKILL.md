@@ -47,9 +47,11 @@ Design quality comes from priority, restraint, and verification, not decoration.
 5. Use cards only for repeated items, modals, or genuinely bounded tools. Do not
    make the whole app a set of oversized floating cards when an unframed layout,
    table, split pane, or toolbar would be clearer.
-6. Type scale follows information hierarchy. Hero-scale type is only for real
-   heroes; tool headings, panel titles, labels, and result text stay compact
-   enough that the main workflow remains visible in the first viewport.
+6. Typography is content architecture, not decoration. Type scale, measure,
+   leading, rhythm, and numeric alignment follow the reading task and
+   information hierarchy. Hero-scale type is only for real heroes; tool
+   headings, panel titles, labels, and result text stay compact enough that the
+   main workflow remains visible in the first viewport.
 7. Color is for hierarchy and state, not theme saturation. Avoid making every
    heading, link, button, and success message the same accent color.
 8. When no product, brand, or jurisdictional design system applies, use IBM
@@ -88,14 +90,16 @@ Design quality comes from priority, restraint, and verification, not decoration.
 5. If no official or existing product design system applies to a generic
    product/tool UI, use Carbon and IBM Plex as the visual baseline before
    inventing custom tokens.
-6. Define hierarchy, layout, states, empty/error/loading behavior, and
+6. Define typography early: type families, scale, measure, line-height,
+   vertical rhythm, and tabular/proportional numeral behavior.
+7. Define hierarchy, layout, states, empty/error/loading behavior, and
    responsive rules.
-7. For collection UIs, design the populated state first, then
+8. For collection UIs, design the populated state first, then
    empty/loading/error states. Empty states must disappear when items exist.
-8. Apply tokens consistently; avoid stray one-off values.
-9. Verify with real rendering, keyboard navigation, contrast, and reduced-motion
+9. Apply tokens consistently; avoid stray one-off values.
+10. Verify with real rendering, keyboard navigation, contrast, and reduced-motion
    behavior.
-10. Remove elements that do not change comprehension, trust, or actionability.
+11. Remove elements that do not change comprehension, trust, or actionability.
 
 ## Verification
 
@@ -111,6 +115,10 @@ Design quality comes from priority, restraint, and verification, not decoration.
       surprises.
 - [ ] Type scale is proportional to the container and task; hero-scale type is
       absent unless this is a real hero/landing surface.
+- [ ] Long-form text has readable measure and leading; dense UI text remains
+      compact without becoming cramped.
+- [ ] Metrics, tables, timestamps, prices, counters, and aligned technical
+      values use tabular numerals where comparison matters.
 - [ ] Empty states, success states, and populated states do not contradict each
       other.
 - [ ] Accent color is used selectively for action/state, not every prominent
@@ -142,3 +150,5 @@ Design quality comes from priority, restraint, and verification, not decoration.
 - `references/frameworks.md`: frontend framework tradeoffs.
 - `references/platforms.md`: platform design systems.
 - `references/css.md`: modern CSS capabilities.
+- `references/typography.md`: Bringhurst-informed typography harmonized with
+  Swiss/product UI practice.
