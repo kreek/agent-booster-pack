@@ -67,6 +67,13 @@ For an existing personal `~/AGENTS.md`, merge deliberately:
 Codex now discovers skills directly from `.agents/skills` / `~/.agents/skills`;
 do not rely on `~/.codex/prompts` for slash commands in current Codex CLI.
 
+GitHub Copilot CLI, Pi, Cursor, Gemini CLI, and OpenCode auto-discover from
+`~/.agents/skills/`, so the `stow agents` link is enough — no extra `setup.sh`
+wiring needed. Copilot also scans `~/.copilot/skills` and `~/.claude/skills`;
+the pack deliberately leaves `~/.copilot/skills` unlinked so skills are not
+registered twice. For project-scoped Copilot skills, drop a `.github/skills/`,
+`.claude/skills/`, or `.agents/skills/` directory in the repo itself.
+
 ## Skill System
 
 Skills are progressive context. Agents see only `name` and `description` until a
@@ -76,19 +83,27 @@ run scripts when the skill asks for them.
 The skill pack is deliberately not a checklist library. It is a set of
 discipline-enforcing lenses:
 
-| Area                      | Skills                                                 |
-| ------------------------- | ------------------------------------------------------ |
-| Foundational design       | `data`, `proof`                                        |
-| Correctness and change    | `tests`, `debugging`, `refactoring`, `errors`          |
-| Safety gates              | `security`, `database`, `deployment`, `resilience`     |
-| Production quality        | `observability`, `concurrency`, `performance`, `cache` |
-| Public/user surfaces      | `api`, `docs`, `frontend`                              |
-| Project and repo workflow | `scaffolding`, `git`, `commit`                         |
+| Area                      | Skills                                                             |
+| ------------------------- | ------------------------------------------------------------------ |
+| Foundational design       | `data`, `proof`                                                    |
+| Correctness and change    | `tests`, `debugging`, `refactoring`, `errors`                      |
+| Safety gates              | `security`, `database`, `deployment`, `resilience`                 |
+| Production quality        | `observability`, `realtime`, `concurrency`, `performance`, `cache` |
+| Public/user surfaces      | `api`, `docs`, `frontend`, `accessibility`                         |
+| Project and repo workflow | `scaffolding`, `git`, `commit`                                     |
 
 The most important addition is `proof`: if an agent asserts a behavior,
 invariant, contract, root cause, or refactor-safety claim, it must name the
 proof obligation and evidence. Missing evidence is reported as unproven, not
 complete.
+
+The `scaffolding` skill includes ecosystem references for broad coverage and
+makes some intentionally opinionated framework calls, such as Hono, SvelteKit,
+FastAPI, Fiber, and Axum as defaults in their lanes. Node / TypeScript, Python,
+Ruby, JVM, Rust, and frontend defaults reflect stronger day-to-day preferences.
+PHP, Elixir, .NET, Go, and Swift references are included for agent coverage
+rather than daily personal practice; verify those choices against current
+official/community guidance before serious project work.
 
 ## Authoring Rules
 

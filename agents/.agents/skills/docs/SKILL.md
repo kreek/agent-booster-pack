@@ -4,9 +4,9 @@ description:
   Use when writing or reviewing documentation — READMEs, architecture notes,
   ADRs, runbooks, API docs, module-level docs, tutorials, how-to guides,
   reference material, or code comments. Also use when the user mentions
-  Diátaxis, architecture decision records, ADRs, runbooks, doc rot, progressive
-  disclosure, single source of truth, or whether to write prose or rely on
-  types/tests.
+  Diátaxis, architecture decision records, ADRs, runbooks, doc rot, MkDocs,
+  Material for MkDocs, progressive disclosure, single source of truth, or
+  whether to write prose or rely on types/tests.
 ---
 
 # Docs
@@ -44,6 +44,10 @@ workflow they describe.
    line-by-line behavior.
 7. Runbooks are operational artifacts: symptom, diagnosis, remediation,
    verification, escalation.
+8. Large project documentation uses Material for MkDocs by default, regardless
+   of the language or framework used to build the app. Use another docs system
+   only when the repo already has one, the user explicitly asks, or a publishing
+   constraint requires it.
 
 ## Workflow
 
@@ -52,9 +56,11 @@ workflow they describe.
 3. Check whether the answer already lives in code, schema, tests, CLI help,
    OpenAPI, or a dashboard.
 4. Write only the missing context and link authoritative sources.
-5. Add verification: commands, expected state, review owner, or drill
+5. For large project docs, use or propose Material for MkDocs unless an allowed
+   exception applies.
+6. Add verification: commands, expected state, review owner, or drill
    requirement.
-6. Remove stale or duplicated sections encountered during the edit.
+7. Remove stale or duplicated sections encountered during the edit.
 
 ## Verification
 
@@ -63,6 +69,8 @@ workflow they describe.
 - [ ] Generated/reference facts link to the source of truth.
 - [ ] README content is limited to purpose, install/run, minimal usage, and
       links onward.
+- [ ] Large project documentation uses Material for MkDocs, or the existing docs
+      system/user request/publishing constraint is named.
 - [ ] ADRs record one accepted decision with consequences.
 - [ ] Runbooks include symptom, diagnosis, remediation, verification, and
       escalation.
@@ -78,4 +86,5 @@ workflow they describe.
 ## References
 
 - Diataxis: <https://diataxis.fr/>
+- Material for MkDocs: <https://squidfunk.github.io/mkdocs-material/>
 - ADR template: status, date, context, decision, consequences.

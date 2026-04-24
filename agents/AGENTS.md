@@ -45,6 +45,23 @@
   modules** (Go), **composer** (PHP), **gradle** (Java/Kotlin, unless the
   project is locked to Maven), **SwiftPM** (Swift), **dotnet/NuGet** (.NET),
   **mix** (Elixir). Never mix managers in one repo.
+- Do not downgrade from the listed modern default merely because an older tool
+  ships with the runtime or avoids setup. For example: use pnpm instead of npm
+  for new Node projects, and uv instead of raw pip/venv for new Python projects,
+  even when there are no dependencies yet. Use older/built-in tools only when
+  they are the ecosystem's preferred default, such as Cargo for Rust or Go
+  modules for Go, or when the repo/user explicitly chooses them.
+- For new TypeScript web apps without explicit hosting constraints, prefer
+  Cloudflare Workers with Hono as the backend/runtime default. Confirm before
+  locking it in. Use Render, Fly.io, AWS, GCP, Azure, containers, or a VPS when
+  the user requests them or when the app needs long-running processes,
+  unsupported native dependencies, special networking, strict region/data
+  residency, conventional Node server semantics, or managed services outside
+  Cloudflare's model.
+- For new web app scaffolds, do not hand-roll HTTP servers or routing when a
+  mature framework supplies the conventions. Use the scaffolding skill's
+  framework defaults, and search current official/project sources when the
+  language, runtime, or app shape is not covered.
 - For non-trivial, ambiguous, or risky changes, state the short plan,
   assumptions, and tradeoffs before editing. Ask only when the answer changes
   the implementation or risk.
@@ -116,6 +133,10 @@ operability, scalability, and performance after the core model is sound.
 
 - `observability`: use when adding or reviewing logs, metrics, traces, health
   checks, dashboards, SLOs, alerts, or telemetry redaction.
+- `realtime`: use when designing event streams, live updates, pub/sub,
+  subscriptions, SSE, WebSockets, Kafka, Kinesis, Redis Streams, consumer
+  groups, offsets, lag, replay, retention, partitions, ordering, delivery
+  guarantees, or stream backpressure.
 - `concurrency`: use when writing async, threaded, actor, channel, lock, queue,
   cancellation, or backpressure-sensitive code.
 - `performance`: use when optimising or diagnosing latency, throughput, p99s,
@@ -135,8 +156,10 @@ hard to maintain.
 - `docs`: use when writing or reviewing READMEs, ADRs, runbooks, API docs,
   reference docs, tutorials, or explanatory comments.
 - `frontend`: use when building or materially changing frontend pages,
-  components, interaction flows, responsive layout, accessibility, or visual
-  design.
+  components, interaction flows, responsive layout, or visual design.
+- `accessibility`: use when UI work touches WCAG 2.2, ARIA, semantic HTML,
+  keyboard navigation, focus management, screen readers, contrast, forms,
+  modals, custom controls, reduced motion, forced colors, or inclusive design.
 
 ### Workflow
 

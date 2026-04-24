@@ -50,16 +50,20 @@ link_skills_per_agent "Codex" "$HOME/.codex/skills"
 # Windsurf (Codeium Cascade): ~/.codeium/windsurf/skills/
 link_skills_per_agent "Windsurf" "$HOME/.codeium/windsurf/skills"
 
-# Pi, Cursor, Gemini CLI, and OpenCode read ~/.agents/skills/ directly per the
-# agentskills.io de-facto convention — no per-tool symlinks needed.
+# Pi, Cursor, Gemini CLI, OpenCode, and GitHub Copilot CLI read
+# ~/.agents/skills/ directly per the agentskills.io de-facto convention — no
+# per-tool symlinks needed. (Copilot CLI scans ~/.copilot, ~/.claude, and
+# ~/.agents; relying on ~/.agents avoids duplicate registration with the
+# ~/.claude/skills symlink above.)
 echo ""
 echo "Auto-discovered via ~/.agents/skills/ (no extra wiring needed):"
-for tool in pi cursor gemini opencode; do
+for tool in pi cursor gemini opencode copilot; do
   case "$tool" in
     pi)       home_dir="$HOME/.pi" ;;
     cursor)   home_dir="$HOME/.cursor" ;;
     gemini)   home_dir="$HOME/.gemini" ;;
     opencode) home_dir="$HOME/.config/opencode" ;;
+    copilot)  home_dir="$HOME/.copilot" ;;
   esac
   if [ -d "$home_dir" ]; then
     echo "  - $tool ($home_dir exists)"
