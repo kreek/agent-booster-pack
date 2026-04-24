@@ -1,7 +1,10 @@
-# OWASP Top 10:2025 — category mitigations
+# OWASP Top 10 — category mitigations
 
 Reference for the `security-review` skill. Each category: the risk, the
 recurring failure pattern, and the concrete mitigations to check for in review.
+Category names, IDs, and emphasis track the current edition of the OWASP Top 10
+— consult https://owasp.org/Top10/ before a review to confirm the list has not
+shifted.
 
 ## A01 — Broken Access Control
 
@@ -36,8 +39,9 @@ Check:
 
 ## A03 — Software Supply Chain Failures
 
-Shift from 2021: elevated from "Vulnerable and Outdated Components". The concern
-is now provenance, not just CVE presence.
+Covers provenance, not just CVE presence. The concern is who built the artifact
+and whether the build is reproducible, not only whether a known vulnerability is
+listed.
 
 Check:
 
@@ -139,9 +143,8 @@ Check:
 
 ## A10 — Mishandling of Exceptional Conditions
 
-Shift from 2021: new category. Covers information disclosure through error
-messages, missing auth checks in error paths, and timing differences that
-enumerate valid users/tokens.
+Covers information disclosure through error messages, missing auth checks in
+error paths, and timing differences that enumerate valid users or tokens.
 
 Check:
 

@@ -79,5 +79,5 @@ typed values before use, and keep secrets out of every output channel.
 ## Tools and References
 
 - `scripts/dep-audit.sh`: lockfile-aware dependency auditor wrapper.
-- `references/owasp-2025.md`: OWASP Top 10 notes.
+- `references/owasp-top-10.md`: OWASP Top 10 notes.
 - `references/secrets.md`: secret-handling notes.
