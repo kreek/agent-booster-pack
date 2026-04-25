@@ -8,7 +8,7 @@ A portable set of high-leverage, general-purpose skills for leveling up coding
 agents, with strong defaults for building, changing, testing, reviewing, and
 operating web applications and services.
 
-Agent Booster Pack distills 25 years of software engineering experience, from
+Agent Booster Pack distills my 25 years of software engineering experience, from
 startups to large private and public sector organizations, into portable skills
 for Codex, Claude Code, and other agents that understand the Agent Skills
 layout. It raises engineering maturity by pushing agents toward simpler designs,
