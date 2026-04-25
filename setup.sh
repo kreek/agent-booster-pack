@@ -148,4 +148,15 @@ if [ -d "$AGENTS_COMMANDS" ]; then
   done
 fi
 
+# Sync the in-repo Claude Code plugin (plugin/) so its skills/ and commands/
+# mirror the source of truth. The plugin is what gives Claude Code users the
+# `/abp:<skill>` namespace via /plugin install or marketplace add. Keeping
+# this in setup.sh means new skills land in the plugin without a separate step.
+REPO_ROOT=$(cd "$(dirname "$0")" && pwd)
+GENERATE_PLUGIN="$REPO_ROOT/scripts/generate-plugin-symlinks.sh"
+if [ -x "$GENERATE_PLUGIN" ]; then
+  echo ""
+  "$GENERATE_PLUGIN" "$REPO_ROOT"
+fi
+
 echo "Done."

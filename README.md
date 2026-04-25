@@ -46,7 +46,13 @@ that means:
 - `agents/.agents/commands/` contains cross-agent command prompts where a tool
   still supports command fan-out.
 - `agents/.claude/CLAUDE.md` is a thin Claude Code wrapper around `AGENTS.md`.
-- `setup.sh` wires skills and commands into tool-specific locations.
+- `plugin/` is the Claude Code plugin packaging — its `skills/` and `commands/`
+  are symlinks back to `agents/.agents/`, so installing the plugin namespaces
+  every skill as `/abp:<name>`.
+- `.claude-plugin/marketplace.json` advertises the plugin so users can
+  `/plugin marketplace add` this repo directly.
+- `setup.sh` wires skills and commands into tool-specific locations and keeps
+  the plugin's symlinks in sync.
 
 ## Install
 
@@ -94,6 +100,43 @@ do not rely only on `~/.agents/skills/`:
 - `~/.codeium/windsurf/skills/<name>/` links each skill when Windsurf is present
 - `~/.claude/commands/<name>.md` links command prompts
 - `~/.codex/prompts/<name>.md` is kept for legacy Codex prompt-command support
+
+It also keeps the in-repo Claude Code plugin (`plugin/`) in sync with the
+source-of-truth skills, so `/abp:<skill>` slash commands always reflect the
+current pack.
+
+## Install for Claude Code (namespaced)
+
+The flat `~/.claude/skills/` symlink above gives Claude Code unprefixed slash
+commands like `/frontend` and `/security`. To get the same behaviour Codex
+already uses (`ABP:` prefix), install ABP as a Claude Code plugin instead:
+
+```sh
+# Inside Claude Code:
+/plugin marketplace add kreek/agent-booster-pack
+/plugin install abp@abp
+```
+
+Slash commands then namespace as `/abp:frontend`, `/abp:security`, `/abp:tests`,
+etc. — the prefix protects against name clashes with built-in or third-party
+plugin skills.
+
+For local development against a working tree, point `/plugin install` at the
+repo's `plugin/` directory:
+
+```sh
+/plugin install /path/to/agent-booster-pack/plugin
+```
+
+After installing the plugin, drop the legacy whole-directory symlink if you want
+only the namespaced commands and no duplicates:
+
+```sh
+rm ~/.claude/skills        # only if it is a symlink to ~/.agents/skills
+```
+
+The plugin and the flat symlink can coexist — they will simply both appear in
+`/help` listings, prefixed and unprefixed respectively.
 
 `stow agents` does not merge files. If `~/AGENTS.md` already exists as a real
 file, Stow will report a conflict instead of appending the Agent Booster Pack
@@ -220,6 +263,11 @@ After adding or renaming a skill:
 ./setup.sh
 ```
 
+This reruns the per-agent symlink fan-out and the plugin sync (so
+`plugin/skills/<new-name>` is created and stale links are pruned). The
+`scripts/validate-skill-anatomy.sh` script enforces the same drift check, so a
+plugin out of sync with `agents/.agents/skills/` will fail validation.
+
 Then update:
 
 - `agents/AGENTS.md` so agents can route to it
@@ -243,4 +291,6 @@ stow -D agents
 
 Manual cleanup may still be needed for tool-specific symlinks under
 `~/.claude/skills/`, `~/.codex/skills/`, `~/.codeium/windsurf/skills/`,
-`~/.claude/commands/`, and `~/.codex/prompts/`.
+`~/.claude/commands/`, and `~/.codex/prompts/`. If you installed the Claude Code
+plugin, also run `/plugin uninstall abp@abp` and (optionally)
+`/plugin marketplace remove abp` from inside Claude Code.

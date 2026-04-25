@@ -143,9 +143,42 @@ done < <(find "$DIR" -name SKILL.md -type f | sort)
 
 if [ "$fails" -eq 0 ]; then
   echo "all skills conform to the anatomy"
-  exit 0
+else
+  echo
+  echo "$fails skill(s) failed anatomy validation"
 fi
 
-echo
-echo "$fails skill(s) failed anatomy validation"
-exit 1
+# Drift check: every skill in the source must be mirrored as a symlink under
+# plugin/skills/ so the Claude Code `abp` plugin stays in sync. Only runs when
+# the validator is invoked from a repo root with a plugin/ directory.
+PLUGIN_SKILLS="$(cd "$DIR/../../.." 2>/dev/null && pwd)/plugin/skills"
+drift=0
+if [ -d "$PLUGIN_SKILLS" ]; then
+  for skill_dir in "$DIR"/*/; do
+    name=$(basename "$skill_dir")
+    link="$PLUGIN_SKILLS/$name"
+    if [ ! -L "$link" ]; then
+      echo "plugin drift: $link missing — run scripts/generate-plugin-symlinks.sh"
+      drift=$((drift+1))
+      continue
+    fi
+    target=$(readlink "$link")
+    resolved=$(cd "$(dirname "$link")" && cd "$target" 2>/dev/null && pwd)
+    expected=$(cd "$skill_dir" && pwd)
+    if [ "$resolved" != "$expected" ]; then
+      echo "plugin drift: $link resolves to $resolved (expected $expected)"
+      drift=$((drift+1))
+    fi
+  done
+  if [ "$drift" -eq 0 ]; then
+    echo "plugin/ symlinks in sync with source"
+  else
+    echo
+    echo "$drift plugin symlink(s) drifted from source"
+  fi
+fi
+
+if [ "$fails" -ne 0 ] || [ "$drift" -ne 0 ]; then
+  exit 1
+fi
+exit 0
