@@ -10,11 +10,11 @@ operating web applications and services.
 
 Agent Booster Pack distills my 25 years of software engineering experience, from
 startups to large private and public sector organizations, into portable skills
-for Codex, Claude Code, and other agents that understand the Agent Skills
-layout. It raises engineering maturity by pushing agents toward simpler designs,
-explicit data models, proven behavior, safer production systems, intuitive and
-accessible interfaces, and clear, scoped changes a human can review and
-maintain.
+for agents that understand the Agent Skills layout, including Codex, Claude
+Code, Pi, Cursor, Gemini CLI, GitHub Copilot CLI, OpenCode, and Windsurf. It
+raises engineering maturity by pushing agents toward simpler designs, explicit
+data models, proven behavior, safer production systems, intuitive and accessible
+interfaces, and clear, scoped changes a human can review and maintain.
 
 In practice, ABP steers agents to:
 
