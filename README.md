@@ -16,7 +16,7 @@ explicit data models, proven behavior, safer production systems, intuitive and
 accessible interfaces, and clear, scoped changes a human can review and
 maintain.
 
-In practice, that means:
+In practice, ABP steers agents to:
 
 - Get the data model right first: make values, states, and invariants explicit,
   limit side effects, and push state changes to the boundaries.
@@ -145,13 +145,13 @@ Codex discovers skills directly from `.agents/skills` / `~/.agents/skills`
 and namespaces them as `ABP:<name>`; ABP no longer fans skills out to
 `~/.codex/prompts`.
 
-GitHub Copilot CLI, Pi, Cursor, Gemini CLI, and OpenCode auto-discover from
-`~/.agents/skills/`, so the `stow --target="$HOME" agents` link is enough — no
-extra `setup.sh` wiring needed. Copilot also scans `~/.copilot/skills` and
-`~/.claude/skills`; the pack deliberately leaves `~/.copilot/skills` unlinked so
-skills are not registered twice. For project-scoped Copilot skills, drop a
-`.github/skills/`, `.claude/skills/`, or `.agents/skills/` directory in the repo
-itself.
+GitHub Copilot CLI, [Pi][pi-skills], Cursor, Gemini CLI, and OpenCode
+auto-discover from `~/.agents/skills/`, so the `stow --target="$HOME" agents`
+link is enough — no extra `setup.sh` wiring needed. Copilot also scans
+`~/.copilot/skills` and `~/.claude/skills`; the pack deliberately leaves
+`~/.copilot/skills` unlinked so skills are not registered twice. For
+project-scoped Copilot skills, drop a `.github/skills/`, `.claude/skills/`, or
+`.agents/skills/` directory in the repo itself.
 
 ## Skill System
 
@@ -264,27 +264,12 @@ apply:
 [skill-security]: agents/.agents/skills/security/SKILL.md
 [skill-testing]: agents/.agents/skills/testing/SKILL.md
 [skill-versioning]: agents/.agents/skills/versioning/SKILL.md
+[pi-skills]: https://www.mintlify.com/badlogic/pi-mono/coding-agent/skills
 
 ## Authoring Rules
 
-Every skill should be short, directive, portable, and hard to skip:
-
-- Use portable frontmatter: `name` plus a trigger-focused `description`.
-- Put discriminating trigger words in the description; the body loads only after
-  the skill triggers.
-- State one Iron Law near the top when the skill has a non-negotiable rule.
-- Include `When to Use` and `When NOT to Use` so neighboring skills do not blur
-  together.
-- Use imperative workflow steps; do not write background essays.
-- Require evidence in `Verification`; unchecked proof obligations mean the work
-  is reported as unproven.
-- Use `Handoffs` to route to neighboring skills instead of duplicating their
-  bodies.
-- Put deterministic or fragile checks in `scripts/` so agents run them instead
-  of re-deriving them.
-- Put deeper reference material in `references/`; keep each referenced file one
-  hop from `SKILL.md`.
-- Delete stale or duplicative prose instead of preserving it as "context."
+See the repo-root [`AGENTS.md`](AGENTS.md#skill-anatomy-enforced-by-the-validator)
+for the canonical skill anatomy, authoring rules, and pack-versioning policy.
 
 ## Maintenance
 
