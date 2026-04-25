@@ -1,6 +1,7 @@
 # AGENTS.md
 
-This file provides guidance to coding agents (Claude Code, Codex, Cursor, and others that read `AGENTS.md`) when working with code in this repository.
+This file provides guidance to coding agents (Claude Code, Codex, Cursor, and
+others that read `AGENTS.md`) when working with code in this repository.
 
 The skill-pack doctrine in [`agents/AGENTS.md`](agents/AGENTS.md) — priority
 rules, proof obligations, code-and-data discipline, user-change
@@ -89,10 +90,15 @@ Every `SKILL.md` must have:
   the steering body. Skill bodies should spend tokens on agent behavior, not
   provenance.
 
-Plus the README's authoring rules: keep skills short and directive, lead
-with an Iron Law when one exists, route to neighbours via `Handoffs`
-instead of duplicating their bodies, push deterministic checks into
-`scripts/` and deeper material into `references/`.
+Plus the README's authoring rules: keep skills short and directive. A
+`SKILL.md` is steering context, not a book: every paragraph competes with the
+repo, diff, user request, and proof evidence for the agent's attention. The
+body should answer only when to use the skill, what rule/workflow to follow,
+and how to verify the result. Lead with an Iron Law when one exists, route to
+neighbours via `Handoffs` instead of duplicating their bodies, push
+deterministic checks into `scripts/`, and move nuance, citations, examples, and
+deep ecosystem notes into targeted `references/` files that are loaded only
+when needed.
 
 For `agents/.agents/skills/code-review/references/<language>.md`, do not
 duplicate anything a linter, formatter, type checker, syntax checker, or
