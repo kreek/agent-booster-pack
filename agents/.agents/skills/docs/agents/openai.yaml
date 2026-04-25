@@ -1,4 +1,0 @@
-interface:
-  display_name: "ABP: Docs"
-  short_description: "Write durable technical docs"
-  default_prompt: "Use $docs to rewrite this doc around the reader question."

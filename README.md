@@ -164,7 +164,7 @@ apply:
 
 ### Correctness and change
 
-- [`review`][skill-review]: risk-focused review of diffs, branches, PRs,
+- [`code-review`][skill-code-review]: risk-focused review of diffs, branches, PRs,
   requested changes, and agent-generated code.
 - [`tests`][skill-tests]: behavior-focused tests that prove caller-visible
   contracts without overspecifying implementation.
@@ -199,15 +199,15 @@ apply:
   cancellation, queues, and backpressure.
 - [`performance`][skill-performance]: latency, throughput, p99s, CPU, memory,
   allocations, I/O, and resource saturation.
-- [`cache`][skill-cache]: cache strategy, invalidation, stampede prevention,
+- [`caching`][skill-caching]: cache strategy, invalidation, stampede prevention,
   Redis, Memcached, CDNs, and stale data.
 
 ### Public/user surfaces
 
 - [`api`][skill-api]: HTTP APIs, OpenAPI, status codes, pagination, idempotency,
   rate limits, versioning, and webhooks.
-- [`docs`][skill-docs]: READMEs, ADRs, runbooks, reference docs, tutorials, and
-  explanatory comments.
+- [`documentation`][skill-documentation]: READMEs, ADRs, runbooks, reference
+  docs, tutorials, and explanatory comments.
 - [`frontend`][skill-frontend]: pages, components, interaction flows, responsive
   layout, visual design, and component states.
 - [`accessibility`][skill-accessibility]: WCAG, semantic HTML, ARIA, keyboard
@@ -229,14 +229,14 @@ apply:
 [skill-accessibility]: agents/.agents/skills/accessibility/SKILL.md
 [skill-api]: agents/.agents/skills/api/SKILL.md
 [skill-background-jobs]: agents/.agents/skills/background-jobs/SKILL.md
-[skill-cache]: agents/.agents/skills/cache/SKILL.md
+[skill-caching]: agents/.agents/skills/caching/SKILL.md
 [skill-commit]: agents/.agents/skills/commit/SKILL.md
 [skill-concurrency]: agents/.agents/skills/concurrency/SKILL.md
 [skill-data]: agents/.agents/skills/data/SKILL.md
 [skill-database]: agents/.agents/skills/database/SKILL.md
 [skill-debugging]: agents/.agents/skills/debugging/SKILL.md
 [skill-deployment]: agents/.agents/skills/deployment/SKILL.md
-[skill-docs]: agents/.agents/skills/docs/SKILL.md
+[skill-documentation]: agents/.agents/skills/documentation/SKILL.md
 [skill-error-handling]: agents/.agents/skills/error-handling/SKILL.md
 [skill-frontend]: agents/.agents/skills/frontend/SKILL.md
 [skill-git]: agents/.agents/skills/git/SKILL.md
@@ -246,7 +246,7 @@ apply:
 [skill-realtime]: agents/.agents/skills/realtime/SKILL.md
 [skill-refactoring]: agents/.agents/skills/refactoring/SKILL.md
 [skill-resilience]: agents/.agents/skills/resilience/SKILL.md
-[skill-review]: agents/.agents/skills/review/SKILL.md
+[skill-code-review]: agents/.agents/skills/code-review/SKILL.md
 [skill-scaffolding]: agents/.agents/skills/scaffolding/SKILL.md
 [skill-security]: agents/.agents/skills/security/SKILL.md
 [skill-tests]: agents/.agents/skills/tests/SKILL.md

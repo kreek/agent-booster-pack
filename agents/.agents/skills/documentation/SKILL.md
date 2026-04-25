@@ -1,19 +1,19 @@
 ---
-name: docs
+name: documentation
 description:
   Use when writing or reviewing documentation — READMEs, architecture notes,
   ADRs, runbooks, API docs, module-level docs, tutorials, how-to guides,
   reference material, or code comments. Also use when the user mentions
-  Diátaxis, architecture decision records, ADRs, runbooks, doc rot, MkDocs,
-  Material for MkDocs, progressive disclosure, single source of truth, or
-  whether to write prose or rely on types/tests.
+  living documentation, Diátaxis, architecture decision records, ADRs,
+  runbooks, doc rot, MkDocs, Material for MkDocs, progressive disclosure,
+  single source of truth, or whether to write prose or rely on types/tests.
 ---
 
-# Docs
+# Documentation
 
 ## Iron Law
 
-`DOC CHANGES SHIP WITH THE BEHAVIOR THEY DESCRIBE.`
+`DOCUMENTATION IS LIVING: SHIP IT WITH THE BEHAVIOR IT DESCRIBES OR DELETE IT.`
 
 Docs rot when they are detached from the code, schema, command, alert, or
 workflow they describe.
@@ -33,18 +33,20 @@ workflow they describe.
 
 ## Core Ideas
 
-1. One doc has one reader situation: tutorial, how-to, reference, explanation,
+1. Living documentation has an owner, a nearby source of truth, and a change
+   path; orphaned prose becomes misinformation.
+2. One doc has one reader situation: tutorial, how-to, reference, explanation,
    or runbook.
-2. Link to source-of-truth artifacts instead of restating generated facts.
-3. Put docs next to the code or service whose reviewers can catch drift.
-4. Write the why, context, and tradeoffs; let code/tests/schemas prove
+3. Link to source-of-truth artifacts instead of restating generated facts.
+4. Put docs next to the code or service whose reviewers can catch drift.
+5. Write the why, context, and tradeoffs; let code/tests/schemas prove
    mechanics.
-5. Delete stale docs when you cannot fix them now.
-6. Comments explain non-obvious intent, constraints, or hazards, not
+6. Delete stale docs when you cannot fix them now.
+7. Comments explain non-obvious intent, constraints, or hazards, not
    line-by-line behavior.
-7. Runbooks are operational artifacts: symptom, diagnosis, remediation,
+8. Runbooks are operational artifacts: symptom, diagnosis, remediation,
    verification, escalation.
-8. Large project documentation uses Material for MkDocs by default, regardless
+9. Large project documentation uses Material for MkDocs by default, regardless
    of the language or framework used to build the app. Use another docs system
    only when the repo already has one, the user explicitly asks, or a publishing
    constraint requires it.
@@ -82,6 +84,8 @@ workflow they describe.
 - Use `api` for OpenAPI and wire-contract shape.
 - Use `observability` for alert/runbook signal definitions.
 - Use `git` or `commit` when documenting commit/PR history or release notes.
+- Use `versioning` for CHANGELOG hygiene and migration notes that ship with a
+  release.
 
 ## References
 

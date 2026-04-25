@@ -114,7 +114,7 @@ failures.
 Use these broadly when changing behavior or structure. They keep code provable,
 recoverable, and understandable.
 
-- `review`: use when reviewing local diffs, branches, GitHub PRs,
+- `code-review`: use when reviewing local diffs, branches, GitHub PRs,
   agent-generated code, requested changes, or review comments; use it as the
   generic code-review entrypoint before loading narrower domain lenses.
 - `proof`: use when engineering claims need explicit proof obligations: data
@@ -147,7 +147,7 @@ operability, scalability, and performance after the core model is sound.
   cancellation, or backpressure-sensitive code.
 - `performance`: use when optimising or diagnosing latency, throughput, p99s,
   CPU, memory, allocations, I/O, or resource saturation.
-- `cache`: use when adding caches, choosing TTL/invalidation, preventing
+- `caching`: use when adding caches, choosing TTL/invalidation, preventing
   stampedes, using Redis/Memcached/CDNs, or debugging stale data.
 - `api`: use when designing REST/HTTP APIs, OpenAPI, status codes, pagination,
   idempotency keys, rate limits, versioning, or webhooks.
@@ -159,8 +159,8 @@ They should not override correctness or safety. They may override weak project
 conventions when the existing surface is inaccessible, confusing, misleading, or
 hard to maintain.
 
-- `docs`: use when writing or reviewing READMEs, ADRs, runbooks, API docs,
-  reference docs, tutorials, or explanatory comments.
+- `documentation`: use when writing or reviewing READMEs, ADRs, runbooks, API
+  docs, reference docs, tutorials, or explanatory comments.
 - `frontend`: use when building or materially changing frontend pages,
   components, interaction flows, responsive layout, or visual design.
 - `accessibility`: use when UI work touches WCAG 2.2, ARIA, semantic HTML,

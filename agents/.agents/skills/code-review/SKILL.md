@@ -1,5 +1,5 @@
 ---
-name: review
+name: code-review
 description:
   Use when performing code review of local diffs, staged changes, branches,
   GitHub pull requests, or agent-generated code; when asked to review a PR,
@@ -8,7 +8,7 @@ description:
   merging broad changes when no narrower domain skill fully covers the review.
 ---
 
-# Review
+# Code Review
 
 ## Iron Law
 
@@ -44,8 +44,10 @@ names a concrete defect, the impact, and the change that would remove the risk.
 5. Every non-trivial “looks fine” claim needs proof evidence or must be scoped
    as unproven.
 6. Use domain skills as mandatory lenses when their risk appears.
-7. Review comments should be sparse, specific, and actionable.
-8. AI-generated code is untrusted until behavior, tests, and security-sensitive
+7. Duplication and dead code are review risks when they can hide divergent
+   behavior, stale invariants, unreachable branches, or untested paths.
+8. Review comments should be sparse, specific, and actionable.
+9. AI-generated code is untrusted until behavior, tests, and security-sensitive
    paths are verified.
 
 ## Workflow
@@ -63,16 +65,26 @@ names a concrete defect, the impact, and the change that would remove the risk.
    load `security` for any auth, trust-boundary, input, dependency, secret,
    cryptography, logging-redaction, or user-controlled sink concern. Load other
    domain skills as needed: `database`, `api`, `tests`, `proof`, `data`,
-   `errors`, `concurrency`, `resilience`, `deployment`, `observability`,
+   `error-handling`, `concurrency`, `resilience`, `deployment`, `observability`,
    `frontend`, `accessibility`, `docs`, `performance`, `cache`, or `realtime`.
-5. Check correctness, data integrity, security, error handling, tests,
+5. Identify the language(s) in the diff and load the matching reference under
+   `references/` (`rust.md`, `fsharp.md`, `csharp.md`, `python.md`,
+   `node-typescript.md`, `ruby.md`, `java.md`, `kotlin.md`, `bash.md`,
+   `sql.md`). Apply its tooling-passing checks and high-signal defect list
+   before generic correctness review. If the diff touches multiple languages,
+   load every matching reference.
+6. Check correctness, data integrity, security, error handling, tests,
    observability, compatibility, performance, and maintainability in that order.
-6. For the security pass, check secrets, auth/authz, input validation, output
+7. For the security pass, check secrets, auth/authz, input validation, output
    encoding, unsafe SQL/shell/HTML/SSRF/deserialization sinks, dependency or
    build changes, and logging/error disclosure.
-7. Classify findings by severity and merge risk.
-8. Report findings first. If none are found, say that clearly and name residual
-   risk or missing verification.
+8. Check for harmful duplication, orphaned code, unreachable branches, dead
+   feature flags, unused public surface, and stale tests/docs/config. For
+   removals and refactors, verify old paths were fully removed or intentionally
+   preserved, and that callers now reach the intended path.
+9. Classify findings by severity and merge risk.
+10. Report findings first. If none are found, say that clearly and name residual
+    risk or missing verification.
 
 ## Local Review
 
@@ -80,6 +92,9 @@ names a concrete defect, the impact, and the change that would remove the risk.
   review, and `git diff <base>...HEAD` for branch review.
 - Use `git diff --check` to catch whitespace and conflict-marker issues.
 - Inspect new tests and the tests that should have changed but did not.
+- When code was removed or refactored, search for leftover call sites,
+  duplicated implementations, stale adapters, unused exports, dead
+  routes/jobs/handlers, and tests that still exercise the retired path.
 - Do not review generated, vendored, lockfile, or formatting-only churn as if it
   were hand-written code; sample only enough to detect obvious risk.
 - If the diff is too large, review by risk area and state the partial scope.
@@ -140,7 +155,11 @@ after findings, not before.
 - [ ] Diff and enough surrounding context were read.
 - [ ] A security pass checked secrets, auth/authz, input handling, unsafe sinks,
       dependencies, and logging/error disclosure.
+- [ ] Duplication and dead-code risks were checked, especially for removals,
+      refactors, renamed paths, feature flags, routes, jobs, exports, and tests.
 - [ ] Triggered domain skills were used and named.
+- [ ] Language reference(s) under `code-review/references/` were loaded for every
+      language touched by the diff, and their tooling-gates were checked.
 - [ ] Findings are ordered by severity and grounded in file/line or PR thread
       anchors.
 - [ ] Each blocking finding explains impact and fix direction.
@@ -161,6 +180,11 @@ after findings, not before.
 
 ## References
 
+- Language-specific reviewer guides (load whichever language(s) appear in the
+  diff): `references/rust.md`, `references/fsharp.md`, `references/csharp.md`,
+  `references/python.md`, `references/node-typescript.md`,
+  `references/ruby.md`, `references/java.md`, `references/kotlin.md`,
+  `references/bash.md`, `references/sql.md`.
 - Google Engineering Practices, Code Review:
   <https://google.github.io/eng-practices/review/>
 - Google Engineering Practices, What to Look For:

@@ -1,5 +1,5 @@
 ---
-name: cache
+name: caching
 description:
   Use when adding a cache, choosing between TTL-based and event-based
   invalidation, picking cache-aside vs read-through vs write-through, preventing
@@ -8,7 +8,7 @@ description:
   caching, or asks why users are seeing outdated data.
 ---
 
-# Cache
+# Caching
 
 ## Iron Law
 
