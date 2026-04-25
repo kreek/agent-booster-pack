@@ -98,7 +98,13 @@ For `agents/.agents/skills/code-review/references/<language>.md`, do not
 duplicate anything a linter, formatter, type checker, syntax checker, or
 compiler already catches. Those files should focus on high-signal review risks:
 semantic bugs, unsafe edge cases, framework traps, missing proof, and patterns
-that automated tooling routinely misses.
+that automated tooling routinely misses. Make language advice conditional on
+the repo's declared runtime, framework, and compatibility policy; never suggest
+syntax or libraries that would break supported versions. When naming testing
+expectations, steer toward the ecosystem's behavior/spec-flavored test library
+when one is available, such as RSpec for Ruby or Vitest/Jest `describe`/`it`
+suites for TypeScript, because review evidence should describe caller-visible
+behavior.
 
 ## When skill changes ripple
 

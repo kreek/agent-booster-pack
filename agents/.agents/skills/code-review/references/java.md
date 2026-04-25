@@ -5,8 +5,8 @@ main `code-review` skill workflow.
 
 ## Data-first bias (apply first)
 
-The Java ecosystem grew up on mutable POJOs. The `data` skill's
-doctrine is canonical:
+The Java ecosystem grew up on mutable POJOs. The `domain-design`
+skill's doctrine is canonical:
 
 - Prefer `record` (Java 14+) for value types over POJOs with getters
   and setters.
@@ -20,7 +20,7 @@ doctrine is canonical:
   Service classes that mutate shared fields outside construction are
   almost always wrong.
 
-When in doubt, route to the `data` skill.
+When in doubt, route to the `domain-design` skill.
 
 ## Tooling that should be passing
 
@@ -49,6 +49,9 @@ When in doubt, route to the `data` skill.
   `AutoCloseable`. A new `InputStream`, `Connection`, or
   `PreparedStatement` opened with no scoped close is a finding.
 - **Exceptions**:
+  - Expected domain failures use named checked/unchecked exception
+    types or explicit result variants, not generic
+    `RuntimeException("message")`.
   - Don't catch `Exception` / `Throwable` at random; be specific.
   - Don't throw from `finally` (swallows the original).
   - Wrapping a checked exception as `RuntimeException` requires a

@@ -1,13 +1,15 @@
 # Python review reference
 
 Use when reviewing Python code in the diff. Apply this alongside the
-main `code-review` skill workflow. Targets Python ≥ 3.10 codebases that
-already use `uv` and Ruff.
+main `code-review` skill workflow. Before using any version-specific
+guidance, read the repo's declared Python support from `pyproject.toml`,
+`setup.cfg`, classifiers, CI, Docker images, and README. Repo compatibility
+wins: Python 3.8 libraries do not get Python 3.10+ syntax findings.
 
 ## Data-first bias (apply first)
 
-Even though Python supports OOP, the `data` skill's doctrine is
-canonical:
+Even though Python supports OOP, the `domain-design` skill's doctrine
+is canonical:
 
 - Prefer `@dataclass(frozen=True, slots=True, kw_only=True)` value
   objects internally; reach for plain classes only when behavior
@@ -22,34 +24,34 @@ canonical:
 - Make illegal states unrepresentable: `StrEnum`, `Literal`, sealed
   dataclass hierarchies, `NewType` for distinct identities.
 
-When in doubt, route to the `data` skill.
+When in doubt, route to the `domain-design` skill.
 
 ## Tooling that should be passing
 
-- `ruff check` and `ruff format --check` — Ruff is the default
-  linter+formatter. Curated `select` (not `["ALL"]`); pinned version
-  in `[dependency-groups]`. Every `# noqa: <CODE>` carries a code and
-  a reason.
-- `mypy --strict` (or `pyright` strict) — every public function is
-  typed; `# type: ignore[code]` is mandatory (bare `# type: ignore`
-  rejected); `Any` requires justification.
-- `pytest` — at least the package under change. CI runs the full
-  suite. `pytest-asyncio` mode set explicitly.
-- Security: `bandit -r src/` or Ruff's `S` family enabled;
-  `pip-audit` / `uv pip audit`; `detect-secrets` pre-commit hook.
-- Packaging: `uv` is the package manager; `uv.lock` committed;
-  `uv sync --frozen` in CI. Build backend is `hatchling` or
-  `uv_build` for pure Python; `dev`/`test` deps live in
-  `[dependency-groups]` (PEP 735), **not**
-  `[project.optional-dependencies]`.
-- Pre-commit: hooks pinned (`rev:`), `ruff-check` + `ruff-format`
-  IDs (renamed late 2024 from `ruff`).
+- Run the repo's declared checks first. If it uses Ruff, prefer
+  `ruff check` and `ruff format --check`; if it uses Black/isort/Flake8,
+  treat those as the current contract unless the diff is changing tooling.
+- Type checking is valuable, but match the repo's checker and strictness
+  level. Missing strict mypy/pyright is not a review finding unless the change
+  adds or weakens the type-checking contract.
+- `pytest` is the default behavior-focused runner when the repo has no other
+  convention. Prefer spec/behavior structure (`describe`/`it` via
+  `pytest-describe`, or clear test names) when adding tests, but follow an
+  existing suite's style.
+- Security and dependency checks should match the repo's risk surface and
+  existing tooling: Bandit/Ruff `S`, `pip-audit`/OSV, and secret scanning are
+  findings when present and failing, or when a high-risk diff lacks any guard.
+- Packaging advice is conditional. Use `uv` when the repo has chosen it or is
+  adding Python tooling from scratch; otherwise respect the existing supported
+  package manager and lockfile.
 
 ## Type system
 
-- **Modern syntax** is non-negotiable on 3.10+: `list[T]`,
-  `dict[K, V]`, `X | None`. New code using `Optional`, `List`, `Dict`,
-  `Union` from `typing` is a finding (Ruff `UP006`/`UP007`).
+- **Modern syntax follows declared support.** On Python 3.10+ projects, prefer
+  `list[T]`, `dict[K, V]`, `X | None`. On Python 3.8/3.9-compatible projects,
+  `typing.List`, `typing.Dict`, `Optional`, and `Union` may be required unless
+  `from __future__ import annotations` and the project's tooling support the
+  newer form.
 - **`dict[str, Any]` is a `TypedDict` waiting to be born.** The
   single most common type smell — flag it on sight.
 - `# type: ignore` without an error code → block.
@@ -60,20 +62,25 @@ When in doubt, route to the `data` skill.
   `.read()`"-style consumers. `@runtime_checkable` only checks
   attribute *presence* — not signatures.
 - `TypeIs` (3.13+) narrows both branches; `TypeGuard` only narrows
-  true. Default to `TypeIs` unless one-sided is deliberate.
-- `@override` (3.12+) on every overriding method, with mypy
-  `enable_error_code = ["explicit-override"]`.
-- `Self` (3.11+) for fluent return types — replaces
+  true. Use it only when the supported runtime or `typing_extensions` allows it.
+- `@override` (3.12+ / `typing_extensions`) on overriding methods when the repo
+  has enabled that convention.
+- `Self` (3.11+ / `typing_extensions`) for fluent return types — replaces
   `T = TypeVar("T", bound="MyClass")`.
 - Decorators: `ParamSpec`/`Concatenate` (PEP 612), never
   `Callable[..., T]`.
 - PEP 695 generic syntax (3.12+): `class Stack[T]:` over the old
-  `TypeVar` dance. Don't mix old and new in the same class.
+  `TypeVar` dance only in projects that have dropped older runtime support.
 - Liberal in (`Iterable`, `Mapping`, `Sequence` parameters), strict
   out (concrete `list[T]` returns so callers can iterate twice).
 
 ## Error handling
 
+- Expected failures use specific exception classes or typed
+  `Result`/variant shapes. `raise "message"` is invalid Python, but
+  `raise Exception("message")` or `raise RuntimeError("message")` for
+  domain outcomes is still a finding; define a named domain error or
+  return a typed result.
 - Bare `except:` catches `BaseException` (`KeyboardInterrupt`,
   `SystemExit`, `asyncio.CancelledError`). **Never acceptable.**
   `except Exception:` is acceptable only at trust boundaries
@@ -135,14 +142,14 @@ When in doubt, route to the `data` skill.
   comprehensions only when readable in ~2 lines.
 - Float `==` is wrong; use `math.isclose(a, b, rel_tol=...)`. Money
   uses `Decimal` or integer cents — never `float`. See
-  `data/references/money.md` for the cross-language discipline
+  `domain-design/references/money.md` for the cross-language discipline
   (currency travels with amount, ISO 4217, per-currency decimals).
 - `dataclass(slots=True)` cuts memory ~40% and speeds attribute
   access; `frozen=True` for value objects (avoid on hot paths,
   ~2.4× slower instantiation).
 - Timezone-aware datetimes only in production code (Ruff `DTZ`).
   `datetime.now(tz=UTC)`, never naive `datetime.now()`. See
-  `data/references/dates.md` for the cross-language discipline
+  `domain-design/references/dates.md` for the cross-language discipline
   (UTC storage, RFC 3339 on the wire, instant vs wall-clock-only).
 
 ## Security
@@ -222,8 +229,9 @@ When in doubt, route to the `data` skill.
 - `raise X(...)` inside `except` without `from e` (or bare `raise`).
 - `# type: ignore` without an error code; `Any` without a comment.
 - `dict[str, Any]` past a deserialisation boundary.
-- `Optional[X]` from `typing` in new code; `Optional[T]` returns
-  that never return `None`.
+- `Optional[T]` returns that never return `None`. `Optional` syntax itself is
+  only a finding when the repo's declared Python version and style allow
+  `T | None`.
 - `print(...)` for logging in production code.
 - `time.sleep(n)` or `requests.get(...)` inside `async def`.
 - `asyncio.create_task(coro)` with no strong ref or TaskGroup.

@@ -1,4 +1,0 @@
-interface:
-  display_name: "ABP: Data"
-  short_description: "Shape data, state, and effects"
-  default_prompt: "Use $data to model the domain data and invariants first."

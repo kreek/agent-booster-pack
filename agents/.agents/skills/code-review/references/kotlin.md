@@ -6,7 +6,7 @@ main `code-review` skill workflow.
 ## Data-first bias (apply first)
 
 Kotlin gives you the tools for data-first design out of the box. The
-`data` skill's doctrine is canonical:
+`domain-design` skill's doctrine is canonical:
 
 - Prefer `data class` with `val` properties over POJO-style classes
   with `var`.
@@ -21,7 +21,7 @@ Kotlin gives you the tools for data-first design out of the box. The
   Service classes mutating fields outside construction are almost
   always wrong.
 
-When in doubt, route to the `data` skill.
+When in doubt, route to the `domain-design` skill.
 
 ## Tooling that should be passing
 
@@ -48,6 +48,9 @@ When in doubt, route to the `data` skill.
   framework-injected fields. `lateinit` in plain domain code is a
   smell — the value should arrive through the constructor.
 - **Coroutines**:
+  - Expected domain failures use sealed result/error types or named
+    exceptions, not generic `Exception("message")` / `error("message")`
+    values that leak across domain boundaries.
   - Prefer structured concurrency: `coroutineScope { }`,
     `supervisorScope { }`. `GlobalScope.launch { }` is a leak in a
     long-running app — Critical.

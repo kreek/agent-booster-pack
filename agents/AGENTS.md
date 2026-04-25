@@ -79,8 +79,9 @@ the higher-priority concerns.
 Use these before choosing abstractions or control flow for non-trivial code.
 They shape the problem, not just the implementation.
 
-- `data`: use when designing state, data models, inputs, invariants, effects, or
-  module boundaries.
+- `domain-design`: use when designing state, domain data, inputs, invariants,
+  effects, module boundaries, or domain/feature locality versus horizontal
+  layers.
 
 ### Safety Gates
 
@@ -92,11 +93,10 @@ failures.
   validation, dependency trust, logging of sensitive data, or any trust
   boundary.
 - `database`: use when changing schemas, migrations, indexes, queries,
-  transactions, connection pools, deletion semantics, or production data access.
+  transactions, transactional outbox, connection pools, deletion semantics, or
+  production data access.
 - `deployment`: use when changing pipelines, release steps, rollout strategy,
   rollback paths, feature flags, or deploy-time database coordination.
-- `resilience`: use when making remote calls or designing timeouts, retries,
-  idempotency, sagas, outbox, event ordering, or consistency.
 
 ### Correctness And Change Control
 
@@ -110,8 +110,9 @@ recoverable, and understandable.
   invariant, boundary, executable check, and evidence.
 - `tests`: use when adding, reviewing, or fixing tests; deciding what to mock;
   proving caller-visible behavior; addressing flakes or overspecified tests.
-- `error-handling`: use when designing error types, propagation, retries, crash
-  boundaries, user-facing messages, or recovery behavior.
+- `error-handling`: use when designing error types, propagation, retries,
+  remote-call timeouts, circuit breakers, crash boundaries, user-facing
+  messages, or recovery behavior.
 - `debugging`: use when investigating bugs, flakes, regressions, production
   symptoms, or any problem where the cause is not yet proven.
 - `refactoring`: use when reshaping existing code, extracting modules, renaming
@@ -123,8 +124,9 @@ recoverable, and understandable.
 Use these when their technical domain appears in the work. They improve
 operability, scalability, and performance after the core model is sound.
 
-- `observability`: use when adding or reviewing logs, metrics, traces, health
-  checks, dashboards, SLOs, alerts, or telemetry redaction.
+- `observability`: use when adding or reviewing logs, metrics, traces,
+  dependency health, health checks, dashboards, SLOs, alerts, or telemetry
+  redaction.
 - `realtime`: use when designing event streams, live updates, pub/sub,
   subscriptions, SSE, WebSockets, Kafka, Kinesis, Redis Streams, consumer
   groups, offsets, lag, replay, retention, partitions, ordering, delivery
@@ -190,8 +192,8 @@ effects at the boundary.
 - Make illegal states unrepresentable — prefer sum types over stringly-typed
   flags.
 - Default to immutability; mutate only where the performance case is clear.
-- Use the `data` skill for the full canon on modelling state, values, effects,
-  and invariants.
+- Use the `domain-design` skill for the full canon on modelling state, values,
+  effects, and invariants.
 
 ## Code Structure
 

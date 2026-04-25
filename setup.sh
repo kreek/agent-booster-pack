@@ -145,35 +145,39 @@ for tool in pi cursor gemini opencode copilot; do
 done
 echo ""
 
-# Commands: fan out each command file to every agent's expected location.
-# Claude Code → ~/.claude/commands/<name>.md
-# Codex CLI   → ~/.codex/prompts/<name>.md
-declare -a COMMAND_TARGETS=(
-  "$HOME/.claude/commands"
-  "$HOME/.codex/prompts"
-)
-
-for dir in "${COMMAND_TARGETS[@]}"; do
-  mkdir -p "$dir"
-done
-
-if [ -d "$AGENTS_COMMANDS" ]; then
-  for cmd_file in "$AGENTS_COMMANDS"/*.md; do
-    [ -e "$cmd_file" ] || continue
-    cmd_name=$(basename "$cmd_file")
-    for dir in "${COMMAND_TARGETS[@]}"; do
-      target="$dir/$cmd_name"
-      if [ -L "$target" ]; then
-        echo "${target/#$HOME/~} already symlinked, skipping"
-      elif [ -e "$target" ]; then
-        echo "WARNING: $target exists as a real file. Move or remove it, then re-run."
-      else
-        ln -s "$cmd_file" "$target"
-        echo "Linked ${target/#$HOME/~} → ~/.agents/commands/$cmd_name"
-      fi
-    done
+# Commands fan-out has been removed.
+#
+# Modern agents (Claude Code, Codex, Cursor, Copilot CLI, Gemini CLI, OpenCode,
+# Pi, Windsurf) discover skills directly from `~/.agents/skills/` and register
+# the slash command from each skill's frontmatter. Linking
+# `agents/.agents/commands/<name>.md` separately into `~/.claude/commands/`
+# and `~/.codex/prompts/` produced duplicate `/<name>` entries in the slash
+# command list — the same skill registered twice (once via SKILL.md, once via
+# the standalone command file). Codex's per-skill `~/.codex/skills/<name>/`
+# fan-out already namespaces cleanly as `ABP:<name>`; Claude Code's flat
+# `~/.claude/skills` symlink registers the skill directly. Both made the
+# extra commands link redundant.
+#
+# This block also prunes stale symlinks left behind by previous setup.sh
+# runs that did fan out commands.
+prune_stale_command_links() {
+  local dir="$1"
+  [ -d "$dir" ] || return 0
+  local entry link_target
+  for entry in "$dir"/*; do
+    [ -L "$entry" ] || continue
+    link_target=$(readlink "$entry")
+    case "$link_target" in
+      "$AGENTS_COMMANDS"/* | "$HOME"/.agents/commands/*)
+        rm "$entry"
+        echo "Removed legacy command link ${entry/#$HOME/~}"
+        ;;
+    esac
   done
-fi
+}
+
+prune_stale_command_links "$HOME/.claude/commands"
+prune_stale_command_links "$HOME/.codex/prompts"
 
 # Sync the in-repo Claude Code plugin for maintainers when uv is available.
 # End-user installs use the committed plugin symlinks and should not need Python

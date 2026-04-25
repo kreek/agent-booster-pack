@@ -73,8 +73,14 @@ do not rely only on `~/.agents/skills/`:
 - `~/.claude/skills/` points at `~/.agents/skills/`
 - `~/.codex/skills/<name>/` links each portable skill individually
 - `~/.codeium/windsurf/skills/<name>/` links each skill when Windsurf is present
-- `~/.claude/commands/<name>.md` links command prompts
-- `~/.codex/prompts/<name>.md` is kept for legacy Codex prompt-command support
+
+`./setup.sh` does **not** fan out command files to `~/.claude/commands/` or
+`~/.codex/prompts/`. Modern agents register slash commands directly from each
+skill's `SKILL.md` frontmatter, and the extra fan-out produced duplicate
+`/<name>` entries in Claude Code's command list. If you previously installed
+ABP and have stale symlinks under `~/.claude/commands/<name>.md` or
+`~/.codex/prompts/<name>.md` that point at `~/.agents/commands/`, re-run
+`./setup.sh` and they will be pruned automatically.
 
 It also keeps the in-repo Claude Code plugin (`plugin/`) in sync with the
 source-of-truth skills when `uv` is available. Published checkouts already ship
@@ -135,8 +141,9 @@ Maintainers with `uv` can optionally use `scripts/sync_agents_md.py` to test or
 refresh a fenced ABP block in a personal `AGENTS.md`; that script is not part of
 the end-user install path.
 
-Codex now discovers skills directly from `.agents/skills` / `~/.agents/skills`;
-do not rely on `~/.codex/prompts` for slash commands in current Codex CLI.
+Codex discovers skills directly from `.agents/skills` / `~/.agents/skills`
+and namespaces them as `ABP:<name>`; ABP no longer fans skills out to
+`~/.codex/prompts`.
 
 GitHub Copilot CLI, Pi, Cursor, Gemini CLI, and OpenCode auto-discover from
 `~/.agents/skills/`, so the `stow --target="$HOME" agents` link is enough — no
@@ -162,8 +169,8 @@ apply:
 
 ### Foundational design
 
-- [`data`][skill-data]: data shapes, state transitions, invariants, effects, and
-  module boundaries.
+- [`domain-design`][skill-domain-design]: domain data, state transitions,
+  invariants, effects, module boundaries, and domain/feature locality.
 - [`proof`][skill-proof]: explicit proof obligations for behavior, contracts,
   invariants, root causes, and refactor safety.
 
@@ -178,23 +185,23 @@ apply:
 - [`refactoring`][skill-refactoring]: structure changes that preserve behavior
   while improving clarity or migration paths.
 - [`error-handling`][skill-error-handling]: error types, propagation, retries,
-  recovery, crash boundaries, and user-facing messages.
+  remote-call timeouts, circuit breakers, recovery, crash boundaries, and
+  user-facing messages.
 
 ### Safety gates
 
 - [`security`][skill-security]: authentication, authorization, secrets,
   cryptography, input validation, and trust boundaries.
 - [`database`][skill-database]: schemas, migrations, indexes, queries,
-  transactions, deletion semantics, and production data access.
+  transactions, transactional outbox, deletion semantics, and production data
+  access.
 - [`deployment`][skill-deployment]: CI/CD, rollout strategy, rollback paths,
   feature flags, and deploy-time coordination.
-- [`resilience`][skill-resilience]: remote calls, timeouts, retries,
-  idempotency, consistency, sagas, and outbox patterns.
 
 ### Production quality
 
-- [`observability`][skill-observability]: logs, metrics, traces, health checks,
-  dashboards, SLOs, alerts, and telemetry quality.
+- [`observability`][skill-observability]: logs, metrics, traces, dependency
+  health, health checks, dashboards, SLOs, alerts, and telemetry quality.
 - [`realtime`][skill-realtime]: event streams, live updates, pub/sub,
   subscriptions, delivery guarantees, ordering, and replay.
 - [`background-jobs`][skill-background-jobs]: async workers, schedulers,
@@ -239,7 +246,7 @@ apply:
 [skill-caching]: agents/.agents/skills/caching/SKILL.md
 [skill-commit]: agents/.agents/skills/commit/SKILL.md
 [skill-concurrency]: agents/.agents/skills/concurrency/SKILL.md
-[skill-data]: agents/.agents/skills/data/SKILL.md
+[skill-domain-design]: agents/.agents/skills/domain-design/SKILL.md
 [skill-database]: agents/.agents/skills/database/SKILL.md
 [skill-debugging]: agents/.agents/skills/debugging/SKILL.md
 [skill-deployment]: agents/.agents/skills/deployment/SKILL.md
@@ -252,7 +259,6 @@ apply:
 [skill-proof]: agents/.agents/skills/proof/SKILL.md
 [skill-realtime]: agents/.agents/skills/realtime/SKILL.md
 [skill-refactoring]: agents/.agents/skills/refactoring/SKILL.md
-[skill-resilience]: agents/.agents/skills/resilience/SKILL.md
 [skill-code-review]: agents/.agents/skills/code-review/SKILL.md
 [skill-scaffolding]: agents/.agents/skills/scaffolding/SKILL.md
 [skill-security]: agents/.agents/skills/security/SKILL.md
@@ -323,7 +329,6 @@ stow --target="$HOME" -D agents
 ```
 
 Manual cleanup may still be needed for tool-specific symlinks under
-`~/.claude/skills/`, `~/.codex/skills/`, `~/.codeium/windsurf/skills/`,
-`~/.claude/commands/`, and `~/.codex/prompts/`. If you installed the Claude Code
+`~/.claude/skills/`, `~/.codex/skills/`, and `~/.codeium/windsurf/skills/`. If you installed the Claude Code
 plugin, also run `/plugin uninstall abp@abp` and (optionally)
 `/plugin marketplace remove abp` from inside Claude Code.

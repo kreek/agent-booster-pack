@@ -5,7 +5,7 @@ Use when reviewing F# code in the diff. Apply this alongside the main
 
 ## Data-first bias (apply first)
 
-F# is a natural fit for the `data` skill's doctrine — but the
+F# is a natural fit for the `domain-design` skill's doctrine — but the
 ecosystem leaks OOP habits from C#. Lean into the functional core:
 
 - Prefer **records** and **discriminated unions** over classes;
@@ -20,7 +20,7 @@ ecosystem leaks OOP habits from C#. Lean into the functional core:
 - Parse at the boundary: model controller / queue inputs as DTOs
   validated into typed domain values once.
 
-When in doubt, route to the `data` skill.
+When in doubt, route to the `domain-design` skill.
 
 ## Tooling that should be passing
 

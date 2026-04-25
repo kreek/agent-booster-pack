@@ -13,19 +13,18 @@ description:
 
 `MEASURE BEFORE OPTIMISING. MEASURE AGAIN BEFORE KEEPING THE CHANGE.`
 
-A performance change without before/after evidence is speculative complexity.
-
 ## When to Use
 
-- Diagnosing slowness, optimizing latency/throughput/allocation, reading
-  profiles, designing benchmarks, investigating p99/p99.9, or deciding whether a
-  performance change is worth it.
+- Diagnosing slowness, optimizing latency/throughput/allocation,
+  reading profiles, designing benchmarks, investigating p99/p99.9, or
+  deciding whether a performance change is worth it.
 
 ## When NOT to Use
 
-- Concurrency correctness without measured slowness; use `concurrency`.
+- Concurrency correctness without measured slowness; use
+  `concurrency`.
 - Database query safety without profiling context; use `database`.
-- Caching design; use `cache`.
+- Caching design; use `caching`.
 
 ## Core Ideas
 
@@ -33,27 +32,25 @@ A performance change without before/after evidence is speculative complexity.
 2. Use a realistic workload and identical before/after conditions.
 3. Optimize the measured bottleneck, not the suspicious-looking code.
 4. Tail latency matters; averages hide user pain.
-5. CPU, off-CPU, memory, allocation, I/O, lock contention, and network wait are
-   different problems.
+5. CPU, off-CPU, memory, allocation, I/O, lock contention, and
+   network wait are different problems.
 6. Micro-benchmarks prove local mechanics, not end-to-end wins.
 7. Keep complexity only when the measured gain justifies it.
 
 ## Workflow
 
-1. Define the metric: p99 latency, throughput, CPU time, allocation rate,
-   memory, or error budget impact.
-2. Capture baseline with production-shaped data and concurrency.
-3. Profile to find the dominant bottleneck.
-4. Make one change.
-5. Re-measure under the same conditions.
-6. Check adjacent regressions: memory, error rate, tail latency, CPU, and
-   maintainability.
+1. Define the metric: p99 latency, throughput, CPU time, allocation
+   rate, memory, or error budget impact. Capture baseline with
+   production-shaped data and concurrency.
+2. Profile to find the dominant bottleneck. Make one change.
+3. Re-measure under the same conditions. Check adjacent regressions:
+   memory, error rate, tail latency, CPU, maintainability.
 
 ## Verification
 
 - [ ] Target metric is named and user/business relevance is clear.
-- [ ] Baseline and after measurements use the same workload and environment.
-- [ ] Raw results or profile artifacts are saved or summarized.
+- [ ] Baseline and after measurements use the same workload and
+      environment; raw results or profile artifacts are saved.
 - [ ] Only one performance change is measured per commit.
 - [ ] Off-CPU and allocation behavior were considered where relevant.
 - [ ] Load generator avoids coordinated omission for latency work.
@@ -63,12 +60,14 @@ A performance change without before/after evidence is speculative complexity.
 ## Handoffs
 
 - Use `database` for query plans, indexes, and migration risk.
-- Use `observability` for production validation and continuous profiling.
-- Use `cache` only after measurement shows repeated expensive work or I/O.
+- Use `observability` for production validation and continuous
+  profiling.
+- Use `caching` only after measurement shows repeated expensive work
+  or I/O.
 
 ## References
 
-- Brendan Gregg, flame graphs: <https://www.brendangregg.com/flamegraphs.html>
+- Flame graphs: <https://www.brendangregg.com/flamegraphs.html>
 - USE method: <https://www.brendangregg.com/usemethod.html>
 - Coordinated omission:
   <https://groups.google.com/g/mechanical-sympathy/c/icNZJejUHfE/m/BfDekfBEs_sJ>
