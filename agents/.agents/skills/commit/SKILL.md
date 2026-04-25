@@ -69,6 +69,9 @@ hooks or bundles unrelated changes cannot be trusted.
 - Use `git` for history rewriting, conflicts, bisect, force-push, or recovery.
 - Use `refactoring` when splitting structural and behavioral work requires code
   changes.
+- Use `versioning` when the working tree includes a version manifest bump,
+  CHANGELOG entry, deprecation, or release tag — the bump and CHANGELOG are
+  classified there before being committed here.
 - Respect Codex/user sandbox approval requirements; this skill does not bypass
   permission gates.
 

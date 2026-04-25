@@ -77,6 +77,8 @@ real users.
 - Use `observability` for rollout metrics, dashboards, alerts, and runbooks.
 - Use `security` for CI credentials, artifact signing, SBOMs, and dependency
   trust.
+- Use `versioning` for the version bump, CHANGELOG entry, and tag that
+  precedes a release rollout — deployment owns what happens after the tag.
 
 ## References
 

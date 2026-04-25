@@ -179,6 +179,9 @@ organized, not what the code should do.
   commits, recovering history, or cleaning branch history.
 - `commit`: use when grouping a messy working tree, proposing commit splits,
   writing commit messages, or committing approved changes.
+- `versioning`: use when bumping a version manifest, editing a CHANGELOG,
+  deprecating or removing a public symbol/endpoint/flag, classifying a
+  change as breaking/additive/fix, or preparing a release tag.
 
 Proof obligations override style, aesthetics, and weak local conventions. If a
 behavior, invariant, contract, root-cause, or refactor-safety claim cannot be

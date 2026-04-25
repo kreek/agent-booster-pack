@@ -219,6 +219,8 @@ apply:
   branch cleanup, and PR history.
 - [`commit`][skill-commit]: working-tree grouping, commit splits, concise commit
   messages, and approved commits.
+- [`versioning`][skill-versioning]: version bumps, CHANGELOG hygiene,
+  deprecation policy, breaking-change classification, and release tags.
 - [`scaffolding`][skill-scaffolding]: new projects, baseline tooling,
   package-manager defaults, test runners, linting, and CI. It includes
   opinionated defaults for TypeScript APIs on Cloudflare Workers with Hono,
@@ -250,6 +252,7 @@ apply:
 [skill-scaffolding]: agents/.agents/skills/scaffolding/SKILL.md
 [skill-security]: agents/.agents/skills/security/SKILL.md
 [skill-tests]: agents/.agents/skills/tests/SKILL.md
+[skill-versioning]: agents/.agents/skills/versioning/SKILL.md
 
 ## Authoring Rules
 
