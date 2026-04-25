@@ -65,7 +65,7 @@ description:
 ## Handoffs
 
 - Use `proof` when a fix claim needs explicit evidence.
-- Use `tests` for the regression test shape.
+- Use `testing` for the regression test shape.
 - Use `git` for `git bisect`, reflog recovery, or conflict-heavy
   debugging.
 - Use `observability` when the right evidence must come from logs,

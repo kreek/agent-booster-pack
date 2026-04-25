@@ -29,7 +29,7 @@ and run the baseline without local knowledge.
 ## When NOT to Use
 
 - Adding a feature to an already healthy project; use the domain
-  skill plus `tests`.
+  skill plus `testing`.
 - Deployment pipeline beyond baseline CI; use `deployment`.
 - Detailed UI design choices after the framework is chosen; use
   `frontend`.
@@ -149,7 +149,7 @@ to the full checklist.
 
 ## Handoffs
 
-- Use `tests` for the first real feature test.
+- Use `testing` for the first real feature test.
 - Use `deployment` when CI becomes release/deploy automation.
 - Use `security` when adding dependency audits, secret scanning,
   signing, or supply-chain gates.

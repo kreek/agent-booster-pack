@@ -98,7 +98,7 @@ already uses (`ABP:` prefix), install ABP as a Claude Code plugin instead:
 /plugin install abp@abp
 ```
 
-Slash commands then namespace as `/abp:frontend`, `/abp:security`, `/abp:tests`,
+Slash commands then namespace as `/abp:frontend`, `/abp:security`, `/abp:testing`,
 etc. — the prefix protects against name clashes with built-in or third-party
 plugin skills.
 
@@ -178,7 +178,7 @@ apply:
 
 - [`code-review`][skill-code-review]: risk-focused review of diffs, branches, PRs,
   requested changes, and agent-generated code.
-- [`tests`][skill-tests]: behavior-focused tests that prove caller-visible
+- [`testing`][skill-testing]: behavior-focused tests that prove caller-visible
   contracts without overspecifying implementation.
 - [`debugging`][skill-debugging]: root-cause investigation for bugs, flakes,
   regressions, and unexplained symptoms.
@@ -262,7 +262,7 @@ apply:
 [skill-code-review]: agents/.agents/skills/code-review/SKILL.md
 [skill-scaffolding]: agents/.agents/skills/scaffolding/SKILL.md
 [skill-security]: agents/.agents/skills/security/SKILL.md
-[skill-tests]: agents/.agents/skills/tests/SKILL.md
+[skill-testing]: agents/.agents/skills/testing/SKILL.md
 [skill-versioning]: agents/.agents/skills/versioning/SKILL.md
 
 ## Authoring Rules

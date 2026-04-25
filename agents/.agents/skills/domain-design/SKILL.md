@@ -111,7 +111,7 @@ the diff:
 ## Handoffs
 
 - Use `proof` when data claims need explicit proof obligations.
-- Use `tests` to prove domain behavior through public boundaries.
+- Use `testing` to prove domain behavior through public boundaries.
 - Use `error-handling` for parse failures, Result/Either shape, and
   error context.
 - Use `concurrency` when mutable places or ownership cross task/thread

@@ -21,7 +21,7 @@ description:
 
 ## When NOT to Use
 
-- Behavior-first feature work; use `tests`.
+- Behavior-first feature work; use `testing`.
 - Commit grouping after changes already exist; use `commit`.
 - Git history surgery; use `git`.
 
@@ -67,7 +67,7 @@ description:
 
 - Use `proof` when refactor safety depends on explicit preservation
   evidence.
-- Use `tests` for characterization and boundary tests.
+- Use `testing` for characterization and boundary tests.
 - Use `commit` to group resulting changes cleanly.
 - Use `domain-design` when the refactor is mainly about untangling
   effects, domain shape, or domain/feature locality versus horizontal

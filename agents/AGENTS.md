@@ -108,7 +108,7 @@ recoverable, and understandable.
   generic code-review entrypoint before loading narrower domain lenses.
 - `proof`: use when engineering claims need explicit proof obligations: data
   invariant, boundary, executable check, and evidence.
-- `tests`: use when adding, reviewing, or fixing tests; deciding what to mock;
+- `testing`: use when adding, reviewing, or fixing tests; deciding what to mock;
   proving caller-visible behavior; addressing flakes or overspecified tests.
 - `error-handling`: use when designing error types, propagation, retries,
   remote-call timeouts, circuit breakers, crash boundaries, user-facing
@@ -248,7 +248,7 @@ tests. Test-first is optional; test-at-all is not.
 - Internal helpers and persistence modules do not need their own tests when
   outer-boundary tests exercise them. They do need tests when the logic is
   non-trivial in isolation — parsers, state machines, pure algorithms.
-- Load the `tests` skill before authoring tests. Do not skip it.
+- Load the `testing` skill before authoring tests. Do not skip it.
 - If the working directory is empty, lacks a project manifest, or has no
   test/lint/typecheck baseline, load `scaffolding` before creating feature code.
 - When starting a new project or adding quality tooling to one that lacks it,

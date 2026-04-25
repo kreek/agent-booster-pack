@@ -69,7 +69,7 @@ description:
 4. Load triggered domain skills as mandatory lenses. **Always** include a
    security pass for any auth, trust-boundary, input, dependency, secret,
    crypto, logging-redaction, or user-controlled-sink concern. Add others
-   as triggered: `database`, `api`, `tests`, `proof`,
+   as triggered: `database`, `api`, `testing`, `proof`,
    `domain-design`, `error-handling`, `concurrency`, `deployment`,
    `observability`, `frontend`, `accessibility`, `documentation`,
    `performance`, `caching`, `realtime`.
@@ -138,7 +138,7 @@ findings, not before.
 - Use `database` for migrations, locking, transactions, schema, indexes,
   or production data access.
 - Use `proof` when review claims need explicit proof obligations.
-- Use `tests` for test quality, missing behavior coverage, mocks, or
+- Use `testing` for test quality, missing behavior coverage, mocks, or
   flakes.
 - Use `git` for branch mechanics and `commit` for packaging accepted
   fixes.

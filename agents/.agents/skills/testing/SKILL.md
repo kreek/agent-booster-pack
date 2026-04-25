@@ -1,5 +1,5 @@
 ---
-name: tests
+name: testing
 description:
   Best practices for writing behavior-focused tests from the caller's point of
   view. Use whenever the user is writing tests, reviewing tests, adding coverage
@@ -15,7 +15,7 @@ description:
   something is worth testing.
 ---
 
-# Tests
+# Testing
 
 ## Iron Law
 

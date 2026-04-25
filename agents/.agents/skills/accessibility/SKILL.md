@@ -86,7 +86,7 @@ description:
 
 - Use `frontend` for visual hierarchy, layout, design systems, and
   component composition.
-- Use `tests` for browser automation around accessibility-critical
+- Use `testing` for browser automation around accessibility-critical
   flows.
 - Use `documentation` when writing accessibility statements,
   design-system guidance, or remediation notes.
