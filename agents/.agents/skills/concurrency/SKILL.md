@@ -27,6 +27,8 @@ under load.
 ## When NOT to Use
 
 - Remote-call resilience; use `resilience`.
+- Durable background jobs, worker queues, retry exhaustion, and dead jobs; use
+  `background-jobs`.
 - External event streams, brokers, subscriptions, offsets, lag, replay, or
   consumer groups; use `realtime`.
 - Performance measurement without concurrency design changes; use `performance`.
@@ -70,6 +72,8 @@ under load.
 - Use `data` to remove shared mutable state from the core design.
 - Use `realtime` for external stream/broker topology, delivery semantics,
   offsets, replay, and lag.
+- Use `background-jobs` for durable job queues, retries, job payloads, and
+  worker failure semantics.
 - Use `observability` when concurrency failure needs metrics, traces, or
   saturation dashboards.
 - Use `debugging` for existing races or deadlocks before changing code.

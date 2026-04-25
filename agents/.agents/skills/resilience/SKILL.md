@@ -27,6 +27,8 @@ into a larger outage.
 ## When NOT to Use
 
 - In-process concurrency only; use `concurrency`.
+- Background jobs, worker queues, schedulers, job payloads, and dead jobs; use
+  `background-jobs`.
 - HTTP surface design only; use `api`.
 - Event stream transport, ordering, fanout, replay, lag, offsets, or broker
   selection; use `realtime`.
@@ -71,6 +73,8 @@ into a larger outage.
 ## Handoffs
 
 - Use `errors` for propagation, wrapping, and user-facing failure shape.
+- Use `background-jobs` for worker payloads, job retry exhaustion, dead jobs,
+  queue priority, and scheduler behavior.
 - Use `realtime` for event stream shape, broker choice, delivery semantics,
   partitioning, offsets, replay, lag, and fanout.
 - Use `observability` for dependency metrics, traces, alerts, and runbooks.

@@ -107,7 +107,7 @@ failures.
 - `deployment`: use when changing pipelines, release steps, rollout strategy,
   rollback paths, feature flags, or deploy-time database coordination.
 - `resilience`: use when making remote calls or designing timeouts, retries,
-  idempotency, sagas, outbox, queues, event ordering, or consistency.
+  idempotency, sagas, outbox, event ordering, or consistency.
 
 ### Correctness And Change Control
 
@@ -140,6 +140,9 @@ operability, scalability, and performance after the core model is sound.
   subscriptions, SSE, WebSockets, Kafka, Kinesis, Redis Streams, consumer
   groups, offsets, lag, replay, retention, partitions, ordering, delivery
   guarantees, or stream backpressure.
+- `background-jobs`: use when designing or reviewing background jobs, async
+  workers, schedulers, retries, job payloads, dead jobs, queue priority, worker
+  concurrency, or Sidekiq/Celery/BullMQ/RQ/Oban-style task processors.
 - `concurrency`: use when writing async, threaded, actor, channel, lock, queue,
   cancellation, or backpressure-sensitive code.
 - `performance`: use when optimising or diagnosing latency, throughput, p99s,

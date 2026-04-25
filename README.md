@@ -192,6 +192,9 @@ apply:
   dashboards, SLOs, alerts, and telemetry quality.
 - [`realtime`][skill-realtime]: event streams, live updates, pub/sub,
   subscriptions, delivery guarantees, ordering, and replay.
+- [`background-jobs`][skill-background-jobs]: async workers, schedulers,
+  retries, job payloads, dead jobs, queue priority, and worker failure
+  visibility.
 - [`concurrency`][skill-concurrency]: async, threads, actors, channels, locks,
   cancellation, queues, and backpressure.
 - [`performance`][skill-performance]: latency, throughput, p99s, CPU, memory,
@@ -225,6 +228,7 @@ apply:
 
 [skill-accessibility]: agents/.agents/skills/accessibility/SKILL.md
 [skill-api]: agents/.agents/skills/api/SKILL.md
+[skill-background-jobs]: agents/.agents/skills/background-jobs/SKILL.md
 [skill-cache]: agents/.agents/skills/cache/SKILL.md
 [skill-commit]: agents/.agents/skills/commit/SKILL.md
 [skill-concurrency]: agents/.agents/skills/concurrency/SKILL.md
