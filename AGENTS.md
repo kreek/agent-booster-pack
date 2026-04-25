@@ -1,0 +1,138 @@
+# AGENTS.md
+
+This file provides guidance to coding agents (Claude Code, Codex, Cursor, and others that read `AGENTS.md`) when working with code in this repository.
+
+The skill-pack doctrine in [`agents/AGENTS.md`](agents/AGENTS.md) — priority
+rules, proof obligations, code-and-data discipline, user-change
+preservation — also governs work in this repo. Read it alongside this
+file; the two are additive.
+
+## What this repo is
+
+Agent Booster Pack is a portable skill pack for coding agents (Claude Code,
+Codex, Cursor, Copilot, Gemini CLI, OpenCode, Pi, Windsurf). It ships
+prose — `SKILL.md` files plus a few maintenance helpers — not application code.
+Most edits are to skill bodies, the top-level `AGENTS.md` index, or the
+`README.md`. There is no build, no test runner, no service to run.
+
+## Source of truth and mirrors
+
+- **Canonical skills**: `agents/.agents/skills/<name>/SKILL.md`. Every skill
+  lives here; siblings may add `agents/`, `references/`, and `scripts/`.
+- **Canonical commands**: `agents/.agents/commands/<name>.md` (shared command
+  prompts surfaced by every agent).
+- **Top-level index**: `agents/AGENTS.md`. Lists every skill with a
+  one-line trigger; the wrapper at `agents/.claude/CLAUDE.md` just
+  `@`-includes it for Claude Code.
+- **Claude Code plugin mirror**: `plugin/skills/<name>` and
+  `plugin/commands/<name>.md` are **relative symlinks** into
+  `agents/.agents/...`. They give Claude Code users the namespaced
+  `/abp:<skill>` slash commands via `.claude-plugin/marketplace.json`.
+  Never edit a `plugin/` SKILL — edit the canonical file; the symlink
+  resolves through.
+- **Install layout**: `agents/` is a GNU Stow package. `stow --target="$HOME"
+  agents` links it under `~/AGENTS.md`, `~/.agents/skills/`,
+  `~/.agents/commands/`, and `~/.claude/CLAUDE.md`. `setup.sh` then
+  fans those out to per-tool locations and re-runs the plugin-sync.
+
+When you add, rename, or delete a skill or command, the canonical file under
+`agents/.agents/` is the only place to write. Everything else is
+regenerated.
+
+## Common commands
+
+```sh
+# Re-sync plugin/ symlinks and per-tool fan-out after a skill is
+# added / renamed / removed. Idempotent.
+./setup.sh
+
+# Just the plugin-sync (subset of setup.sh; safe to run standalone).
+uv run python scripts/generate_plugin_symlinks.py
+
+# Validate every SKILL.md against the playbook anatomy (frontmatter,
+# required sections, no inline expert attribution) AND check for
+# plugin/ drift. Run this before publishing skill changes.
+uv run python scripts/validate_skill_anatomy.py
+
+# Validate local Markdown links and anchors. Remote URL checks are omitted by
+# default so this stays deterministic for local development.
+uv run refcheck . --no-color
+
+# Self-test the validator itself (uses a tmp dir of fixtures).
+uv run python scripts/validate_skill_anatomy.py --self-test
+
+# Python formatting and linting.
+uv run pytest
+uv run ruff format --check .
+uv run ruff check .
+```
+
+There is no application test suite; the validator script is the closest
+thing to one. Treat clean `pytest`, `validate_skill_anatomy.py`,
+`refcheck`, and `uv` Python formatting/lint commands as the bar for script
+changes.
+
+## Skill anatomy (enforced by the validator)
+
+Every `SKILL.md` must have:
+
+- Frontmatter with kebab-case `name:` and a trigger-focused `description:`.
+- Required sections: `## When to Use`, `## When NOT to Use`,
+  `## Verification`.
+- Optional sections: `## Common Rationalizations` and `## Red Flags` when
+  they add real review value, especially for high-risk or commonly misused
+  skills.
+- No inline `per <Expert Name>` attribution outside a `## References` or
+  `## Canon` section — move citations there.
+
+Plus the README's authoring rules: keep skills short and directive, lead
+with an Iron Law when one exists, route to neighbours via `Handoffs`
+instead of duplicating their bodies, push deterministic checks into
+`scripts/` and deeper material into `references/`.
+
+## When skill changes ripple
+
+Adding or renaming a skill needs four updates, in order:
+
+1. Canonical files under `agents/.agents/skills/<name>/` (and a test that
+   the body satisfies the validator's required sections).
+2. `agents/AGENTS.md` — add the routing line under the right grouping
+   (Foundational Design / Safety Gates / Correctness And Change Control /
+   Production Quality / Communication And UX / Workflow).
+3. `README.md` — update the human-facing skill list and its
+   `[skill-<name>]:` reference link at the bottom.
+4. `./setup.sh` to regenerate `plugin/skills/<name>` and prune stale
+   per-agent links. The validator's drift check fails CI/local runs if
+   step 4 is skipped.
+
+Neighbouring skills may need their `Handoffs` updated when routing
+changes. Do not duplicate skill prose between files.
+
+## Pack versioning (`marketplace.json`)
+
+The pack publishes a single semantic version in
+`.claude-plugin/marketplace.json` (both `metadata.version` and the
+`plugins[0].version`). Bump it when canonical content changes so
+`scripts/sync_agents_md.py` shows users a meaningful version delta.
+
+| Bump | Trigger |
+|---|---|
+| **major** (X.0.0) | Skill renamed or removed; an Iron Law or non-negotiable rule reversed; `agents/AGENTS.md` priority order rearranged; anything that changes what agents will refuse vs accept |
+| **minor** (1.X.0) | New skill added; new reference file under `references/`; new section in an existing `SKILL.md`; doctrine clarified or strengthened without reversal; new tooling expectation that's strictly additive |
+| **patch** (1.0.X) | Typos, link fixes, formatting, internal re-flow that doesn't change meaning |
+
+Bump in the same PR as the canonical edit; both `version` fields move
+together. Pre-1.0 (`0.x.y`) is reserved for early development and
+follows the same shape, but minor bumps may carry breaking changes —
+the pack is past that and should not regress to it.
+
+## Conventions specific to this repo
+
+- No commits to `main`. Use `feature/`, `fix/`, `refactor/`, `chore/`
+  branches.
+- Markdown and Python are the only languages. Use `uv` for Python tooling,
+  `ruff` for Python linting/formatting, and `refcheck` for local Markdown link
+  validation. Keep Markdown prose manually formatted; do not reintroduce a Node
+  formatter for docs.
+- Do not add author-attribution trailers (`Co-Authored-By`,
+  `Generated by`) to commits.

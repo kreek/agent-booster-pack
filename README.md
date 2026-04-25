@@ -54,12 +54,12 @@ Fresh checkout and install:
 ```sh
 git clone https://github.com/kreek/agent-booster-pack.git
 cd agent-booster-pack
-stow agents
+stow --target="$HOME" agents
 ./setup.sh
 ```
 
-`stow agents` is the main install step. It links the repo's `agents/` package
-into your home directory:
+`stow --target="$HOME" agents` is the main install step. It links the repo's
+`agents/` package into your home directory, so the checkout can live anywhere:
 
 - `~/AGENTS.md`
 - `~/.agents/skills/`
@@ -77,8 +77,8 @@ do not rely only on `~/.agents/skills/`:
 - `~/.codex/prompts/<name>.md` is kept for legacy Codex prompt-command support
 
 It also keeps the in-repo Claude Code plugin (`plugin/`) in sync with the
-source-of-truth skills, so `/abp:<skill>` slash commands always reflect the
-current pack.
+source-of-truth skills when `uv` is available. Published checkouts already ship
+the plugin symlinks, so end-user installs do not need Python or uv.
 
 ## Install for Claude Code (namespaced)
 
@@ -113,10 +113,10 @@ rm ~/.claude/skills        # only if it is a symlink to ~/.agents/skills
 The plugin and the flat symlink can coexist — they will simply both appear in
 `/help` listings, prefixed and unprefixed respectively.
 
-`stow agents` does not merge files. If `~/AGENTS.md` already exists as a real
-file, Stow will report a conflict instead of appending the Agent Booster Pack
-instructions. Do not use `stow --adopt` unless you intentionally want Stow to
-take ownership of that file.
+`stow --target="$HOME" agents` does not merge files. If `~/AGENTS.md` already
+exists as a real file, Stow will report a conflict instead of appending the
+Agent Booster Pack instructions. Do not use `stow --adopt` unless you
+intentionally want Stow to take ownership of that file.
 
 For an existing personal `~/AGENTS.md`, merge deliberately:
 
@@ -125,21 +125,26 @@ For an existing personal `~/AGENTS.md`, merge deliberately:
 3. Preserve the ABP rule that local project `AGENTS.md` files are additive and
    more specific, but must not weaken safety, proof, validation, or
    user-change-preservation requirements.
-4. Run `stow --ignore='^AGENTS\.md$' agents` so `~/.agents/skills/`,
-   `~/.agents/commands/`, and `~/.claude/CLAUDE.md` are still linked while your
-   existing `~/AGENTS.md` remains manually maintained.
+4. Run `stow --target="$HOME" --ignore='^AGENTS\.md$' agents` so
+   `~/.agents/skills/`, `~/.agents/commands/`, and `~/.claude/CLAUDE.md` are
+   still linked while your existing `~/AGENTS.md` remains manually maintained.
 5. Run `./setup.sh` so tool-specific compatibility links are created from those
    shared `~/.agents` links.
+
+Maintainers with `uv` can optionally use `scripts/sync_agents_md.py` to test or
+refresh a fenced ABP block in a personal `AGENTS.md`; that script is not part of
+the end-user install path.
 
 Codex now discovers skills directly from `.agents/skills` / `~/.agents/skills`;
 do not rely on `~/.codex/prompts` for slash commands in current Codex CLI.
 
 GitHub Copilot CLI, Pi, Cursor, Gemini CLI, and OpenCode auto-discover from
-`~/.agents/skills/`, so the `stow agents` link is enough — no extra `setup.sh`
-wiring needed. Copilot also scans `~/.copilot/skills` and `~/.claude/skills`;
-the pack deliberately leaves `~/.copilot/skills` unlinked so skills are not
-registered twice. For project-scoped Copilot skills, drop a `.github/skills/`,
-`.claude/skills/`, or `.agents/skills/` directory in the repo itself.
+`~/.agents/skills/`, so the `stow --target="$HOME" agents` link is enough — no
+extra `setup.sh` wiring needed. Copilot also scans `~/.copilot/skills` and
+`~/.claude/skills`; the pack deliberately leaves `~/.copilot/skills` unlinked so
+skills are not registered twice. For project-scoped Copilot skills, drop a
+`.github/skills/`, `.claude/skills/`, or `.agents/skills/` directory in the repo
+itself.
 
 ## Skill System
 
@@ -285,7 +290,7 @@ After adding or renaming a skill:
 
 This reruns the per-agent symlink fan-out and the plugin sync (so
 `plugin/skills/<new-name>` is created and stale links are pruned). The
-`scripts/validate-skill-anatomy.sh` script enforces the same drift check, so a
+`scripts/validate_skill_anatomy.py` script enforces the same drift check, so a
 plugin out of sync with `agents/.agents/skills/` will fail validation.
 
 Then update:
@@ -293,20 +298,28 @@ Then update:
 - `agents/AGENTS.md` so agents can route to it
 - this README so humans understand the pack
 - any neighboring skills' handoffs when routing changes
+- `.claude-plugin/marketplace.json` per the pack-versioning rules in the
+  repo-root [`AGENTS.md`](AGENTS.md#pack-versioning-marketplacejson) — the
+  version in the canonical AGENTS.md block is what
+  `scripts/sync_agents_md.py` shows users on update
 
-Run the markdown check before publishing broad doc updates:
+Run the Python checks before publishing script updates:
 
 ```sh
-pnpm format:check
+uv run pytest
+uv run ruff format --check .
+uv run ruff check .
+uv run refcheck . --no-color
 ```
 
-Use `pnpm format` only when you intend to rewrite all markdown formatting in the
-repo.
+Use `uv run ruff format .` only when you intend to rewrite Python formatting in
+the repo. `refcheck` skips remote URLs unless `--check-remote` is passed, so the
+default command validates local Markdown links and anchors deterministically.
 
 ## Remove
 
 ```sh
-stow -D agents
+stow --target="$HOME" -D agents
 ```
 
 Manual cleanup may still be needed for tool-specific symlinks under

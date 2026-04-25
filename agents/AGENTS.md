@@ -51,17 +51,6 @@
   even when there are no dependencies yet. Use older/built-in tools only when
   they are the ecosystem's preferred default, such as Cargo for Rust or Go
   modules for Go, or when the repo/user explicitly chooses them.
-- For new TypeScript web apps without explicit hosting constraints, prefer
-  Cloudflare Workers with Hono as the backend/runtime default. Confirm before
-  locking it in. Use Render, Fly.io, AWS, GCP, Azure, containers, or a VPS when
-  the user requests them or when the app needs long-running processes,
-  unsupported native dependencies, special networking, strict region/data
-  residency, conventional Node server semantics, or managed services outside
-  Cloudflare's model.
-- For new web app scaffolds, do not hand-roll HTTP servers or routing when a
-  mature framework supplies the conventions. Use the scaffolding skill's
-  framework defaults, and search current official/project sources when the
-  language, runtime, or app shape is not covered.
 - For non-trivial, ambiguous, or risky changes, state the short plan,
   assumptions, and tradeoffs before editing. Ask only when the answer changes
   the implementation or risk.
@@ -172,9 +161,10 @@ hard to maintain.
 Use these for repository mechanics and change packaging. They govern how work is
 organized, not what the code should do.
 
-- `scaffolding`: use when bootstrapping a new project, adding baseline tooling
-  (linter, formatter, type check, test runner, coverage) to a project that lacks
-  it, or setting up initial CI config.
+- `scaffolding`: use when bootstrapping a new project, choosing new-app
+  framework/runtime defaults, adding baseline tooling (linter, formatter, type
+  check, test runner, coverage) to a project that lacks it, or setting up
+  initial CI config.
 - `git`: use when rebasing, bisecting, resolving conflicts, splitting/squashing
   commits, recovering history, or cleaning branch history.
 - `commit`: use when grouping a messy working tree, proposing commit splits,
@@ -308,8 +298,8 @@ tests. Test-first is optional; test-at-all is not.
 
 - When explaining code or summarising work: give a concise high-level
   introduction first, then build knowledge from there.
-- For new code and edits: explain why the change makes the software better and
-  what it enables.
+- For new code and edits: explain why the new approach is better than what it
+  replaced and what it enables.
 - If you cannot explain how the change improves the system and what it enables
   next, treat that as an AI-coding-agent smell: pause and consider a simpler or
   better-scoped solution.
