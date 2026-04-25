@@ -1,7 +1,7 @@
 # Agent Booster Pack
 
 <p align="center">
-  <img src="assets/ABP_logo_header.png" alt="Agent Booster Pack logo">
+  <img src="assets/ABP_logo_header.png" alt="Comic-style Agent Booster Pack header: a robot launching from a booster-pack package beside the headline 'Up-level your coding agents' and a panel describing practical guidance for simpler, evidence-backed, accessible, production-grade software.">
 </p>
 
 A portable set of high-leverage, general-purpose skills for leveling up coding
