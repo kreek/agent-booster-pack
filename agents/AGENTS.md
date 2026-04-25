@@ -121,7 +121,7 @@ recoverable, and understandable.
   invariant, boundary, executable check, and evidence.
 - `tests`: use when adding, reviewing, or fixing tests; deciding what to mock;
   proving caller-visible behavior; addressing flakes or overspecified tests.
-- `errors`: use when designing error types, propagation, retries, crash
+- `error-handling`: use when designing error types, propagation, retries, crash
   boundaries, user-facing messages, or recovery behavior.
 - `debugging`: use when investigating bugs, flakes, regressions, production
   symptoms, or any problem where the cause is not yet proven.

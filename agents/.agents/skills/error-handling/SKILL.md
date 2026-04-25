@@ -1,5 +1,5 @@
 ---
-name: errors
+name: error-handling
 description:
   Use when designing error types, deciding between exceptions and Result/Either
   types, wrapping errors with context, deciding whether to retry or fail,
@@ -8,7 +8,7 @@ description:
   propagate errors without losing context.
 ---
 
-# Errors
+# Error Handling
 
 ## Iron Law
 
@@ -34,10 +34,13 @@ context, or stop because continuing is unsafe.
 2. Add context at each boundary; preserve the original cause.
 3. Catch only where you can decide: recover, translate, retry, or terminate.
 4. Classify errors as user-correctable, transient, or programmer/system faults.
-5. User-facing messages are safe and actionable; internal errors keep diagnostic
+5. For REST APIs, translate failures by origin at the boundary: request problems
+   become `4xx`, upstream dependency failures become `502`/`503`/`504`, and
+   unexpected application faults become `500`.
+6. User-facing messages are safe and actionable; internal errors keep diagnostic
    detail under a correlation ID.
-6. Retrying is an error-handling choice only for idempotent, transient failures.
-7. Panics/assertions are for impossible states and process boundaries, not
+7. Retrying is an error-handling choice only for idempotent, transient failures.
+8. Panics/assertions are for impossible states and process boundaries, not
    routine control flow.
 
 ## Workflow
@@ -46,7 +49,8 @@ context, or stop because continuing is unsafe.
 2. Choose return-value errors, exceptions, Result/Either, or process termination
    based on caller contract.
 3. Wrap with operation, resource, and correlation context.
-4. Translate to user/API/CLI shape at the boundary.
+4. Translate to user/API/CLI shape at the boundary. For REST APIs, use the `api`
+   skill's HTTP status-code taxonomy before choosing the response code.
 5. Test at least one failure path for each public operation that can fail.
 
 ## Verification
@@ -59,6 +63,8 @@ context, or stop because continuing is unsafe.
 - [ ] User-facing errors do not expose stack traces, SQL, file paths, hostnames,
       or secrets.
 - [ ] Error responses include a correlation ID that connects to internal logs.
+- [ ] REST API errors are classified by origin before status-code selection:
+      request, upstream dependency, or application fault.
 - [ ] Auth failures avoid user enumeration through shape, content, and timing.
 - [ ] Retries apply only to idempotent/transient failures with a budget.
 - [ ] Tests cover representative failure paths.
@@ -67,12 +73,16 @@ context, or stop because continuing is unsafe.
 
 - Use `security` for auth, secrets, validation, fail-closed behavior, and
   information disclosure.
+- Use `api` for REST status-code selection, Problem Details/JSON:API/FHIR error
+  contracts, OpenAPI response docs, and API compatibility concerns.
 - Use `resilience` for retry budgets, idempotency keys, and circuit breakers.
 - Use `observability` for correlation IDs, logs, traces, and error-rate alerts.
 
 ## References
 
 - Go error wrapping: <https://go.dev/blog/go1.13-errors>
+- `../api/references/rest-error-status-codes.md`: local REST error status-code
+  decision tree.
 - Rust error handling:
   <https://doc.rust-lang.org/book/ch09-00-error-handling.html>
 - Dave Cheney, error handling:

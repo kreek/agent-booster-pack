@@ -181,7 +181,7 @@ discipline-enforcing lenses:
 - Foundational design: [`data`][skill-data], [`proof`][skill-proof].
 - Correctness and change: [`review`][skill-review], [`tests`][skill-tests],
   [`debugging`][skill-debugging], [`refactoring`][skill-refactoring],
-  [`errors`][skill-errors].
+  [`error-handling`][skill-error-handling].
 - Safety gates: [`security`][skill-security], [`database`][skill-database],
   [`deployment`][skill-deployment], [`resilience`][skill-resilience].
 - Production quality: [`observability`][skill-observability],
@@ -219,7 +219,7 @@ against current official/community guidance before serious project work.
 [skill-debugging]: agents/.agents/skills/debugging/SKILL.md
 [skill-deployment]: agents/.agents/skills/deployment/SKILL.md
 [skill-docs]: agents/.agents/skills/docs/SKILL.md
-[skill-errors]: agents/.agents/skills/errors/SKILL.md
+[skill-error-handling]: agents/.agents/skills/error-handling/SKILL.md
 [skill-frontend]: agents/.agents/skills/frontend/SKILL.md
 [skill-git]: agents/.agents/skills/git/SKILL.md
 [skill-observability]: agents/.agents/skills/observability/SKILL.md
