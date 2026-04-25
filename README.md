@@ -33,6 +33,22 @@ In practice, ABP steers agents to:
 - Debug and change code from the root cause, not the symptom.
 - Package work into scoped, reviewable changes a human can trust and maintain.
 
+## How ABP Is Different
+
+ABP is built for risk management in human-in-the-loop software work. The goal is
+straightforward: help agent-written code meet the high bar for production use. It
+treats the agent as a coding partner, not a human replacement. Humans are good
+at judgment, review, tradeoffs, ownership, and bringing the full context needed
+to make choices during iteration, so the skills steer agents toward scoped
+changes, explicit evidence, and reviewable decisions instead of trying to remove
+you from the loop.
+
+It also assumes coding agents already know how to code. Planning is built in,
+and syntax should be handled by linters, formatters, type checkers, and test
+suites. Skills do not need to handle those things. ABP works with coding agents
+through progressive enhancement: focused skills add the missing engineering pressure
+at the moment it matters, without trying to rewire the agent's internals.
+
 ## Install
 
 Prerequisites:
