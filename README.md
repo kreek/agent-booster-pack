@@ -223,8 +223,8 @@ apply:
   package-manager defaults, test runners, linting, and CI. It includes
   opinionated defaults for TypeScript APIs on Cloudflare Workers with Hono,
   larger frontend apps with SvelteKit, quick-to-build typed Python APIs with
-  FastAPI and the Python ecosystem, or high-performance web services with Go and
-  Fiber or Rust and Axum.
+  FastAPI and the Python ecosystem, or high-performance Rust web services with
+  Axum.
 
 [skill-accessibility]: agents/.agents/skills/accessibility/SKILL.md
 [skill-api]: agents/.agents/skills/api/SKILL.md
