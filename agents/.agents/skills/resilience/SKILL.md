@@ -72,7 +72,7 @@ into a larger outage.
 
 ## Handoffs
 
-- Use `errors` for propagation, wrapping, and user-facing failure shape.
+- Use `error-handling` for propagation, wrapping, and user-facing failure shape.
 - Use `background-jobs` for worker payloads, job retry exhaustion, dead jobs,
   queue priority, and scheduler behavior.
 - Use `realtime` for event stream shape, broker choice, delivery semantics,

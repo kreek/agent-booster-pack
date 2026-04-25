@@ -26,7 +26,7 @@ healthy, slow, failing, or saturated.
 ## When NOT to Use
 
 - Local-only scripts or libraries with no operational surface.
-- Error type design; use `errors`.
+- Error type design; use `error-handling`.
 - Deployment sequencing; use `deployment`.
 
 ## Core Ideas

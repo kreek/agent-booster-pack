@@ -71,7 +71,7 @@ typed values before use, and keep secrets out of every output channel.
 
 ## Handoffs
 
-- Use `errors` for safe error propagation and user-facing failure shape.
+- Use `error-handling` for safe error propagation and user-facing failure shape.
 - Use `api` for auth/error/idempotency contract shape.
 - Use specialist static-analysis tools for high-risk codebases where Semgrep,
   CodeQL, or dependency provenance matters.
