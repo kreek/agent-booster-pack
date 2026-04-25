@@ -84,11 +84,21 @@ Every `SKILL.md` must have:
   skills.
 - No inline `per <Expert Name>` attribution outside a `## References` or
   `## Canon` section — move citations there.
+- Put references to people, books, talks, papers, videos, and YouTube links in
+  `## References`, `## Canon`, or a `references/` file, not in frontmatter or
+  the steering body. Skill bodies should spend tokens on agent behavior, not
+  provenance.
 
 Plus the README's authoring rules: keep skills short and directive, lead
 with an Iron Law when one exists, route to neighbours via `Handoffs`
 instead of duplicating their bodies, push deterministic checks into
 `scripts/` and deeper material into `references/`.
+
+For `agents/.agents/skills/code-review/references/<language>.md`, do not
+duplicate anything a linter, formatter, type checker, syntax checker, or
+compiler already catches. Those files should focus on high-signal review risks:
+semantic bugs, unsafe edge cases, framework traps, missing proof, and patterns
+that automated tooling routinely misses.
 
 ## When skill changes ripple
 
