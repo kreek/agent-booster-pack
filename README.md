@@ -1,7 +1,7 @@
 # Agent Booster Pack
 
 <p align="center">
-  <img src="assets/ABP_logo_foil.png" alt="Agent Booster Pack logo" width="420">
+  <img src="assets/ABP_logo_foil.png" alt="Agent Booster Pack logo">
 </p>
 
 A portable set of high-leverage skills for leveling up coding agents.
