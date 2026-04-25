@@ -4,56 +4,30 @@
   <img src="assets/ABP_logo_header.png" alt="Agent Booster Pack logo">
 </p>
 
-A portable set of high-leverage skills for leveling up coding agents.
+A portable set of high-leverage, general-purpose skills for leveling up coding
+agents, with strong defaults for building, changing, testing, reviewing, and
+operating web applications and services.
 
-This is my brain dump of over 25 years of software development: the habits,
-standards, and hard-won lessons I accumulated working in startup environments
-through large private and public sector organizations. It reflects the full
-gamut: doing everything under the sun at a startup, through focused API
-governance, to leading SRE teams at large organizations and guiding multiple
-teams toward better engineering practices.
-
-This is my source of truth for how coding agents should reason, change code,
-prove correctness, and package work across Codex, Claude Code, and other agents
-that understand the Agent Skills layout. Since skills were introduced, I have
-documented and categorized each recurring correction I made to a model and
-turned those interventions into guidance for how agents should approach the next
-similar task. I also audited the skills libraries I found and did not find many
-that focused on increasing the engineering maturity or code quality of what
-agents produced, so I made my own.
-
-Complexity is death for any software project. Rich Hickey's [“Simple Made
-Easy”][simple-made-easy] is the best talk I have heard on software engineering,
-and its philosophy, along with other [data-first functional best
-practices][skill-data] (even when working in OOP-heavy languages), is the
-baseline for this set of skills. I have also learned from experience and
-research that agents produce their best results when pushed toward simplicity
-and required to prove their work rather than just claim completion.
+Agent Booster Pack distills 25 years of software engineering experience, from
+startups to large private and public sector organizations, into portable skills
+for Codex, Claude Code, and other agents that understand the Agent Skills
+layout. It raises engineering maturity by pushing agents toward simpler designs,
+explicit data models, proven behavior, safer production systems, intuitive and
+accessible interfaces, and clear, scoped changes a human can review and
+maintain.
 
 In practice, that means:
 
-- Model values, states, invariants, and effects before picking abstractions.
-- Turn every meaningful engineering claim into evidence.
-- Prove behavior through the boundary a real caller uses.
-- Let security, data loss, deploy risk, and production reliability outrank style
-  and local habit.
-- Keep changes small: one root cause, one logical behavior, one clean commit.
-
-## Repository Shape
-
-- `agents/AGENTS.md` is the global instruction file and skill index.
-- `agents/.agents/skills/` contains portable skills for engineering judgment,
-  proof obligations, testing, safety, production quality, UX, and workflow.
-- `agents/.agents/commands/` contains cross-agent command prompts where a tool
-  still supports command fan-out.
-- `agents/.claude/CLAUDE.md` is a thin Claude Code wrapper around `AGENTS.md`.
-- `plugin/` is the Claude Code plugin packaging — its `skills/` and `commands/`
-  are symlinks back to `agents/.agents/`, so installing the plugin namespaces
-  every skill as `/abp:<name>`.
-- `.claude-plugin/marketplace.json` advertises the plugin so users can
-  `/plugin marketplace add` this repo directly.
-- `setup.sh` wires skills and commands into tool-specific locations and keeps
-  the plugin's symlinks in sync.
+- Get the data model right first: make values, states, and invariants explicit,
+  limit side effects, and push state changes to the boundaries.
+- Replace "looks right" with proof from tests, contracts, logs, and
+  caller-visible checks.
+- Plan past launch and harden beyond the MVP: observability, reliability,
+  deployment safety, and rollback planning.
+- Treat security, data safety, and accessibility as engineering requirements,
+  not optional polish.
+- Debug and change code from the root cause, not the symptom.
+- Package work into scoped, reviewable changes a human can trust and maintain.
 
 ## Install
 
@@ -169,46 +143,81 @@ registered twice. For project-scoped Copilot skills, drop a `.github/skills/`,
 
 ## Skill System
 
-Skills are progressive context. Agents see only `name` and `description` until a
-skill triggers, then load the matching `SKILL.md`, and only read references or
-run scripts when the skill asks for them.
-
-Each skill is opened only when the task calls for it; the right draw gives the
-agent a sharper rule, workflow, and proof check for the work in front of it.
+Skills are progressive context: agents see only `name` and `description` until a
+task triggers a skill, then load the matching `SKILL.md` for the sharper rule,
+workflow, and proof check needed for the work in front of them.
 
 The skill pack is deliberately not a checklist library. It is a set of
-discipline-enforcing lenses:
+discipline-enforcing lenses, grouped by the kind of engineering pressure they
+apply:
 
-- Foundational design: [`data`][skill-data], [`proof`][skill-proof].
-- Correctness and change: [`review`][skill-review], [`tests`][skill-tests],
-  [`debugging`][skill-debugging], [`refactoring`][skill-refactoring],
-  [`error-handling`][skill-error-handling].
-- Safety gates: [`security`][skill-security], [`database`][skill-database],
-  [`deployment`][skill-deployment], [`resilience`][skill-resilience].
-- Production quality: [`observability`][skill-observability],
-  [`realtime`][skill-realtime], [`concurrency`][skill-concurrency],
-  [`performance`][skill-performance], [`cache`][skill-cache].
-- Public/user surfaces: [`api`][skill-api], [`docs`][skill-docs],
-  [`frontend`][skill-frontend], [`accessibility`][skill-accessibility].
-- Project and repo workflow: [`scaffolding`][skill-scaffolding],
-  [`git`][skill-git], [`commit`][skill-commit].
+### Foundational design
 
-The most important addition is [`proof`][skill-proof]: if an agent asserts a
-behavior, invariant, contract, root cause, or refactor-safety claim, it must
-name the proof obligation and evidence. Missing evidence is reported as
-unproven, not complete.
+- [`data`][skill-data]: data shapes, state transitions, invariants, effects, and
+  module boundaries.
+- [`proof`][skill-proof]: explicit proof obligations for behavior, contracts,
+  invariants, root causes, and refactor safety.
 
-[`review`][skill-review] is the general code-review entrypoint for local diffs,
-GitHub PRs, requested changes, and review-comment follow-up. It routes risky
-areas into the narrower domain skills rather than replacing them.
+### Correctness and change
 
-The [`scaffolding`][skill-scaffolding] skill includes ecosystem references for
-broad coverage and makes some intentionally opinionated framework calls, such as
-Hono, SvelteKit, FastAPI, Fiber, and Axum as defaults in their lanes. Node /
-TypeScript, Python, Ruby, JVM, Rust, and frontend defaults reflect stronger
-day-to-day preferences. PHP, Elixir, .NET, Go, and Swift references are included
-for agent coverage rather than daily personal practice; verify those choices
-against current official/community guidance before serious project work.
+- [`review`][skill-review]: risk-focused review of diffs, branches, PRs,
+  requested changes, and agent-generated code.
+- [`tests`][skill-tests]: behavior-focused tests that prove caller-visible
+  contracts without overspecifying implementation.
+- [`debugging`][skill-debugging]: root-cause investigation for bugs, flakes,
+  regressions, and unexplained symptoms.
+- [`refactoring`][skill-refactoring]: structure changes that preserve behavior
+  while improving clarity or migration paths.
+- [`error-handling`][skill-error-handling]: error types, propagation, retries,
+  recovery, crash boundaries, and user-facing messages.
+
+### Safety gates
+
+- [`security`][skill-security]: authentication, authorization, secrets,
+  cryptography, input validation, and trust boundaries.
+- [`database`][skill-database]: schemas, migrations, indexes, queries,
+  transactions, deletion semantics, and production data access.
+- [`deployment`][skill-deployment]: CI/CD, rollout strategy, rollback paths,
+  feature flags, and deploy-time coordination.
+- [`resilience`][skill-resilience]: remote calls, timeouts, retries,
+  idempotency, consistency, sagas, and outbox patterns.
+
+### Production quality
+
+- [`observability`][skill-observability]: logs, metrics, traces, health checks,
+  dashboards, SLOs, alerts, and telemetry quality.
+- [`realtime`][skill-realtime]: event streams, live updates, pub/sub,
+  subscriptions, delivery guarantees, ordering, and replay.
+- [`concurrency`][skill-concurrency]: async, threads, actors, channels, locks,
+  cancellation, queues, and backpressure.
+- [`performance`][skill-performance]: latency, throughput, p99s, CPU, memory,
+  allocations, I/O, and resource saturation.
+- [`cache`][skill-cache]: cache strategy, invalidation, stampede prevention,
+  Redis, Memcached, CDNs, and stale data.
+
+### Public/user surfaces
+
+- [`api`][skill-api]: HTTP APIs, OpenAPI, status codes, pagination, idempotency,
+  rate limits, versioning, and webhooks.
+- [`docs`][skill-docs]: READMEs, ADRs, runbooks, reference docs, tutorials, and
+  explanatory comments.
+- [`frontend`][skill-frontend]: pages, components, interaction flows, responsive
+  layout, visual design, and component states.
+- [`accessibility`][skill-accessibility]: WCAG, semantic HTML, ARIA, keyboard
+  navigation, focus, contrast, forms, and inclusive UI.
+
+### Project and repo workflow
+
+- [`git`][skill-git]: rebases, conflict resolution, bisects, history recovery,
+  branch cleanup, and PR history.
+- [`commit`][skill-commit]: working-tree grouping, commit splits, concise commit
+  messages, and approved commits.
+- [`scaffolding`][skill-scaffolding]: new projects, baseline tooling,
+  package-manager defaults, test runners, linting, and CI. It includes
+  opinionated defaults for TypeScript APIs on Cloudflare Workers with Hono,
+  larger frontend apps with SvelteKit, quick-to-build typed Python APIs with
+  FastAPI and the Python ecosystem, or high-performance web services with Go and
+  Fiber or Rust and Axum.
 
 [skill-accessibility]: agents/.agents/skills/accessibility/SKILL.md
 [skill-api]: agents/.agents/skills/api/SKILL.md
@@ -233,7 +242,6 @@ against current official/community guidance before serious project work.
 [skill-scaffolding]: agents/.agents/skills/scaffolding/SKILL.md
 [skill-security]: agents/.agents/skills/security/SKILL.md
 [skill-tests]: agents/.agents/skills/tests/SKILL.md
-[simple-made-easy]: https://www.youtube.com/watch?v=SxdOUGdseq4
 
 ## Authoring Rules
 
