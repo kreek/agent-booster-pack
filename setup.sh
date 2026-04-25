@@ -6,6 +6,33 @@ AGENTS_SKILLS="$HOME/.agents/skills"
 AGENTS_COMMANDS="$HOME/.agents/commands"
 
 if [ ! -d "$AGENTS_SKILLS" ]; then
+  # Most common cause of stow failing silently: a personal ~/AGENTS.md
+  # that stow refuses to overwrite, which aborts the whole package.
+  # Detect that case and surface the merge path instead of the generic
+  # "run stow" hint.
+  if [ -e "$HOME/AGENTS.md" ] && [ ! -L "$HOME/AGENTS.md" ]; then
+    cat >&2 <<EOF
+ERROR: $AGENTS_SKILLS is missing.
+
+You already have a personal ~/AGENTS.md, which makes 'stow agents'
+refuse to overwrite it and abort the whole package. To install without
+losing your file:
+
+  1. Merge the ABP guidance from agents/AGENTS.md into your ~/AGENTS.md.
+     Keep your personal rules, and preserve the ABP rule that project
+     AGENTS.md files are additive and must not weaken safety, proof,
+     validation, or user-change-preservation requirements.
+
+  2. Re-run stow with AGENTS.md ignored so the rest of the pack links:
+       stow --target="\$HOME" --ignore='^AGENTS\\.md\$' agents
+
+  3. Re-run this script:
+       ./setup.sh
+
+See the "Install" section of README.md for the full procedure.
+EOF
+    exit 1
+  fi
   echo "ERROR: $AGENTS_SKILLS is missing. Run 'stow agents' from the repo root first." >&2
   exit 1
 fi
@@ -39,7 +66,7 @@ prune_stale_skill_links() {
 # Claude Code: symlink the whole skills dir
 CLAUDE_SKILLS="$HOME/.claude/skills"
 if [ -L "$CLAUDE_SKILLS" ]; then
-  echo "~/.claude/skills already symlinked, skipping"
+  echo "${CLAUDE_SKILLS/#$HOME/~} already symlinked, skipping"
 elif [ -d "$CLAUDE_SKILLS" ]; then
   echo "WARNING: ~/.claude/skills exists as a real directory. Move or remove it, then re-run."
 else
@@ -72,10 +99,10 @@ link_skills_per_agent() {
     expected_real_target="$AGENTS_SKILLS_REAL/$skill_name/"
     if [ -L "$target" ]; then
       current_target=$(readlink "$target")
-      if [ "$current_target" = "$expected_target" ] \
-        || [ "$current_target" = "${expected_target%/}" ] \
-        || [ "$current_target" = "$expected_real_target" ] \
-        || [ "$current_target" = "${expected_real_target%/}" ]; then
+      if [ "$current_target" = "$expected_target" ] ||
+        [ "$current_target" = "${expected_target%/}" ] ||
+        [ "$current_target" = "$expected_real_target" ] ||
+        [ "$current_target" = "${expected_real_target%/}" ]; then
         echo "$label: $skill_name already symlinked, skipping"
       else
         echo "WARNING: $target is a symlink to $current_target. Expected $expected_target. Skipping."
@@ -104,11 +131,11 @@ echo ""
 echo "Auto-discovered via ~/.agents/skills/ (no extra wiring needed):"
 for tool in pi cursor gemini opencode copilot; do
   case "$tool" in
-    pi)       home_dir="$HOME/.pi" ;;
-    cursor)   home_dir="$HOME/.cursor" ;;
-    gemini)   home_dir="$HOME/.gemini" ;;
+    pi) home_dir="$HOME/.pi" ;;
+    cursor) home_dir="$HOME/.cursor" ;;
+    gemini) home_dir="$HOME/.gemini" ;;
     opencode) home_dir="$HOME/.config/opencode" ;;
-    copilot)  home_dir="$HOME/.copilot" ;;
+    copilot) home_dir="$HOME/.copilot" ;;
   esac
   if [ -d "$home_dir" ]; then
     echo "  - $tool ($home_dir exists)"
@@ -148,15 +175,17 @@ if [ -d "$AGENTS_COMMANDS" ]; then
   done
 fi
 
-# Sync the in-repo Claude Code plugin (plugin/) so its skills/ and commands/
-# mirror the source of truth. The plugin is what gives Claude Code users the
-# `/abp:<skill>` namespace via /plugin install or marketplace add. Keeping
-# this in setup.sh means new skills land in the plugin without a separate step.
+# Sync the in-repo Claude Code plugin for maintainers when uv is available.
+# End-user installs use the committed plugin symlinks and should not need Python
+# tooling just to fan out already-published skills.
 REPO_ROOT=$(cd "$(dirname "$0")" && pwd)
-GENERATE_PLUGIN="$REPO_ROOT/scripts/generate-plugin-symlinks.sh"
-if [ -x "$GENERATE_PLUGIN" ]; then
+GENERATE_PLUGIN="$REPO_ROOT/scripts/generate_plugin_symlinks.py"
+if [ -f "$GENERATE_PLUGIN" ] && command -v uv >/dev/null 2>&1; then
   echo ""
-  "$GENERATE_PLUGIN" "$REPO_ROOT"
+  (cd "$REPO_ROOT" && uv run python "$GENERATE_PLUGIN" "$REPO_ROOT")
+elif [ -f "$GENERATE_PLUGIN" ]; then
+  echo ""
+  echo "uv not found; skipping maintainer-only plugin sync"
 fi
 
 echo "Done."
