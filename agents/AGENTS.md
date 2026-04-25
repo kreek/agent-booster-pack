@@ -114,6 +114,9 @@ failures.
 Use these broadly when changing behavior or structure. They keep code provable,
 recoverable, and understandable.
 
+- `review`: use when reviewing local diffs, branches, GitHub PRs,
+  agent-generated code, requested changes, or review comments; use it as the
+  generic code-review entrypoint before loading narrower domain lenses.
 - `proof`: use when engineering claims need explicit proof obligations: data
   invariant, boundary, executable check, and evidence.
 - `tests`: use when adding, reviewing, or fixing tests; deciding what to mock;

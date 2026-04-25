@@ -136,7 +136,7 @@ The skill pack is deliberately not a checklist library. It is a set of
 discipline-enforcing lenses:
 
 - Foundational design: [`data`][skill-data], [`proof`][skill-proof].
-- Correctness and change: [`tests`][skill-tests],
+- Correctness and change: [`review`][skill-review], [`tests`][skill-tests],
   [`debugging`][skill-debugging], [`refactoring`][skill-refactoring],
   [`errors`][skill-errors].
 - Safety gates: [`security`][skill-security], [`database`][skill-database],
@@ -153,6 +153,10 @@ The most important addition is [`proof`][skill-proof]: if an agent asserts a
 behavior, invariant, contract, root cause, or refactor-safety claim, it must
 name the proof obligation and evidence. Missing evidence is reported as
 unproven, not complete.
+
+[`review`][skill-review] is the general code-review entrypoint for local diffs,
+GitHub PRs, requested changes, and review-comment follow-up. It routes risky
+areas into the narrower domain skills rather than replacing them.
 
 The [`scaffolding`][skill-scaffolding] skill includes ecosystem references for
 broad coverage and makes some intentionally opinionated framework calls, such as
@@ -181,6 +185,7 @@ against current official/community guidance before serious project work.
 [skill-realtime]: agents/.agents/skills/realtime/SKILL.md
 [skill-refactoring]: agents/.agents/skills/refactoring/SKILL.md
 [skill-resilience]: agents/.agents/skills/resilience/SKILL.md
+[skill-review]: agents/.agents/skills/review/SKILL.md
 [skill-scaffolding]: agents/.agents/skills/scaffolding/SKILL.md
 [skill-security]: agents/.agents/skills/security/SKILL.md
 [skill-tests]: agents/.agents/skills/tests/SKILL.md
