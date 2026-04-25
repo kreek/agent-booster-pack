@@ -4,9 +4,8 @@ description:
   Use when writing or reviewing documentation — READMEs, architecture notes,
   ADRs, runbooks, API docs, module-level docs, tutorials, how-to guides,
   reference material, or code comments. Also use when the user mentions
-  living documentation, Diátaxis, architecture decision records, ADRs,
-  runbooks, doc rot, MkDocs, Material for MkDocs, progressive disclosure,
-  single source of truth, or whether to write prose or rely on types/tests.
+  ADRs, runbooks, doc rot, MkDocs, Material for MkDocs, or whether to write
+  prose or rely on types/tests.
 ---
 
 # Documentation

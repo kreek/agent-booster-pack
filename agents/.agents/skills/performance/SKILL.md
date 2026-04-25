@@ -3,8 +3,8 @@ name: performance
 description:
   Use when optimising performance, diagnosing slowness, reading flame graphs,
   deciding what to optimise, running micro-benchmarks, or when the user mentions
-  profiling tools like pprof, py-spy, perf, async-profiler, or asks about tail
-  latency, p99, allocation rate, or Amdahl's law.
+  profilers (pprof, py-spy, perf, async-profiler), tail latency, p99, or
+  allocation rate.
 ---
 
 # Performance

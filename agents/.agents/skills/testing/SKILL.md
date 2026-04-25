@@ -2,17 +2,12 @@
 name: testing
 description:
   Best practices for writing behavior-focused tests from the caller's point of
-  view. Use whenever the user is writing tests, reviewing tests, adding coverage
-  for a feature, deciding what to test or skip, naming tests, picking what to
-  mock, or fixing flaky or over-specified test suites. Language and framework
-  agnostic, applying to any spec-style test framework with describe/context/it
-  blocks (RSpec, Vitest, Jest, Mocha, Jasmine, Pest, Kotest, Spek, Ginkgo,
-  Quick, pytest-describe, and similar). Focuses on test boundaries, names,
-  assertions, mocks, and flake resistance. Explicitly does not test framework or
-  library internals. Trigger even when the user does not say "behavior-driven"
-  or "BDD", especially for prompts about adding tests, choosing what to test,
-  fixing flaky tests, choosing mocks, writing specs, or deciding whether
-  something is worth testing.
+  view. Use when writing tests, reviewing tests, adding coverage for a feature,
+  deciding what to test or skip, naming tests, picking what to mock, or fixing
+  flaky or over-specified test suites. Language and framework agnostic — any
+  spec-style framework with describe/context/it blocks (RSpec, Vitest, Jest,
+  Mocha, Pest, pytest-describe, etc.). Focuses on test boundaries, assertions,
+  mocks, and flake resistance, not framework internals.
 ---
 
 # Testing

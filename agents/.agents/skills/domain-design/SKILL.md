@@ -6,9 +6,8 @@ description:
   should be a value vs a mutable place; when organizing code by domain/feature
   vs horizontal layers; when reasoning about side effects; or when reviewing
   code that mixes I/O with domain rules. Also use when the user mentions
-  immutability, parse-don't-validate, illegal states, values vs places,
-  functional core / imperative shell, effect coloring, domain-driven design,
-  layered architecture, domain locality, or premature abstraction.
+  immutability, illegal states, domain-driven design, layered architecture,
+  or premature abstraction.
 ---
 
 # Domain Design

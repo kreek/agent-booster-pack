@@ -2,9 +2,8 @@
 name: refactoring
 description:
   Use when refactoring legacy code, doing a large rename or module extraction,
-  migrating from one framework to another, or when the user mentions Mikado
-  method, strangler fig, branch by abstraction, characterisation tests, or
-  parallel change. Also use when someone is about to do a big-bang rewrite.
+  migrating from one framework to another, or when someone mentions strangler
+  fig, branch by abstraction, or is about to do a big-bang rewrite.
 ---
 
 # Refactoring

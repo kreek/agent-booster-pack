@@ -5,10 +5,7 @@ description:
   components, layouts, typography, colour systems, motion, or responsive
   behavior. Also use when picking a frontend framework, designing a component
   API, writing CSS from scratch, setting up design tokens, configuring dark
-  mode, or shaping component states. Also use when the user mentions Swiss
-  design, Bauhaus, Rams, Müller-Brockmann, Nielsen's heuristics, OKLCH,
-  container queries, View Transitions, shadcn/ui, Tailwind, design tokens,
-  Material 3 Expressive, Apple Liquid Glass, or the "AI look".
+  mode, or shaping component states.
 ---
 
 # Frontend
@@ -28,7 +25,7 @@ description:
 - Backend API shape; use `api`.
 - Accessibility-specific implementation or review; use
   `accessibility`.
-- Frontend runtime debugging or tests only; pair with `tests` and
+- Frontend runtime debugging or tests only; pair with `testing` and
   browser tooling.
 - Performance profiling beyond UI design choices; use `performance`.
 
@@ -136,7 +133,7 @@ description:
 
 ## Handoffs
 
-- Use `tests` for UI behavior tests and browser-verified flows.
+- Use `testing` for UI behavior tests and browser-verified flows.
 - Use `accessibility` for WCAG, ARIA, semantic HTML, keyboard, focus,
   contrast, screen-reader, and inclusive-design work.
 - Use `performance` for measured Core Web Vitals or rendering

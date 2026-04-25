@@ -4,9 +4,8 @@ description:
   Use when turning engineering claims into explicit proof obligations,
   especially for data invariants, behavior changes, API contracts, refactors,
   bug fixes, or any work where the agent must show evidence instead of claiming
-  correctness. Also use when the user mentions proofs, proof production,
-  evidence, invariants, boundary tests, claims, "done means proven", or making
-  mature engineering practices mandatory.
+  correctness. Also use when the user mentions proofs, evidence, invariants,
+  boundary tests, or claims that need to be demonstrated.
 ---
 
 # Proof
@@ -27,7 +26,7 @@ description:
 - Pure formatting, typo fixes, or mechanical file moves with no behavior,
   data, or contract claim.
 - Commit grouping after evidence already exists; use `commit`.
-- Test-shape decisions only; use `tests`.
+- Test-shape decisions only; use `testing`.
 
 ## Core Ideas
 
@@ -78,7 +77,7 @@ For every non-trivial engineering claim, record:
 
 - Use `domain-design` to shape invariants and make invalid states
   unrepresentable.
-- Use `tests` to choose proof boundaries and test names.
+- Use `testing` to choose proof boundaries and test names.
 - Use `debugging` when the proof depends on root-cause evidence.
 - Use `api` when the claim is a public contract.
 - Use `refactoring` when the proof is behavior preservation through
