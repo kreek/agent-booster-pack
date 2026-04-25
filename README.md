@@ -147,6 +147,10 @@ Skills are progressive context: agents see only `name` and `description` until a
 task triggers a skill, then load the matching `SKILL.md` for the sharper rule,
 workflow, and proof check needed for the work in front of them.
 
+You can invoke a skill directly when you want a specific lens, or make a
+natural-language request and let the agent choose the relevant skills from their
+descriptions.
+
 The skill pack is deliberately not a checklist library. It is a set of
 discipline-enforcing lenses, grouped by the kind of engineering pressure they
 apply:
