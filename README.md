@@ -1,35 +1,51 @@
-<p align="center">
-  <img src="assets/ABP_logo.png" alt="Agent Booster Pack logo" width="280">
-</p>
-
 # Agent Booster Pack
 
-A portable set of high-leverage skills for leveling up coding agents.
+<table>
+  <tr>
+    <td width="280" valign="top">
+      <img src="assets/ABP_logo_foil.png" alt="Agent Booster Pack logo" width="240">
+    </td>
+    <td width="720" valign="top">
+      <p>
+        A portable set of high-leverage skills for leveling up coding agents.
+      </p>
+      <p>
+        This is my brain dump of over 25 years of software development: the
+        habits, standards, and hard-won lessons I accumulated working in startup
+        environments through large private and public sector organizations. It
+        reflects the full gamut: doing everything under the sun at a startup,
+        through focused API governance, to leading SRE teams at large
+        organizations and guiding multiple teams toward better engineering
+        practices.
+      </p>
+      <p>
+        This is my source of truth for how coding agents should reason, change
+        code, prove correctness, and package work across Codex, Claude Code, and
+        other agents that understand the Agent Skills layout. Since skills were
+        introduced, I have documented and categorized each recurring correction I
+        made to a model and turned those interventions into guidance for how
+        agents should approach the next similar task. I also audited the skills
+        libraries I found and did not find many that focused on increasing the
+        engineering maturity or code quality of what agents produced, so I made
+        my own.
+      </p>
+      <p>
+        Complexity is death for any software project. Rich Hickey's
+        <a href="https://www.youtube.com/watch?v=SxdOUGdseq4">“Simple Made
+        Easy”</a> is the best talk I have heard on software engineering, and its
+        philosophy, along with other
+        <a href="agents/.agents/skills/data/SKILL.md">data-first functional best
+        practices</a> (even when working in OOP-heavy languages), is the
+        baseline for this set of skills. I have also learned from experience and
+        research that agents produce their best results when pushed toward
+        simplicity and required to prove their work rather than just claim
+        completion.
+      </p>
+    </td>
+  </tr>
+</table>
 
-This is my brain dump of over 25 years of software development: the habits,
-standards, and hard-won lessons I accumulated working in startup environments
-through large private and public sector organizations. It reflects the full
-gamut: doing everything under the sun at a startup, through focused API
-governance, to leading SRE teams at large organizations and guiding multiple
-teams toward better engineering practices.
-
-This is my source of truth for how coding agents should reason, change code,
-prove correctness, and package work across Codex, Claude Code, and other agents
-that understand the Agent Skills layout. Since skills were introduced, I have
-documented and categorized each recurring correction I made to a model and
-turned those interventions into guidance for how agents should approach the next
-similar task. I also audited the skills libraries I found and did not find many
-that focused on increasing the engineering maturity or code quality of what
-agents produced, so I made my own.
-
-Complexity is death for any software project. Rich Hickey's [“Simple Made
-Easy”][simple-made-easy] is the best talk I have heard on software engineering,
-and its philosophy, along with other [data-first functional best
-practices][skill-data] (even when working in OOP-heavy languages), is the
-baseline for this set of skills. I have also learned from experience and
-research that agents produce their best results when pushed toward simplicity
-and required to prove their work rather than just claim completion. In practice,
-that means:
+In practice, that means:
 
 - Model values, states, invariants, and effects before picking abstractions.
 - Turn every meaningful engineering claim into evidence.
