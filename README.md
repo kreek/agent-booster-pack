@@ -1,6 +1,8 @@
 # Agent Booster Pack
 
-<img align="left" src="assets/ABP_logo_foil.png" alt="Agent Booster Pack logo" width="240">
+<p align="center">
+  <img src="assets/ABP_logo_foil.png" alt="Agent Booster Pack logo" width="420">
+</p>
 
 A portable set of high-leverage skills for leveling up coding agents.
 
@@ -27,8 +29,6 @@ practices][skill-data] (even when working in OOP-heavy languages), is the
 baseline for this set of skills. I have also learned from experience and
 research that agents produce their best results when pushed toward simplicity
 and required to prove their work rather than just claim completion.
-
-<br clear="left">
 
 In practice, that means:
 
