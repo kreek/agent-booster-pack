@@ -94,13 +94,16 @@ These are non-default defaults the pack prescribes:
    `references/`, search the web and prefer current official/project
    sources before choosing. Explain the chosen default in one
    sentence.
-4. Add one smoke test that proves the runner, import path, and build
+4. Prefer established, boring technology. Use built-in platform
+   features when they are sufficient; add packages when they remove
+   real complexity or supply mature conventions the project needs.
+5. Add one smoke test that proves the runner, import path, and build
    system work together.
-5. CI runs the same commands developers run locally. `.gitignore`
+6. CI runs the same commands developers run locally. `.gitignore`
    excludes generated output, dependencies, local env files, IDE
    state, and secrets.
-6. README says what it is, how to run it, and how to test it.
-7. The first real feature should not need tooling decisions.
+7. README says what it is, how to run it, and how to test it.
+8. The first real feature should not need tooling decisions.
 
 ## Workflow
 

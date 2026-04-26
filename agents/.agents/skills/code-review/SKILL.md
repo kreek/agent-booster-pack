@@ -51,6 +51,10 @@ description:
 7. AI-generated code is untrusted until behavior, tests, and
    security-sensitive paths are verified.
 8. Review comments should be sparse, specific, and actionable.
+9. Maintainability findings are valid when complexity creates real risk:
+   deep nesting, long functions, hidden mutable state, clever expressions,
+   unnecessary indirection, or code organized so one behavior is scattered
+   across unrelated places.
 
 ## Workflow
 
@@ -122,6 +126,8 @@ findings, not before.
 - [ ] Duplication and dead-code risks were checked, especially for
       removals, refactors, renames, feature flags, routes, jobs,
       exports, and tests.
+- [ ] Complexity risks were checked: deep nesting, oversized functions,
+      hidden mutable state, clever code, and unnecessary indirection.
 - [ ] Triggered domain skills and language reference(s) were loaded and
       named.
 - [ ] Findings are ordered by severity and grounded in file/line or PR

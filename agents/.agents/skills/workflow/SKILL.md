@@ -57,6 +57,15 @@ description:
    delegation, parallelism, and sub-agents. ABP skills guide
    engineering quality and risk; they do not replace the runtime's
    native planning or task-dispatch behavior.
+7. Prefer direct, explicit, established code that follows the repo's
+   house style. Avoid clever one-liners, speculative abstractions,
+   unnecessary dependencies, and future-proofing.
+8. Keep implementation shape easy to reason about: small functions,
+   guard clauses, low nesting, one responsibility per function, and
+   feature/domain locality before horizontal layering.
+9. Treat compatibility, rollout risk, and extra edge-case machinery as
+   product decisions. Ask before adding shims, retries, fallback paths,
+   or backward-compatible behavior the user did not request.
 
 ## Workflow
 
@@ -91,7 +100,9 @@ description:
    conflict, prefer safety, data integrity, correctness, proof, and
    user trust over convenience or style.
 6. Keep the work scoped. Add dependencies, abstractions, and rollout
-   machinery only when the task or risk profile needs them.
+   machinery only when the task, acceptance criteria, or risk profile
+   needs them. Implement the happy path first, then the edge cases
+   required by security, data safety, compatibility, or acceptance.
 7. Finish by naming what was proven, what remains unproven, and what a
    human should review or decide.
 
@@ -116,6 +127,8 @@ description:
 | "I'll infer the product behavior" | Draft likely acceptance criteria, then ask the user to confirm or correct the ambiguous parts before editing. | Mechanical edits or explicit implementation-only tasks with no behavior choice. |
 | "Use every skill to be safe" | Pick the few skills that change the outcome. | Explicit audit/review request across the whole pack. |
 | "I'll branch at commit time" | Branch before editing so the diff, tests, and commits belong to one scoped change. | Read-only research or a task explicitly done outside Git. |
+| "I'll make it flexible for later" | Build the direct requested behavior; add flexibility only when current acceptance or risk needs it. | Public library/API design where extension points are part of the requirement. |
+| "I'll preserve old behavior just in case" | Ask whether backward compatibility is required before adding shims or dual paths. | Existing public contract or migration policy already requires compatibility. |
 | "ABP should decide sub-agent dispatch" | Use the agent runtime's native judgment and tools for delegation; use ABP only to shape the engineering risks each task must respect. | The user explicitly asks to design a delegation policy for this repo. |
 | "The agent will decide acceptance" | Ask or infer caller-visible acceptance criteria and prove them with `proof`. | User explicitly says they will verify acceptance themselves. |
 | "This is only docs" | Check whether the docs change behavior, install path, commands, or user expectations. | Pure typo with no procedural meaning. |

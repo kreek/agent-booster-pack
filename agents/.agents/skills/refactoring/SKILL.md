@@ -36,6 +36,9 @@ description:
    rewrites.
 5. Delete old paths only when traffic/callers have moved and
    verification proves it.
+6. Do not assume backward compatibility is free or required. Ask which
+   callers, data, and releases must keep working before adding shims,
+   dual paths, or migration complexity.
 
 ## Workflow
 
@@ -56,6 +59,9 @@ description:
       shippable at every commit.
 - [ ] Public interface changes use expand-contract or compatibility
       shims; old and new paths both work during migration.
+- [ ] Backward compatibility expectations were confirmed or inherited
+      from an explicit public contract before compatibility machinery
+      was added.
 - [ ] Deleted tests were replaced by equal or stronger behavior
       coverage.
 - [ ] Leftover migration/deletion work has owner and deadline.
