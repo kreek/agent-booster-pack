@@ -46,10 +46,23 @@ description:
    idempotency strategy: key scope, replay window, duplicate response
    behavior, and conflict semantics.
 5. List endpoints have bounded pagination and stable ordering.
-6. Compatibility is a feature: add before remove, deprecate before
-   breaking. Hand off the bump itself to `versioning`.
+6. Compatibility is a feature: optional additive changes can evolve an
+   API without a major version; removals, renames, required additions,
+   status-code changes, and semantic changes are breaking. Hand off the
+   bump itself to `versioning`.
 7. Webhooks are APIs too: sign payloads, version events, and make
    receivers idempotent.
+
+## API Evolution
+
+Optional additive changes can avoid major versioning only when existing
+calls keep working and existing consumers can ignore the new surface.
+Adding endpoints, optional query parameters, optional fields, and
+optional headers is usually evolutionary. Changing methods, status
+codes, header names/types, required fields, removals, or in-place
+renames is breaking. Rename by adding the successor, keeping the old
+name, and deprecating it. Prefer extensible object shapes over ordered
+or flat scalar payloads.
 
 ## HTTP Error Codes
 
@@ -72,9 +85,10 @@ server-origin failures into a client error.
    Define paths, methods, request/response bodies, status codes, auth,
    pagination, idempotency, and error shape.
 2. For each error response, pick status by origin (request, upstream,
-   your service). Check compatibility: new optional fields are usually
-   safe; renames, removals, status-code changes, and semantic changes
-   are breaking.
+   your service). Check compatibility: new optional fields, query
+   parameters, headers, methods, and endpoints are usually safe;
+   renames, removals, required additions, status-code changes, and
+   semantic changes are breaking.
 3. For retryable public mutations, document the idempotency-key
    contract and prove duplicate submissions cannot create duplicate
    side effects.
@@ -96,6 +110,10 @@ server-origin failures into a client error.
       response behavior, and conflict semantics.
 - [ ] Lists have cursor or equivalent bounded pagination with a
       server-side cap.
+- [ ] Additive changes are optional; old calls and consumers that
+      ignore new fields, parameters, headers, or endpoints still work.
+- [ ] Request and response bodies use extensible object shapes and
+      specific field names rather than ordered or flat scalar payloads.
 - [ ] Breaking changes have versioning or deprecation with overlap and
       successor guidance.
 - [ ] Webhooks are signed, timestamped, replay-protected, and
@@ -126,6 +144,8 @@ server-origin failures into a client error.
 - RFC 9457 Problem Details: <https://www.rfc-editor.org/rfc/rfc9457>
 - `references/rest-error-status-codes.md`: local REST error status-code
   decision tree.
+- `references/api-evolution.md`: optional additive API evolution and
+  extensibility guidance.
 - Idempotency-Key draft:
   <https://datatracker.ietf.org/doc/draft-ietf-httpapi-idempotency-key-header/>
 - RateLimit headers draft:
