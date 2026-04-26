@@ -72,7 +72,7 @@ description:
 
 ## Handoffs
 
-- Use `domain-design` to remove shared mutable state from the core
+- Use `data-first` to remove shared mutable state from the core
   design.
 - Use `realtime` for external stream/broker topology, delivery
   semantics, offsets, replay, and lag.

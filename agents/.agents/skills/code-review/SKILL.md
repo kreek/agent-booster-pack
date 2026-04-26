@@ -69,9 +69,9 @@ description:
 4. Load triggered domain skills as mandatory lenses. **Always** include a
    security pass for any auth, trust-boundary, input, dependency, secret,
    crypto, logging-redaction, or user-controlled-sink concern. Add others
-   as triggered: `database`, `api`, `testing`, `proof`,
-   `domain-design`, `error-handling`, `concurrency`, `deployment`,
-   `observability`, `frontend`, `accessibility`, `documentation`,
+   as triggered: `database`, `api`, `testing`, `proof`, `data-first`,
+   `architecture`, `error-handling`, `concurrency`, `deployment`,
+   `observability`, `ui-design`, `accessibility`, `documentation`,
    `performance`, `caching`, `realtime`.
 5. Check in this order: correctness → data integrity → security → error
    handling → tests → observability → compatibility → performance →
@@ -130,6 +130,16 @@ findings, not before.
       evidence was reported as unproven.
 - [ ] GitHub writes were not performed without explicit user request.
 - [ ] If no issues, residual risk and unreviewed scope were named.
+
+## Tripwires
+
+| Trigger | Do this instead | False alarm |
+|---|---|---|
+| "Small PR, skim is enough" | Sweep lifecycle, security, data, tests, and dead-code risk anyway. | Documentation-only typo with no executable surface. |
+| "Tests pass, ship it" | Check what the tests prove and still review safety/data lenses. | The task is only to report current CI status. |
+| "Style nits are blocking" | Separate style notes from correctness, security, and maintainability findings. | Style issue hides a real ambiguity or risky control flow. |
+| "I trust this author" | Review the diff with the same lenses; trust changes tone, not coverage. | Pair review where the same evidence was already inspected in this turn. |
+| "Skip the security pass this once" | Run the security lens and name why it is or is not relevant. | Files are provably outside executable, config, dependency, and data surfaces. |
 
 ## Handoffs
 

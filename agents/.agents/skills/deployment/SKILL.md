@@ -69,6 +69,17 @@ description:
       are pinned.
 - [ ] Release notes or PR body name deploy risk and rollback.
 
+## Tripwires
+
+| Trigger | Do this instead | False alarm |
+|---|---|---|
+| "Rollback is just `git revert`" | Name the rollback path for data, caches, config, and external side effects. | Code-only change with no persisted state or external side effect. |
+| "Low-traffic window, skip canary" | Keep the canary or name the equivalent progressive gate. | Non-production environment with no real users. |
+| "Feature flag default-on at launch" | Default off, ramp deliberately, and define fail-safe behavior. | Kill-switch flag guarding an already-on behavior. |
+| "Config change isn't a deploy" | Apply the same gates, observability, and rollback note. | Local development config excluded from release. |
+| "We can hotfix forward" | Document rollback or disable path before shipping. | User explicitly asks for emergency mitigation and risk is named. |
+| "Flag is temporary" | Add owner, expiry, and cleanup work now. | One-shot migration flag removed in the same change. |
+
 ## Risk Tier
 
 For prototypes or non-production systems, keep the same shape but

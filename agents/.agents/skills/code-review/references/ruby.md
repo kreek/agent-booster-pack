@@ -7,7 +7,7 @@ Rails 7.x / 8.x.
 ## Data-first bias (apply first)
 
 Ruby's culture leans heavily on objects with state. The
-`domain-design` skill's doctrine still applies:
+`data-first` skill's doctrine still applies:
 
 - Prefer `Data.define` (Ruby 3.2+) for value objects: frozen,
   structural equality, `with(x: 1)` copy-update, pattern-match
@@ -388,11 +388,11 @@ into RBS 4.0. Inline `#:` annotations work in both ecosystems.
   outcomes; define a named exception or explicit result variant.
 - `@result ||= compute` when `compute` may return `false`/`nil`.
 - `Time.now` in domain logic; prefer `Time.current` or an injected
-  clock. See [`domain-design/references/dates.md`](../../domain-design/references/dates.md)
+  clock. See [`data-first/references/dates.md`](../../data-first/references/dates.md)
   for the cross-language discipline.
 - `BigDecimal`-less monetary math; mixing currencies. `money-rails`
   is the standard Rails pick. See
-  [`domain-design/references/money.md`](../../domain-design/references/money.md).
+  [`data-first/references/money.md`](../../data-first/references/money.md).
 - Brakeman without `--exit-on-warn`.
 - Single-platform `Gemfile.lock`.
 - `master.key` in git history.

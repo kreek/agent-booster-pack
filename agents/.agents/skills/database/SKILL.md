@@ -80,6 +80,16 @@ description:
       when the workflow depends on both.
 - [ ] Rollback and backup/PITR coverage are documented.
 
+## Tripwires
+
+| Trigger | Do this instead | False alarm |
+|---|---|---|
+| "Small table, online migration is fine" | Use the online mechanism or document why production size/write rate cannot matter. | Test fixture or local-only schema. |
+| "The lock is brief" | Measure on representative load or assume the worst-case lock behavior. | Database engine guarantees metadata-only behavior for this exact operation. |
+| "We'll backfill async later" | Ship the backfill plan now or leave the schema expand-only. | Follow-up migration already exists in the same rollout plan. |
+| "Soft delete is good enough" | Decide the lifecycle rule once and enforce reads/indexes/schema around it. | Explicit audit-retention requirement with tested filters. |
+| "No one's using that index" | Observe across a full traffic cycle before dropping it. | Brand-new unused index in an unshipped migration. |
+
 ## Handoffs
 
 - Use `deployment` for deploy ordering, rollback rehearsal, and feature

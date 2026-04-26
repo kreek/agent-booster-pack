@@ -80,9 +80,11 @@ Every `SKILL.md` must have:
 - Frontmatter with kebab-case `name:` and a trigger-focused `description:`.
 - Required sections: `## When to Use`, `## When NOT to Use`,
   `## Verification`.
-- Optional sections: `## Common Rationalizations` and `## Red Flags` when
-  they add real review value, especially for high-risk or commonly misused
-  skills.
+- Optional section: `## Tripwires` when a skill has known agent failure modes.
+  Use a table with `Trigger`, `Do this instead`, and `False alarm` columns.
+  Phrase rows as implementation intentions, not scolding: when this shortcut
+  thought appears, take this concrete next action. Do not add tripwires as
+  anatomy filler; omit the section when no row pays for its tokens.
 - No inline `per <Expert Name>` attribution outside a `## References` or
   `## Canon` section — move citations there.
 - Put references to people, books, talks, papers, videos, and YouTube links in

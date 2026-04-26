@@ -52,16 +52,16 @@ description:
 6. Job schemas are versioned enough for old enqueued jobs to survive
    deploys.
 
-## Red Flags
+## Tripwires
 
-| Smell | Why it's wrong |
-|---|---|
-| Reads from session, request context, thread-local user state, or in-memory objects captured at enqueue time. | Won't run after session expiry, deploy, retry delay, queue backup, or worker restart. |
-| Retry settings defaulted, unbounded, or copied without naming retryable errors. | Retry storms, infinite jobs, or silently-discarded work. |
-| Worker rescues exceptions and logs without re-raising, recording failure, or marking terminal. | Failure invisible to operators. |
-| Payload stores whole records, serialized models, credentials, or mutable snapshots. | Stale data, leaked secrets, breakage on schema change. |
-| Enqueue happens before the database transaction commits. | Job runs against state that doesn't exist. |
-| Queue priority/concurrency lets bulk jobs starve interactive work. | User-facing latency degrades. |
+| Trigger | Do this instead | False alarm |
+|---|---|---|
+| Payload reads session, request, thread-local, or in-memory state. | Pass stable IDs and immutable parameters, then reload needed state in the job. | In-process async task that never leaves the request lifecycle. |
+| Retry settings are defaulted, unbounded, or copied. | Name retryable errors, budget, backoff, and terminal behavior. | Job is explicitly non-retryable and records terminal failure. |
+| Worker rescues and only logs. | Re-raise, mark terminal, or record failure visibly. | Best-effort cleanup job with documented discard semantics. |
+| Payload stores records, serialized models, credentials, or mutable snapshots. | Store identifiers and non-secret immutable values. | Tiny immutable value object with versioned schema and no secrets. |
+| Enqueue happens before transaction commit. | Enqueue after commit or use transactional outbox/enqueue. | Job reads no state written by the transaction. |
+| Bulk queue can starve user-facing work. | Set priority, concurrency, timeout, or separate queues. | Dedicated worker pool with isolation already proven. |
 
 ## Workflow
 

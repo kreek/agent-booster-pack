@@ -28,7 +28,7 @@ description:
 
 - Backend-only changes with no user-facing output.
 - Visual hierarchy or brand direction without implementation; use
-  `frontend` first, then return here for accessibility constraints.
+  `ui-design` first, then return here for accessibility constraints.
 - Performance-only UI work; use `performance`, then verify
   accessibility if rendering behavior changed.
 
@@ -84,7 +84,7 @@ description:
 
 ## Handoffs
 
-- Use `frontend` for visual hierarchy, layout, design systems, and
+- Use `ui-design` for visual hierarchy, layout, design systems, and
   component composition.
 - Use `testing` for browser automation around accessibility-critical
   flows.

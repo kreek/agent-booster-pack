@@ -30,6 +30,12 @@ description: Good test skill
 ## Verification
 
 - [ ] check
+
+## Tripwires
+
+| Trigger | Do this instead | False alarm |
+|---|---|---|
+| "Should work" | Run the check. | Research notes that do not claim completion. |
 """
 
 BAD_SKILL = """---
@@ -44,6 +50,42 @@ Per Rich Hickey, prefer values over places.
 ## Overview
 
 Stuff.
+
+## Common Rationalizations
+
+| Excuse | Reality |
+|---|---|
+| "Should work" | It might not. |
+
+## Red Flags
+
+- "Probably fine"
+"""
+
+BAD_TRIPWIRES_SKILL = """---
+name: bad-tripwires
+description: Bad tripwire table
+---
+
+# Bad Tripwires
+
+## When to Use
+
+- trigger
+
+## When NOT to Use
+
+- other
+
+## Verification
+
+- [ ] check
+
+## Tripwires
+
+| Trigger | Action |
+|---|---|
+| "Should work" | Run the check. |
 """
 
 
@@ -100,7 +142,20 @@ def describe_validate_skill_anatomy_cli():
         assert "missing section: ## When to Use" in result.stdout
         assert "missing section: ## Verification" in result.stdout
         assert "inline 'per <expert>' attribution found" in result.stdout
+        assert "obsolete section: ## Common Rationalizations" in result.stdout
+        assert "obsolete section: ## Red Flags" in result.stdout
+        assert "obsolete table header" in result.stdout
         assert "1 skill(s) failed anatomy validation" in result.stdout
+
+    def it_requires_tripwire_tables_to_use_the_standard_columns(tmp_path: Path):
+        skills_dir = tmp_path / "agents" / ".agents" / "skills"
+        make_skill(skills_dir, "bad-tripwires", BAD_TRIPWIRES_SKILL)
+
+        result = run_script(skills_dir)
+
+        assert result.returncode == 1
+        assert "bad-tripwires/SKILL.md" in result.stdout
+        assert "Tripwires table must use" in result.stdout
 
     def it_reports_plugin_drift_when_a_skill_link_is_missing(tmp_path: Path):
         skills_dir = tmp_path / "agents" / ".agents" / "skills"

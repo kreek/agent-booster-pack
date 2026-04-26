@@ -74,17 +74,29 @@ Fresh checkout and install:
 ```sh
 git clone https://github.com/kreek/agent-booster-pack.git
 cd agent-booster-pack
+
+# Option A: install the system-wide AGENTS.md plus skills.
 stow --target="$HOME" agents
+
+# Option B: install skills only, leaving ~/AGENTS.md untouched.
+stow --target="$HOME" --ignore='^AGENTS\.md$' agents
+
 ./setup.sh
 ```
 
-`stow --target="$HOME" agents` is the main install step. It links the repo's
-`agents/` package into your home directory, so the checkout can live anywhere:
+The Stow command is the main install step. Choose whether ABP should install
+both the system-wide `~/AGENTS.md` and the skills, or only the shared skill
+directories while leaving your existing `~/AGENTS.md` untouched. Either way, the
+checkout can live anywhere.
+
+Full install links:
 
 - `~/AGENTS.md`
 - `~/.agents/skills/`
 - `~/.agents/commands/`
 - `~/.claude/CLAUDE.md`
+
+Skills-only install links everything except `~/AGENTS.md`.
 
 `./setup.sh` is the compatibility step. It does not install Stow, clone the
 repo, or merge instruction files. It adds tool-specific symlinks for agents that
@@ -109,7 +121,7 @@ the plugin symlinks, so end-user installs do not need Python or uv.
 ## Install for Claude Code (namespaced)
 
 The flat `~/.claude/skills/` symlink above gives Claude Code unprefixed slash
-commands like `/frontend` and `/security`. To get the same behaviour Codex
+commands like `/ui-design` and `/security`. To get the same behaviour Codex
 already uses (`ABP:` prefix), install ABP as a Claude Code plugin instead:
 
 ```sh
@@ -118,7 +130,7 @@ already uses (`ABP:` prefix), install ABP as a Claude Code plugin instead:
 /plugin install abp@abp
 ```
 
-Slash commands then namespace as `/abp:frontend`, `/abp:security`, `/abp:testing`,
+Slash commands then namespace as `/abp:ui-design`, `/abp:security`, `/abp:testing`,
 etc. — the prefix protects against name clashes with built-in or third-party
 plugin skills.
 
@@ -189,10 +201,12 @@ apply:
 
 ### Foundational design
 
-- [`domain-design`][skill-domain-design]: domain data, state transitions,
-  invariants, effects, module boundaries, and domain/feature locality.
+- [`data-first`][skill-data-first]: data shapes, state transitions, invariants,
+  effects, and parse-at-boundary discipline.
+- [`architecture`][skill-architecture]: module boundaries, domain/feature
+  locality versus horizontal layers, and DDD tactical patterns.
 - [`proof`][skill-proof]: explicit proof obligations for behavior, contracts,
-  invariants, root causes, and refactor safety.
+  invariants, root causes, refactor safety, and completion claims.
 
 ### Correctness and change
 
@@ -240,7 +254,7 @@ apply:
   rate limits, versioning, and webhooks.
 - [`documentation`][skill-documentation]: READMEs, ADRs, runbooks, reference
   docs, tutorials, and explanatory comments.
-- [`frontend`][skill-frontend]: pages, components, interaction flows, responsive
+- [`ui-design`][skill-ui-design]: pages, components, interaction flows, responsive
   layout, visual design, and component states.
 - [`accessibility`][skill-accessibility]: WCAG, semantic HTML, ARIA, keyboard
   navigation, focus, contrast, forms, and inclusive UI.
@@ -259,20 +273,20 @@ apply:
   larger frontend apps with SvelteKit, quick-to-build typed Python APIs with
   FastAPI and the Python ecosystem, or high-performance Rust web services with
   Axum.
-
 [skill-accessibility]: agents/.agents/skills/accessibility/SKILL.md
 [skill-api]: agents/.agents/skills/api/SKILL.md
 [skill-background-jobs]: agents/.agents/skills/background-jobs/SKILL.md
 [skill-caching]: agents/.agents/skills/caching/SKILL.md
 [skill-commit]: agents/.agents/skills/commit/SKILL.md
 [skill-concurrency]: agents/.agents/skills/concurrency/SKILL.md
-[skill-domain-design]: agents/.agents/skills/domain-design/SKILL.md
+[skill-architecture]: agents/.agents/skills/architecture/SKILL.md
+[skill-data-first]: agents/.agents/skills/data-first/SKILL.md
 [skill-database]: agents/.agents/skills/database/SKILL.md
 [skill-debugging]: agents/.agents/skills/debugging/SKILL.md
 [skill-deployment]: agents/.agents/skills/deployment/SKILL.md
 [skill-documentation]: agents/.agents/skills/documentation/SKILL.md
 [skill-error-handling]: agents/.agents/skills/error-handling/SKILL.md
-[skill-frontend]: agents/.agents/skills/frontend/SKILL.md
+[skill-ui-design]: agents/.agents/skills/ui-design/SKILL.md
 [skill-git]: agents/.agents/skills/git/SKILL.md
 [skill-observability]: agents/.agents/skills/observability/SKILL.md
 [skill-performance]: agents/.agents/skills/performance/SKILL.md
@@ -326,6 +340,17 @@ uv run refcheck . --no-color
 Use `uv run ruff format .` only when you intend to rewrite Python formatting in
 the repo. `refcheck` skips remote URLs unless `--check-remote` is passed, so the
 default command validates local Markdown links and anchors deterministically.
+
+Maintainers can enable the repo-local pre-commit guard after setup:
+
+```sh
+git config core.hooksPath .githooks
+```
+
+The hook blocks commits on `main`/`master`, checks the staged diff, and runs the
+repo validation commands relevant to staged files. It is a deterministic safety
+net for any coding agent that uses Git; it does not replace the `proof` skill's
+requirement to show acceptance evidence before claiming work is done.
 
 ## Remove
 

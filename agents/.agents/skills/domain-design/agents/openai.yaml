@@ -1,4 +1,0 @@
-interface:
-  display_name: "ABP: Domain Design"
-  short_description: "Shape domain data and effects"
-  default_prompt: "Use $domain-design to model domain data, invariants, and boundaries first."

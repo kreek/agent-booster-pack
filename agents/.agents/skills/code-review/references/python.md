@@ -8,7 +8,7 @@ wins: Python 3.8 libraries do not get Python 3.10+ syntax findings.
 
 ## Data-first bias (apply first)
 
-Even though Python supports OOP, the `domain-design` skill's doctrine
+Even though Python supports OOP, the `data-first` skill's doctrine
 is canonical:
 
 - Prefer `@dataclass(frozen=True, slots=True, kw_only=True)` value
@@ -24,7 +24,7 @@ is canonical:
 - Make illegal states unrepresentable: `StrEnum`, `Literal`, sealed
   dataclass hierarchies, `NewType` for distinct identities.
 
-When in doubt, route to the `domain-design` skill.
+When in doubt, route to the `data-first` skill.
 
 ## Tooling that should be passing
 
@@ -142,14 +142,14 @@ When in doubt, route to the `domain-design` skill.
   comprehensions only when readable in ~2 lines.
 - Float `==` is wrong; use `math.isclose(a, b, rel_tol=...)`. Money
   uses `Decimal` or integer cents — never `float`. See
-  `domain-design/references/money.md` for the cross-language discipline
+  `data-first/references/money.md` for the cross-language discipline
   (currency travels with amount, ISO 4217, per-currency decimals).
 - `dataclass(slots=True)` cuts memory ~40% and speeds attribute
   access; `frozen=True` for value objects (avoid on hot paths,
   ~2.4× slower instantiation).
 - Timezone-aware datetimes only in production code (Ruff `DTZ`).
   `datetime.now(tz=UTC)`, never naive `datetime.now()`. See
-  `domain-design/references/dates.md` for the cross-language discipline
+  `data-first/references/dates.md` for the cross-language discipline
   (UTC storage, RFC 3339 on the wire, instant vs wall-clock-only).
 
 ## Security

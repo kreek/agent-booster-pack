@@ -7,7 +7,10 @@ description:
   flaky or over-specified test suites. Language and framework agnostic — any
   spec-style framework with describe/context/it blocks (RSpec, Vitest, Jest,
   Mocha, Pest, pytest-describe, etc.). Focuses on test boundaries, assertions,
-  mocks, and flake resistance, not framework internals.
+  mocks, and flake resistance, not framework internals. Trigger even when the
+  user does not say "behavior-driven" or "BDD", especially for prompts about
+  adding tests, choosing what to test, fixing flaky tests, choosing mocks,
+  writing specs, or deciding whether something is worth testing.
 ---
 
 # Testing
@@ -67,6 +70,16 @@ description:
 - [ ] `scripts/sniff-mocks.sh <test-dir>` is clean or findings are
       explained.
 
+## Tripwires
+
+| Trigger | Do this instead | False alarm |
+|---|---|---|
+| "Too simple to test" | Write the smallest behavior test that would fail if the code did nothing. | Pure formatting, copy, or generated metadata changes. |
+| "Already covered by another test" | Name the existing behavior test or add the missing assertion. | The named test enters through the same caller boundary and would fail for this bug. |
+| "Mock is faster than a fixture" | Use the real collaborator unless it crosses a true system boundary. | Clock, network, third-party service, process, filesystem, or expensive infrastructure. |
+| "I'll add tests after the feature lands" | Add the behavior assertion before claiming the feature is done. | Exploratory spike explicitly marked as not complete. |
+| "Private helper, no boundary needed" | Test through the public boundary that reaches the helper. | The helper is a pure algorithm with meaningful behavior not reachable cheaply elsewhere. |
+
 ## Handoffs
 
 - Use `proof` when the work needs explicit proof contracts, evidence
@@ -75,7 +88,7 @@ description:
   guard test.
 - Use `refactoring` when tests are characterization coverage for legacy
   code.
-- Use `domain-design` when behavior is hard to test because pure logic
+- Use `data-first` when behavior is hard to test because pure logic
   is mixed with I/O.
 
 ## Tools

@@ -28,7 +28,7 @@ description:
 ## When NOT to Use
 
 - Internal function signatures with no caller contract; use
-  `domain-design` or `refactoring`.
+  `data-first` or `refactoring`.
 - Auth, secrets, or trust-boundary review beyond API shape; use
   `security`.
 - Database schema design; use `database`.

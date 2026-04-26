@@ -5,7 +5,7 @@ main `code-review` skill workflow.
 
 ## Data-first bias (apply first)
 
-The Java ecosystem grew up on mutable POJOs. The `domain-design`
+The Java ecosystem grew up on mutable POJOs. The `data-first`
 skill's doctrine is canonical:
 
 - Prefer `record` (Java 14+) for value types over POJOs with getters
@@ -20,7 +20,7 @@ skill's doctrine is canonical:
   Service classes that mutate shared fields outside construction are
   almost always wrong.
 
-When in doubt, route to the `domain-design` skill.
+When in doubt, route to the `data-first` skill.
 
 ## Tooling that should be passing
 

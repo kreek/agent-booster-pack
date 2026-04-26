@@ -21,6 +21,10 @@ REQUIRED_SECTIONS = (
 NAME_RE = re.compile(r"^name:\s+[a-z][a-z0-9-]*\s*$", re.MULTILINE)
 DESCRIPTION_RE = re.compile(r"^description:", re.MULTILINE)
 ATTRIBUTION_RE = re.compile(r"\b[Pp]er\s+(?:[A-Z][a-z]+\s+)?[A-Z][a-z]+\b")
+TRIPWIRE_HEADER_RE = re.compile(
+    r"^\|\s*Trigger\s*\|\s*Do this instead\s*\|\s*False alarm\s*\|\s*$",
+    re.MULTILINE,
+)
 
 
 @dataclass(frozen=True)
@@ -70,6 +74,21 @@ def validate_skill_file(path: Path) -> SkillFinding | None:
     for heading in REQUIRED_SECTIONS:
         if not section_re(heading).search(body):
             problems.append(f"missing section: ## {heading}")
+
+    if section_re("Common Rationalizations").search(body):
+        problems.append(
+            "obsolete section: ## Common Rationalizations -- use ## Tripwires"
+        )
+    if section_re("Red Flags").search(body):
+        problems.append("obsolete section: ## Red Flags -- fold into ## Tripwires")
+    if re.search(r"^\|\s*Excuse\s*\|\s*Reality\s*\|", body, re.MULTILINE):
+        problems.append(
+            "obsolete table header: use Trigger | Do this instead | False alarm"
+        )
+    if section_re("Tripwires").search(body) and not TRIPWIRE_HEADER_RE.search(body):
+        problems.append(
+            "Tripwires table must use: Trigger | Do this instead | False alarm"
+        )
 
     attribution_lines = [
         line
@@ -179,6 +198,11 @@ description: Ok
 
 ## Verification
 - [ ] check
+
+## Tripwires
+| Trigger | Do this instead | False alarm |
+|---|---|---|
+| "Should work" | Run the check. | Research notes that do not claim completion. |
 """,
         )
         write_fixture(
@@ -195,6 +219,14 @@ Per Rich Hickey, prefer values over places.
 ## Overview
 
 Stuff.
+
+## Common Rationalizations
+| Excuse | Reality |
+|---|---|
+| "Should work" | It might not. |
+
+## Red Flags
+- "Probably fine"
 """,
         )
 
@@ -208,6 +240,9 @@ Stuff.
             "When to Use",
             "Verification",
             "per <expert>",
+            "Common Rationalizations",
+            "Red Flags",
+            "Trigger | Do this instead | False alarm",
         ):
             if expected not in rendered:
                 print(

@@ -6,7 +6,7 @@ main `code-review` skill workflow.
 ## Data-first bias (apply first)
 
 Kotlin gives you the tools for data-first design out of the box. The
-`domain-design` skill's doctrine is canonical:
+`data-first` skill's doctrine is canonical:
 
 - Prefer `data class` with `val` properties over POJO-style classes
   with `var`.
@@ -21,7 +21,7 @@ Kotlin gives you the tools for data-first design out of the box. The
   Service classes mutating fields outside construction are almost
   always wrong.
 
-When in doubt, route to the `domain-design` skill.
+When in doubt, route to the `data-first` skill.
 
 ## Tooling that should be passing
 

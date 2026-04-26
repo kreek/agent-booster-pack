@@ -68,6 +68,18 @@ description:
 - [ ] Security-sensitive behavior has tests or documented manual
       verification.
 
+## Tripwires
+
+| Trigger | Do this instead | False alarm |
+|---|---|---|
+| "It's an internal endpoint" | Treat it as untrusted and check auth, authz, validation, and logging. | Isolated local-only developer endpoint with no deployed route. |
+| "The framework handles validation" | Validate the domain rule at the boundary you control. | Framework constraint exactly encodes the domain invariant and is tested. |
+| "Low severity, ship and patch later" | Fix now or document explicit risk acceptance before merge. | Triage-only task that is not shipping code. |
+| "The input source is trusted" | Trace the trust chain and validate before dangerous sinks. | Cryptographically verified internal protocol with tested schema enforcement. |
+| "Just this one secret" | Stop and remove the secret from the diff/history path before continuing. | Placeholder value that cannot authenticate anywhere. |
+| "TODO: add authz check" | Add the authorization check before exposing the path. | Dead code path being deleted in the same change. |
+| "Noisy alert, suppress it" | Tune signal, owner, threshold, or routing instead of silencing. | Temporary suppression during a documented incident response. |
+
 ## Handoffs
 
 - Use `error-handling` for safe error propagation and user-facing

@@ -98,6 +98,17 @@ description:
       load-shedding, or deliberate fail-fast behavior.
 - [ ] Tests cover representative failure paths.
 
+## Tripwires
+
+| Trigger | Do this instead | False alarm |
+|---|---|---|
+| "Log and continue is fine" | Decide whether to recover, translate, retry, or terminate. | Best-effort telemetry failure with an explicit drop policy. |
+| "This can't fail in practice" | Declare the failure-capable contract and test a representative failure. | Compile-time impossible state enforced by type/value construction. |
+| "Naked retry will recover it" | Add timeout, retry budget, backoff/jitter, and idempotency guard. | User-triggered retry after a visible failed operation. |
+| "Swallow at the boundary" | Translate for the caller and preserve the cause for diagnostics. | Security boundary deliberately hides details while logging correlation. |
+| "Context isn't worth the noise" | Wrap with operation, resource, and correlation context. | The lower layer already provides equivalent structured context. |
+| "We'll add timeouts later" | Set finite connect/read or equivalent timeout before merging. | Local in-memory call with no blocking I/O. |
+
 ## Handoffs
 
 - Use `security` for auth, secrets, validation, fail-closed behavior,
@@ -105,7 +116,7 @@ description:
 - Use `api` for REST status-code selection, Problem Details/JSON:API
   error contracts, public idempotency-key contracts, OpenAPI response
   docs, and compatibility.
-- Use `domain-design` when the error vocabulary is part of the domain
+- Use `data-first` when the error vocabulary is part of the domain
   model or state machine.
 - Use `observability` for correlation IDs, logs, traces, and error-rate
   alerts, including critical dependency health.

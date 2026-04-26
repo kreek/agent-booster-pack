@@ -5,7 +5,7 @@ Use when reviewing C# code in the diff. Apply this alongside the main
 
 ## Data-first bias (apply first)
 
-C# has matured toward the `domain-design` skill's doctrine over the last few
+C# has matured toward the `data-first` skill's doctrine over the last few
 versions; lean into the modern features:
 
 - Prefer `record` (or `record struct`) with `init`-only properties
@@ -21,7 +21,7 @@ versions; lean into the modern features:
 - Parse at the boundary: validate controller inputs into typed
   domain values once and let downstream code trust them.
 
-When in doubt, route to the `domain-design` skill.
+When in doubt, route to the `data-first` skill.
 
 ## Tooling that should be passing
 

@@ -79,9 +79,12 @@ the higher-priority concerns.
 Use these before choosing abstractions or control flow for non-trivial code.
 They shape the problem, not just the implementation.
 
-- `domain-design`: use when designing state, domain data, inputs, invariants,
-  effects, module boundaries, or domain/feature locality versus horizontal
-  layers.
+- `data-first`: use when designing state, data shapes, inputs, invariants, or
+  effects; when deciding what should be a value vs a mutable place; or when
+  reviewing code that mixes I/O with pure logic.
+- `architecture`: use when deciding module boundaries, organizing code by
+  domain/feature versus horizontal layers, applying DDD tactical patterns, or
+  shaping bounded contexts.
 
 ### Safety Gates
 
@@ -107,7 +110,8 @@ recoverable, and understandable.
   agent-generated code, requested changes, or review comments; use it as the
   generic code-review entrypoint before loading narrower domain lenses.
 - `proof`: use when engineering claims need explicit proof obligations: data
-  invariant, boundary, executable check, and evidence.
+  invariant, boundary, executable check, and evidence. Also use it before
+  claiming work is complete, fixed, ready to commit, ready for a PR, or passing.
 - `testing`: use when adding, reviewing, or fixing tests; deciding what to mock;
   proving caller-visible behavior; addressing flakes or overspecified tests.
 - `error-handling`: use when designing error types, propagation, retries,
@@ -152,7 +156,7 @@ hard to maintain.
 
 - `documentation`: use when writing or reviewing READMEs, ADRs, runbooks, API
   docs, reference docs, tutorials, or explanatory comments.
-- `frontend`: use when building or materially changing frontend pages,
+- `ui-design`: use when building or materially changing frontend pages,
   components, interaction flows, responsive layout, or visual design.
 - `accessibility`: use when UI work touches WCAG 2.2, ARIA, semantic HTML,
   keyboard navigation, focus management, screen readers, contrast, forms,
@@ -179,6 +183,12 @@ Proof obligations override style, aesthetics, and weak local conventions. If a
 behavior, invariant, contract, root-cause, or refactor-safety claim cannot be
 proven, say it is unproven rather than complete.
 
+Before claiming work is done, re-read the latest user request and corrections,
+inspect the final diff or touched surface, run the relevant check after the last
+edit, and report the command/result or blocker. A passing check only proves the
+claim it actually covers; do not treat unrelated lint, stale test output, or
+partial checks as acceptance evidence for the requested change.
+
 ## Code and Data
 
 Programs are transformations over data before they are object hierarchies.
@@ -192,7 +202,7 @@ effects at the boundary.
 - Make illegal states unrepresentable — prefer sum types over stringly-typed
   flags.
 - Default to immutability; mutate only where the performance case is clear.
-- Use the `domain-design` skill for the full canon on modelling state, values,
+- Use the `data-first` skill for the full canon on modelling state, values,
   effects, and invariants.
 
 ## Code Structure
@@ -262,14 +272,18 @@ tests. Test-first is optional; test-at-all is not.
 - Branch per change when the workflow supports it or the user asks. Never commit
   directly to `main`/`master`; if branch creation is outside the agent's current
   authority, keep changes uncommitted and say so.
+- If already on `main`/`master`, create or request a topic branch before editing
+  when the task is more than read-only inspection.
 - Branch names use a type prefix: `feature/`, `fix/`, `refactor/`, `chore/`
   (e.g. `fix/null-on-login`).
 - One logical change per commit; keep commits atomic. If the subject needs
   "and", split it.
 - Commit messages: imperative mood, first line ≤72 chars, explain _why_ not
   _what_.
-- Review your own diff before every commit — catch debug prints, dead code, and
-  stray changes before anyone else sees them.
+- Review your own staged diff before every commit — catch debug prints, dead
+  code, stale paths, and stray changes before anyone else sees them.
+- Commit only after the relevant proof or acceptance check is current. If a
+  check cannot run, leave the claim unproven and say why.
 - Rebase onto the latest base branch before opening a PR so conflicts surface
   early.
 - Delete merged branches locally and remotely; stale branches obscure active

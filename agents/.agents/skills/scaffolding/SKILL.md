@@ -32,7 +32,7 @@ and run the baseline without local knowledge.
   skill plus `testing`.
 - Deployment pipeline beyond baseline CI; use `deployment`.
 - Detailed UI design choices after the framework is chosen; use
-  `frontend`.
+  `ui-design`.
 
 ## Preflight
 
@@ -43,7 +43,12 @@ Before creating files or running generator commands:
    and state it before proceeding.
 2. Read the relevant `references/` ecosystem file before choosing
    framework, commands, file layout, or generator.
-3. For fresh web apps, **don't** scaffold a hand-rolled HTTP
+3. For web work, classify the request before choosing files:
+   local prototype/spike, new app scaffold, or production-bound app.
+   Static HTML/CSS/JS is acceptable for a local throwaway prototype or
+   isolated demo. Say when you are taking that path and name the
+   likely upgrade framework if work continues.
+4. For fresh web apps, **don't** scaffold a hand-rolled HTTP
    server/router by default. Use a mature framework with routing,
    request handling, testing, and deployment conventions baked in.
    Hand-rolled servers are only for explicit user requests, tiny
@@ -102,11 +107,12 @@ These are non-default defaults the pack prescribes:
 1. Detect language, framework, and existing conventions. Select and
    state the package manager before running any scaffold or install
    command. Read the relevant ecosystem reference.
-2. For frontend without an existing framework, propose Alpine.js
-   (small/demo) or Svelte/SvelteKit (larger), explain in one sentence,
-   confirm before creating files. For TypeScript web apps without an
-   existing runtime/host, propose Cloudflare Workers + Hono, confirm
-   before creating deploy/runtime files.
+2. For web work, state whether this is a prototype, scaffold, or
+   production-bound app. For frontend without an existing framework,
+   propose Alpine.js (small/demo) or Svelte/SvelteKit (larger), explain
+   in one sentence, confirm before creating files. For TypeScript web
+   apps without an existing runtime/host, propose Cloudflare Workers +
+   Hono, confirm before creating deploy/runtime files.
 3. Choose minimal standard tooling for install, format, lint,
    typecheck, test, and coverage. Add scripts/commands with consistent
    names. Add one smoke test and ensure it can fail and pass.
@@ -126,6 +132,9 @@ These are non-default defaults the pack prescribes:
       framework or explicit user request was present; small
       interactive frontend apps use Alpine.js rather than ad hoc
       inline JavaScript in the backend entrypoint.
+- [ ] Web work was classified as prototype, scaffold, or
+      production-bound app before files were created. Prototype mode
+      was named explicitly and included an upgrade path.
 - [ ] TypeScript web runtime/host choice was confirmed when no
       existing deployment constraint or explicit user request was
       present.
