@@ -62,7 +62,19 @@ description:
 
 1. State the user-visible goal and the risk profile to the user in one
    or two sentences, so they can correct course before any code lands.
-2. Select the smallest useful skill set:
+2. Check acceptance clarity before editing. For feature work, bug
+   fixes, PRD/spec work, refactors, or behavior-affecting changes,
+   draft the acceptance criteria the work appears to require. If
+   behavior, scope, data shape, compatibility, UX, safety, or
+   verification is ambiguous, ask a focused question and offer a
+   concrete proposed acceptance criterion the user can accept or
+   revise. Use `documentation` for PRDs, specs, issues, user stories,
+   or other requirements artifacts that need clearer wording.
+3. For feature work, bug fixes, refactors, dependency changes, or other
+   repo mutations, check the current branch before editing. If on
+   `main` or `master`, create or request a short topic branch using the
+   repo's naming convention. Do not wait until commit time to branch.
+4. Select the smallest useful skill set:
    - shape data and invariants with `data-first`;
    - choose boundaries with `architecture`;
    - prove behavior with `testing` and `proof`;
@@ -75,12 +87,12 @@ description:
      `documentation`, `ui-design`, or `accessibility`;
    - package repository work with `git`, `commit`, or `versioning`;
    - start new projects or missing tooling with `scaffolding`.
-3. Load those skills and follow their workflows. If two skills
+5. Load those skills and follow their workflows. If two skills
    conflict, prefer safety, data integrity, correctness, proof, and
    user trust over convenience or style.
-4. Keep the work scoped. Add dependencies, abstractions, and rollout
+6. Keep the work scoped. Add dependencies, abstractions, and rollout
    machinery only when the task or risk profile needs them.
-5. Finish by naming what was proven, what remains unproven, and what a
+7. Finish by naming what was proven, what remains unproven, and what a
    human should review or decide.
 
 ## Verification
@@ -101,7 +113,9 @@ description:
 | Trigger | Do this instead | False alarm |
 |---|---|---|
 | "I'll just code it" | Name the risk profile and load the smallest useful skill set first. | None — even trivial edits enter; they may exit at step 1 with no skills. |
+| "I'll infer the product behavior" | Draft likely acceptance criteria, then ask the user to confirm or correct the ambiguous parts before editing. | Mechanical edits or explicit implementation-only tasks with no behavior choice. |
 | "Use every skill to be safe" | Pick the few skills that change the outcome. | Explicit audit/review request across the whole pack. |
+| "I'll branch at commit time" | Branch before editing so the diff, tests, and commits belong to one scoped change. | Read-only research or a task explicitly done outside Git. |
 | "ABP should decide sub-agent dispatch" | Use the agent runtime's native judgment and tools for delegation; use ABP only to shape the engineering risks each task must respect. | The user explicitly asks to design a delegation policy for this repo. |
 | "The agent will decide acceptance" | Ask or infer caller-visible acceptance criteria and prove them with `proof`. | User explicitly says they will verify acceptance themselves. |
 | "This is only docs" | Check whether the docs change behavior, install path, commands, or user expectations. | Pure typo with no procedural meaning. |
@@ -114,4 +128,5 @@ description:
   agent-generated code.
 - Use `scaffolding` when a project lacks baseline tooling.
 - Use `documentation` when writing user-facing or maintainer-facing
-  explanations of how ABP or a project should be used.
+  explanations of how ABP or a project should be used, including
+  requirements and acceptance criteria.
