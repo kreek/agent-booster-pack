@@ -87,6 +87,7 @@ description:
 | "We'll backfill async later" | Ship the backfill plan now or leave the schema expand-only. | Follow-up migration already exists in the same rollout plan. |
 | "Soft delete is good enough" | Decide the lifecycle rule once and enforce reads/indexes/schema around it. | Explicit audit-retention requirement with tested filters. |
 | "No one's using that index" | Observe across a full traffic cycle before dropping it. | Brand-new unused index in an unshipped migration. |
+| "Adding a `password` column" | Load `security`. Store only an `argon2id`/`scrypt`/`bcrypt` hash in `password_hash`, never plaintext. The same applies to API keys, OAuth tokens, MFA secrets, and recovery codes. | Read-only mirror of an external auth source the app never writes to. |
 
 ## Handoffs
 
@@ -97,6 +98,10 @@ description:
 - Use `observability` for migration and query dashboards/alerts.
 - Use `realtime` or `background-jobs` for stream or worker consumer
   semantics after the durable handoff exists.
+- Use `security` when the schema touches credentials, secrets, tokens,
+  MFA factors, or sensitive PII. Password hashing parameters and
+  storage rules live in `security/references/secrets.md`; do not
+  invent your own.
 
 ## References
 
