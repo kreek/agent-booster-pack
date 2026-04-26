@@ -8,9 +8,9 @@
   </picture>
 </p>
 
-A portable skill library that helps coding agents create software that is effective, correct, safe, accessible, maintainable, and performant.
+A portable skill library focused on engineering quality that helps coding agents create software that is effective, correct, safe, accessible, maintainable, and performant.
 
-Agent Booster Pack is based on my 25 years of software engineering experience, from startups to large organizations. It offers portable skills for agents that use the Agent Skills layout, such as Codex, Claude Code, Pi, Cursor, Gemini CLI, GitHub Copilot CLI, OpenCode, and Windsurf. The pack helps agents follow workflows that lead to simpler designs, clear data models, reliable behavior, safer production systems, user-friendly interfaces, and changes that are easy for people to review and maintain.
+Agent Booster Pack is based on my 25 years of software engineering experience, from startups to large organizations. It offers portable skills for agents that use the Agent Skills layout, such as Codex, Claude Code, Pi, Cursor, Gemini CLI, GitHub Copilot CLI, OpenCode, and Windsurf. The pack helps agents follow workflows that lead to simpler designs, clear data models, reliable behavior, safer production systems, user-friendly interfaces, and changes that are easy for humans to review and maintain.
 
 In practice, ABP guides agents to:
 
@@ -23,9 +23,9 @@ In practice, ABP guides agents to:
 
 ## What Makes ABP Unique
 
-ABP is designed to manage risk in software projects where people stay involved. Its main goal is to help agent-written code reach production standards. ABP treats the agent as a coding partner, not a replacement for people. Humans bring judgment, review, decision-making, and context to the process, so these skills guide agents to make clear, reviewable changes and provide evidence, instead of trying to take you out of the loop.
+ABP is designed to manage risk in software projects and guide agents to write production grade code. ABP treats the agent as a coding partner, not a replacement for people. Humans bring judgment, review, decision-making, and context to the process, so these skills guide agents to make clear, reviewable changes and provide evidence, instead of trying to take you out of the loop.
 
-ABP assumes coding agents already know the basics of coding, planning, and using tools, and that syntax is handled by linters, formatters, type checkers, and test suites. The skills do not cover those areas. Instead, ABP works by adding focused skills that provide extra engineering support when needed, without changing how the agent works inside.
+ABP assumes coding agents already know the basics of coding, planning, and using tools, and that syntax is handled by linters, formatters, type checkers, and test suites. The skills do not cover those areas. Instead, ABP works by adding focused skills that provide extra engineering support when needed, without changing agent internals.
 
 ## Installation
 
