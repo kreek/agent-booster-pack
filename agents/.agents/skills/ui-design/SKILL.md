@@ -1,7 +1,7 @@
 ---
 name: ui-design
-description:
-  Use when building or materially changing frontend interfaces — pages,
+description: >-
+  Use when building or materially changing frontend interfaces: pages,
   components, layouts, typography, colour systems, motion, or responsive
   behavior. Also use when picking a frontend framework, designing a component
   API, writing CSS from scratch, setting up design tokens, configuring dark

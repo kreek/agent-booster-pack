@@ -28,19 +28,19 @@ EXPLAIN (ANALYZE, BUFFERS, FORMAT TEXT) SELECT ...;
 
 ### Numbers to read first
 
-- **actual time** — how long the node took, per loop × loops. Multiply when
+- **actual time**: how long the node took, per loop × loops. Multiply when
   there are many loops.
-- **rows vs actual rows** — estimator accuracy. A 100× mismatch means stale
+- **rows vs actual rows**: estimator accuracy. A 100× mismatch means stale
   statistics; run `ANALYZE` or increase `default_statistics_target` for the
   column.
-- **Buffers: shared hit vs read** — `hit` is cache, `read` is disk. A repeated
+- **Buffers: shared hit vs read**: `hit` is cache, `read` is disk. A repeated
   query with high `read` is a cache miss pattern; a single hot query with high
   `read` is a missing index.
-- **Plan rows** under `Rows Removed by Filter` — the query executor is reading
+- **Plan rows** under `Rows Removed by Filter`: the query executor is reading
   rows then throwing them away. Push the filter into the index instead
   (composite or partial index).
 
-### `pg_stat_statements` — find the queries to EXPLAIN
+### `pg_stat_statements`: find the queries to EXPLAIN
 
 ```sql
 SELECT query, calls, total_exec_time, mean_exec_time, rows
@@ -66,27 +66,27 @@ ORDER BY pg_relation_size(s.indexrelid) DESC;
 Zero-scan indexes cost write throughput. If stats are fresh (no recent
 `pg_stat_reset`) and the index has never been used, consider dropping.
 
-## Transaction isolation — what you actually get
+## Transaction isolation: what you actually get
 
 ### ANSI standard (theoretical)
 
 | Level            | Dirty read | Non-repeatable read | Phantom read | Serial anomaly |
 | ---------------- | ---------- | ------------------- | ------------ | -------------- |
 | Read Uncommitted | possible   | possible            | possible     | possible       |
-| Read Committed   | —          | possible            | possible     | possible       |
-| Repeatable Read  | —          | —                   | possible     | possible       |
-| Serialisable     | —          | —                   | —            | —              |
+| Read Committed   | no         | possible            | possible     | possible       |
+| Repeatable Read  | no         | no                  | possible     | possible       |
+| Serialisable     | no         | no                  | no           | no             |
 
 ### Postgres (what you actually get)
 
 - **Read Uncommitted** → implemented as Read Committed. No dirty reads, ever.
-- **Read Committed** (default) — each statement sees a snapshot at _statement_
+- **Read Committed** (default): each statement sees a snapshot at _statement_
   start. Writes block writes on the same row.
-- **Repeatable Read** — snapshot at _transaction_ start. Equivalent to
+- **Repeatable Read**: snapshot at _transaction_ start. Equivalent to
   **Snapshot Isolation**; stronger than ANSI RR (no phantoms). Still allows
   **write skew** (two transactions read overlapping rows and write
   non-overlapping rows, each violating an invariant the other didn't see).
-- **Serialisable** — Snapshot Isolation + SSI (Serialisable Snapshot Isolation).
+- **Serialisable**: Snapshot Isolation + SSI (Serialisable Snapshot Isolation).
   True serializability. Transactions may abort with
   `SQLSTATE 40001 serialization_failure`. **Callers MUST retry.**
 

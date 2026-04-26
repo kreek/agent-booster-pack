@@ -13,7 +13,7 @@ Kotlin gives you the tools for data-first design out of the box. The
 - `val` over `var` everywhere; a `var` that is never reassigned is a
   finding.
 - Sealed classes / sealed interfaces for sum types, with exhaustive
-  `when` (no `else` branch — let the compiler enforce coverage).
+  `when` (no `else` branch: let the compiler enforce coverage).
 - `copy()` over in-place mutation.
 - Read-only collections (`List<T>` / `Map<K,V>`) in public API;
   `MutableList<T>` only when the contract genuinely requires it.
@@ -29,7 +29,7 @@ When in doubt, route to the `data-first` skill.
   analysis.
 - **Format**: `./gradlew ktlintCheck` (or the project's chosen
   `spotlessCheck`).
-- **Static analysis**: `./gradlew detekt` — new warnings introduced
+- **Static analysis**: `./gradlew detekt`: new warnings introduced
   by the diff are findings; new `@Suppress("...")` needs a reason.
 - **Coverage**: project-defined gate (JaCoCo / Kover). Don't drop
   coverage silently.
@@ -46,15 +46,15 @@ When in doubt, route to the `data-first` skill.
     interop boundaries should pin them as `T` or `T?` explicitly.
 - **`lateinit var`**: only legitimate in DI / test fixtures /
   framework-injected fields. `lateinit` in plain domain code is a
-  smell — the value should arrive through the constructor.
+  smell: the value should arrive through the constructor.
 - **Coroutines**:
   - Expected domain failures use sealed result/error types or named
     exceptions, not generic `Exception("message")` / `error("message")`
     values that leak across domain boundaries.
   - Prefer structured concurrency: `coroutineScope { }`,
     `supervisorScope { }`. `GlobalScope.launch { }` is a leak in a
-    long-running app — Critical.
-  - Don't block coroutines with `Thread.sleep` or blocking I/O —
+    long-running app: Critical.
+  - Don't block coroutines with `Thread.sleep` or blocking I/O:
     use `withContext(Dispatchers.IO)` only at the boundary.
   - Cancellation: `CancellationException` must propagate; catching
     it without rethrow breaks structured concurrency.
@@ -70,7 +70,7 @@ When in doubt, route to the `data-first` skill.
   the receiver.
 - **Inline / reified**: useful for type tokens and avoiding
   reflection; `inline` on a non-trivial function bloats the call
-  site — needs a reason.
+  site: needs a reason.
 - **Visibility**: Kotlin defaults to `public`. New top-level
   functions and classes meant to be internal should say `internal`
   explicitly.

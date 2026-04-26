@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# block-dangerous-git.sh — Claude Code PreToolUse hook that rejects destructive
+# block-dangerous-git.sh: Claude Code PreToolUse hook that rejects destructive
 # git commands before they execute. Install as an entry under hooks.PreToolUse
 # with matcher=Bash. Exit 0 = allow, 2 = block (harness rejects the tool call).
 #

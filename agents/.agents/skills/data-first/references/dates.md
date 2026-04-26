@@ -1,7 +1,7 @@
 # Dates and times
 
 Use this when storing, comparing, formatting, serialising, or computing
-on dates or times — at the language, wire, database, or display layer.
+on dates or times: at the language, wire, database, or display layer.
 Triggered from the `data-first` skill's Crosscutting Hazards
 section.
 
@@ -10,7 +10,7 @@ section.
 1. **Always timezone-aware.** Naive datetimes (no tz attached) are
    ambiguous and a source of silent bugs. They are acceptable only
    for genuinely wall-clock-only values (a birthday, "school starts
-   at 09:00") — and even then, prefer a distinct type that says so.
+   at 09:00"), and even then, prefer a distinct type that says so.
 2. **Store and compute in UTC.** Convert to local time only at the
    user-facing boundary (UI, scheduled-reminder evaluation). Logs,
    APIs, databases, and message payloads stay UTC.
@@ -18,7 +18,7 @@ section.
    unambiguous; `04/25/2026` is not.
 4. **Use a date library.** Never do date math on strings or epochs.
    Calendar arithmetic involves DST, leap years/seconds, month
-   lengths, and locale-specific weeks — none of which obey
+   lengths, and locale-specific weeks: none of which obey
    `n_days * 86400`.
 5. **Distinguish instants from wall-clock-only values.** An instant
    in time (UTC moment) and a wall-clock value (`LocalDate`,
@@ -29,9 +29,9 @@ section.
 
 | Layer | Default |
 |---|---|
-| **Database** | `TIMESTAMP WITH TIME ZONE` (Postgres `TIMESTAMPTZ`); MySQL `DATETIME` only with an enforced UTC convention; SQLite stores text — pick ISO 8601. For wall-clock-only values use `DATE` / `TIME` / `LocalDate` types. |
+| **Database** | `TIMESTAMP WITH TIME ZONE` (Postgres `TIMESTAMPTZ`); MySQL `DATETIME` only with an enforced UTC convention; SQLite stores text: pick ISO 8601. For wall-clock-only values use `DATE` / `TIME` / `LocalDate` types. |
 | **Wire / API / log** | RFC 3339 string with `Z` or explicit offset. Epoch seconds/millis acceptable for high-throughput protocols, but document the unit. Mixing string and numeric formats in one API is a finding. |
-| **Domain code** | The language's tz-aware type: Python `datetime` with `tzinfo=UTC`; JS `Date` is fine for instants but lacks tz semantics — prefer Temporal (Stage 4 in 2026) or `Luxon`/`date-fns-tz`; Rust `chrono::DateTime<Utc>` or `jiff`; Java/Kotlin `Instant` / `ZonedDateTime`; Ruby `Time.now.utc` / `ActiveSupport::TimeWithZone`; .NET `DateTimeOffset` (never `DateTime` for instants). |
+| **Domain code** | The language's tz-aware type: Python `datetime` with `tzinfo=UTC`; JS `Date` is fine for instants but lacks tz semantics: prefer Temporal (Stage 4 in 2026) or `Luxon`/`date-fns-tz`; Rust `chrono::DateTime<Utc>` or `jiff`; Java/Kotlin `Instant` / `ZonedDateTime`; Ruby `Time.now.utc` / `ActiveSupport::TimeWithZone`; .NET `DateTimeOffset` (never `DateTime` for instants). |
 | **Display** | Locale-aware formatting at the UI edge: `Intl.DateTimeFormat`, ICU, `Locale.format`. Never inject locale-specific strings into logs, APIs, or filenames. |
 
 ## High-signal review checks
@@ -40,27 +40,27 @@ section.
   timezone is a finding. Use `datetime.now(UTC)`,
   `Time.now.utc`, `ZonedDateTime.now(ZoneOffset.UTC)`,
   `DateTimeOffset.UtcNow`.
-- Comparing two datetimes with different (or unknown) timezones —
+- Comparing two datetimes with different (or unknown) timezones:
   convert both to UTC first.
-- Adding seconds/minutes/days by multiplying — works for *durations*
+- Adding seconds/minutes/days by multiplying: works for *durations*
   (`Duration.ofMinutes(5)`), breaks across DST for "tomorrow at the
   same wall-clock time."
 - "Every Tuesday at 09:00 in the user's timezone" needs a
   timezone-aware schedule, not a stored UTC instant. The user moves
   cities; the cron doesn't.
-- Storing a date as an integer (days since epoch / `YYYYMMDD`) —
+- Storing a date as an integer (days since epoch / `YYYYMMDD`):
   fine if the column type or wrapper makes the unit obvious; a bare
   `int` in an API is a smell.
-- Locale-formatted dates in logs, filenames, or DB rows — they break
+- Locale-formatted dates in logs, filenames, or DB rows: they break
   searches and tooling. Logs are for machines first.
 - Mixing `DateTime` (no offset) with `DateTimeOffset` in C#, or
   `Date` (legacy) with `Instant` in Java, in the same call chain.
 - Test fixtures that bake in "today" via a real call to
-  `datetime.now()` — flaky around midnight; inject a clock.
-- Server clock drift / NTP sync assumptions — rate limits,
+  `datetime.now()`: flaky around midnight; inject a clock.
+- Server clock drift / NTP sync assumptions: rate limits,
   signatures, JWTs that depend on `now()` need monotonic + wall
   clock distinguished.
-- Leap second handling — most code can assume no leap seconds (Linux
+- Leap second handling: most code can assume no leap seconds (Linux
   and most OSes smear); audit when you depend on millisecond
   ordering across boundaries.
 
@@ -69,7 +69,7 @@ section.
 - `datetime.now()` (Python), `new Date()` for "now" without UTC
   intent (JS), `Time.now` (Ruby) in domain code without `.utc`,
   `LocalDateTime.now()` (Java) for an instant.
-- `DateTime.Now` in C# domain code — use `DateTimeOffset.UtcNow` and
+- `DateTime.Now` in C# domain code: use `DateTimeOffset.UtcNow` and
   inject an `IClock` for testability.
 - String-built date math: `"%s-%s-%s" % (year, month, day)` then
   parsing.
@@ -79,7 +79,7 @@ section.
 - `==` between two datetimes from different sources without
   converting to UTC first.
 - Filename / log key built from local-time formatting
-  (`2026-04-25-09:00`) — non-sortable across timezones.
+  (`2026-04-25-09:00`): non-sortable across timezones.
 - Test that passes Mon–Sat and fails on Sundays (or in a different
   TZ) because of a `weekday()` check on `now()`.
 - A user-supplied date string parsed without a timezone,

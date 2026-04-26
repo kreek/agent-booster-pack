@@ -58,16 +58,16 @@ When in doubt, route to the `data-first` skill.
     useful message and the cause chain (`new RuntimeException(msg,
     e)`, not `new RuntimeException(msg)`).
   - Custom exceptions extend `RuntimeException` for unchecked,
-    `Exception` for checked — pick deliberately.
+    `Exception` for checked: pick deliberately.
 - **Concurrency**:
   - Shared mutable state across threads needs `volatile`,
-    `AtomicX`, `java.util.concurrent` collections, or a `Lock` —
+    `AtomicX`, `java.util.concurrent` collections, or a `Lock`:
     never plain `HashMap`.
   - `synchronized` on `this` or on a public reference is a
     Critical-tier finding (callers can lock on the same monitor).
     Prefer a private `final Object lock = new Object();`.
   - Virtual threads (Java 21+): blocking is fine, but synchronized
-    blocks pin the carrier — prefer `ReentrantLock`.
+    blocks pin the carrier: prefer `ReentrantLock`.
 - **`equals` / `hashCode` / `toString`**: must move together.
   `record` gives them for free; manual overrides need tests.
   Inheritance + `equals` is a known minefield (see Effective Java).
@@ -76,18 +76,18 @@ When in doubt, route to the `data-first` skill.
     transaction.
   - `@Transactional` on a private/protected method is silently a
     no-op.
-  - Default rollback only on `RuntimeException` — checked exceptions
+  - Default rollback only on `RuntimeException`: checked exceptions
     don't roll back unless declared (`rollbackFor = ...`).
 - **Dependency injection**: prefer constructor injection over field
   injection (`@Autowired private Foo foo;`). Constructor-injected
   classes are testable without Spring; field-injected ones aren't.
 - **Logging**: SLF4J parameter form (`log.info("user {} did x",
-  id)`) over string concatenation — lazy evaluation, no leak when
+  id)`) over string concatenation: lazy evaluation, no leak when
   level is off.
 - **Streams**: stateful lambda inside `map` / `filter` is a finding;
   parallel streams almost always need a justification (CPU-bound,
   no shared state, large enough to amortise the fork-join overhead).
-- **`Date` / `Calendar`**: stay in `java.time` — `Instant`,
+- **`Date` / `Calendar`**: stay in `java.time`: `Instant`,
   `LocalDate`, `ZonedDateTime`. Legacy `Date` in new code is a
   finding.
 - **Builds**: a new dependency in `pom.xml` / `build.gradle` should
@@ -109,7 +109,7 @@ When in doubt, route to the `data-first` skill.
 
 ## Sources
 
-- *Effective Java* (Bloch) — canonical.
+- *Effective Java* (Bloch): canonical.
 - Google Java Style Guide:
   <https://google.github.io/styleguide/javaguide.html>
 - Java Records:

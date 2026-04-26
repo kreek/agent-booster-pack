@@ -1,10 +1,10 @@
 ---
 name: testing
-description:
+description: >-
   Best practices for writing behavior-focused tests from the caller's point of
   view. Use when writing tests, reviewing tests, adding coverage for a feature,
   deciding what to test or skip, naming tests, picking what to mock, or fixing
-  flaky or over-specified test suites. Language and framework agnostic — any
+  flaky or over-specified test suites. Language and framework agnostic: any
   spec-style framework with describe/context/it blocks (RSpec, Vitest, Jest,
   Mocha, Pest, pytest-describe, etc.). Focuses on test boundaries, assertions,
   mocks, and flake resistance, not framework internals. Trigger even when the
@@ -35,7 +35,7 @@ description:
 ## Core Ideas
 
 1. Test behavior, not implementation: assertions describe what a
-   caller observes. Enter at the outermost practical boundary — HTTP,
+   caller observes. Enter at the outermost practical boundary: HTTP,
    CLI, UI, public API, or module facade.
 2. One test covers one behavior; if the name needs "and", split it.
 3. Prefer real collaborators until they cross a true system boundary.
@@ -67,8 +67,7 @@ description:
 - [ ] The test would fail if production code did nothing, and would
       survive a contract-preserving implementation swap.
 - [ ] Tests are order-independent and do not rely on arbitrary sleeps.
-- [ ] `scripts/sniff-mocks.sh <test-dir>` is clean or findings are
-      explained.
+- [ ] Mocking choices were reviewed against the system-boundary rule.
 
 ## Tripwires
 
@@ -90,9 +89,3 @@ description:
   code.
 - Use `data-first` when behavior is hard to test because pure logic
   is mixed with I/O.
-
-## Tools
-
-- `scripts/sniff-mocks.sh <test-dir>`: warning-only scan for mock
-  abuse, private-method testing, call-count-only assertions, and
-  arbitrary waits.

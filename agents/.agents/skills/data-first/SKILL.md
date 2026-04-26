@@ -68,12 +68,12 @@ will construct it.
 ## Crosscutting Hazards
 
 Two topics cause more boundary bugs than any other: time and money. Both are
-canonical cases of the iron law — illegal states are easy to represent unless
+canonical cases of the iron law: illegal states are easy to represent unless
 the type forces care. Load the right reference when either appears in the diff.
 
-- `references/dates.md` — when storing, comparing, formatting, serialising, or
+- `references/dates.md`: when storing, comparing, formatting, serialising, or
   computing on dates / times.
-- `references/money.md` — when storing, comparing, formatting, serialising, or
+- `references/money.md`: when storing, comparing, formatting, serialising, or
   computing on monetary amounts.
 
 ## Verification
@@ -107,8 +107,8 @@ the type forces care. Load the right reference when either appears in the diff.
 
 ## References
 
-- `references/dates.md` — timezone-aware always; UTC storage; ISO 8601 / RFC 3339 wire format; instant vs wall-clock-only distinction.
-- `references/money.md` — never `float`; amount + currency travel together; ISO 4217 codes; per-currency decimal places.
+- `references/dates.md`: timezone-aware always; UTC storage; ISO 8601 / RFC 3339 wire format; instant vs wall-clock-only distinction.
+- `references/money.md`: never `float`; amount + currency travel together; ISO 4217 codes; per-currency decimal places.
 - "Parse, Don't Validate":
   <https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/>
 - "Effective ML / Make Illegal States Unrepresentable":

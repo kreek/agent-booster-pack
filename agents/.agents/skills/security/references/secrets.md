@@ -18,17 +18,17 @@ picked, how credentials are stored, how sessions are managed.
 - Development: `.env` files in `.gitignore`, loaded via `direnv` or equivalent.
 - CI/CD: platform secret stores (GitHub Actions secrets, GitLab CI variables,
   AWS Secrets Manager, Vault).
-- Production: workload identity where possible — IRSA on EKS, Workload Identity
+- Production: workload identity where possible: IRSA on EKS, Workload Identity
   on GKE, SPIFFE/SPIRE for non-cloud. No static credential to rotate, no
   credential to leak.
 
 **Envelope encryption:** encrypt data with a data encryption key (DEK); encrypt
 the DEK with a key encryption key (KEK) managed by KMS. The plaintext DEK is
-never stored — only the encrypted envelope. Rotate KEKs regularly; re-wrapping
+never stored: only the encrypted envelope. Rotate KEKs regularly; re-wrapping
 DEKs does not require re-encrypting the underlying data.
 
 **Rotation:** treat all secrets as having a 90-day lifetime maximum. Automate
-rotation. Rotation should be a non-event — if rotating is a crisis, the system
+rotation. Rotation should be a non-event: if rotating is a crisis, the system
 is coupled to a specific credential instance.
 
 ## Auth tokens: prefer PASETO
@@ -38,8 +38,8 @@ confusion, header injection, weak key validation). Default to PASETO
 (Platform-Agnostic Security Tokens): fixed algorithms per version, no algorithm
 field in the header.
 
-- `v4.local` — symmetric encryption (use when issuer = verifier).
-- `v4.public` — asymmetric signatures (use when tokens cross trust boundaries).
+- `v4.local`: symmetric encryption (use when issuer = verifier).
+- `v4.public`: asymmetric signatures (use when tokens cross trust boundaries).
 
 Keep JWT only where a federated protocol (OIDC/SSO) requires it.
 
@@ -50,7 +50,7 @@ Keep JWT only where a federated protocol (OIDC/SSO) requires it.
   untrusted token header decide verification policy.
 - Short expiry (15 min access tokens) + refresh tokens.
 - Validate `iss`, `aud`, `exp`, `nbf`, `iat`.
-- Never put sensitive data in the payload — it's base64-encoded, not encrypted.
+- Never put sensitive data in the payload: it's base64-encoded, not encrypted.
 
 **OAuth2 + OIDC** for federated identity. Never roll your own auth protocol.
 
@@ -84,7 +84,7 @@ Keep JWT only where a federated protocol (OIDC/SSO) requires it.
   `Path` scoped.
 - Revocation: maintain a session registry and honour server-side logout/revoke
   across all devices.
-- Do not reuse session IDs as authorisation tokens for cross-service calls — use
+- Do not reuse session IDs as authorisation tokens for cross-service calls: use
   a separate short-lived service token.
 
 ## Service identity

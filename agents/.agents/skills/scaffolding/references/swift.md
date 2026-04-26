@@ -5,7 +5,7 @@ Use this before scaffolding fresh Swift projects.
 ## Defaults
 
 - Package/build tool: Swift Package Manager.
-- Concurrency posture: enable **Approachable Concurrency** for new projects —
+- Concurrency posture: enable **Approachable Concurrency** for new projects:
   main-thread-by-default for UI/scripts, explicit `@concurrent` for opting into
   parallel work. This is the recommended stance for new code on current Swift.
 - Test framework: **Swift Testing** (`@Test` macro) is an opt-in modern

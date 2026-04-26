@@ -1,12 +1,12 @@
-# OWASP Top 10 — category mitigations
+# OWASP Top 10: category mitigations
 
 Reference for the `security-review` skill. Each category: the risk, the
 recurring failure pattern, and the concrete mitigations to check for in review.
-Category names, IDs, and emphasis track the current edition of the OWASP Top 10
-— consult https://owasp.org/Top10/ before a review to confirm the list has not
+Category names, IDs, and emphasis track the current edition of the OWASP Top 10.
+Consult https://owasp.org/Top10/ before a review to confirm the list has not
 shifted.
 
-## A01 — Broken Access Control
+## A01: Broken Access Control
 
 Failure pattern: the router authenticates but the handler forgets to authorise,
 or the ORM fetches any row if the ID is known (IDOR).
@@ -20,7 +20,7 @@ Check:
 - Tests cover unauthenticated, wrong-tenant, and wrong-role callers on every
   protected path.
 
-## A02 — Security Misconfiguration
+## A02: Security Misconfiguration
 
 Failure pattern: frameworks shipped in debug/dev mode, default credentials left
 enabled, permissive CORS, S3 bucket policies default-public, DB port exposed.
@@ -37,7 +37,7 @@ Check:
 - Cloud storage buckets are private-by-default; public access is explicitly
   documented.
 
-## A03 — Software Supply Chain Failures
+## A03: Software Supply Chain Failures
 
 Covers provenance, not just CVE presence. The concern is who built the artifact
 and whether the build is reproducible, not only whether a known vulnerability is
@@ -46,13 +46,13 @@ listed.
 Check:
 
 - Lockfile pins exact versions; no floating ranges in production.
-- `scripts/dep-audit.sh` output is clean (npm/pnpm/pip/cargo/bundle/go).
+- Native dependency audit output is clean or findings are triaged.
 - New transitive dependencies are explained in the PR.
 - Build artifacts are signed (Sigstore/cosign) where supported.
 - SLSA Level 2+ for critical services: build provenance attestations.
 - SBOMs generated (`syft`, `cdxgen`) and stored with releases.
 
-## A04 — Cryptographic Failures
+## A04: Cryptographic Failures
 
 Failure pattern: roll-your-own crypto, MD5/SHA1 still in use, RSA without
 padding, hardcoded IVs, missing constant-time comparison.
@@ -69,7 +69,7 @@ Check:
   (`crypto/subtle.ConstantTimeCompare`, `hmac.compare_digest`,
   `crypto.timingSafeEqual`).
 
-## A05 — Injection
+## A05: Injection
 
 Covers SQL, NoSQL, OS command, LDAP, expression-language, template, and log
 injection.
@@ -85,7 +85,7 @@ Check:
   structured field.
 - SSTI: templates compiled from user input = bug.
 
-## A06 — Insecure Design
+## A06: Insecure Design
 
 Failure pattern: the threat model was never written; the design doc assumes the
 happy path.
@@ -97,7 +97,7 @@ Check:
 - Privileged paths have separate authz checks, not shared middleware.
 - Abuse cases are listed alongside use cases.
 
-## A07 — Authentication Failures
+## A07: Authentication Failures
 
 Covers credential stuffing, session fixation, weak password policies, missing
 MFA on privileged roles.
@@ -113,7 +113,7 @@ Check:
   (WebAuthn/passkeys) preferred.
 - SMS OTP is a fallback only, never sole factor.
 
-## A08 — Software or Data Integrity Failures
+## A08: Software or Data Integrity Failures
 
 Covers unsigned updates, deserialisation of untrusted data, CI/CD pipeline
 tampering.
@@ -126,22 +126,22 @@ Check:
 - CI/CD secrets scoped by environment; prod secrets never loaded in PR builds.
 - Artifacts signed; consumers verify before deploy.
 
-## A09 — Security Logging and Alerting Failures
+## A09: Security Logging and Alerting Failures
 
-Failure pattern: ample logs that record the wrong things — user secrets appear,
+Failure pattern: ample logs that record the wrong things: user secrets appear,
 but auth denials don't.
 
 Check:
 
 - Log authn success/failure, authz denials, admin actions, boundary validation
-  rejections — with request ID and actor, not raw payload.
+  rejections: with request ID and actor, not raw payload.
 - Never log passwords, tokens, session IDs, raw PII, full payment data.
 - Alerts configured on failed-login spikes, privilege escalations, new admin
   creation, unexpected outbound connections.
 - Retention meets policy; logs are tamper-evident (append-only, optionally
   hash-chained).
 
-## A10 — Mishandling of Exceptional Conditions
+## A10: Mishandling of Exceptional Conditions
 
 Covers information disclosure through error messages, missing auth checks in
 error paths, and timing differences that enumerate valid users or tokens.

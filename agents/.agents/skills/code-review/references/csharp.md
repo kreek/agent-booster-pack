@@ -25,10 +25,10 @@ When in doubt, route to the `data-first` skill.
 
 ## Tooling that should be passing
 
-- `dotnet format --verify-no-changes` — formatting is enforced.
-- `dotnet build -warnaserror` — clean build; new warnings are
+- `dotnet format --verify-no-changes`: formatting is enforced.
+- `dotnet build -warnaserror`: clean build; new warnings are
   blockers unless an `EditorConfig` rule shifts in the same diff.
-- `dotnet test` — narrow to the changed project first; full solution
+- `dotnet test`: narrow to the changed project first; full solution
   before merge.
 - Project flags that should be set on every modern C# project:
   `<TreatWarningsAsErrors>true</TreatWarningsAsErrors>`,
@@ -40,16 +40,16 @@ When in doubt, route to the `data-first` skill.
 
 - **Nullable reference types**: a method that returns `T?` but
   documents "never null" should return `T`. The null-forgiving
-  operator (`!`) needs a one-line justification — it's a claim the
+  operator (`!`) needs a one-line justification: it's a claim the
   reviewer must accept.
 - **Async**:
-  - `async void` outside event handlers — Critical, swallows
+  - `async void` outside event handlers: Critical, swallows
     exceptions.
-  - `Task.Result` / `.Wait()` blocking on async — deadlock bait.
+  - `Task.Result` / `.Wait()` blocking on async: deadlock bait.
   - `ConfigureAwait(false)` is required in libraries to avoid
     deadlocks when a caller has a sync context. Missing it on a new
     library method is a finding.
-  - `async` method with no `await` and a `.Result` inside — almost
+  - `async` method with no `await` and a `.Result` inside: almost
     certainly wrong.
 - **`IDisposable` / `IAsyncDisposable`**: any disposable opened in
   a method must be in a `using` / `await using` scope or explicitly
@@ -61,7 +61,7 @@ When in doubt, route to the `data-first` skill.
   - `.Include()` chains causing cartesian explosion.
   - `AsNoTracking()` missing on read-only queries.
   - N+1 inside a loop iterating over a navigation property.
-  - Raw SQL with string interpolation — use `FromSqlInterpolated` /
+  - Raw SQL with string interpolation: use `FromSqlInterpolated` /
     parameters.
 - **LINQ**: `IEnumerable<T>` returned from a method that the caller
   enumerates twice will execute twice. Materialise (`.ToList()`)
@@ -72,7 +72,7 @@ When in doubt, route to the `data-first` skill.
   exception types or explicit result variants, not generic
   `Exception("message")` / `InvalidOperationException("domain
   outcome")` values that leak across domain boundaries. `throw ex;`
-  reset the stack — use `throw;`.
+  reset the stack: use `throw;`.
 - **Pattern matching**: `switch` over a closed hierarchy without an
   exhaustive default is brittle. New cases added later won't fail
   the compile. Prefer `_ => throw new UnreachableException()` or a
@@ -90,7 +90,7 @@ When in doubt, route to the `data-first` skill.
   message templates and can leak PII. Prefer
   `_logger.LogInformation("user {UserId} did X", id)`.
 - **DI lifetimes**: `Singleton` capturing `Scoped` is a captive
-  dependency — silent bug. Reviews should call out new
+  dependency: silent bug. Reviews should call out new
   registrations with mismatched lifetimes.
 
 ## Anti-patterns / red flags
@@ -98,10 +98,10 @@ When in doubt, route to the `data-first` skill.
 - `async void` outside an event handler.
 - `.Result` / `.Wait()` blocking on `Task`.
 - `new HttpClient()` per call.
-- `DateTime.Now` in domain logic — prefer `DateTimeOffset.UtcNow` or
+- `DateTime.Now` in domain logic: prefer `DateTimeOffset.UtcNow` or
   an injected `IClock`.
 - Public mutable static state.
-- `_logger.LogInformation($"... {sensitive}")` — interpolation
+- `_logger.LogInformation($"... {sensitive}")`: interpolation
   inside a log template.
 - `throw ex;` (use `throw;`).
 - `catch (Exception) { /* swallow */ }`.

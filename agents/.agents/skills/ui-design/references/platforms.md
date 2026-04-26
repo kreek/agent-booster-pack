@@ -19,7 +19,7 @@ Deviate to a unified cross-platform brand when:
   collaboration tools).
 - The product is a content-canvas pro tool (IDE, design tool, DAW).
 
-Non-negotiable even when deviating — never rebuild these:
+Non-negotiable even when deviating, never rebuild these:
 
 - Native scrolling physics, text selection, input methods (IME, autocorrect,
   predictive text).
@@ -31,10 +31,10 @@ Non-negotiable even when deviating — never rebuild these:
 - System-preference queries: dark mode, Reduce Motion, Reduce Transparency,
   Increase Contrast, Dynamic Type, Forced Colors.
 
-Web apps have no single platform — target WCAG 2.2 AA, 44×44 CSS px tap targets,
+Web apps have no single platform: target WCAG 2.2 AA, 44×44 CSS px tap targets,
 semantic HTML, and responsive breakpoints around 600 / 900 / 1240 px.
 
-## Apple — Liquid Glass
+## Apple: Liquid Glass
 
 Use when targeting iOS, iPadOS, macOS, watchOS, tvOS, or visionOS.
 
@@ -44,7 +44,7 @@ Rules:
   when content is the point.
 - Honour lensing and concentricity. Inner corner radius = outer radius −
   padding.
-- Adaptive optics — tint materials from surrounding content; auto-adapt to
+- Adaptive optics: tint materials from surrounding content; auto-adapt to
   light/dark.
 - Motion is a cue: context menus expand from tap point, alerts emerge where the
   user acted.
@@ -77,7 +77,7 @@ Metrics:
 
 Reference: https://developer.apple.com/design/human-interface-guidelines
 
-## Google — Material Expressive
+## Google: Material Expressive
 
 Use when targeting Android or Wear OS.
 
@@ -89,7 +89,7 @@ Rules:
   prominent controls.
 - Use emphasised typography variants to differentiate hierarchy.
 - Prefer short bottom bars and floating toolbars over heavy chrome.
-- Always pair colour roles (`primary`/`onPrimary`, `surface`/`onSurface`) —
+- Always pair colour roles (`primary`/`onPrimary`, `surface`/`onSurface`):
   never pick colours that bypass the contrast guarantee.
 
 Dynamic colour:
@@ -100,9 +100,9 @@ Dynamic colour:
 
 Type scale:
 
-- Display — 57 / 45 / 36.
-- Headline — 32 / 28 / 24.
-- Title, Body, Label — each large / medium / small.
+- Display: 57 / 45 / 36.
+- Headline: 32 / 28 / 24.
+- Title, Body, Label: each large / medium / small.
 
 Corner radius scale (dp):
 
@@ -129,7 +129,7 @@ Tap target: 48×48 dp.
 
 Reference: https://m3.material.io/
 
-## Microsoft — Fluent
+## Microsoft: Fluent
 
 Use when targeting Windows, or when a Microsoft-adjacent web/native app wants
 platform fidelity (Fluent UI React, Fluent UI Web Components, native Apple /
@@ -142,13 +142,13 @@ Rules:
   reach past aliases to globals in app code.
 - Use Segoe UI Variable on Windows (optical sizing on). Native system fonts
   elsewhere.
-- Respect Windows material rules — they are not interchangeable:
+- Respect Windows material rules: they are not interchangeable:
 
 | Material | Use                                                    |
 | -------- | ------------------------------------------------------ |
 | Solid    | Default surfaces.                                      |
 | Mica     | Opaque, wallpaper-tinted. Primary long-lived surfaces. |
-| Acrylic  | Frosted. Transient surfaces only — menus, flyouts.     |
+| Acrylic  | Frosted. Transient surfaces only: menus, flyouts.     |
 | Smoke    | Modal dim.                                             |
 
 Metrics:
@@ -168,12 +168,12 @@ system before inventing a generic app shell. These encode accessibility, content
 style, trust patterns, form conventions, and service-design defaults users
 already recognise.
 
-- United States: U.S. Web Design System (USWDS) —
+- United States: U.S. Web Design System (USWDS):
   https://designsystem.digital.gov/
-- United Kingdom: GOV.UK Design System — https://design-system.service.gov.uk/
-- Canada: Canada.ca Design System — https://design.canada.ca/
-- Australia: GOLD Design System — https://gold.designsystemau.org/
-- New Zealand: Govt.nz Design System — https://design-system.digital.govt.nz/
+- United Kingdom: GOV.UK Design System: https://design-system.service.gov.uk/
+- Canada: Canada.ca Design System: https://design.canada.ca/
+- Australia: GOLD Design System: https://gold.designsystemau.org/
+- New Zealand: Govt.nz Design System: https://design-system.digital.govt.nz/
 
 For other jurisdictions, search for the official design system or service manual
 first. If none exists, use the closest public-sector pattern and note the gap.

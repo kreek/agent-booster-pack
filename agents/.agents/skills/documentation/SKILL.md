@@ -1,7 +1,7 @@
 ---
 name: documentation
-description:
-  Use when writing or reviewing documentation — READMEs, architecture notes,
+description: >-
+  Use when writing or reviewing documentation: READMEs, architecture notes,
   ADRs, runbooks, API docs, module-level docs, tutorials, how-to guides,
   requirements, acceptance criteria, user stories, reference material, or code
   comments. Also use when the user mentions ADRs, runbooks, doc rot, MkDocs,

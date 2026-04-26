@@ -71,7 +71,7 @@ Never pass raw upstream or internal errors through.
 
 | Origin | Use |
 |---|---|
-| Consumer request problem | `4xx` — `400` malformed, `401` unauthenticated, `403` unauthorized, `404` missing, `422` semantically invalid, `429` rate limited |
+| Consumer request problem | `4xx`: `400` malformed, `401` unauthenticated, `403` unauthorized, `404` missing, `422` semantically invalid, `429` rate limited |
 | Upstream dependency problem | `503` upstream unavailable, `504` upstream timeout, `502` upstream responded but failed |
 | Your service problem | `500` for unexpected application faults; platform may surface `503`/`504` at gateway boundary |
 

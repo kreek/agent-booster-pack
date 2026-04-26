@@ -5,7 +5,7 @@ Use when reviewing F# code in the diff. Apply this alongside the main
 
 ## Data-first bias (apply first)
 
-F# is a natural fit for the `data-first` skill's doctrine — but the
+F# is a natural fit for the `data-first` skill's doctrine, but the
 ecosystem leaks OOP habits from C#. Lean into the functional core:
 
 - Prefer **records** and **discriminated unions** over classes;
@@ -24,10 +24,10 @@ When in doubt, route to the `data-first` skill.
 
 ## Tooling that should be passing
 
-- `dotnet format --verify-no-changes` — formatting is enforced.
-- `dotnet build -warnaserror` — clean build; new warnings are
+- `dotnet format --verify-no-changes`: formatting is enforced.
+- `dotnet build -warnaserror`: clean build; new warnings are
   blockers unless an `EditorConfig` rule shifts in the same diff.
-- `dotnet test` — narrow to the changed project first; full solution
+- `dotnet test`: narrow to the changed project first; full solution
   before merge.
 - FSharpLint or analyzers if the repo configures them; respect the
   configured rule set.
@@ -36,7 +36,7 @@ When in doubt, route to the `data-first` skill.
 
 - **`Result` vs exceptions**: domain logic should return
   `Result<'T,'E>`. Any new `failwith`, `raise`, or `invalidArg` in a
-  domain function needs a justification — typically a precondition
+  domain function needs a justification: typically a precondition
   the type system can't yet express.
 - **Discriminated unions over enums + flags**: a "status" string
   with three valid values, or a record with mutually-exclusive
@@ -60,7 +60,7 @@ When in doubt, route to the `data-first` skill.
   Active patterns that throw are a finding.
 - **Module organisation**: top-down ordering. A function used in
   `let foo` defined later means the project has wired up
-  recursive modules or out-of-order definitions — usually worth
+  recursive modules or out-of-order definitions: usually worth
   flagging.
 - **Pipelines**: `|>` chains over deeply nested calls; flag
   pipelines that obscure error propagation by `Result.iter`-ing
@@ -82,9 +82,9 @@ When in doubt, route to the `data-first` skill.
 - Open `System.Linq` or pervasive `System.Collections.Generic`
   usage in domain code (suggests C#-style mutation creeping in).
 - `Seq.head` / `List.head` on a sequence with no bounds proof.
-- A class with `member this.X` that has no real OOP need — should
+- A class with `member this.X` that has no real OOP need: should
   be a module of functions.
-- Wrapping every function in `task { return ... }` — adds
+- Wrapping every function in `task { return ... }`: adds
   allocations for sync work.
 
 ## Sources

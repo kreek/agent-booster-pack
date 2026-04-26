@@ -5,13 +5,13 @@ Use when reviewing Rust code in the diff. Apply this alongside the main
 
 ## Tooling that should be passing
 
-- `cargo fmt --all -- --check` — formatting is non-negotiable.
-- `cargo clippy --all-targets --all-features -- -D warnings` — clippy
+- `cargo fmt --all -- --check`: formatting is non-negotiable.
+- `cargo clippy --all-targets --all-features -- -D warnings`: clippy
   warnings are errors. Diffs that downgrade or `#[allow(...)]` lints
   need a justification.
-- `cargo test --all` — for libraries, run with `--no-default-features`
+- `cargo test --all`: for libraries, run with `--no-default-features`
   too if features are non-trivial.
-- `cargo deny check` (if configured) — flags advisories, license
+- `cargo deny check` (if configured): flags advisories, license
   changes, and disallowed sources.
 - For applications: `Cargo.lock` is committed. For libraries: it is
   not (unless the project has a deliberate policy).

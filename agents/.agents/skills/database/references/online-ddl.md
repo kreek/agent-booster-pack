@@ -6,7 +6,7 @@ are SQLite and Postgres.
 
 ## Postgres
 
-- `CREATE INDEX CONCURRENTLY` — builds the index without an exclusive lock.
+- `CREATE INDEX CONCURRENTLY`: builds the index without an exclusive lock.
   Takes longer but safe on production. **Never** `CREATE INDEX` without
   `CONCURRENTLY` on a live table.
 - Always set `lock_timeout` before schema changes:
@@ -61,9 +61,9 @@ are SQLite and Postgres.
 
 ## Tooling that enforces these rules
 
-- **strong_migrations** (Rails / Active Record) — blocks migrations that violate
+- **strong_migrations** (Rails / Active Record): blocks migrations that violate
   zero-downtime rules, with fix-up recipes in the error message.
-- **safe-pg-migrations** (Doctolib, Rails) — wraps every migration in
+- **safe-pg-migrations** (Doctolib, Rails): wraps every migration in
   `lock_timeout` + `with_lock_retries`.
 - **Django's `atomic=False` migration operations** for custom concurrent index
   creation.
@@ -86,7 +86,7 @@ Every migration must be rehearsed against a production-sized copy:
 - Restore a recent PITR snapshot into a scratch DB.
 - Run the full migration; record wall-clock time.
 - If the migration took >5 min on a table you care about, it is
-  production-hostile — redesign it.
+  production-hostile: redesign it.
 - Capture `pg_stat_activity` during Postgres migrations, and rehearse SQLite
   migrations against a copy of the real database file to confirm lock behaviour
   matches expectation.

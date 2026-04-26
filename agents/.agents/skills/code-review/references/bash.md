@@ -5,7 +5,7 @@ Apply this alongside the main `code-review` skill workflow.
 
 ## Tooling that should be passing
 
-- `shellcheck <script>` — non-negotiable. Warnings introduced by the
+- `shellcheck <script>`: non-negotiable. Warnings introduced by the
   diff are findings; new `# shellcheck disable=SCxxxx` comments need
   a one-line reason.
 - `shfmt -d -i 2 -ci <script>` (or the project's chosen indent) for
@@ -58,7 +58,7 @@ Apply this alongside the main `code-review` skill workflow.
 - `eval` on a constructed string.
 - `cd $dir` without checking the result, then doing destructive work.
 - `rm -rf "$VAR/"` where `$VAR` could be empty (`rm -rf "/"`).
-- `[ "$x" = "" ]` — prefer `[ -z "$x" ]` and quote.
+- `[ "$x" = "" ]`: prefer `[ -z "$x" ]` and quote.
 - Deeply nested pipelines that hide a failed step due to no
   `pipefail`.
 - `#!/bin/sh` with bashisms (`[[`, arrays, `function` keyword).

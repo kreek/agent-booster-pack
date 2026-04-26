@@ -10,7 +10,7 @@ Use this before scaffolding fresh Elixir projects.
 - Lightweight/API default: Plug running on **Bandit** (pure Elixir,
   async-friendly, WebSocket-native) when the service is truly minimal.
 - Robust/full-stack default: Phoenix. Phoenix now uses **Bandit** as its default
-  web server — Cowboy is legacy. **LiveView is the default interactive tier**;
+  web server; Cowboy is legacy. **LiveView is the default interactive tier**;
   reach for channels only when LiveView is not the shape of the problem.
 - Do not hand-roll Cowboy/Bandit wiring for app scaffolds when Plug or Phoenix
   provides the conventions.

@@ -94,7 +94,7 @@ must happen before first real users.
 - Use `security` for CI credentials, artifact signing, SBOMs, and
   dependency trust.
 - Use `versioning` for the version bump, CHANGELOG entry, and tag that
-  precedes a release rollout — deployment owns what happens after the
+  precedes a release rollout: deployment owns what happens after the
   tag.
 
 ## References

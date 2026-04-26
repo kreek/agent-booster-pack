@@ -20,7 +20,7 @@ Use this before scaffolding fresh Rust projects.
 
 ## Choose
 
-- Axum for most Rust HTTP APIs and services — especially when Tokio ecosystem
+- Axum for most Rust HTTP APIs and services: especially when Tokio ecosystem
   integration and Tower-style middleware are useful.
 - Actix Web when its ecosystem, performance profile, or an existing project
   convention is a better fit.

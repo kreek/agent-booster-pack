@@ -30,8 +30,8 @@ Use this before scaffolding fresh Java or Kotlin projects.
   with AOT; Quarkus leans Jakarta-EE-aligned with dev-mode live reload.
 - Spring Boot for production-grade JVM services needing starters,
   auto-configuration, actuator/metrics/health, data integrations, and broad
-  enterprise conventions. **GraalVM native image support is GA** in Spring Boot
-  — opt in when cold-start and memory budgets justify the build-time cost.
+  enterprise conventions. **GraalVM native image support is GA** in Spring Boot;
+  opt in when cold-start and memory budgets justify the build-time cost.
 
 ## Minimum Scaffold
 

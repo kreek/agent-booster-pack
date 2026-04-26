@@ -10,15 +10,15 @@ WCAG 2.2 AA is the floor. Depth reference for the rules summarised in
 W3C Recommendation; also published as ISO/IEC 40500. Quoted verbatim from
 https://www.w3.org/TR/WCAG22/ :
 
-> **Perceivable** — Information and user interface components must be
+> **Perceivable**: Information and user interface components must be
 > presentable to users in ways they can perceive.
 >
-> **Operable** — User interface components and navigation must be operable.
+> **Operable**: User interface components and navigation must be operable.
 >
-> **Understandable** — Information and the operation of user interface must be
+> **Understandable**: Information and the operation of user interface must be
 > understandable.
 >
-> **Robust** — Content must be robust enough that it can be interpreted reliably
+> **Robust**: Content must be robust enough that it can be interpreted reliably
 > by a wide variety of user agents, including assistive technologies.
 
 WCAG 2.2 is additive to 2.1. Removes the obsolete 4.1.1 Parsing success
@@ -32,12 +32,12 @@ criterion.
 | --------- | ----- | -------------------------------------------------------- |
 | 2.4.11    | AA    | Focus Not Obscured (Minimum)                             |
 | 2.4.12    | AAA   | Focus Not Obscured (Enhanced)                            |
-| 2.4.13    | AAA   | Focus Appearance — indicator ≥ 2 CSS px perimeter, 3 : 1 |
-| 2.5.7     | AA    | Dragging Movements — single-pointer alternative required |
-| 2.5.8     | AA    | Target Size Minimum — 24×24 CSS px                       |
+| 2.4.13    | AAA   | Focus Appearance: indicator ≥ 2 CSS px perimeter, 3 : 1 |
+| 2.5.7     | AA    | Dragging Movements: single-pointer alternative required |
+| 2.5.8     | AA    | Target Size Minimum: 24×24 CSS px                       |
 | 3.2.6     | A     | Consistent Help                                          |
 | 3.3.7     | A     | Redundant Entry                                          |
-| 3.3.8     | AA    | Accessible Authentication (Minimum) — no cognitive tests |
+| 3.3.8     | AA    | Accessible Authentication (Minimum): no cognitive tests |
 | 3.3.9     | AAA   | Accessible Authentication (Enhanced)                     |
 
 ---
@@ -49,17 +49,17 @@ criterion.
 | 1.4.3     | Contrast 4.5 : 1 body / 3 : 1 large                                                |
 | 1.4.10    | Reflow to 320 CSS px                                                               |
 | 1.4.11    | Non-text Contrast 3 : 1 for UI components and graphics                             |
-| 1.4.12    | Text Spacing survival — line-height 1.5×, paragraph 2×, letter 0.12em, word 0.16em |
+| 1.4.12    | Text Spacing survival: line-height 1.5×, paragraph 2×, letter 0.12em, word 0.16em |
 | 2.4.7     | Focus Visible                                                                      |
-| 4.1.2     | Name, Role, Value — for every custom control                                       |
-| 4.1.3     | Status Messages — without focus shift                                              |
+| 4.1.2     | Name, Role, Value: for every custom control                                       |
+| 4.1.3     | Status Messages: without focus shift                                              |
 
 ---
 
 ## WCAG 3.0 status
 
 A Working Draft, retitled _W3C Accessibility Guidelines_ (same acronym). **Do
-not use for compliance until it reaches W3C Recommendation status** — check the
+not use for compliance until it reaches W3C Recommendation status**: check the
 W3C status page before relying on it.
 
 Preview of structural changes:
@@ -76,7 +76,7 @@ Ref: https://www.w3.org/TR/wcag-3.0/
 
 - `<button>` for in-page actions.
 - `<a href>` for navigation.
-- Native `<dialog>` with `.showModal()` — handles focus trap and `inert`
+- Native `<dialog>` with `.showModal()`: handles focus trap and `inert`
   automatically.
 - `<nav>`, `<main>`, `<article>`, `<section>`, `<aside>` for landmarks.
 - One `<h1>` per page. Don't skip levels.
@@ -111,7 +111,7 @@ https://webaim.org/projects/million/
 ### APG patterns to implement faithfully
 
 Dialog, Combobox, Listbox, Menu / Menubar, Tabs, Accordion, Disclosure, Tooltip,
-Switch, Treegrid — with their prescribed keyboard maps.
+Switch, Treegrid: with their prescribed keyboard maps.
 
 Ref: https://www.w3.org/WAI/ARIA/apg/patterns/
 
@@ -122,7 +122,7 @@ Ref: https://www.w3.org/WAI/ARIA/apg/patterns/
 - `tabindex="0"` to add to natural order.
 - `tabindex="-1"` for programmatically focusable only.
 - **Never positive tabindex.**
-- Show focus rings via `:focus-visible`, not `:focus` — `outline: none` for
+- Show focus rings via `:focus-visible`, not `:focus`: `outline: none` for
   mouse is acceptable only with `:focus-visible` rings.
 - Implement skip links:
   `<a class="skip-link" href="#main">Skip to main content</a>`.
@@ -138,18 +138,18 @@ Honour these; do not override:
 
 | Query                            | Action                                                                                                                                                                             |
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `prefers-reduced-motion: reduce` | Keep subtle fades. Kill parallax, large scale changes. Do not nuke all animation — vestibular users often benefit from orienting transforms                                        |
+| `prefers-reduced-motion: reduce` | Keep subtle fades. Kill parallax, large scale changes. Do not nuke all animation: vestibular users often benefit from orienting transforms                                        |
 | `prefers-color-scheme: dark`     | Theme. Provide manual override.                                                                                                                                                    |
 | `prefers-contrast: more`         | Raise contrast.                                                                                                                                                                    |
 | `prefers-reduced-transparency`   | Turn off backdrop blur.                                                                                                                                                            |
-| `forced-colors: active`          | Windows High Contrast. Use CSS system colours — `Canvas`, `CanvasText`, `LinkText`, `ButtonFace`, `ButtonText`, `Highlight`. Never `forced-color-adjust: none` unless unavoidable. |
+| `forced-colors: active`          | Windows High Contrast. Use CSS system colours: `Canvas`, `CanvasText`, `LinkText`, `ButtonFace`, `ButtonText`, `Highlight`. Never `forced-color-adjust: none` unless unavoidable. |
 
 ---
 
 ## Contrast tools
 
-- WebAIM Contrast Checker — https://webaim.org/resources/contrastchecker/
-- APCA — https://apcacontrast.com/
+- WebAIM Contrast Checker: https://webaim.org/resources/contrastchecker/
+- APCA: https://apcacontrast.com/
 - Chrome DevTools colour picker shows both.
 
 ---
@@ -167,15 +167,15 @@ Automated tools (axe DevTools, WAVE, Lighthouse, Accessibility Insights) catch
 
 Refs:
 
-- axe DevTools — https://www.deque.com/axe/devtools/
-- WAVE — https://wave.webaim.org/
-- Accessibility Insights — https://accessibilityinsights.io/
+- axe DevTools: https://www.deque.com/axe/devtools/
+- WAVE: https://wave.webaim.org/
+- Accessibility Insights: https://accessibilityinsights.io/
 
 ---
 
 ## Inclusive design
 
-Microsoft's **Inclusive Design** — https://inclusive.microsoft.design/
+Microsoft's **Inclusive Design**: https://inclusive.microsoft.design/
 
 Principles:
 
@@ -183,9 +183,9 @@ Principles:
 2. Learn from diversity.
 3. Solve for one, extend to many.
 
-**Persona spectrum** — permanent, temporary, and situational variants of every
+**Persona spectrum**: permanent, temporary, and situational variants of every
 disability. Captions (designed for Deaf users) serve people in noisy bars,
 language learners, and parents with sleeping infants.
 
-Kat Holmes, _Mismatch_ (MIT Press, 2018) — the definitive text.
+Kat Holmes, _Mismatch_ (MIT Press, 2018): the definitive text.
 https://mitpress.mit.edu/9780262038881/mismatch/

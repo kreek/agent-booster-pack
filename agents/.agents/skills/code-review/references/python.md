@@ -15,9 +15,9 @@ is canonical:
   objects internally; reach for plain classes only when behavior
   genuinely belongs with data.
 - Pure functions over methods that mutate `self`. A class that exists
-  only as a namespace for free functions is a smell — flag it.
+  only as a namespace for free functions is a smell: flag it.
 - Parse at the boundary with Pydantic v2 / `attrs`; emit DTOs on the
-  way out. Don't pass Pydantic models through ten layers — the
+  way out. Don't pass Pydantic models through ten layers: the
   per-construction validation is a 2–3× tax on internal hot paths.
 - Push side effects (DB, HTTP, filesystem) to module edges; keep
   domain logic pure and testable without mocks.
@@ -53,19 +53,19 @@ When in doubt, route to the `data-first` skill.
   `from __future__ import annotations` and the project's tooling support the
   newer form.
 - **`dict[str, Any]` is a `TypedDict` waiting to be born.** The
-  single most common type smell — flag it on sight.
+  single most common type smell: flag it on sight.
 - `# type: ignore` without an error code → block.
 - `Any` silently disables checking on the value and everything
   derived from it. Prefer `object` when you mean "I don't care"; it
   forces narrowing.
 - `Protocol` (structural) over `ABC` (nominal) for "anything with
   `.read()`"-style consumers. `@runtime_checkable` only checks
-  attribute *presence* — not signatures.
+  attribute *presence*, not signatures.
 - `TypeIs` (3.13+) narrows both branches; `TypeGuard` only narrows
   true. Use it only when the supported runtime or `typing_extensions` allows it.
 - `@override` (3.12+ / `typing_extensions`) on overriding methods when the repo
   has enabled that convention.
-- `Self` (3.11+ / `typing_extensions`) for fluent return types — replaces
+- `Self` (3.11+ / `typing_extensions`) for fluent return types: replaces
   `T = TypeVar("T", bound="MyClass")`.
 - Decorators: `ParamSpec`/`Concatenate` (PEP 612), never
   `Callable[..., T]`.
@@ -88,11 +88,11 @@ When in doubt, route to the `data-first` skill.
 - `raise X from e` to preserve the chain; `from None` only when
   deliberately hiding implementation detail; bare `raise` to
   re-raise the original. `raise X(...)` inside `except` already
-  chains via `__context__` — don't accidentally suppress.
+  chains via `__context__`: don't accidentally suppress.
 - **Log-and-reraise is an antipattern**: `log.error(f"... {e}"); raise`
   loses the traceback and double-logs at the boundary. Either
   `log.exception("foo failed")` (full traceback, no re-raise) or
-  re-raise — never both.
+  re-raise, never both.
 - `ExceptionGroup` / `except*` (PEP 654, 3.11+) for aggregated
   validation, `TaskGroup` failures, parallel cleanup. Migrating
   from `raise X` to `raise ExceptionGroup` is a breaking change.
@@ -102,7 +102,7 @@ When in doubt, route to the `data-first` skill.
 - `assert` for runtime validation in production is **stripped under
   `python -O`**. Fine in tests and for type-narrowing hints; never
   for input validation or security checks.
-- Never catch `asyncio.CancelledError` without re-raising — it
+- Never catch `asyncio.CancelledError` without re-raising: it
   breaks the cancellation contract (it's `BaseException` since 3.8).
 
 ## Async / concurrency
@@ -112,7 +112,7 @@ When in doubt, route to the `data-first` skill.
   the whole RTT. Use `httpx.AsyncClient`, `await asyncio.sleep`,
   `await asyncio.to_thread(...)`.
 - `asyncio.TaskGroup` (3.11+) over `gather()` for new code.
-  `gather` does NOT cancel siblings on first failure — they orphan.
+  `gather` does NOT cancel siblings on first failure: they orphan.
   `gather(..., return_exceptions=True)` silently turns failures
   into result objects easy to forget to inspect.
 - `async with asyncio.timeout(5):` over `wait_for(..., timeout=5)`.
@@ -126,7 +126,7 @@ When in doubt, route to the `data-first` skill.
 - `asyncio` with CPU-bound work isn't concurrency. Move to
   `to_thread`/`ProcessPoolExecutor`.
 - Threads: shared mutable state needs `Lock` / `RLock` /
-  `concurrent` collections — never plain `dict`. `multiprocessing`
+  `concurrent` collections, never plain `dict`. `multiprocessing`
   entry point must be guarded with `if __name__ == "__main__":`.
 
 ## Resources and performance
@@ -141,7 +141,7 @@ When in doubt, route to the `data-first` skill.
 - Generators / generator expressions for large iterables;
   comprehensions only when readable in ~2 lines.
 - Float `==` is wrong; use `math.isclose(a, b, rel_tol=...)`. Money
-  uses `Decimal` or integer cents — never `float`. See
+  uses `Decimal` or integer cents, never `float`. See
   `data-first/references/money.md` for the cross-language discipline
   (currency travels with amount, ISO 4217, per-currency decimals).
 - `dataclass(slots=True)` cuts memory ~40% and speeds attribute
@@ -169,7 +169,7 @@ When in doubt, route to the `data-first` skill.
   security. `hmac.compare_digest` for token comparisons. Passwords:
   `argon2-cffi` or `bcrypt`. Never raw SHA + salt; never MD5/SHA-1
   for security.
-- `requests` / `httpx` calls without `timeout=` hang forever — a
+- `requests` / `httpx` calls without `timeout=` hang forever: a
   finding in any service path.
 - `verify=False` is Critical in production HTTP. `yaml.safe_load`
   always; never `yaml.load`. `defusedxml` for untrusted XML. JWT:
@@ -185,13 +185,13 @@ When in doubt, route to the `data-first` skill.
 
 - `print()` in libraries or services is a finding (Ruff `T20`).
   Use `logging` (or `structlog`).
-- `logger.info("user %s did %s", uid, action)` — lazy `%` args.
+- `logger.info("user %s did %s", uid, action)`: lazy `%` args.
   f-strings inside log calls interpolate eagerly even when the
   level is filtered (Ruff `G004` is correct but pedantic; many
   ignore for non-hot paths). With `structlog` the question is moot.
 - `logger.exception("payment_failed", order_id=...)` inside the
   `except`. Never log secrets, tokens, PII, full request/response
-  bodies, `Authorization` headers — redact at the processor level.
+  bodies, `Authorization` headers: redact at the processor level.
 - Libraries add a `NullHandler` and never call `basicConfig` (which
   mutates the root logger).
 - Metrics label cardinality: `user_id` as a Prometheus label blows
@@ -216,16 +216,16 @@ When in doubt, route to the `data-first` skill.
   the top-level package is not public.
 - Deprecation: `@deprecated("Use Client.fetch instead; removed in
   v3.0 (2026-Q4).")` (3.13+ / `typing_extensions`). Pre-3.13:
-  `warnings.warn(..., DeprecationWarning, stacklevel=2)` —
+  `warnings.warn(..., DeprecationWarning, stacklevel=2)`:
   `stacklevel=2` is critical so the warning blames the caller.
   Always document the removal version.
 
 ## Anti-patterns / red flags
 
-- `def fn(values=[])` — mutable default.
+- `def fn(values=[])`: mutable default.
 - `except:` or `except Exception:` outside a trust boundary.
-- `except Exception as e: log.error(f"... {e}"); raise` — log-and-reraise.
-- `except asyncio.CancelledError: pass` — breaks cancellation contract.
+- `except Exception as e: log.error(f"... {e}"); raise`: log-and-reraise.
+- `except asyncio.CancelledError: pass`: breaks cancellation contract.
 - `raise X(...)` inside `except` without `from e` (or bare `raise`).
 - `# type: ignore` without an error code; `Any` without a comment.
 - `dict[str, Any]` past a deserialisation boundary.
@@ -238,17 +238,17 @@ When in doubt, route to the `data-first` skill.
 - `asyncio.gather(...)` where TaskGroup semantics are wanted.
 - `eval`, `exec`, `pickle.loads` on anything from outside.
 - `subprocess(..., shell=True)` with a non-literal command.
-- `cur.execute(f"... {x}")` or `text(f"... {x}")` — string-built SQL.
+- `cur.execute(f"... {x}")` or `text(f"... {x}")`: string-built SQL.
 - `requests` / `httpx` without `timeout=`.
 - `verify=False` for TLS in production.
 - `yaml.load(...)` instead of `yaml.safe_load`.
 - `random.random()` / `random.choice()` for anything security-sensitive.
 - `assert` for input validation, security checks, or auth gates.
-- `if x is "admin"` / `if x == None` — `is` only for sentinels;
+- `if x is "admin"` / `if x == None`: `is` only for sentinels;
   `is None` mandatory.
-- `type(x) == list` — use `isinstance` (or `Protocol`).
+- `type(x) == list`: use `isinstance` (or `Protocol`).
 - `lambda` assigned to a name (Ruff `E731`).
-- `0.1 + 0.2 == 0.3` — float `==`; use `math.isclose` / `Decimal`.
+- `0.1 + 0.2 == 0.3`: float `==`; use `math.isclose` / `Decimal`.
 - `os.path.join(...)` in new code.
 - `utils.py` / `helpers.py` / `*Manager` / `*Service` with no real
   noun.

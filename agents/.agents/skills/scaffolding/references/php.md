@@ -15,7 +15,7 @@ Use this before scaffolding fresh PHP projects.
   when the shape fits: **Volt** (functional Livewire syntax), **Folio**
   (page-based routing), **Reverb** (WebSocket server), and **Herd** (zero-config
   local dev environment for macOS/Windows).
-- Enterprise-grade alternative to Laravel: Symfony — pick it when
+- Enterprise-grade alternative to Laravel: Symfony; pick it when
   components-first composition, long-term stability contracts, or existing
   Symfony ecosystem familiarity matters more than Laravel's defaults.
 - Testing default for new projects: **Pest** (built on PHPUnit, more expressive

@@ -48,8 +48,8 @@ description:
 1. Map actors, assets, entry points, trust boundaries, and data flows.
 2. Review authentication, authorization, input validation, output
    encoding, secrets, errors, logs, dependencies, and SSRF paths.
-3. Run `scripts/dep-audit.sh` when dependency manifests or lockfiles
-   are present.
+3. Run the ecosystem's native dependency audit command when dependency
+   manifests or lockfiles are present.
 4. Block merge on high-risk issues; name any unchecked area explicitly.
 
 ## Verification
@@ -63,8 +63,7 @@ description:
 - [ ] Auth failure responses do not enumerate users via shape, content,
       or timing.
 - [ ] Logs, metrics, traces, and errors are source-redacted.
-- [ ] Dependencies are pinned and `scripts/dep-audit.sh` is clean or
-      findings are triaged.
+- [ ] Dependencies are pinned and native audit findings are triaged.
 - [ ] Security-sensitive behavior has tests or documented manual
       verification.
 
@@ -88,8 +87,7 @@ description:
 - Use specialist static-analysis tools (Semgrep, CodeQL, dependency
   provenance) for high-risk codebases.
 
-## Tools and References
+## References
 
-- `scripts/dep-audit.sh`: lockfile-aware dependency auditor wrapper.
 - `references/owasp-top-10.md`: OWASP Top 10 notes.
 - `references/secrets.md`: secret-handling notes.

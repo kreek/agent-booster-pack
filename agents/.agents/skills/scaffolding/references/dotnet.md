@@ -8,12 +8,12 @@ Use this before scaffolding fresh .NET projects.
   (`Directory.Packages.props`) in any solution with more than one project to
   keep versions consistent.
 - .NET baseline: target the current **LTS** release for new projects (the .NET
-  LTS cycle alternates with STS — check the support policy link before picking).
+  LTS cycle alternates with STS; check the support policy link before picking).
   Use an STS release only when its new features are load-bearing for the
   project.
 - Lightweight/API default: ASP.NET Core Minimal APIs.
 - Robust/full-stack defaults: ASP.NET Core MVC, Razor Pages, or Blazor depending
-  on app shape — including **Blazor Static Server-Side Rendering** as a
+  on app shape: including **Blazor Static Server-Side Rendering** as a
   lightweight alternative to Blazor Server/WASM when the app is largely static
   HTML with islands of interactivity.
 - **Native AOT** is expanded across ASP.NET Core, MAUI, and EF Core pre-compiled

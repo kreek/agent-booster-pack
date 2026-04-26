@@ -1,8 +1,8 @@
 ---
 name: workflow
-description:
+description: >-
   Master entrypoint for Agent Booster Pack. Load at the start of every
-  software engineering task — feature work, bug fixes, prototyping, working
+  software engineering task: feature work, bug fixes, prototyping, working
   from a PRD or tech spec, refactoring, code review, scaffolding, performance
   work, security-sensitive changes, production readiness work, config or CI
   edits, dependency bumps, infra-as-code changes, exploratory research, and
@@ -123,7 +123,7 @@ description:
 
 | Trigger | Do this instead | False alarm |
 |---|---|---|
-| "I'll just code it" | Name the risk profile and load the smallest useful skill set first. | None — even trivial edits enter; they may exit at step 1 with no skills. |
+| "I'll just code it" | Name the risk profile and load the smallest useful skill set first. | None: even trivial edits enter; they may exit at step 1 with no skills. |
 | "I'll infer the product behavior" | Draft likely acceptance criteria, then ask the user to confirm or correct the ambiguous parts before editing. | Mechanical edits or explicit implementation-only tasks with no behavior choice. |
 | "Use every skill to be safe" | Pick the few skills that change the outcome. | Explicit audit/review request across the whole pack. |
 | "I'll branch at commit time" | Branch before editing so the diff, tests, and commits belong to one scoped change. | Read-only research or a task explicitly done outside Git. |

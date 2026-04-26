@@ -1,7 +1,7 @@
 # Money and currency
 
 Use this when storing, comparing, formatting, serialising, or computing
-on monetary amounts — at the language, wire, database, or display
+on monetary amounts: at the language, wire, database, or display
 layer. Triggered from the `data-first` skill's Crosscutting Hazards
 section.
 
@@ -12,9 +12,9 @@ section.
    `float` / `double` / `Number` for money is a Critical-tier
    finding regardless of how "small" the application looks today.
 2. **Amount and currency travel together.** A bare number is not
-   money — `Money(amount, currency)` is. APIs, function signatures,
+   money: `Money(amount, currency)` is. APIs, function signatures,
    DB schemas, and event payloads all carry both.
-3. **ISO 4217 codes (3-letter, uppercase).** `USD`, `EUR`, `JPY` —
+3. **ISO 4217 codes (3-letter, uppercase).** `USD`, `EUR`, `JPY`:
    not `$`, `€`, `¥`. Symbols are display-layer only; codes are the
    stored / wire identity.
 4. **Convert at the boundary, with a recorded rate.** Mid-calculation
@@ -22,7 +22,7 @@ section.
    what happened. Convert once at the edge and persist the rate plus
    the conversion timestamp.
 5. **Pick a rounding policy and document it.** Banker's rounding
-   (half-to-even, financial default), half-up, half-down — all are
+   (half-to-even, financial default), half-up, half-down: all are
    valid; silent inconsistency between layers is not.
 
 ## Storage / wire / display
@@ -51,33 +51,33 @@ significant digit.
 ## High-signal review checks
 
 - Any `float` / `double` / JS `Number` holding money. Walk the call
-  graph — once a float is in the chain, you've already lost
+  graph: once a float is in the chain, you've already lost
   precision.
 - Mixed-currency arithmetic with no conversion: `USD + EUR` should
   fail at the type level, not silently coerce.
-- A `price * tax_rate` followed by `round` for the line total —
+- A `price * tax_rate` followed by `round` for the line total:
   per-line rounding rules are jurisdiction-specific. Round per line,
   then sum. (Exception: VAT regimes that round at the invoice
   total.)
-- Storing `1234.567` in a `NUMERIC(19, 2)` column — the database
+- Storing `1234.567` in a `NUMERIC(19, 2)` column: the database
   silently truncates to `1234.57` (or 56, depending on policy).
 - Storing the symbol `"$"` instead of the code `"USD"`. Australian
   dollars, Canadian dollars, US dollars, Mexican pesos, Chilean
   pesos, and several others all share `$`.
 - A discount or fee computed as a percentage with `Decimal` but
-  truncated to integer cents at the wrong moment — verify the order
+  truncated to integer cents at the wrong moment: verify the order
   of operations matches the regulatory or product spec.
 - Currency conversion in a service method without persisting the
   rate or the conversion timestamp. Reconciliation needs both.
 - Caching a "USD" price across regions because the codebase forgot a
   currency exists.
 - Free-fall conversion: a "preferred display currency" feature that
-  converts on every page load with the live rate — leads to flicker,
+  converts on every page load with the live rate: leads to flicker,
   reconciliation drift, and tax problems.
 - "Round-trip safe" tests that assume `Decimal("0.1") + Decimal("0.2") == Decimal("0.3")`
-  hold across formatters/parsers — most do, but JSON via `float`
+  hold across formatters/parsers: most do, but JSON via `float`
   silently doesn't.
-- Negative amounts: a refund is not a "credit" type — pick a sign
+- Negative amounts: a refund is not a "credit" type: pick a sign
   convention and use it consistently. Mixed sign conventions across
   modules cause double-counting.
 
@@ -88,12 +88,12 @@ significant digit.
 - `JSON.stringify({ price: 12.34 })` going through `Number` in a
   language that defaults to IEEE 754 (most).
 - `total = sum(prices)` where `prices` is `list[float]`.
-- `format(amount, "$%.2f")` — embedding the symbol in code.
+- `format(amount, "$%.2f")`: embedding the symbol in code.
 - `if amount > other_amount` where the two amounts may be different
   currencies.
 - A migration adding `price NUMERIC(10, 2)` with no `currency`
   column.
-- Converting "to USD for storage" silently — the source currency is
+- Converting "to USD for storage" silently: the source currency is
   lost.
 - Hardcoded `100` (cents per major unit) in the conversion: works
   for USD, breaks for JPY (1) and BHD (1000).

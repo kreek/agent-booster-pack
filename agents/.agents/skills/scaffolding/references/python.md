@@ -6,7 +6,7 @@ Use this before scaffolding fresh Python projects.
 
 - Package manager: uv. Do not fall back to raw pip/venv because uv is not
   preinstalled. uv consolidates pip, pip-tools, pipx, Poetry, pyenv, and
-  virtualenv into a single tool for the whole workflow — there is no need to
+  virtualenv into a single tool for the whole workflow: there is no need to
   layer any of those on top.
 - API default: FastAPI.
 - High-throughput alternative: Litestar (msgspec-based serialisation, structured

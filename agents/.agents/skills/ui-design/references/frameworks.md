@@ -1,11 +1,11 @@
-# Framework tradeoffs — frontend-design
+# Framework tradeoffs: frontend-design
 
 Opinionated picks to kick-start a scaffold. Version numbers and release dates
-are not pinned here — check each project's release notes before committing.
+are not pinned here: check each project's release notes before committing.
 
 ---
 
-## Svelte + SvelteKit — default
+## Svelte + SvelteKit: default
 
 Current Svelte uses **runes** (`$state`, `$derived`, `$effect`, `$props`,
 `$bindable`) as its reactivity model.
@@ -16,7 +16,7 @@ Current Svelte uses **runes** (`$state`, `$derived`, `$effect`, `$props`,
   `+layout.svelte`), SSR/SSG/edge/CSR per-route, form actions with progressive
   enhancement, typed `load` functions, adapters for Vercel, Cloudflare, Node,
   static hosts.
-- Built-in animation primitives — `transition:fade|fly|slide|scale|blur`,
+- Built-in animation primitives: `transition:fade|fly|slide|scale|blur`,
   `animate:flip` (FLIP built in), `crossfade` for shared-element morphs,
   `spring`/`tweened` stores.
 - Scoped styles automatic. `$bindable` + types keep component APIs terse.
@@ -36,7 +36,7 @@ Refs: https://svelte.dev/ · https://kit.svelte.dev/
 
 Modern React ships Actions, `useActionState`, `useFormStatus`, `useOptimistic`,
 `use()`, `ref` as a regular prop, and stable Server Components. Next.js ships
-Turbopack and the React Compiler — use them.
+Turbopack and the React Compiler; use them.
 
 Pick when:
 
@@ -79,8 +79,8 @@ Refs: https://astro.build/
 
 Pick when absolute performance or resumability matters more than ecosystem.
 
-- Solid — fine-grained reactivity, JSX syntax, tiny bundles.
-- Qwik — resumability over hydration.
+- Solid: fine-grained reactivity, JSX syntax, tiny bundles.
+- Qwik: resumability over hydration.
 
 Refs: https://www.solidjs.com/ · https://qwik.dev/
 
@@ -98,14 +98,14 @@ Refs: https://htmx.org/
 
 | Stack                  | Library                                                     |
 | ---------------------- | ----------------------------------------------------------- |
-| React                  | Radix Primitives — https://www.radix-ui.com/primitives      |
-| React                  | React Aria Components — https://react-spectrum.adobe.com/   |
-| React/Vue/Solid/Svelte | Ark UI — https://ark-ui.com/                                |
-| Svelte                 | Melt UI — https://melt-ui.com/                              |
-| Svelte                 | Bits UI — https://www.bits-ui.com/                          |
-| Solid                  | Kobalte — https://kobalte.dev/                              |
-| Solid                  | Corvu — https://corvu.dev/                                  |
-| Any (positioning)      | Floating UI — https://floating-ui.com/                      |
+| React                  | Radix Primitives: https://www.radix-ui.com/primitives      |
+| React                  | React Aria Components: https://react-spectrum.adobe.com/   |
+| React/Vue/Solid/Svelte | Ark UI: https://ark-ui.com/                                |
+| Svelte                 | Melt UI: https://melt-ui.com/                              |
+| Svelte                 | Bits UI: https://www.bits-ui.com/                          |
+| Solid                  | Kobalte: https://kobalte.dev/                              |
+| Solid                  | Corvu: https://corvu.dev/                                  |
+| Any (positioning)      | Floating UI: https://floating-ui.com/                      |
 | Any (positioning)      | Native CSS anchor positioning (preferred where it suffices) |
 
 ---

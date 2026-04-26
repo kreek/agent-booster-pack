@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# sniff-mocks.sh — scan a test tree for common mock-abuse patterns.
+# sniff-mocks.sh: scan a test tree for common mock-abuse patterns.
 # Warning-only; use the output as a review checklist, not a CI gate.
 #
 # Usage:  sniff-mocks.sh <dir>
@@ -131,7 +131,7 @@ rm -f /tmp/sniff-mocks.$$
 # Heuristic: toHaveBeenCalledTimes / toHaveBeenCalled present,
 # and no toBe/toEqual/toHaveProperty/toMatch within the same 'test(' / 'it('.
 while IFS= read -r hit; do
-  [ -n "$hit" ] && report MEDIUM "call-count assertion" "$hit — no behaviour assertion in the same test"
+  [ -n "$hit" ] && report MEDIUM "call-count assertion" "$hit; no behaviour assertion in the same test"
 done < <(
   find "$dir" -type f \( -name '*.test.*' -o -name '*.spec.*' \) -not -path '*/node_modules/*' | while read -r f; do
     awk '

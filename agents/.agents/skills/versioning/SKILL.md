@@ -66,7 +66,7 @@ surface.
 Use language-native warnings so static analysers and IDEs see them:
 
 - Python ≥3.13: `from warnings import deprecated`. Pre-3.13:
-  `warnings.warn(..., DeprecationWarning, stacklevel=2)` —
+  `warnings.warn(..., DeprecationWarning, stacklevel=2)`:
   `stacklevel=2` is non-negotiable so the warning blames the caller.
 - TypeScript: JSDoc `@deprecated` (TSDoc-aware).
 - Rust: `#[deprecated(since = "...", note = "...")]`.
@@ -123,7 +123,7 @@ Follow Keep a Changelog: `Added`, `Changed`, `Deprecated`, `Removed`,
 
 - Use `commit` for Conventional Commits format and splitting the
   version-bump commit cleanly.
-- Use `deployment` once the tag is in place — rollout, feature flags,
+- Use `deployment` once the tag is in place: rollout, feature flags,
   and release coordination are deployment's territory.
 - Use `documentation` for migration guides and reference docs that
   move on a major bump.

@@ -1,9 +1,9 @@
 ---
 name: scaffolding
-description:
+description: >-
   Use when bootstrapping a new project, scaffolding a new repo, initialising a
-  new application from scratch, or adding baseline tooling — package manager,
-  linter, formatter, type or syntax checker, test runner, code coverage — to a
+  new application from scratch, or adding baseline tooling: package manager,
+  linter, formatter, type or syntax checker, test runner, code coverage: to a
   project that lacks it. Also use when setting up initial CI, defining standard
   package scripts (test, lint, format, typecheck), or picking defaults for a
   greenfield project. Also use when the current directory is empty or lacks a

@@ -73,7 +73,7 @@ it changes, the structure is fighting the work.
 - [ ] One feature can be edited without traversing more directories than the
       change deserves.
 - [ ] Horizontal controller/service/repository/DTO layers, where present,
-      correspond to real technical boundaries — not default ceremony.
+      correspond to real technical boundaries, not default ceremony.
 - [ ] DDD tactical patterns are applied where they earn their keep, not as
       decoration.
 - [ ] Module surfaces hide volatile decisions; callers depend on the

@@ -5,14 +5,14 @@ Use this before scaffolding fresh Ruby projects.
 ## Defaults
 
 - Package manager: Bundler with `Gemfile` and `Gemfile.lock`.
-- Ruby runtime: target the current stable Ruby. YJIT is on by default — no extra
+- Ruby runtime: target the current stable Ruby. YJIT is on by default; no extra
   tuning required.
 - Lightweight/API defaults: Sinatra, Hanami, or Roda. Sinatra for minimal
   route-handler style; Hanami when a clean-architecture app with slices and
   explicit boundaries is wanted; Roda for routing-tree minimalism with a small
   core and plugin-driven surface.
 - Robust/full-stack default: modern Ruby on Rails with Solid Queue, Solid Cache,
-  and Solid Cable — Redis is no longer a hard dependency, as the Solid Trifecta
+  and Solid Cable: Redis is no longer a hard dependency, as the Solid Trifecta
   is database-backed. Asset pipeline is Propshaft (Sprockets is legacy). The
   built-in authentication generator scaffolds session-based auth.
 - Deploy default for Rails apps without an existing PaaS choice: Kamal.

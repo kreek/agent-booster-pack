@@ -27,7 +27,7 @@ description:
 ## Core Ideas
 
 1. Preserve behavior first; add characterization tests where coverage
-   is missing. Separate structural from behavior changes — every commit
+   is missing. Separate structural from behavior changes: every commit
    is one or the other, never both.
 2. Make every step small, reversible, and shippable.
 3. Validate the target shape before moving large amounts of code.

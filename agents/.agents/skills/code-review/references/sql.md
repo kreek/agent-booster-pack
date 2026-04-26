@@ -7,7 +7,7 @@ ad-hoc query scripts, in the diff. Apply this alongside the main
 ## When to defer
 
 - **Schema, migrations, indexes added via DDL**: defer to the
-  `database` skill — it owns production data risk, locking, and
+  `database` skill: it owns production data risk, locking, and
   rollout.
 - **ORM-generated queries**: review the call site (N+1, eager
   loading) using the language reference (e.g. `ruby.md` for AR,
@@ -44,7 +44,7 @@ ad-hoc query scripts, in the diff. Apply this alongside the main
   filters on the right side of a left join.
 - **Transaction scope**: keep transactions short. Long transactions
   hold locks and bloat MVCC. `BEGIN ... call_external_api ... COMMIT`
-  is a finding — pull the side effect outside.
+  is a finding: pull the side effect outside.
 - **Lock escalation / hot rows**: `UPDATE` on a heavily-contended
   row, `SELECT FOR UPDATE` without a clear ordering, can deadlock.
   Note any new locking pattern.
@@ -56,7 +56,7 @@ ad-hoc query scripts, in the diff. Apply this alongside the main
 - **Date/time**: store and compare in UTC; truncate explicitly
   (`date_trunc(...)`) rather than relying on session timezone.
 - **Materialised views and triggers**: any new trigger or
-  materialised view changes invariants on writes — call out the
+  materialised view changes invariants on writes: call out the
   impact on existing call sites and refresh strategy.
 
 ## Anti-patterns / red flags
@@ -81,6 +81,6 @@ ad-hoc query scripts, in the diff. Apply this alongside the main
   <https://www.postgresql.org/docs/current/using-explain.html>
 - MySQL Optimizer docs:
   <https://dev.mysql.com/doc/refman/8.0/en/optimization.html>
-- Joe Celko, *SQL for Smarties* — canonical for set-based thinking.
+- Joe Celko, *SQL for Smarties*: canonical for set-based thinking.
 - OWASP SQL Injection Prevention Cheat Sheet:
   <https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html>

@@ -30,7 +30,7 @@ description:
 
 1. Default to SQLite (embedded, local-first, small, operationally
    simple) or Postgres (server default). Use Postgres until you can
-   prove it's the wrong tool — JSONB, full-text, geospatial, vectors,
+   prove it's the wrong tool: JSONB, full-text, geospatial, vectors,
    time-series, constraints, transactions are all native or extension.
    Don't introduce a document store just because the payload is JSON;
    reach for one only when its unique benefits (native document API,
@@ -55,17 +55,15 @@ description:
 1. Classify the change as schema, data, query, index, constraint,
    transaction, or operational tuning. Identify table size, write rate,
    lock risk, rollback path, and deploy order.
-2. Run `scripts/migration-preflight.sh <file>` for migration files.
-   Capture EXPLAIN/ANALYZE for important query changes on
+2. Review migration files directly for destructive operations and lock
+   behavior. Capture EXPLAIN/ANALYZE for important query changes on
    representative data.
 3. Split unsafe changes into expand-contract phases. Document
    verification and rollback in the PR or deploy note.
 
 ## Verification
 
-- [ ] Migration SQL was reviewed for destructive changes and locking;
-      `scripts/migration-preflight.sh <file>` is clean or findings are
-      addressed.
+- [ ] Migration SQL was reviewed for destructive changes and locking.
 - [ ] Destructive or tightening changes are split across expand-contract
       phases.
 - [ ] Backfills are batched and resumable; each batch holds locks
@@ -100,8 +98,7 @@ description:
 - Use `realtime` or `background-jobs` for stream or worker consumer
   semantics after the durable handoff exists.
 
-## Tools and References
+## References
 
-- `scripts/migration-preflight.sh <file>`: warning-only migration scan.
 - `references/online-ddl.md`: online migration patterns.
 - `references/explain-and-isolation.md`: EXPLAIN and isolation notes.

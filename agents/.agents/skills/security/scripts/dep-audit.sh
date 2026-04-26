@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# dep-audit.sh — detect the lockfile and run the matching dependency auditor.
+# dep-audit.sh: detect the lockfile and run the matching dependency auditor.
 # Input: run from the project root (or pass --dir <path>).
 # Output: stdout = normalised findings; exit 0 = clean, 1 = findings, 2 = no auditor available.
 

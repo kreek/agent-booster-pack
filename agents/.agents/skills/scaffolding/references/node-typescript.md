@@ -15,8 +15,8 @@ Use this before scaffolding fresh Node or TypeScript projects.
 
 ## TypeScript execution
 
-- Modern Node strips TypeScript natively for single-file scripts and simple CLIs
-  — no flag, no loader needed. Reach for a bundler or `tsc` only when types,
+- Modern Node strips TypeScript natively for single-file scripts and simple CLIs:
+  no flag, no loader needed. Reach for a bundler or `tsc` only when types,
   emit, declaration files, or non-`.ts` compile steps are genuinely required.
 - When a TypeScript runner is still needed for dev loops or scripts with
   decorators/legacy TS features, use `tsx`. Do not reach for `ts-node`; it is no

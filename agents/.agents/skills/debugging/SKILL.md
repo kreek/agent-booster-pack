@@ -33,7 +33,7 @@ description:
    boundary: data, service, integration, application, infrastructure.
 3. Fix the root cause and add a guard test.
 4. For incidents, produce blameless learning with owned follow-up
-   actions — never "human error" as a root cause.
+   actions, never "human error" as a root cause.
 
 ## Workflow
 
