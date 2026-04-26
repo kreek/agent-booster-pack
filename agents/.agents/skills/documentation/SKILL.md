@@ -3,9 +3,10 @@ name: documentation
 description:
   Use when writing or reviewing documentation — READMEs, architecture notes,
   ADRs, runbooks, API docs, module-level docs, tutorials, how-to guides,
-  reference material, or code comments. Also use when the user mentions
-  ADRs, runbooks, doc rot, MkDocs, Material for MkDocs, Diátaxis,
-  progressive disclosure, or whether to write prose or rely on types/tests.
+  requirements, acceptance criteria, user stories, reference material, or code
+  comments. Also use when the user mentions ADRs, runbooks, doc rot, MkDocs,
+  Material for MkDocs, Diátaxis, progressive disclosure, or whether to write
+  prose or rely on types/tests.
 ---
 
 # Documentation
@@ -17,7 +18,8 @@ description:
 ## When to Use
 
 - Writing or reviewing READMEs, ADRs, runbooks, tutorials, how-to
-  guides, reference docs, module docs, or code comments.
+  guides, reference docs, module docs, requirements, acceptance
+  criteria, user stories, or code comments.
 - Deciding whether prose is needed or whether a type, schema,
   generated reference, test, or command output should be the source of
   truth.
@@ -49,6 +51,9 @@ description:
    regardless of language or framework. Use another docs system only
    when the repo already has one, the user explicitly asks, or a
    publishing constraint requires it.
+9. Requirements docs should make behavior, constraints, and acceptance
+   explicit. Use user-story format only when it helps; do not let
+   template wording replace concrete acceptance criteria.
 
 ## Workflow
 
@@ -60,6 +65,9 @@ description:
 3. Add verification: commands, expected state, review owner, or drill
    requirement. Remove stale or duplicated sections encountered during
    the edit.
+4. For PRDs, specs, issues, user stories, or acceptance criteria, read
+   `references/requirements-and-acceptance.md` and write from the
+   user's goal to observable behavior.
 
 ## Verification
 
@@ -78,6 +86,9 @@ description:
 - [ ] Comments explain why; obvious what-comments are removed.
 - [ ] Stale sections are deleted or marked with a tracked rewrite
       owner.
+- [ ] Requirements and acceptance criteria name caller-visible
+      behavior, constraints, non-goals, and proof, not implementation
+      guesses.
 
 ## Handoffs
 
@@ -87,9 +98,13 @@ description:
   notes.
 - Use `versioning` for CHANGELOG hygiene and migration notes that ship
   with a release.
+- Use `proof` when acceptance criteria need to become completion
+  evidence.
 
 ## References
 
 - Diataxis: <https://diataxis.fr/>
 - Material for MkDocs: <https://squidfunk.github.io/mkdocs-material/>
 - ADR template: status, date, context, decision, consequences.
+- Requirements and acceptance criteria:
+  `references/requirements-and-acceptance.md`.
