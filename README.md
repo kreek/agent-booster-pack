@@ -256,6 +256,7 @@ apply:
   larger frontend apps with SvelteKit, quick-to-build typed Python APIs with
   FastAPI and the Python ecosystem, or high-performance Rust web services with
   Axum.
+
 [skill-accessibility]: agents/.agents/skills/accessibility/SKILL.md
 [skill-api]: agents/.agents/skills/api/SKILL.md
 [skill-background-jobs]: agents/.agents/skills/background-jobs/SKILL.md
