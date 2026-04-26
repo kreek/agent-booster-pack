@@ -74,6 +74,11 @@ existing project conventions, style/aesthetics. Project conventions are evidence
 of local intent, not proof of quality; follow them only when they do not weaken
 the higher-priority concerns.
 
+- `workflow`: use as the ABP entrypoint when deciding which skills apply to a
+  task, especially for broad feature work, bug fixes, reviews, refactors,
+  scaffolding, performance work, security-sensitive changes, or production
+  readiness work.
+
 ### Foundational Design
 
 Use these before choosing abstractions or control flow for non-trivial code.

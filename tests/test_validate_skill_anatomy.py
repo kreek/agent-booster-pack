@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import subprocess
 import sys
@@ -108,6 +109,63 @@ def make_skill(skills_dir: Path, name: str, body: str = GOOD_SKILL) -> Path:
     return skill
 
 
+def make_codex_plugin_package(
+    root: Path,
+    *,
+    include_marketplace: bool = True,
+    include_manifest: bool = True,
+    marketplace_source_path: str = "./plugin",
+    include_policy: bool = True,
+    include_category: bool = True,
+    manifest_skills_path: str = "./skills/",
+) -> None:
+    """Create Codex plugin metadata fixtures under a repository root."""
+    if include_marketplace:
+        plugin_entry: dict[str, object] = {
+            "name": "abp",
+            "source": {
+                "source": "local",
+                "path": marketplace_source_path,
+            },
+        }
+        if include_policy:
+            plugin_entry["policy"] = {
+                "installation": "AVAILABLE",
+                "authentication": "ON_INSTALL",
+            }
+        if include_category:
+            plugin_entry["category"] = "Coding"
+
+        marketplace = {
+            "name": "abp",
+            "interface": {
+                "displayName": "Agent Booster Pack",
+            },
+            "plugins": [plugin_entry],
+        }
+        marketplace_path = root / ".agents" / "plugins" / "marketplace.json"
+        marketplace_path.parent.mkdir(parents=True, exist_ok=True)
+        marketplace_path.write_text(json.dumps(marketplace), encoding="utf-8")
+
+    if include_manifest:
+        manifest = {
+            "name": "abp",
+            "version": "2.0.0",
+            "skills": manifest_skills_path,
+            "interface": {
+                "displayName": "Agent Booster Pack",
+                "category": "Coding",
+                "capabilities": ["Read", "Write"],
+                "defaultPrompt": [
+                    "Use ABP workflow for this engineering task.",
+                ],
+            },
+        }
+        manifest_path = root / "plugin" / ".codex-plugin" / "plugin.json"
+        manifest_path.parent.mkdir(parents=True, exist_ok=True)
+        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+
 def describe_validate_skill_anatomy_cli():
     def it_runs_its_self_test_successfully():
         result = run_script("--self-test")
@@ -122,12 +180,14 @@ def describe_validate_skill_anatomy_cli():
         plugin_skills.mkdir(parents=True)
         link = plugin_skills / "good"
         link.symlink_to("../../agents/.agents/skills/good")
+        make_codex_plugin_package(tmp_path)
 
         result = run_script(skills_dir)
 
         assert result.returncode == 0
         assert "all skills conform to the anatomy" in result.stdout
         assert "plugin/ symlinks in sync with source" in result.stdout
+        assert "codex plugin package valid" in result.stdout
         assert link.resolve() == (skills_dir / "good").resolve()
         assert os.readlink(link) == "../../agents/.agents/skills/good"
 
@@ -161,6 +221,7 @@ def describe_validate_skill_anatomy_cli():
         skills_dir = tmp_path / "agents" / ".agents" / "skills"
         make_skill(skills_dir, "good")
         (tmp_path / "plugin" / "skills").mkdir(parents=True)
+        make_codex_plugin_package(tmp_path)
 
         result = run_script(skills_dir)
 
@@ -169,6 +230,65 @@ def describe_validate_skill_anatomy_cli():
         assert "plugin drift:" in result.stdout
         assert "plugin/skills/good missing" in result.stdout
         assert "1 plugin symlink(s) drifted from source" in result.stdout
+
+    def it_reports_missing_codex_marketplace_when_plugin_exists(tmp_path: Path):
+        skills_dir = tmp_path / "agents" / ".agents" / "skills"
+        make_skill(skills_dir, "good")
+        plugin_skills = tmp_path / "plugin" / "skills"
+        plugin_skills.mkdir(parents=True)
+        (plugin_skills / "good").symlink_to("../../agents/.agents/skills/good")
+        make_codex_plugin_package(tmp_path, include_marketplace=False)
+
+        result = run_script(skills_dir)
+
+        assert result.returncode == 1
+        assert "codex plugin:" in result.stdout
+        assert "missing" in result.stdout
+        assert ".agents/plugins/marketplace.json" in result.stdout
+
+    def it_reports_wrong_codex_marketplace_source_path(tmp_path: Path):
+        skills_dir = tmp_path / "agents" / ".agents" / "skills"
+        make_skill(skills_dir, "good")
+        plugin_skills = tmp_path / "plugin" / "skills"
+        plugin_skills.mkdir(parents=True)
+        (plugin_skills / "good").symlink_to("../../agents/.agents/skills/good")
+        make_codex_plugin_package(tmp_path, marketplace_source_path="./plugins/abp")
+
+        result = run_script(skills_dir)
+
+        assert result.returncode == 1
+        assert "abp.source.path must be './plugin'" in result.stdout
+
+    def it_reports_missing_codex_marketplace_policy_and_category(tmp_path: Path):
+        skills_dir = tmp_path / "agents" / ".agents" / "skills"
+        make_skill(skills_dir, "good")
+        plugin_skills = tmp_path / "plugin" / "skills"
+        plugin_skills.mkdir(parents=True)
+        (plugin_skills / "good").symlink_to("../../agents/.agents/skills/good")
+        make_codex_plugin_package(
+            tmp_path,
+            include_policy=False,
+            include_category=False,
+        )
+
+        result = run_script(skills_dir)
+
+        assert result.returncode == 1
+        assert "abp.policy must be an object" in result.stdout
+        assert "abp.category must be 'Coding'" in result.stdout
+
+    def it_reports_wrong_codex_manifest_skills_path(tmp_path: Path):
+        skills_dir = tmp_path / "agents" / ".agents" / "skills"
+        make_skill(skills_dir, "good")
+        plugin_skills = tmp_path / "plugin" / "skills"
+        plugin_skills.mkdir(parents=True)
+        (plugin_skills / "good").symlink_to("../../agents/.agents/skills/good")
+        make_codex_plugin_package(tmp_path, manifest_skills_path="./not-skills/")
+
+        result = run_script(skills_dir)
+
+        assert result.returncode == 1
+        assert "skills must be './skills/'" in result.stdout
 
     def it_rejects_paths_that_are_not_skill_directories(tmp_path: Path):
         missing_dir = tmp_path / "missing"

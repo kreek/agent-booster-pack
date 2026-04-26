@@ -1,15 +1,14 @@
 #!/usr/bin/env bash
-# Run after `stow agents` to wire cross-agent skill and command symlinks.
+# Run after the Stow skills install to wire cross-agent skill symlinks.
 set -euo pipefail
 
 usage() {
 	cat <<EOF
 Usage: ./setup.sh
 
-Wire ABP skills into local agent skill directories after one of:
+Wire ABP skills into local agent skill directories after:
 
-  stow --target="\$HOME" agents
-  stow --target="\$HOME" --ignore='^AGENTS\\.md\$' agents
+  stow --target="\$HOME" --ignore='^AGENTS\\.md\$' --ignore='^\\.claude/CLAUDE\\.md\$' agents
 
 Options:
   -h, --help Show this help.
@@ -51,46 +50,15 @@ confirm() {
 }
 
 if [ ! -d "$AGENTS_SKILLS" ]; then
-	# Most common cause of stow failing silently: a personal ~/AGENTS.md
-	# that stow refuses to overwrite, which aborts the whole package.
-	# Detect that case and surface the merge path instead of the generic
-	# "run stow" hint.
-	if [ -e "$HOME/AGENTS.md" ] && [ ! -L "$HOME/AGENTS.md" ]; then
-		cat >&2 <<EOF
-ERROR: $AGENTS_SKILLS is missing.
-
-You already have a personal ~/AGENTS.md, which makes 'stow agents'
-refuse to overwrite it and abort the whole package. Choose one install mode:
-
-  A. System-wide AGENTS.md + skills:
-     Merge the ABP guidance from agents/AGENTS.md into your ~/AGENTS.md.
-     Keep your personal rules, and preserve the ABP rule that project
-     AGENTS.md files are additive and must not weaken safety, proof,
-     validation, or user-change-preservation requirements.
-     Then re-run:
-       stow --target="\$HOME" agents
-
-  B. Skills only:
-     Leave ~/AGENTS.md untouched and link the shared skill directories:
-       stow --target="\$HOME" --ignore='^AGENTS\\.md\$' agents
-
-  Then re-run this script:
-       ./setup.sh
-
-See the "Install" section of README.md for the full procedure.
-EOF
-		exit 1
-	fi
 	cat >&2 <<EOF
 ERROR: $AGENTS_SKILLS is missing.
 
-Run one install mode from the repo root first:
+Run the skills install from the repo root first:
 
-  # System-wide AGENTS.md + skills:
-  stow --target="\$HOME" agents
+  stow --target="\$HOME" --ignore='^AGENTS\\.md\$' --ignore='^\\.claude/CLAUDE\\.md\$' agents
 
-  # Skills only:
-  stow --target="\$HOME" --ignore='^AGENTS\\.md\$' agents
+ABP uses skills and plugin metadata; system AGENTS.md / CLAUDE.md files are not
+part of the install.
 EOF
 	exit 1
 fi

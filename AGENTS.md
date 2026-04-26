@@ -22,19 +22,26 @@ Most edits are to skill bodies, the top-level `AGENTS.md` index, or the
   lives here; siblings may add `agents/`, `references/`, and `scripts/`.
 - **Canonical commands**: `agents/.agents/commands/<name>.md` (shared command
   prompts surfaced by every agent).
-- **Top-level index**: `agents/AGENTS.md`. Lists every skill with a
-  one-line trigger; the wrapper at `agents/.claude/CLAUDE.md` just
-  `@`-includes it for Claude Code.
+- **Top-level index**: `agents/AGENTS.md`. Lists every skill with a one-line
+  trigger for repo-maintainer reference. Normal ABP use relies on skill
+  frontmatter, plugin metadata, and the `workflow` skill; users do not need to
+  install or merge system instruction files.
 - **Claude Code plugin mirror**: `plugin/skills/<name>` and
   `plugin/commands/<name>.md` are **relative symlinks** into
   `agents/.agents/...`. They give Claude Code users the namespaced
   `/abp:<skill>` slash commands via `.claude-plugin/marketplace.json`.
   Never edit a `plugin/` SKILL — edit the canonical file; the symlink
   resolves through.
+- **Codex plugin library**: `.agents/plugins/marketplace.json` points Codex at
+  the shared `plugin/` root, and `plugin/.codex-plugin/plugin.json` exposes the
+  same symlinked skills to Codex as a namespaced plugin. Keep the Codex
+  marketplace and manifest in sync with Claude plugin packaging.
 - **Install layout**: `agents/` is a GNU Stow package. `stow --target="$HOME"
-  agents` links it under `~/AGENTS.md`, `~/.agents/skills/`,
-  `~/.agents/commands/`, and `~/.claude/CLAUDE.md`. `setup.sh` then
-  fans those out to per-tool locations and re-runs the plugin-sync.
+  --ignore='^AGENTS\.md$' --ignore='^\.claude/CLAUDE\.md$' agents` links the
+  shared skills and commands. System `AGENTS.md` / `CLAUDE.md` files are not
+  part of ABP installation.
+  `setup.sh` then fans those out to per-tool locations and re-runs the
+  plugin-sync.
 
 When you add, rename, or delete a skill or command, the canonical file under
 `agents/.agents/` is the only place to write. Everything else is
@@ -51,8 +58,9 @@ regenerated.
 uv run python scripts/generate_plugin_symlinks.py
 
 # Validate every SKILL.md against the playbook anatomy (frontmatter,
-# required sections, no inline expert attribution) AND check for
-# plugin/ drift. Run this before publishing skill changes.
+# required sections, no inline expert attribution), plugin/ drift, and
+# Codex plugin marketplace/manifest shape. Run this before publishing
+# skill changes.
 uv run python scripts/validate_skill_anatomy.py
 
 # Validate local Markdown links and anchors. Remote URL checks are omitted by
@@ -122,22 +130,26 @@ Adding or renaming a skill needs four updates, in order:
    the body satisfies the validator's required sections).
 2. `agents/AGENTS.md` — add the routing line under the right grouping
    (Foundational Design / Safety Gates / Correctness And Change Control /
-   Production Quality / Communication And UX / Workflow).
+   Production Quality / Communication And UX / Workflow) for maintainer
+   reference.
 3. `README.md` — update the human-facing skill list and its
    `[skill-<name>]:` reference link at the bottom.
-4. `./setup.sh` to regenerate `plugin/skills/<name>` and prune stale
+4. `workflow` — update the meta-skill only when the new or renamed skill changes
+   the broad ABP routing workflow.
+5. `./setup.sh` to regenerate `plugin/skills/<name>` and prune stale
    per-agent links. The validator's drift check fails CI/local runs if
-   step 4 is skipped.
+   step 5 is skipped.
 
 Neighbouring skills may need their `Handoffs` updated when routing
 changes. Do not duplicate skill prose between files.
 
-## Pack versioning (`marketplace.json`)
+## Pack versioning (`marketplace.json` / `plugin.json`)
 
 The pack publishes a single semantic version in
 `.claude-plugin/marketplace.json` (both `metadata.version` and the
-`plugins[0].version`). Bump it when canonical content changes so
-`scripts/sync_agents_md.py` shows users a meaningful version delta.
+`plugins[0].version`), `plugin/.claude-plugin/plugin.json`, and
+`plugin/.codex-plugin/plugin.json`. Bump all of them together when canonical
+content changes so plugin managers see the same package version.
 
 | Bump | Trigger |
 |---|---|

@@ -4,12 +4,15 @@
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import shutil
 import sys
 import tempfile
 from dataclasses import dataclass
+from json import JSONDecodeError
 from pathlib import Path
+from typing import Any
 
 
 REQUIRED_SECTIONS = (
@@ -134,6 +137,11 @@ def plugin_skills_dir(skills_dir: Path) -> Path:
     return skills_dir.parent.parent.parent / "plugin" / "skills"
 
 
+def repo_root_for_skills_dir(skills_dir: Path) -> Path:
+    """Return the repository root implied by a canonical skills directory."""
+    return skills_dir.parent.parent.parent
+
+
 def validate_plugin_drift(skills_dir: Path) -> int:
     """Check that plugin/skills symlinks resolve to canonical skill directories."""
     plugin_dir = plugin_skills_dir(skills_dir)
@@ -168,6 +176,155 @@ def validate_plugin_drift(skills_dir: Path) -> int:
         print(f"{drift} plugin symlink(s) drifted from source")
 
     return drift
+
+
+def read_json_object(path: Path) -> tuple[dict[str, Any] | None, str | None]:
+    """Read a JSON object or return a validation problem."""
+    if not path.is_file():
+        return None, f"missing {path}"
+
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except JSONDecodeError as error:
+        return None, f"{path} is not valid JSON: {error.msg}"
+
+    if not isinstance(data, dict):
+        return None, f"{path} must contain a JSON object"
+
+    return data, None
+
+
+def first_plugin_entry(marketplace: dict[str, Any]) -> dict[str, Any] | None:
+    """Return the ABP plugin entry from a marketplace document."""
+    plugins = marketplace.get("plugins")
+    if not isinstance(plugins, list):
+        return None
+
+    for entry in plugins:
+        if isinstance(entry, dict) and entry.get("name") == "abp":
+            return entry
+
+    return None
+
+
+def validate_codex_plugin_package(skills_dir: Path) -> int:
+    """Validate Codex plugin manifest and repo marketplace metadata."""
+    root = repo_root_for_skills_dir(skills_dir)
+    plugin_root = root / "plugin"
+    if not plugin_root.is_dir():
+        return 0
+
+    problems: list[str] = []
+    marketplace_path = root / ".agents" / "plugins" / "marketplace.json"
+    manifest_path = plugin_root / ".codex-plugin" / "plugin.json"
+
+    marketplace, problem = read_json_object(marketplace_path)
+    if problem is not None:
+        problems.append(problem)
+    elif marketplace is not None:
+        if marketplace.get("name") != "abp":
+            problems.append(f"{marketplace_path} name must be 'abp'")
+        interface = marketplace.get("interface")
+        if not isinstance(interface, dict):
+            problems.append(f"{marketplace_path} interface must be an object")
+        elif interface.get("displayName") != "Agent Booster Pack":
+            problems.append(
+                f"{marketplace_path} interface.displayName must be 'Agent Booster Pack'"
+            )
+
+        entry = first_plugin_entry(marketplace)
+        if entry is None:
+            problems.append(f"{marketplace_path} must include an 'abp' plugin entry")
+        else:
+            source = entry.get("source")
+            if not isinstance(source, dict):
+                problems.append(f"{marketplace_path} abp.source must be an object")
+            else:
+                if source.get("source") != "local":
+                    problems.append(
+                        f"{marketplace_path} abp.source.source must be 'local'"
+                    )
+                if source.get("path") != "./plugin":
+                    problems.append(
+                        f"{marketplace_path} abp.source.path must be './plugin'"
+                    )
+
+            policy = entry.get("policy")
+            if not isinstance(policy, dict):
+                problems.append(f"{marketplace_path} abp.policy must be an object")
+            else:
+                if policy.get("installation") != "AVAILABLE":
+                    problems.append(
+                        f"{marketplace_path} abp.policy.installation must be "
+                        "'AVAILABLE'"
+                    )
+                if policy.get("authentication") != "ON_INSTALL":
+                    problems.append(
+                        f"{marketplace_path} abp.policy.authentication must be "
+                        "'ON_INSTALL'"
+                    )
+
+            if entry.get("category") != "Coding":
+                problems.append(f"{marketplace_path} abp.category must be 'Coding'")
+
+    manifest, problem = read_json_object(manifest_path)
+    if problem is not None:
+        problems.append(problem)
+    elif manifest is not None:
+        if manifest.get("name") != "abp":
+            problems.append(f"{manifest_path} name must be 'abp'")
+        if manifest.get("skills") != "./skills/":
+            problems.append(f"{manifest_path} skills must be './skills/'")
+
+        interface = manifest.get("interface")
+        if not isinstance(interface, dict):
+            problems.append(f"{manifest_path} interface must be an object")
+        else:
+            if interface.get("displayName") != "Agent Booster Pack":
+                problems.append(
+                    f"{manifest_path} interface.displayName must be "
+                    "'Agent Booster Pack'"
+                )
+            if interface.get("category") != "Coding":
+                problems.append(f"{manifest_path} interface.category must be 'Coding'")
+
+            capabilities = interface.get("capabilities")
+            if not isinstance(capabilities, list) or not {
+                "Read",
+                "Write",
+            }.issubset(set(capabilities)):
+                problems.append(
+                    f"{manifest_path} interface.capabilities must include "
+                    "'Read' and 'Write'"
+                )
+
+            default_prompt = interface.get("defaultPrompt")
+            if not isinstance(default_prompt, list) or len(default_prompt) > 3:
+                problems.append(
+                    f"{manifest_path} interface.defaultPrompt must contain "
+                    "at most 3 prompts"
+                )
+
+        claude_marketplace, claude_problem = read_json_object(
+            root / ".claude-plugin" / "marketplace.json"
+        )
+        if claude_problem is None and claude_marketplace is not None:
+            claude_version = claude_marketplace.get("metadata", {}).get("version")
+            if manifest.get("version") != claude_version:
+                problems.append(
+                    f"{manifest_path} version must match "
+                    ".claude-plugin/marketplace.json metadata.version"
+                )
+
+    if problems:
+        for problem in problems:
+            print(f"codex plugin: {problem}")
+        print()
+        print(f"{len(problems)} codex plugin package problem(s)")
+    else:
+        print("codex plugin package valid")
+
+    return len(problems)
 
 
 def write_fixture(path: Path, text: str) -> None:
@@ -299,8 +456,9 @@ def main(argv: list[str] | None = None) -> int:
     findings = validate_skills(skills_dir)
     print_skill_findings(skills_dir, findings)
     drift = validate_plugin_drift(skills_dir)
+    codex_plugin_problems = validate_codex_plugin_package(skills_dir)
 
-    return 1 if findings or drift else 0
+    return 1 if findings or drift or codex_plugin_problems else 0
 
 
 if __name__ == "__main__":

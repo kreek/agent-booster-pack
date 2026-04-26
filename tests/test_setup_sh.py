@@ -1,11 +1,10 @@
-"""Behavior tests for the conflict-detection branch of setup.sh.
+"""Behavior tests for setup.sh.
 
 The script's main job (fanning out per-agent symlinks) needs a real
 stowed install to test end-to-end and is exercised manually. These
-tests focus on the narrower, safety-critical promise: when a personal
-``~/AGENTS.md`` is what made stow abort, ``setup.sh`` recognises the
-state, prints actionable instructions, and exits non-zero without
-touching the user's file.
+tests focus on setup's safety-critical promises: it explains the
+skills install when prerequisites are missing, asks before
+touching links, and exits non-zero without touching user-owned files.
 """
 
 from __future__ import annotations
@@ -103,9 +102,9 @@ def create_stowed_skills(home: Path) -> None:
 
 
 def describe_setup_sh_preflight():
-    def it_explains_the_AGENTS_md_conflict_when_stow_has_aborted(tmp_path: Path):
-        # Simulate the "stow aborted because ~/AGENTS.md exists" state:
-        # a real personal AGENTS.md, no ~/.agents/skills directory.
+    def it_explains_the_skills_install_without_touching_personal_agents_md(
+        tmp_path: Path,
+    ):
         personal = tmp_path / "AGENTS.md"
         personal.write_text("# Personal\n\nDo not touch.\n", encoding="utf-8")
         before = personal.read_text(encoding="utf-8")
@@ -117,31 +116,23 @@ def describe_setup_sh_preflight():
         # File the user owns is left untouched.
         assert personal.read_text(encoding="utf-8") == before
         assert personal.stat().st_mtime_ns == before_mtime
-        # Stderr explains the manual end-user path without requiring Python tooling.
-        assert "personal ~/AGENTS.md" in result.stderr
-        assert "System-wide AGENTS.md + skills" in result.stderr
-        assert "Skills only" in result.stderr
-        assert "Merge the ABP guidance from agents/AGENTS.md" in result.stderr
+        assert "skills install" in result.stderr
+        assert "--ignore='^AGENTS\\.md$'" in result.stderr
+        assert "--ignore='^\\.claude/CLAUDE\\.md$'" in result.stderr
+        assert "system AGENTS.md / CLAUDE.md files are not" in result.stderr
         assert "uv run" not in result.stderr
         assert "stow --target" in result.stderr
 
-    def it_falls_back_to_the_generic_hint_without_a_personal_AGENTS_md(
+    def it_explains_the_same_skills_install_without_a_personal_agents_md(
         tmp_path: Path,
     ):
-        # No ~/AGENTS.md, no ~/.agents/skills — a fresh shell that
-        # forgot the stow step. Generic message is fine here.
         result = run_setup(tmp_path)
 
         assert result.returncode == 1
-        assert "personal ~/AGENTS.md" not in result.stderr
-        assert "System-wide AGENTS.md + skills" in result.stderr
-        assert "Skills only" in result.stderr
+        assert "skills install" in result.stderr
+        assert "--ignore='^AGENTS\\.md$'" in result.stderr
 
-    def it_treats_a_symlinked_AGENTS_md_as_already_installed(tmp_path: Path):
-        # A symlinked ~/AGENTS.md is the stow install path, not a
-        # personal file. Even if .agents/skills is missing for some
-        # reason, the conflict branch must not fire (it would be a
-        # false alarm).
+    def it_does_not_treat_AGENTS_md_as_required_for_setup(tmp_path: Path):
         link_target = tmp_path / "real.md"
         link_target.write_text("# from stow\n", encoding="utf-8")
         symlink = tmp_path / "AGENTS.md"
@@ -150,9 +141,8 @@ def describe_setup_sh_preflight():
         result = run_setup(tmp_path)
 
         assert result.returncode == 1
-        # We do not mention the personal-file workflow when the file
-        # is a symlink, even though .agents/skills is missing.
-        assert "personal ~/AGENTS.md" not in result.stderr
+        assert "skills install" in result.stderr
+        assert "already installed" not in result.stderr
 
 
 def describe_setup_sh_confirmation():

@@ -8,17 +8,17 @@
   </picture>
 </p>
 
-A portable set of high-leverage, general-purpose skills for leveling up coding
-agents, with strong defaults for building, changing, testing, reviewing, and
-operating web applications and services.
+A portable skill library for using coding agents to write more effective,
+correct, safe, accessible, maintainable, and performant software.
 
 Agent Booster Pack distills my 25 years of software engineering experience, from
 startups to large private and public sector organizations, into portable skills
 for agents that understand the Agent Skills layout, including Codex, Claude
 Code, Pi, Cursor, Gemini CLI, GitHub Copilot CLI, OpenCode, and Windsurf. It
-raises engineering maturity by pushing agents toward simpler designs, explicit
-data models, proven behavior, safer production systems, intuitive and accessible
-interfaces, and clear, scoped changes a human can review and maintain.
+raises engineering maturity by giving agents a workflow for simpler designs,
+explicit data models, proven behavior, safer production systems, intuitive and
+accessible interfaces, and clear, scoped changes a human can review and
+maintain.
 
 In practice, ABP steers agents to:
 
@@ -51,6 +51,17 @@ at the moment it matters, without trying to rewire the agent's internals.
 
 ## Install
 
+Choose one install path per agent. The manual path and plugin paths all expose
+the same ABP skills, so installing both for the same agent can create duplicate
+skill entries or slash commands. Use the Claude Code plugin for Claude Code, the
+Codex plugin for Codex, and the manual skills install for agents that read
+`~/.agents/skills/` or do not have a plugin install path.
+
+### Manual Skills Install
+
+Use this when your agent reads `~/.agents/skills/`, or when you want one shared
+skills directory for multiple tools.
+
 Prerequisites:
 
 - Git.
@@ -69,60 +80,46 @@ sudo apt install stow
 sudo dnf install stow
 ```
 
-Fresh checkout and install:
+Clone and link the shared skills:
 
 ```sh
 git clone https://github.com/kreek/agent-booster-pack.git
 cd agent-booster-pack
 
-# Option A: install the system-wide AGENTS.md plus skills.
-stow --target="$HOME" agents
+stow --target="$HOME" --ignore='^AGENTS\.md$' --ignore='^\.claude/CLAUDE\.md$' agents
+```
 
-# Option B: install skills only, leaving ~/AGENTS.md untouched.
-stow --target="$HOME" --ignore='^AGENTS\.md$' agents
+ABP does not need to edit `~/AGENTS.md` or `~/.claude/CLAUDE.md`; agents
+discover skills from the shared skill directory and load each `SKILL.md` only
+when it is relevant. The checkout can live anywhere.
 
+The manual install links:
+
+- `~/.agents/skills/`
+- `~/.agents/commands/`
+
+Run the local link helper only when you use a tool that needs compatibility
+symlinks:
+
+```sh
 ./setup.sh
 ```
 
-The Stow command is the main install step. Choose whether ABP should install
-both the system-wide `~/AGENTS.md` and the skills, or only the shared skill
-directories while leaving your existing `~/AGENTS.md` untouched. Either way, the
-checkout can live anywhere.
-
-Full install links:
-
-- `~/AGENTS.md`
-- `~/.agents/skills/`
-- `~/.agents/commands/`
-- `~/.claude/CLAUDE.md`
-
-Skills-only install links everything except `~/AGENTS.md`.
-
-`./setup.sh` is the compatibility step. It does not install Stow, clone the
-repo, or merge instruction files. It adds tool-specific symlinks for agents that
-do not rely only on `~/.agents/skills/`:
+`./setup.sh` adds tool-specific links for agents that do not rely only on
+`~/.agents/skills/`:
 
 - `~/.claude/skills/` points at `~/.agents/skills/`
 - `~/.codex/skills/<name>/` links each portable skill individually
 - `~/.codeium/windsurf/skills/<name>/` links each skill when Windsurf is present
 
-`./setup.sh` does **not** fan out command files to `~/.claude/commands/` or
-`~/.codex/prompts/`. Modern agents register slash commands directly from each
-skill's `SKILL.md` frontmatter, and the extra fan-out produced duplicate
-`/<name>` entries in Claude Code's command list. If you previously installed
-ABP and have stale symlinks under `~/.claude/commands/<name>.md` or
-`~/.codex/prompts/<name>.md` that point at `~/.agents/commands/`, re-run
-`./setup.sh` and they will be pruned automatically.
+Pi, Cursor, Gemini CLI, OpenCode, GitHub Copilot CLI, and other tools that
+auto-discover `~/.agents/skills/` do not need `./setup.sh`. End-user installs do
+not need Python or uv.
 
-It also keeps the in-repo Claude Code plugin (`plugin/`) in sync with the
-source-of-truth skills when `uv` is available. Published checkouts already ship
-the plugin symlinks, so end-user installs do not need Python or uv.
+### Claude Code Plugin Install
 
-## Install for Claude Code (namespaced)
-
-The flat `~/.claude/skills/` symlink above gives Claude Code unprefixed slash
-commands like `/ui-design` and `/security`. To get the same behaviour Codex
-already uses (`ABP:` prefix), install ABP as a Claude Code plugin instead:
+Use this when you want Claude Code to load ABP as a namespaced plugin and show
+skills as `/abp:<skill>`.
 
 ```sh
 # Inside Claude Code:
@@ -130,74 +127,63 @@ already uses (`ABP:` prefix), install ABP as a Claude Code plugin instead:
 /plugin install abp@abp
 ```
 
-Slash commands then namespace as `/abp:ui-design`, `/abp:security`, `/abp:testing`,
-etc. — the prefix protects against name clashes with built-in or third-party
-plugin skills.
-
-For local development against a working tree, point `/plugin install` at the
-repo's `plugin/` directory:
+For local development against a working tree, add the repo directory as a local
+plugin source:
 
 ```sh
 /plugin install /path/to/agent-booster-pack/plugin
 ```
 
-After installing the plugin, drop the legacy whole-directory symlink if you want
-only the namespaced commands and no duplicates:
+The plugin uses `plugin/.claude-plugin/plugin.json` and loads the shared skills
+from `plugin/skills/`, which are symlinks back to the canonical
+`agents/.agents/skills/` files.
+
+### Codex Plugin Install
+
+Use this when you want Codex to install ABP from this repo's
+[Codex marketplace metadata][codex-plugins].
 
 ```sh
-rm ~/.claude/skills        # only if it is a symlink to ~/.agents/skills
+codex plugin marketplace add kreek/agent-booster-pack
 ```
 
-The plugin and the flat symlink can coexist — they will simply both appear in
-`/help` listings, prefixed and unprefixed respectively.
+Then open Codex's plugin directory and install **Agent Booster Pack** from the
+ABP marketplace.
 
-`stow --target="$HOME" agents` does not merge files. If `~/AGENTS.md` already
-exists as a real file, Stow will report a conflict instead of appending the
-Agent Booster Pack instructions. Do not use `stow --adopt` unless you
-intentionally want Stow to take ownership of that file.
+For local development against a working tree, add the repo directory as a local
+marketplace source:
 
-For an existing personal `~/AGENTS.md`, merge deliberately:
+```sh
+codex plugin marketplace add /path/to/agent-booster-pack
+```
 
-1. Keep any personal or workplace-specific rules that are still current.
-2. Add the skill index and priority rules from `agents/AGENTS.md`.
-3. Preserve the ABP rule that local project `AGENTS.md` files are additive and
-   more specific, but must not weaken safety, proof, validation, or
-   user-change-preservation requirements.
-4. Run `stow --target="$HOME" --ignore='^AGENTS\.md$' agents` so
-   `~/.agents/skills/`, `~/.agents/commands/`, and `~/.claude/CLAUDE.md` are
-   still linked while your existing `~/AGENTS.md` remains manually maintained.
-5. Run `./setup.sh` so tool-specific compatibility links are created from those
-   shared `~/.agents` links.
+The plugin uses `plugin/.codex-plugin/plugin.json` and loads the shared skills
+from `plugin/skills/`, which are symlinks back to the canonical
+`agents/.agents/skills/` files.
 
-Maintainers with `uv` can optionally use `scripts/sync_agents_md.py` to test or
-refresh a fenced ABP block in a personal `AGENTS.md`; that script is not part of
-the end-user install path.
-
-Codex discovers skills directly from `.agents/skills` / `~/.agents/skills`
-and namespaces them as `ABP:<name>`; ABP no longer fans skills out to
-`~/.codex/prompts`.
-
-GitHub Copilot CLI, [Pi][pi-skills], Cursor, Gemini CLI, and OpenCode
-auto-discover from `~/.agents/skills/`, so the `stow --target="$HOME" agents`
-link is enough — no extra `setup.sh` wiring needed. Copilot also scans
-`~/.copilot/skills` and `~/.claude/skills`; the pack deliberately leaves
-`~/.copilot/skills` unlinked so skills are not registered twice. For
-project-scoped Copilot skills, drop a `.github/skills/`, `.claude/skills/`, or
-`.agents/skills/` directory in the repo itself.
-
-## Skill System
+## Using ABP
 
 Skills are progressive context: agents see only `name` and `description` until a
 task triggers a skill, then load the matching `SKILL.md` for the sharper rule,
 workflow, and proof check needed for the work in front of them.
 
-You can invoke a skill directly when you want a specific lens, or make a
-natural-language request and let the agent choose the relevant skills from their
-descriptions.
+Start with [`workflow`][skill-workflow] when you want ABP to guide a broad task.
+It tells the agent how to choose the smallest useful skill set, keep humans in
+the loop for tradeoffs and acceptance, and finish with proof instead of a
+confidence claim.
+
+You can invoke a narrower skill directly when you want a specific lens, or make
+a natural-language request and let the agent choose the relevant skills from
+their descriptions.
 
 The skill pack is deliberately not a checklist library. It is a set of
 discipline-enforcing lenses, grouped by the kind of engineering pressure they
 apply:
+
+### Entry point
+
+- [`workflow`][skill-workflow]: choose the right ABP skills for the task, keep
+  the work scoped, and connect completion claims to proof.
 
 ### Foundational design
 
@@ -298,6 +284,8 @@ apply:
 [skill-security]: agents/.agents/skills/security/SKILL.md
 [skill-testing]: agents/.agents/skills/testing/SKILL.md
 [skill-versioning]: agents/.agents/skills/versioning/SKILL.md
+[skill-workflow]: agents/.agents/skills/workflow/SKILL.md
+[codex-plugins]: https://developers.openai.com/codex/plugins/build
 [pi-skills]: https://www.mintlify.com/badlogic/pi-mono/coding-agent/skills
 
 ## Authoring Rules
@@ -320,13 +308,14 @@ plugin out of sync with `agents/.agents/skills/` will fail validation.
 
 Then update:
 
-- `agents/AGENTS.md` so agents can route to it
+- `agents/AGENTS.md` when the repo-maintainer skill index changes
+- `workflow` when the skill changes how ABP should route broad tasks
 - this README so humans understand the pack
 - any neighboring skills' handoffs when routing changes
 - `.claude-plugin/marketplace.json` per the pack-versioning rules in the
-  repo-root [`AGENTS.md`](AGENTS.md#pack-versioning-marketplacejson) — the
-  version in the canonical AGENTS.md block is what
-  `scripts/sync_agents_md.py` shows users on update
+  repo-root [`AGENTS.md`](AGENTS.md#pack-versioning-marketplacejson--pluginjson)
+- `.agents/plugins/marketplace.json` and `plugin/.codex-plugin/plugin.json`
+  when Codex plugin metadata or packaged skill content changes
 
 Run the Python checks before publishing script updates:
 
