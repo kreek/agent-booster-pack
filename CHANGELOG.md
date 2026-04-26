@@ -1,0 +1,40 @@
+# Changelog
+
+All notable changes to Agent Booster Pack are recorded here. The format
+follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
+the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+## [2.2.0] — 2026-04-26
+
+### Added
+
+- `workflow` master entrypoint skill: load on every software
+  engineering task, identify the risk profile, and select the narrower
+  ABP skills that apply.
+- Acceptance-clarity and branch-hygiene gates in the `workflow` skill
+  flow, with matching tripwires.
+- Requirements and acceptance criteria coverage in the `documentation`
+  skill, plus a new `references/requirements-and-acceptance.md`.
+- Codex plugin packaging under `plugin/.codex-plugin/`.
+- API evolution reference in the `api` skill.
+- `data-first` and `architecture` skills (extracted from the prior
+  `domain-design` skill).
+- `ui-design` skill (replacing the prior `frontend` skill).
+- Skill anatomy validator at `scripts/validate_skill_anatomy.py` and
+  pre-commit hook at `.githooks/pre-commit`.
+
+### Changed
+
+- README repositioned: ABP is presented as ambient — agents use
+  `workflow` automatically rather than via a `/`-style command.
+- Documentation skill description and triggers expanded to cover
+  PRDs, specs, user stories, and acceptance criteria.
+
+### Removed
+
+- `domain-design` skill (split into `data-first` and `architecture`).
+- `frontend` skill (replaced by `ui-design`).
+- `scripts/sync_agents_md.py` and its tests (replaced by the anatomy
+  validator workflow).
