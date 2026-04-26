@@ -24,6 +24,13 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `ui-design` skill (replacing the prior `frontend` skill).
 - Skill anatomy validator at `scripts/validate_skill_anatomy.py` and
   pre-commit hook at `.githooks/pre-commit`.
+- `LICENSE` (MIT), `CONTRIBUTING.md`, `SECURITY.md`, and this
+  `CHANGELOG.md`.
+- `license` and `keywords` fields in the Claude plugin manifests so
+  marketplace listings have complete metadata.
+- Release script at `scripts/release.sh` to bump every manifest
+  version, promote `[Unreleased]` in the changelog, run validators,
+  commit, and tag in one pass.
 
 ### Changed
 
