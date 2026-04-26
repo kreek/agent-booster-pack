@@ -8,60 +8,32 @@
   </picture>
 </p>
 
-A portable skill library for using coding agents to write more effective,
-correct, safe, accessible, maintainable, and performant software.
+A portable skill library that helps coding agents create software that is effective, correct, safe, accessible, maintainable, and performant.
 
-Agent Booster Pack distills my 25 years of software engineering experience, from
-startups to large private and public sector organizations, into portable skills
-for agents that understand the Agent Skills layout, including Codex, Claude
-Code, Pi, Cursor, Gemini CLI, GitHub Copilot CLI, OpenCode, and Windsurf. It
-raises engineering maturity by giving agents a workflow for simpler designs,
-explicit data models, proven behavior, safer production systems, intuitive and
-accessible interfaces, and clear, scoped changes a human can review and
-maintain.
+Agent Booster Pack is based on my 25 years of software engineering experience, from startups to large organizations. It offers portable skills for agents that use the Agent Skills layout, such as Codex, Claude Code, Pi, Cursor, Gemini CLI, GitHub Copilot CLI, OpenCode, and Windsurf. The pack helps agents follow workflows that lead to simpler designs, clear data models, reliable behavior, safer production systems, user-friendly interfaces, and changes that are easy for people to review and maintain.
 
-In practice, ABP steers agents to:
+In practice, ABP guides agents to:
 
-- Get the data model right first: make values, states, and invariants explicit,
-  limit side effects, and push state changes to the boundaries.
-- Replace "looks right" with proof from tests, contracts, logs, and
-  caller-visible checks.
-- Plan past launch and harden beyond the MVP: observability, reliability,
-  deployment safety, and rollback planning.
-- Treat security, data safety, and accessibility as engineering requirements,
-  not optional polish.
-- Debug and change code from the root cause, not the symptom.
-- Package work into scoped, reviewable changes a human can trust and maintain.
+* Focus on the data model first: make values, states, and rules clear, limit side effects, and keep state changes at the edges of the system.
+* Instead of relying on what seems correct, use tests, contracts, logs, and visible checks to prove your code works.
+* Plan for more than just the launch and basic version. Focus on observability, reliability, safe deployment, and having a rollback plan.
+* See security, data safety, and accessibility as essential parts of engineering, not just nice extras.
+* Fix and update code by addressing the root cause, not just the symptoms.
+* Organize your work into clear, reviewable changes that people can trust and maintain.
 
-## How ABP Is Different
+## What Makes ABP Unique
 
-ABP is built for risk management in human-in-the-loop software work. The goal is
-straightforward: help agent-written code meet the high bar for production use. It
-treats the agent as a coding partner, not a human replacement. Humans are good
-at judgment, review, tradeoffs, ownership, and bringing the full context needed
-to make choices during iteration, so the skills steer agents toward scoped
-changes, explicit evidence, and reviewable decisions instead of trying to remove
-you from the loop.
+ABP is designed to manage risk in software projects where people stay involved. Its main goal is to help agent-written code reach production standards. ABP treats the agent as a coding partner, not a replacement for people. Humans bring judgment, review, decision-making, and context to the process, so these skills guide agents to make clear, reviewable changes and provide evidence, instead of trying to take you out of the loop.
 
-It also assumes coding agents the basics of coding, planning, and tool calling built 
-in to the harness, and syntax should be handled by linters, formatters, type checkers, 
-and test suites. Skills do not need to handle those things. ABP works with coding agents
-through progressive enhancement: focused skills add the missing engineering pressure
-at the moment it matters, without trying to rewire the agent's internals.
+ABP assumes coding agents already know the basics of coding, planning, and using tools, and that syntax is handled by linters, formatters, type checkers, and test suites. The skills do not cover those areas. Instead, ABP works by adding focused skills that provide extra engineering support when needed, without changing how the agent works inside.
 
-## Install
+## Installation
 
-Choose one install path per agent. The manual path and plugin paths all expose
-the same ABP skills, so installing both for the same agent can create duplicate
-skill entries or slash commands. Use the Claude Code plugin for Claude Code, the
-Codex plugin for Codex, and the manual skills install for agents that read
-`~/.agents/skills/` or do not have a plugin install path.
+Pick one installation method for each agent. Both the manual and plugin options provide the same ABP skills, so using both for the same agent can cause duplicate entries or commands. Use the Claude Code plugin for Claude Code, the Codex plugin for Codex, and the manual install for agents that read ~/.agents/skills/ or do not support plugins.
 
-### Manual Skills Install
+### Manual Skills Installation
 
-Use this when your agent reads `~/.agents/skills/`, or when you want one shared
-skills directory for multiple tools. e.g., I bounce between Codex, Claude, and Pi
-so it's easier to install ABP for them all with one command.
+Use this method if your agent reads `~/.agents/skills/`, or if you want to share one skills directory across several tools. For example, I switch between Codex, Claude, and Pi, so installing ABP for all of them with one command is simpler.
 
 Prerequisites:
 
