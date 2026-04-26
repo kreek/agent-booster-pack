@@ -43,9 +43,9 @@ to make choices during iteration, so the skills steer agents toward scoped
 changes, explicit evidence, and reviewable decisions instead of trying to remove
 you from the loop.
 
-It also assumes coding agents already know how to code. Planning is built in,
-and syntax should be handled by linters, formatters, type checkers, and test
-suites. Skills do not need to handle those things. ABP works with coding agents
+It also assumes coding agents the basics of coding, planning, and tool calling built 
+in to the harness, and syntax should be handled by linters, formatters, type checkers, 
+and test suites. Skills do not need to handle those things. ABP works with coding agents
 through progressive enhancement: focused skills add the missing engineering pressure
 at the moment it matters, without trying to rewire the agent's internals.
 
