@@ -204,7 +204,7 @@ effects at the boundary.
   effects.
 - Parse inputs into typed structures at trust boundaries; reject invalid data
   early.
-- Make illegal states unrepresentable — prefer sum types over stringly-typed
+- Make illegal states unrepresentable: prefer sum types over stringly-typed
   flags.
 - Default to immutability; mutate only where the performance case is clear.
 - Use the `data-first` skill for the full canon on modelling state, values,
@@ -255,14 +255,14 @@ checks have run, or the exact blocker is reported.
 A feature is not complete until its user-observable behaviors are exercised by
 tests. Test-first is optional; test-at-all is not.
 
-- Identify the outermost boundary the user reaches — HTTP endpoint, UI
+- Identify the outermost boundary the user reaches: HTTP endpoint, UI
   interaction, CLI invocation, public API. That is where tests enter.
 - Write at least one `when X, Y happens` test per user-visible behavior. A
   feature with three endpoints and five distinct behaviors across them needs
   five tests, not one.
 - Internal helpers and persistence modules do not need their own tests when
   outer-boundary tests exercise them. They do need tests when the logic is
-  non-trivial in isolation — parsers, state machines, pure algorithms.
+  non-trivial in isolation: parsers, state machines, pure algorithms.
 - Load the `testing` skill before authoring tests. Do not skip it.
 - If the working directory is empty, lacks a project manifest, or has no
   test/lint/typecheck baseline, load `scaffolding` before creating feature code.
@@ -285,7 +285,7 @@ tests. Test-first is optional; test-at-all is not.
   "and", split it.
 - Commit messages: imperative mood, first line ≤72 chars, explain _why_ not
   _what_.
-- Review your own staged diff before every commit — catch debug prints, dead
+- Review your own staged diff before every commit: catch debug prints, dead
   code, stale paths, and stray changes before anyone else sees them.
 - Commit only after the relevant proof or acceptance check is current. If a
   check cannot run, leave the claim unproven and say why.
@@ -293,7 +293,7 @@ tests. Test-first is optional; test-at-all is not.
   early.
 - Delete merged branches locally and remotely; stale branches obscure active
   work.
-- Don't commit generated artifacts, build output, IDE settings, or OS files —
+- Don't commit generated artifacts, build output, IDE settings, or OS files;
   they belong in `.gitignore`.
 - Never add Co-Authored-By, generated-by, or AI-attribution trailers.
 - Never skip pre-commit hooks (`--no-verify`).

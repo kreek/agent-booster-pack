@@ -3,16 +3,16 @@
 This file provides guidance to coding agents (Claude Code, Codex, Cursor, and
 others that read `AGENTS.md`) when working with code in this repository.
 
-The skill-pack doctrine in [`agents/AGENTS.md`](agents/AGENTS.md) — priority
+The skill-pack doctrine in [`agents/AGENTS.md`](agents/AGENTS.md) (priority
 rules, proof obligations, code-and-data discipline, user-change
-preservation — also governs work in this repo. Read it alongside this
+preservation) also governs work in this repo. Read it alongside this
 file; the two are additive.
 
 ## What this repo is
 
 Agent Booster Pack is a portable skill pack for coding agents (Claude Code,
 Codex, Cursor, Copilot, Gemini CLI, OpenCode, Pi, Windsurf). It ships
-prose — `SKILL.md` files plus a few maintenance helpers — not application code.
+prose (`SKILL.md` files plus a few maintenance helpers), not application code.
 Most edits are to skill bodies, the top-level `AGENTS.md` index, or the
 `README.md`. There is no build, no test runner, no service to run.
 
@@ -30,7 +30,7 @@ Most edits are to skill bodies, the top-level `AGENTS.md` index, or the
   `plugin/commands/<name>.md` are **relative symlinks** into
   `agents/.agents/...`. They give Claude Code users the namespaced
   `/abp:<skill>` slash commands via `.claude-plugin/marketplace.json`.
-  Never edit a `plugin/` SKILL — edit the canonical file; the symlink
+  Never edit a `plugin/` SKILL: edit the canonical file. The symlink
   resolves through.
 - **Codex plugin library**: `.agents/plugins/marketplace.json` points Codex at
   the shared `plugin/` root, and `plugin/.codex-plugin/plugin.json` exposes the
@@ -93,7 +93,7 @@ Every `SKILL.md` must have:
   thought appears, take this concrete next action. Do not add tripwires as
   anatomy filler; omit the section when no row pays for its tokens.
 - No inline `per <Expert Name>` attribution outside a `## References` or
-  `## Canon` section — move citations there.
+  `## Canon` section: move citations there.
 - Put references to people, books, talks, papers, videos, and YouTube links in
   `## References`, `## Canon`, or a `references/` file, not in frontmatter or
   the steering body. Skill bodies should spend tokens on agent behavior, not
@@ -127,13 +127,13 @@ Adding or renaming a skill needs four updates, in order:
 
 1. Canonical files under `agents/.agents/skills/<name>/` (and a test that
    the body satisfies the validator's required sections).
-2. `agents/AGENTS.md` — add the routing line under the right grouping
+2. `agents/AGENTS.md`: add the routing line under the right grouping
    (Foundational Design / Safety Gates / Correctness And Change Control /
    Production Quality / Communication And UX / Workflow) for maintainer
    reference.
-3. `README.md` — update the human-facing skill list and its
+3. `README.md`: update the human-facing skill list and its
    `[skill-<name>]:` reference link at the bottom.
-4. `workflow` — update the meta-skill only when the new or renamed skill changes
+4. `workflow`: update the meta-skill only when the new or renamed skill changes
    the broad ABP routing workflow.
 5. `./setup.sh` to regenerate `plugin/skills/<name>` and prune stale
    per-agent links. The validator's drift check fails CI/local runs if
@@ -158,7 +158,7 @@ content changes so plugin managers see the same package version.
 
 Bump in the same PR as the canonical edit; both `version` fields move
 together. Pre-1.0 (`0.x.y`) is reserved for early development and
-follows the same shape, but minor bumps may carry breaking changes —
+follows the same shape, but minor bumps may carry breaking changes;
 the pack is past that and should not regress to it.
 
 ## Conventions specific to this repo

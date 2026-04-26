@@ -212,7 +212,7 @@ link_skills_per_agent() {
 	local label="$1"
 	local target_dir="$2"
 	if [ ! -d "$(dirname "$target_dir")" ]; then
-		echo "$label not installed — skipping (no $(dirname "$target_dir"))"
+		echo "$label not installed; skipping (no $(dirname "$target_dir"))"
 		return
 	fi
 	mkdir -p "$target_dir"
@@ -251,7 +251,7 @@ link_skills_per_agent "Codex" "$HOME/.codex/skills"
 link_skills_per_agent "Windsurf" "$HOME/.codeium/windsurf/skills"
 
 # Pi, Cursor, Gemini CLI, OpenCode, and GitHub Copilot CLI read
-# ~/.agents/skills/ directly per the agentskills.io de-facto convention — no
+# ~/.agents/skills/ directly per the agentskills.io de-facto convention; no
 # per-tool symlinks needed. (Copilot CLI scans ~/.copilot, ~/.claude, and
 # ~/.agents; relying on ~/.agents avoids duplicate registration with the
 # ~/.claude/skills symlink above.)
@@ -280,7 +280,7 @@ echo ""
 # the slash command from each skill's frontmatter. Linking
 # `agents/.agents/commands/<name>.md` separately into `~/.claude/commands/`
 # and `~/.codex/prompts/` produced duplicate `/<name>` entries in the slash
-# command list — the same skill registered twice (once via SKILL.md, once via
+# command list: the same skill registered twice (once via SKILL.md, once via
 # the standalone command file). Codex's per-skill `~/.codex/skills/<name>/`
 # fan-out already namespaces cleanly as `ABP:<name>`; Claude Code's flat
 # `~/.claude/skills` symlink registers the skill directly. Both made the

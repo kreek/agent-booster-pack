@@ -9,7 +9,7 @@ need to know before opening a PR.
   before authoring or editing skills. They define the engineering
   defaults the skill bodies assume.
 - Skills live under `agents/.agents/skills/<name>/SKILL.md`. The
-  `plugin/skills/` tree is symlinked from there — edit the canonical
+  `plugin/skills/` tree is symlinked from there; edit the canonical
   copy only.
 - Each skill must conform to the anatomy enforced by
   `scripts/validate_skill_anatomy.py`: frontmatter (name + description),
@@ -19,7 +19,7 @@ need to know before opening a PR.
 - Keep skill descriptions concise (under ~100 words) and trigger-rich.
   Lead with verbs and named scenarios; avoid marketing language.
 - Names of authors, books, papers, or external products belong in the
-  `## References` section only — not in skill bodies or frontmatter.
+  `## References` section only, not in skill bodies or frontmatter.
 
 ## Branching and commits
 

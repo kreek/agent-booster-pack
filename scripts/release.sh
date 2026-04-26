@@ -7,7 +7,7 @@
 # Bumps the version in every manifest, promotes the [Unreleased] section of
 # CHANGELOG.md to [X.Y.Z], runs the validators, commits, and tags vX.Y.Z.
 # Pushing the commit + tag and creating the GitHub Release stay manual on
-# purpose — they are the moment of "I really mean it" for shared state.
+# purpose: they are the moment of "I really mean it" for shared state.
 #
 # Requires: jq, uv (for validators).
 
@@ -96,7 +96,7 @@ if grep -q "^## \[Unreleased\]" CHANGELOG.md; then
     /^## \[Unreleased\]/ {
       print
       print ""
-      print "## [" v "] — " d
+      print "## [" v "] (" d ")"
       next
     }
     { print }

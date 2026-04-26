@@ -6,7 +6,7 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-## [2.2.0] — 2026-04-26
+## [2.2.0] (2026-04-26)
 
 ### Added
 
@@ -34,7 +34,7 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
-- README repositioned: ABP is presented as ambient — agents use
+- README repositioned: ABP is presented as ambient; agents use
   `workflow` automatically rather than via a `/`-style command.
 - Documentation skill description and triggers expanded to cover
   PRDs, specs, user stories, and acceptance criteria.
