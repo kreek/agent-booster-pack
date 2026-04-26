@@ -60,7 +60,8 @@ Codex plugin for Codex, and the manual skills install for agents that read
 ### Manual Skills Install
 
 Use this when your agent reads `~/.agents/skills/`, or when you want one shared
-skills directory for multiple tools.
+skills directory for multiple tools. e.g., I bounce between Codex, Claude, and Pi
+so it's easier to install ABP for them all with one command.
 
 Prerequisites:
 
@@ -91,7 +92,9 @@ stow --target="$HOME" --ignore='^AGENTS\.md$' --ignore='^\.claude/CLAUDE\.md$' a
 
 ABP does not need to edit `~/AGENTS.md` or `~/.claude/CLAUDE.md`; agents
 discover skills from the shared skill directory and load each `SKILL.md` only
-when it is relevant. The checkout can live anywhere.
+when it is relevant. The [`workflow`][skill-workflow] skill is the entry point
+that tells agents how to choose the right ABP skills for a task. The checkout
+can live anywhere.
 
 The manual install links:
 
@@ -167,14 +170,13 @@ Skills are progressive context: agents see only `name` and `description` until a
 task triggers a skill, then load the matching `SKILL.md` for the sharper rule,
 workflow, and proof check needed for the work in front of them.
 
-Start with [`workflow`][skill-workflow] when you want ABP to guide a broad task.
-It tells the agent how to choose the smallest useful skill set, keep humans in
-the loop for tradeoffs and acceptance, and finish with proof instead of a
-confidence claim.
-
-You can invoke a narrower skill directly when you want a specific lens, or make
-a natural-language request and let the agent choose the relevant skills from
-their descriptions.
+You do not need to start from a special command. Make a natural-language
+request, and the agent can use [`workflow`][skill-workflow] plus the narrower
+skills needed for the work. You can also invoke a specific skill directly when
+you want a particular lens, such as `documentation` for README work or
+`code-review` for a diff. Some skills are intentionally user-invoked workflow
+commands, such as `commit`, because they package repository state and should run
+only when you ask for that action.
 
 The skill pack is deliberately not a checklist library. It is a set of
 discipline-enforcing lenses, grouped by the kind of engineering pressure they
