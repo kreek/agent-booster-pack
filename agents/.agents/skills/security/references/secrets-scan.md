@@ -6,11 +6,11 @@ on every PR.
 
 ## Tools
 
-- **`gitleaks`**: fast, low false-positive rate, regex + entropy + allowlist.
+- `gitleaks`: fast, low false-positive rate, regex + entropy + allowlist.
   Default choice.
-- **`trufflehog`**: slower but **verifies** detected secrets against the
-  live API to drop false positives. Use for high-signal triage on hits.
-- **`git-secrets`**: AWS-focused; useful as a cheap pre-commit hook.
+- `trufflehog`: slower but verifies detected secrets against the live API
+  to drop false positives. Use for high-signal triage on hits.
+- `git-secrets`: AWS-focused; useful as a cheap pre-commit hook.
 
 ## Scopes
 
@@ -54,7 +54,7 @@ Order matters:
 2. Revoke any sessions or derived tokens.
 3. Audit usage logs for the credential between commit time and rotation
    time.
-4. **Then** scrub. Use `git filter-repo`; `git filter-branch` is deprecated
+4. Then scrub. Use `git filter-repo`; `git filter-branch` is deprecated
    and bug-prone. Force-push, notify collaborators, and accept that any
    clone made before the scrub still contains the secret.
 5. Add an allowlist entry only if the match is a true false positive (test

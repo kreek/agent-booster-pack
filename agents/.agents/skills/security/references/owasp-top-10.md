@@ -3,7 +3,7 @@
 Reference for the `security` skill. Each category: the risk, the recurring
 failure pattern, and the concrete mitigations to check for in review.
 
-**Edition tracked:** OWASP Top 10:2025. Last reviewed April 2026. The 2021
+Edition tracked: OWASP Top 10:2025. Last reviewed April 2026. The 2021
 edition is still widely cited; the most material differences are renumbering
 and the absorption of the 2021 A10 (SSRF) into broader categories. SSRF is
 covered in depth in `ssrf-and-egress.md` regardless of which year's list a
@@ -139,7 +139,7 @@ Check:
 - Logs: never interpolate user input into a log format string; pass as a
   structured field. CRLF in user input must be stripped before any log
   line is written (log injection / forgery).
-- **Header / response splitting (CRLF):** user input interpolated into
+- Header / response splitting (CRLF): user input interpolated into
   `Set-Cookie`, `Location`, or custom headers must be CRLF-stripped or
   rejected. Most framework header APIs do this; only the unsafe ones
   (raw bytes) are exposed.

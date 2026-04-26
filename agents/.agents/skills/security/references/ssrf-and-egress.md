@@ -56,7 +56,7 @@ naive wildcard subdomain rule lets `attacker.example.com` past the gate.
 1. Resolve the hostname once.
 2. Validate every returned A/AAAA against the block/allow list. If any address
    is blocked, refuse.
-3. Connect to the **resolved IP**, not by re-resolving the hostname inside the
+3. Connect to the resolved IP, not by re-resolving the hostname inside the
    HTTP client.
 4. Send the original `Host` header so TLS still works.
 5. Cap the resolver TTL so a split-horizon nameserver cannot return one answer
@@ -79,7 +79,7 @@ naive wildcard subdomain rule lets `attacker.example.com` past the gate.
 
 ## Cloud metadata defence in depth
 
-- AWS: enforce **IMDSv2** (`HttpTokens: required`); set
+- AWS: enforce IMDSv2 (`HttpTokens: required`); set
   `HttpPutResponseHopLimit: 1` so containers cannot reach IMDS through the
   host.
 - GCP: require the `Metadata-Flavor: Google` header at the workload level;

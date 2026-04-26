@@ -25,18 +25,18 @@ When in doubt, route to the `data-first` skill.
 
 ## Tooling that should be passing
 
-- **Build**: `./gradlew check` runs compile + tests + static
+- Build: `./gradlew check` runs compile + tests + static
   analysis.
-- **Format**: `./gradlew ktlintCheck` (or the project's chosen
+- Format: `./gradlew ktlintCheck` (or the project's chosen
   `spotlessCheck`).
-- **Static analysis**: `./gradlew detekt`: new warnings introduced
+- Static analysis: `./gradlew detekt`: new warnings introduced
   by the diff are findings; new `@Suppress("...")` needs a reason.
-- **Coverage**: project-defined gate (JaCoCo / Kover). Don't drop
+- Coverage: project-defined gate (JaCoCo / Kover). Don't drop
   coverage silently.
 
 ## High-signal review checks
 
-- **Null safety**:
+- Null safety:
   - `!!` (the not-null assertion) is a Critical-tier red flag in
     production code. Each one needs a comment proving the value
     cannot be null at that point.
@@ -44,10 +44,10 @@ When in doubt, route to the `data-first` skill.
     or a proper handling branch.
   - Platform types (Java interop) are nullable in disguise; new
     interop boundaries should pin them as `T` or `T?` explicitly.
-- **`lateinit var`**: only legitimate in DI / test fixtures /
+- `lateinit var`: only legitimate in DI / test fixtures /
   framework-injected fields. `lateinit` in plain domain code is a
   smell: the value should arrive through the constructor.
-- **Coroutines**:
+- Coroutines:
   - Expected domain failures use sealed result/error types or named
     exceptions, not generic `Exception("message")` / `error("message")`
     values that leak across domain boundaries.
@@ -61,27 +61,27 @@ When in doubt, route to the `data-first` skill.
   - `runBlocking` outside `main` / tests is suspicious.
   - Hot `Flow` (`SharedFlow`, `StateFlow`) shared without a scope
     leaks subscribers.
-- **`when` exhaustiveness**: `when` over a sealed type used as an
+- `when` exhaustiveness: `when` over a sealed type used as an
   expression is exhaustive; used as a statement, it isn't. Prefer
   the expression form, or assign to `Unit` to force exhaustiveness.
-- **Extension functions**: an extension on a type the project
+- Extension functions: an extension on a type the project
   doesn't own is fine; one that shadows a member function is a bug
   (member wins). Flag any extension named the same as a method on
   the receiver.
-- **Inline / reified**: useful for type tokens and avoiding
+- Inline / reified: useful for type tokens and avoiding
   reflection; `inline` on a non-trivial function bloats the call
   site: needs a reason.
-- **Visibility**: Kotlin defaults to `public`. New top-level
+- Visibility: Kotlin defaults to `public`. New top-level
   functions and classes meant to be internal should say `internal`
   explicitly.
-- **Companion objects / singletons**: a `companion object` with
+- Companion objects / singletons: a `companion object` with
   mutable state is a hidden global. Flag it.
-- **Resource closing**: `use { }` for any `Closeable`. Coroutine
+- Resource closing: `use { }` for any `Closeable`. Coroutine
   scope, flow collection, and file streams all need scoped cleanup.
-- **Spring `@Transactional`** (when applicable): self-invocation
+- Spring `@Transactional` (when applicable): self-invocation
   bypasses the proxy; default rollback is `RuntimeException` only.
   Same caveats as Java.
-- **Logging**: SLF4J parameter form (`log.info("user {} did x",
+- Logging: SLF4J parameter form (`log.info("user {} did x",
   id)`) over string concatenation; with Kotlin's interpolation it's
   tempting to write `log.info("user $id did x")` and lose lazy
   evaluation.

@@ -38,8 +38,8 @@ description:
 2. Pre-1.0 is *not* a license to break callers without warning. Treat
    `0.X.0` as the project's working "major" and document the policy
    in `README.md`.
-3. Every deprecation ships in a **minor** with a removal version named
-   in the warning, then removes in a later **major**. One full minor
+3. Every deprecation ships in a minor with a removal version named
+   in the warning, then removes in a later major. One full minor
    cycle is the minimum gap.
 4. CHANGELOG entries describe what users will *notice when they
    upgrade*, not what the code changed. If an entry could be read off
@@ -52,9 +52,9 @@ description:
 
 | Bump | Trigger |
 |---|---|
-| **major** | Removing or renaming a public symbol / endpoint / flag / config key. Changing a return type, error type, status code, or required argument. Tightening a type or constraint that previously accepted more inputs. Making an optional field required. Reversing a documented invariant. |
-| **minor** | Adding a new symbol, endpoint, flag, optional argument, or optional field. Loosening a constraint. Adding a new error variant in a position callers don't pattern-match exhaustively. Marking something `@deprecated`. |
-| **patch** | Bug fixes that restore documented behavior. Performance improvements. Internal refactors with no caller-visible effect. Docs, build, dependency bumps with no public-surface impact. |
+| major | Removing or renaming a public symbol / endpoint / flag / config key. Changing a return type, error type, status code, or required argument. Tightening a type or constraint that previously accepted more inputs. Making an optional field required. Reversing a documented invariant. |
+| minor | Adding a new symbol, endpoint, flag, optional argument, or optional field. Loosening a constraint. Adding a new error variant in a position callers don't pattern-match exhaustively. Marking something `@deprecated`. |
+| patch | Bug fixes that restore documented behavior. Performance improvements. Internal refactors with no caller-visible effect. Docs, build, dependency bumps with no public-surface impact. |
 
 Conventional Commits map: `fix:` → patch, `feat:` → minor, `feat!:` /
 `fix!:` / `BREAKING CHANGE:` footer → major. `chore: / docs: /
@@ -74,7 +74,7 @@ Use language-native warnings so static analysers and IDEs see them:
 - C#: `[Obsolete("...", true)]` for hard deprecation.
 - Ruby: `Warning.warn` from a `Module#deprecate` shim.
 
-The CHANGELOG `Deprecated` entry describes the **migration path**, not
+The CHANGELOG `Deprecated` entry describes the migration path, not
 just the deprecation. If callers can't replace the symbol from the
 entry alone, the entry is incomplete.
 
@@ -89,7 +89,7 @@ Follow Keep a Changelog: `Added`, `Changed`, `Deprecated`, `Removed`,
   removed feature, fixed regression, performance shift.
 - Internal refactors, dep bumps, and test changes with no observable
   effect do not earn an entry.
-- Breaking changes get a `**BREAKING:**` prefix and link to a migration
+- Breaking changes get a `BREAKING:` prefix and link to a migration
   note.
 - Tag format: `vX.Y.Z` (signed, immutable). Pre-releases:
   `vX.Y.Z-rc.1`, `-beta.2`, `-alpha.3`. The tag points at the same

@@ -5,15 +5,15 @@ Use this before scaffolding fresh Swift projects.
 ## Defaults
 
 - Package/build tool: Swift Package Manager.
-- Concurrency posture: enable **Approachable Concurrency** for new projects:
+- Concurrency posture: enable Approachable Concurrency for new projects:
   main-thread-by-default for UI/scripts, explicit `@concurrent` for opting into
   parallel work. This is the recommended stance for new code on current Swift.
-- Test framework: **Swift Testing** (`@Test` macro) is an opt-in modern
+- Test framework: Swift Testing (`@Test` macro) is an opt-in modern
   alternative to XCTest shipping with current Xcode. Pick it at project
   creation; keep XCTest only when an existing target depends on it.
-- Server-side web default: **Hummingbird** (async/await-native, result-builder
+- Server-side web default: Hummingbird (async/await-native, result-builder
   routing, Swift NIO under the hood) for minimal-to-mid-size server apps. Use
-  **Vapor** for batteries-included server apps with ORM (Fluent), auth,
+  Vapor for batteries-included server apps with ORM (Fluent), auth,
   templating, and a broader plugin ecosystem.
 - Native Apple app default: platform app templates (Xcode) backed by SwiftPM for
   library targets.

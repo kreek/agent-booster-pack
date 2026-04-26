@@ -5,14 +5,14 @@ Use this before scaffolding fresh Rust projects.
 ## Defaults
 
 - Package/build tool: Cargo.
-- Edition: use the current stable **Rust edition** for new crates; pin the MSRV
+- Edition: use the current stable Rust edition for new crates; pin the MSRV
   to what the edition requires and bump it intentionally. Link: the edition
   guide below.
-- API default: **Axum** (Tokio team, Hyper + Tower stack, typed extractors).
+- API default: Axum (Tokio team, Hyper + Tower stack, typed extractors).
 - Async runtime: Tokio.
 - Heavier/performance-focused alternative: Actix Web when its ecosystem, actor
   model, or raw throughput profile is decisive.
-- ORM default for greenfield: **SeaORM** (async-first, SeaQL ecosystem). Use
+- ORM default for greenfield: SeaORM (async-first, SeaQL ecosystem). Use
   `sqlx` when you want hand-written SQL with compile-time verification. Diesel
   is acceptable only for repos already on it.
 - Avoid hand-rolled hyper/TCP servers for web apps unless the user asks, the
@@ -28,8 +28,8 @@ Use this before scaffolding fresh Rust projects.
   tooling.
 - `sqlx` for query-first codebases where raw SQL and compile-time checked
   queries are the point.
-- Full-stack Rust: **Leptos** for SSR web apps with server functions and
-  streaming HTML; **Dioxus** for cross-platform (web/desktop/mobile) with a
+- Full-stack Rust: Leptos for SSR web apps with server functions and
+  streaming HTML; Dioxus for cross-platform (web/desktop/mobile) with a
   React/JSX-like model.
 
 ## Minimum Scaffold

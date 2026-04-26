@@ -5,10 +5,10 @@ Use this before scaffolding fresh Go projects.
 ## Defaults
 
 - Package manager/build: Go modules with `go.mod` and `go.sum`.
-- Router default: **stdlib `net/http` with the modern `ServeMux`** (method
+- Router default: stdlib `net/http` with the modern `ServeMux` (method
   matching such as `GET /users/{id}`, wildcards, and `Request.PathValue()`). It
   subsumes most of what third-party routers were historically used for.
-- Structured router when more is wanted: **Chi**: zero dependencies, fully
+- Structured router when more is wanted: Chi: zero dependencies, fully
   `net/http`-compatible, middleware ecosystem, route groups, sub-routers.
 - `gorilla/mux` is archived; do not scaffold it into new projects.
 - Only reach for a heavier framework when the app actually needs the ecosystem,

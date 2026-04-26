@@ -14,17 +14,17 @@ Defences (pick one; layer on high-value flows):
 - Prefer the framework's CSRF middleware over custom token handling; only
   implement these patterns yourself when the framework cannot model the
   flow.
-- **`SameSite=Lax`** on the session cookie. Modern browser default. Blocks
-  most cross-site POSTs but **does not protect state-changing GETs**, does not
-  protect against attacks from a sibling subdomain, and degrades to "no
+- `SameSite=Lax` on the session cookie. Modern browser default. Blocks
+  most cross-site POSTs but **does not protect state-changing GETs**, does
+  not protect against attacks from a sibling subdomain, and degrades to "no
   protection" on legacy clients.
-- **CSRF token** (synchroniser pattern): server-issued, per-session, sent in a
+- CSRF token (synchroniser pattern): server-issued, per-session, sent in a
   custom header or hidden form field, validated on every state-changing
   request. Constant-time compare on the server side.
-- **Double-submit cookie**: token in cookie + same value in custom header;
+- Double-submit cookie: token in cookie + same value in custom header;
   works without server-side state but vulnerable when any subdomain can set
   cookies on the parent. The `__Host-` cookie prefix mitigates.
-- **Origin / `Sec-Fetch-Site` check**: reject state-changing requests where
+- Origin / `Sec-Fetch-Site` check: reject state-changing requests where
   `Origin` is missing, opaque, or not in the allowlist. Cheap, robust, and
   often sufficient for first-party APIs.
 

@@ -38,11 +38,11 @@ When in doubt, route to the `data-first` skill.
 
 ## High-signal review checks
 
-- **Nullable reference types**: a method that returns `T?` but
+- Nullable reference types: a method that returns `T?` but
   documents "never null" should return `T`. The null-forgiving
   operator (`!`) needs a one-line justification: it's a claim the
   reviewer must accept.
-- **Async**:
+- Async:
   - `async void` outside event handlers: Critical, swallows
     exceptions.
   - `Task.Result` / `.Wait()` blocking on async: deadlock bait.
@@ -51,45 +51,45 @@ When in doubt, route to the `data-first` skill.
     library method is a finding.
   - `async` method with no `await` and a `.Result` inside: almost
     certainly wrong.
-- **`IDisposable` / `IAsyncDisposable`**: any disposable opened in
+- `IDisposable` / `IAsyncDisposable`: any disposable opened in
   a method must be in a `using` / `await using` scope or explicitly
   handed off. Repeat offenders: `new HttpClient()` per call (use
   `IHttpClientFactory`), file streams without `using`, DB
   connections leaked across awaits.
-- **EF Core**:
+- EF Core:
   - `.ToList()` then `.Where()` materialises before filtering.
   - `.Include()` chains causing cartesian explosion.
   - `AsNoTracking()` missing on read-only queries.
   - N+1 inside a loop iterating over a navigation property.
   - Raw SQL with string interpolation: use `FromSqlInterpolated` /
     parameters.
-- **LINQ**: `IEnumerable<T>` returned from a method that the caller
+- LINQ: `IEnumerable<T>` returned from a method that the caller
   enumerates twice will execute twice. Materialise (`.ToList()`)
   once when callers will re-enumerate; avoid materialising in tight
   pipelines.
-- **Exception handling**: `catch (Exception)` swallowing without
+- Exception handling: `catch (Exception)` swallowing without
   rethrow or log is a finding. Expected domain failures use named
   exception types or explicit result variants, not generic
   `Exception("message")` / `InvalidOperationException("domain
   outcome")` values that leak across domain boundaries. `throw ex;`
   reset the stack: use `throw;`.
-- **Pattern matching**: `switch` over a closed hierarchy without an
+- Pattern matching: `switch` over a closed hierarchy without an
   exhaustive default is brittle. New cases added later won't fail
   the compile. Prefer `_ => throw new UnreachableException()` or a
   static analyzer that enforces exhaustiveness.
-- **Allocations on hot paths**: `string.Format` / interpolation in
+- Allocations on hot paths: `string.Format` / interpolation in
   log statements without a level guard, `LINQ.ToList()` where
   `IEnumerable` would do, `params object[]` in tight loops. Match
   against the project's perf gates. Consider `Span<T>`,
   `ReadOnlySpan<T>`, `ArrayPool<T>` only when the perf case is real.
-- **Configuration secrets**: connection strings, API keys, tokens
+- Configuration secrets: connection strings, API keys, tokens
   must not be in checked-in `appsettings.json`. Look for
   user-secrets, environment variables, or a vault.
-- **Logging redaction**: structured logging templates that
+- Logging redaction: structured logging templates that
   interpolate user input (`_logger.LogInformation($"...")`) break
   message templates and can leak PII. Prefer
   `_logger.LogInformation("user {UserId} did X", id)`.
-- **DI lifetimes**: `Singleton` capturing `Scoped` is a captive
+- DI lifetimes: `Singleton` capturing `Scoped` is a captive
   dependency: silent bug. Reviews should call out new
   registrations with mismatched lifetimes.
 

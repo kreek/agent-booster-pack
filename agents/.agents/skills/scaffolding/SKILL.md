@@ -48,7 +48,7 @@ Before creating files or running generator commands:
    Static HTML/CSS/JS is acceptable for a local throwaway prototype or
    isolated demo. Say when you are taking that path and name the
    likely upgrade framework if work continues.
-4. For fresh web apps, **don't** scaffold a hand-rolled HTTP
+4. For fresh web apps, don't scaffold a hand-rolled HTTP
    server/router by default. Use a mature framework with routing,
    request handling, testing, and deployment conventions baked in.
    Hand-rolled servers are only for explicit user requests, tiny
@@ -59,24 +59,24 @@ Before creating files or running generator commands:
 
 These are non-default defaults the pack prescribes:
 
-- **Fresh Node**: pnpm + `pnpm-lock.yaml` (not npm + `package-lock.json`,
+- Fresh Node: pnpm + `pnpm-lock.yaml` (not npm + `package-lock.json`,
   even with zero dependencies).
-- **Fresh Python**: uv (not raw pip/venv, even when uv isn't
+- Fresh Python: uv (not raw pip/venv, even when uv isn't
   preinstalled).
-- **Fresh TypeScript web app** (no explicit hosting constraint):
+- Fresh TypeScript web app (no explicit hosting constraint):
   Cloudflare Workers + Hono. Confirm before locking it in. Use Render,
   Fly.io, AWS, GCP, Azure, containers, or a VPS only when the user
   requests them or the app needs long-running processes, unsupported
   native deps, special networking, region/data residency, conventional
   Node server semantics, or managed services outside Cloudflare.
-- **Fresh frontend, small/demo/prototype**: Alpine.js. **Larger app**:
+- Fresh frontend, small/demo/prototype: Alpine.js. Larger app:
   Svelte/SvelteKit. Confirm framework choice with the user before
   scaffolding. If the user asks for React or Next.js, use it but
   briefly explain why Alpine or Svelte/SvelteKit would normally be the
   lower-complexity default. Don't treat server-rendered HTML with
   inline JavaScript inside the backend entrypoint as the default
   "minimal" frontend.
-- **Large project documentation**: Material for MkDocs by default,
+- Large project documentation: Material for MkDocs by default,
   regardless of app language or framework, unless the repo/user/
   publishing constraint chooses another.
 

@@ -28,15 +28,15 @@ EXPLAIN (ANALYZE, BUFFERS, FORMAT TEXT) SELECT ...;
 
 ### Numbers to read first
 
-- **actual time**: how long the node took, per loop × loops. Multiply when
+- actual time: how long the node took, per loop × loops. Multiply when
   there are many loops.
-- **rows vs actual rows**: estimator accuracy. A 100× mismatch means stale
+- rows vs actual rows: estimator accuracy. A 100× mismatch means stale
   statistics; run `ANALYZE` or increase `default_statistics_target` for the
   column.
-- **Buffers: shared hit vs read**: `hit` is cache, `read` is disk. A repeated
+- Buffers: shared hit vs read: `hit` is cache, `read` is disk. A repeated
   query with high `read` is a cache miss pattern; a single hot query with high
   `read` is a missing index.
-- **Plan rows** under `Rows Removed by Filter`: the query executor is reading
+- Plan rows under `Rows Removed by Filter`: the query executor is reading
   rows then throwing them away. Push the filter into the index instead
   (composite or partial index).
 
@@ -79,14 +79,14 @@ Zero-scan indexes cost write throughput. If stats are fresh (no recent
 
 ### Postgres (what you actually get)
 
-- **Read Uncommitted** → implemented as Read Committed. No dirty reads, ever.
-- **Read Committed** (default): each statement sees a snapshot at _statement_
+- Read Uncommitted → implemented as Read Committed. No dirty reads, ever.
+- Read Committed (default): each statement sees a snapshot at _statement_
   start. Writes block writes on the same row.
-- **Repeatable Read**: snapshot at _transaction_ start. Equivalent to
-  **Snapshot Isolation**; stronger than ANSI RR (no phantoms). Still allows
-  **write skew** (two transactions read overlapping rows and write
+- Repeatable Read: snapshot at _transaction_ start. Equivalent to
+  Snapshot Isolation; stronger than ANSI RR (no phantoms). Still allows
+  write skew (two transactions read overlapping rows and write
   non-overlapping rows, each violating an invariant the other didn't see).
-- **Serialisable**: Snapshot Isolation + SSI (Serialisable Snapshot Isolation).
+- Serialisable: Snapshot Isolation + SSI (Serialisable Snapshot Isolation).
   True serializability. Transactions may abort with
   `SQLSTATE 40001 serialization_failure`. **Callers MUST retry.**
 
@@ -121,15 +121,15 @@ UPDATE doctors SET on_call = false WHERE id = 2;
 -- Both commit; no doctor on call.
 ```
 
-Under **Repeatable Read** both commit. Under **Serialisable** one aborts with
+Under Repeatable Read both commit. Under Serialisable one aborts with
 `40001`. The app must retry.
 
 ### Rule of thumb
 
-- OLTP default: **Read Committed**.
-- Need consistency across many rows read in one transaction: **Repeatable Read**
+- OLTP default: Read Committed.
+- Need consistency across many rows read in one transaction: Repeatable Read
   (check for write skew).
-- Need invariants enforced across transactions: **Serialisable** + retry loop.
+- Need invariants enforced across transactions: Serialisable + retry loop.
 - Want specific locks: `SELECT ... FOR UPDATE` / `SELECT ... FOR SHARE`,
   regardless of level.
 - SQLite default: keep writes short, enable WAL for concurrent readers, and use

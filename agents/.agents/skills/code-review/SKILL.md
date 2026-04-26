@@ -70,7 +70,7 @@ description:
    `typescript.md`, `ruby.md`, `java.md`, `kotlin.md`, `bash.md`,
    `sql.md`). Defer recommendations incompatible with the repo's
    declared toolchain.
-4. Load triggered domain skills as mandatory lenses. **Always** include a
+4. Load triggered domain skills as mandatory lenses. Always include a
    security pass for any auth, trust-boundary, input, dependency, secret,
    crypto, logging-redaction, or user-controlled-sink concern. Add others
    as triggered: `database`, `api`, `testing`, `proof`, `data-first`,
@@ -107,10 +107,10 @@ Lead with findings, ordered by severity:
 
 | Severity | Use for |
 |---|---|
-| **Critical** | Exploitable security issue, data loss, broken auth, destructive migration, production outage risk. |
-| **High** | Incorrect behavior, broken contract, missing authorization, race, serious regression, untested risky path. |
-| **Medium** | Maintainability, error handling, observability, compatibility, or test gap likely to cause future defects. |
-| **Low** | Non-blocking clarity issue. Skip unless asked. |
+| Critical | Exploitable security issue, data loss, broken auth, destructive migration, production outage risk. |
+| High | Incorrect behavior, broken contract, missing authorization, race, serious regression, untested risky path. |
+| Medium | Maintainability, error handling, observability, compatibility, or test gap likely to cause future defects. |
+| Low | Non-blocking clarity issue. Skip unless asked. |
 
 Each finding includes: file/line or PR thread anchor, issue, impact,
 concrete fix direction, evidence or missing proof. Use questions only

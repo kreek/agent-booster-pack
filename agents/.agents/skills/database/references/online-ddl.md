@@ -7,7 +7,7 @@ are SQLite and Postgres.
 ## Postgres
 
 - `CREATE INDEX CONCURRENTLY`: builds the index without an exclusive lock.
-  Takes longer but safe on production. **Never** `CREATE INDEX` without
+  Takes longer but safe on production. Never `CREATE INDEX` without
   `CONCURRENTLY` on a live table.
 - Always set `lock_timeout` before schema changes:
   ```sql
@@ -18,9 +18,9 @@ are SQLite and Postgres.
   blocks the deploy. Wrap DDL in a retry loop with a small lock window (GitLab's
   `with_lock_retries` is the canonical pattern) so the DB keeps serving traffic
   between attempts.
-- `ALTER TABLE ... ADD COLUMN` with a **non-volatile** default is metadata-only
+- `ALTER TABLE ... ADD COLUMN` with a non-volatile default is metadata-only
   in PG 11+ (the modern baseline).
-- **Volatile defaults** (`gen_random_uuid()`, `now()`, `clock_timestamp()`)
+- Volatile defaults (`gen_random_uuid()`, `now()`, `clock_timestamp()`)
   still rewrite the table. Add the column nullable, backfill in batches, then
   set the default on future inserts only.
 - On PG < 11, `NOT NULL DEFAULT` rewrites. Two-step:
@@ -61,13 +61,13 @@ are SQLite and Postgres.
 
 ## Tooling that enforces these rules
 
-- **strong_migrations** (Rails / Active Record): blocks migrations that violate
+- strong_migrations (Rails / Active Record): blocks migrations that violate
   zero-downtime rules, with fix-up recipes in the error message.
-- **safe-pg-migrations** (Doctolib, Rails): wraps every migration in
+- safe-pg-migrations (Doctolib, Rails): wraps every migration in
   `lock_timeout` + `with_lock_retries`.
-- **Django's `atomic=False` migration operations** for custom concurrent index
+- Django's `atomic=False` migration operations for custom concurrent index
   creation.
-- **sqitch** / **Flyway** for explicit forward + rollback migration scripts when
+- sqitch / Flyway for explicit forward + rollback migration scripts when
   the ORM's opinions are wrong for your workload.
 
 ## Rollback rules

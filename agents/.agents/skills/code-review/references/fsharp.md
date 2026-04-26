@@ -8,7 +8,7 @@ Use when reviewing F# code in the diff. Apply this alongside the main
 F# is a natural fit for the `data-first` skill's doctrine, but the
 ecosystem leaks OOP habits from C#. Lean into the functional core:
 
-- Prefer **records** and **discriminated unions** over classes;
+- Prefer records and discriminated unions over classes;
   reach for classes only at I/O boundaries or when you genuinely need
   inheritance/interfaces for interop.
 - `Result<'T,'E>` over throwing methods. Exceptions are reserved for
@@ -34,41 +34,41 @@ When in doubt, route to the `data-first` skill.
 
 ## High-signal review checks
 
-- **`Result` vs exceptions**: domain logic should return
+- `Result` vs exceptions: domain logic should return
   `Result<'T,'E>`. Any new `failwith`, `raise`, or `invalidArg` in a
   domain function needs a justification: typically a precondition
   the type system can't yet express.
-- **Discriminated unions over enums + flags**: a "status" string
+- Discriminated unions over enums + flags: a "status" string
   with three valid values, or a record with mutually-exclusive
   optional fields, is a DU asking to be born.
-- **`Option` over null**: F# code interoperating with C# libraries
+- `Option` over null: F# code interoperating with C# libraries
   often gets handed null. Wrap into `Option` at the boundary, not
   scattered.
-- **Computation expressions**: prefer the project's existing CE
+- Computation expressions: prefer the project's existing CE
   (`result { }`, `task { }`, `asyncResult { }`) over manually
   threading match expressions. Custom CEs need a one-line reason
   in the diff.
-- **`task` vs `async`**: in performance-sensitive code, prefer
+- `task` vs `async`: in performance-sensitive code, prefer
   `task { }` (no thread-hop overhead, plays nicely with C# Task).
   F# `async { }` is fine for workflow code where its cancellation
   composition story matters more than allocations.
-- **Mutable state**: `let mutable` and `ref` cells are warning
+- Mutable state: `let mutable` and `ref` cells are warning
   signs. Most cases are better expressed as a fold or accumulator.
   Caches and adapters at the edge are the legitimate uses.
-- **Active patterns**: powerful but easy to over-use. A simple
+- Active patterns: powerful but easy to over-use. A simple
   `match` is often clearer than a custom `(|Foo|Bar|)` pattern.
   Active patterns that throw are a finding.
-- **Module organisation**: top-down ordering. A function used in
+- Module organisation: top-down ordering. A function used in
   `let foo` defined later means the project has wired up
   recursive modules or out-of-order definitions: usually worth
   flagging.
-- **Pipelines**: `|>` chains over deeply nested calls; flag
+- Pipelines: `|>` chains over deeply nested calls; flag
   pipelines that obscure error propagation by `Result.iter`-ing
   away a meaningful failure.
-- **`Seq` vs `List` vs `Array`**: lazy sequences in places that
+- `Seq` vs `List` vs `Array`: lazy sequences in places that
   iterate twice silently re-evaluate. Materialise once with
   `List.ofSeq` / `Array.ofSeq` when the source is non-trivial.
-- **Interop with C# libraries**: F# `unit` mapping, null returns
+- Interop with C# libraries: F# `unit` mapping, null returns
   from C#, async-to-task adapters. New interop boundaries need a
   thin adapter module that translates into F# idioms.
 

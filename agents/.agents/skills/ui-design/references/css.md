@@ -8,24 +8,23 @@ that depends on a newer feature.
 
 ## Baseline widely available: use without feature query
 
-- **Cascade layers**:
-  `@layer reset, base, tokens, layout, components, utilities;`
-- **Native nesting**: `&` selector.
-- **Container queries**: `@container` with `container-type: inline-size`, units
+- Cascade layers: `@layer reset, base, tokens, layout, components, utilities;`
+- Native nesting: `&` selector.
+- Container queries: `@container` with `container-type: inline-size`, units
   `cqi` / `cqw` / `cqh`.
-- **`:has()`**: relational selector.
-- **Subgrid**.
-- **View Transitions Level 1**: same-document SPA transitions.
-- **`color-mix()`**.
-- **OKLCH** and **oklab**.
-- **`light-dark()`** with `color-scheme`.
-- **`@starting-style`** with `transition-behavior: allow-discrete`: enter /
-  exit from `display:none`.
-- **HTML Popover API**: `popover`, `popovertarget`.
-- **`field-sizing: content`**: auto-sizing inputs.
-- **`text-wrap: balance`** on headings. **`text-wrap: pretty`** on paragraphs.
-- **`@property`**: typed custom properties.
-- **`dvh` / `svh` / `lvh`** viewport units.
+- `:has()`: relational selector.
+- Subgrid.
+- View Transitions Level 1: same-document SPA transitions.
+- `color-mix()`.
+- OKLCH and oklab.
+- `light-dark()` with `color-scheme`.
+- `@starting-style` with `transition-behavior: allow-discrete`: enter / exit
+  from `display:none`.
+- HTML Popover API: `popover`, `popovertarget`.
+- `field-sizing: content`: auto-sizing inputs.
+- `text-wrap: balance` on headings. `text-wrap: pretty` on paragraphs.
+- `@property`: typed custom properties.
+- `dvh` / `svh` / `lvh` viewport units.
 
 ---
 
@@ -53,31 +52,29 @@ Components; bundle cost).
 
 Current defaults:
 
-- **Tailwind CSS v4**: CSS-first config via `@theme {}`, Lightning CSS engine.
+- Tailwind CSS v4: CSS-first config via `@theme {}`, Lightning CSS engine.
   Dominates in practice. https://tailwindcss.com/
-- **shadcn/ui + Tailwind + CVA**: default React stack. https://ui.shadcn.com/
-- **Vanilla Extract**: zero-runtime typed styles.
-  https://vanilla-extract.style/
-- **Panda CSS**: https://panda-css.com/
-- **StyleX** (Meta): https://stylexjs.com/
-- **CUBE CSS** (Andy Bell): BEM-style discipline at scale. https://cube.fyi/
-- **ITCSS** (Harry Roberts): inverted-triangle organisation; maps naturally
-  onto `@layer`. https://csswizardry.com/2018/11/itcss-and-skillshare/
+- shadcn/ui + Tailwind + CVA: default React stack. https://ui.shadcn.com/
+- Vanilla Extract: zero-runtime typed styles. https://vanilla-extract.style/
+- Panda CSS: https://panda-css.com/
+- StyleX (Meta): https://stylexjs.com/
+- CUBE CSS: BEM-style discipline at scale. https://cube.fyi/
+- ITCSS: inverted-triangle organisation; maps naturally onto `@layer`.
+  https://csswizardry.com/2018/11/itcss-and-skillshare/
 
 ---
 
 ## Responsive strategy
 
-- **Fluid typography via `clamp()`**: Utopia approach. Replaces
-  breakpoint-stacked type scales.
-  `--step-0: clamp(1rem, 0.93rem + 0.33vi, 1.19rem);` https://utopia.fyi/
-- **Container queries**: replace many media queries for component
-  responsiveness.
-- **Intrinsic Web Design** (Jen Simmons). Default card grid:
+- Fluid typography via `clamp()`: Utopia approach. Replaces breakpoint-stacked
+  type scales. `--step-0: clamp(1rem, 0.93rem + 0.33vi, 1.19rem);`
+  https://utopia.fyi/
+- Container queries: replace many media queries for component responsiveness.
+- Intrinsic Web Design. Default card grid:
   `repeat(auto-fit, minmax(min(100%, 20rem), 1fr))`.
-- **Logical properties**: `margin-inline`, `padding-block`,
-  `inset-inline-start`. i18n-ready default.
-- **Grid for 2D page and component structure. Flex for 1D content flows.**
+- Logical properties: `margin-inline`, `padding-block`, `inset-inline-start`.
+  i18n-ready default.
+- Grid for 2D page and component structure. Flex for 1D content flows.
 
 ---
 
@@ -138,10 +135,10 @@ Ref: https://developer.chrome.com/docs/web-platform/view-transitions/
 
 ## Motion libraries
 
-- **Motion**: https://motion.dev/, Matt Perry's successor to Framer Motion /
-  Motion One. WAAPI where possible, JS fallback. React, Vue, vanilla bindings.
-- **GSAP**: https://gsap.com/, 100% free including all former Club plugins.
-  Use for timeline orchestration, scroll choreography, SVG / canvas.
-- **Svelte transitions**: shipped in the framework. No install.
-- **Lottie**: https://airbnb.io/lottie/, illustrative After Effects exports.
+- Motion: https://motion.dev/, successor to Framer Motion / Motion One. WAAPI
+  where possible, JS fallback. React, Vue, vanilla bindings.
+- GSAP: https://gsap.com/, 100% free including all former Club plugins. Use
+  for timeline orchestration, scroll choreography, SVG / canvas.
+- Svelte transitions: shipped in the framework. No install.
+- Lottie: https://airbnb.io/lottie/, illustrative After Effects exports.
   Overkill for UI.

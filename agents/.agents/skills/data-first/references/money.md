@@ -11,17 +11,17 @@ section.
    `Decimal` / `BigDecimal` / fixed-point integer minor units.
    `float` / `double` / `Number` for money is a Critical-tier
    finding regardless of how "small" the application looks today.
-2. **Amount and currency travel together.** A bare number is not
+2. Amount and currency travel together. A bare number is not
    money: `Money(amount, currency)` is. APIs, function signatures,
    DB schemas, and event payloads all carry both.
-3. **ISO 4217 codes (3-letter, uppercase).** `USD`, `EUR`, `JPY`:
+3. ISO 4217 codes (3-letter, uppercase). `USD`, `EUR`, `JPY`:
    not `$`, `€`, `¥`. Symbols are display-layer only; codes are the
    stored / wire identity.
-4. **Convert at the boundary, with a recorded rate.** Mid-calculation
+4. Convert at the boundary, with a recorded rate. Mid-calculation
    conversion silently mixes units; later auditing can't reconstruct
    what happened. Convert once at the edge and persist the rate plus
    the conversion timestamp.
-5. **Pick a rounding policy and document it.** Banker's rounding
+5. Pick a rounding policy and document it. Banker's rounding
    (half-to-even, financial default), half-up, half-down: all are
    valid; silent inconsistency between layers is not.
 
@@ -29,10 +29,10 @@ section.
 
 | Layer | Default |
 |---|---|
-| **Database** | Two columns: `amount_minor BIGINT NOT NULL` (integer minor units, e.g. cents) plus `currency CHAR(3) NOT NULL`. Or `NUMERIC(19, 4)` with a documented scale and the currency column. **Never** `FLOAT` / `REAL` / `DOUBLE PRECISION`. Add a check constraint on the currency column. |
-| **Wire / API** | Object form: `{ "amount": "12.34", "currency": "USD" }` (string for the amount preserves precision across JSON's float). Or `{ "amount_minor": 1234, "currency": "USD" }` for an explicit minor-unit contract. Document which one. |
-| **Domain code** | A `Money` value object that bundles amount and currency, rejects mixed-currency arithmetic, and uses `Decimal` / `BigDecimal` internally. Most ecosystems have one (`py-moneyed`, `joda-money`, `Money.gem`, `Stripe.Money`); reach for it before rolling your own. |
-| **Display** | Locale-aware formatting at the UI edge: `Intl.NumberFormat(locale, { style: "currency", currency })`, ICU, `Locale.format`. The DB never sees `"$1,234.56"`; the user never sees `"123456 USD"`. |
+| Database | Two columns: `amount_minor BIGINT NOT NULL` (integer minor units, e.g. cents) plus `currency CHAR(3) NOT NULL`. Or `NUMERIC(19, 4)` with a documented scale and the currency column. Never `FLOAT` / `REAL` / `DOUBLE PRECISION`. Add a check constraint on the currency column. |
+| Wire / API | Object form: `{ "amount": "12.34", "currency": "USD" }` (string for the amount preserves precision across JSON's float). Or `{ "amount_minor": 1234, "currency": "USD" }` for an explicit minor-unit contract. Document which one. |
+| Domain code | A `Money` value object that bundles amount and currency, rejects mixed-currency arithmetic, and uses `Decimal` / `BigDecimal` internally. Most ecosystems have one (`py-moneyed`, `joda-money`, `Money.gem`, `Stripe.Money`); reach for it before rolling your own. |
+| Display | Locale-aware formatting at the UI edge: `Intl.NumberFormat(locale, { style: "currency", currency })`, ICU, `Locale.format`. The DB never sees `"$1,234.56"`; the user never sees `"123456 USD"`. |
 
 ## Per-currency decimal places
 

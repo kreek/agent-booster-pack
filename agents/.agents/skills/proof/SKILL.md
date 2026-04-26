@@ -49,14 +49,14 @@ description:
 
 For every non-trivial engineering claim, record:
 
-- **Claim**: the behavior, invariant, contract, or root cause asserted.
-- **Data invariant**: the data shape, state rule, or type boundary that
+- Claim: the behavior, invariant, contract, or root cause asserted.
+- Data invariant: the data shape, state rule, or type boundary that
   makes bad states impossible or visible.
-- **Boundary**: where the proof enters: public API, CLI, HTTP endpoint,
+- Boundary: where the proof enters: public API, CLI, HTTP endpoint,
   UI flow, migration preflight, module facade, or reproducible command.
-- **Check**: the executable validation that would fail if the claim were
+- Check: the executable validation that would fail if the claim were
   false.
-- **Evidence**: command/result, test name, diff reference, observed
+- Evidence: command/result, test name, diff reference, observed
   failure/pass, or explicit reason the proof could not be run.
 
 ## Workflow

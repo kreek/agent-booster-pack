@@ -6,56 +6,56 @@ ad-hoc query scripts, in the diff. Apply this alongside the main
 
 ## When to defer
 
-- **Schema, migrations, indexes added via DDL**: defer to the
+- Schema, migrations, indexes added via DDL: defer to the
   `database` skill: it owns production data risk, locking, and
   rollout.
-- **ORM-generated queries**: review the call site (N+1, eager
+- ORM-generated queries: review the call site (N+1, eager
   loading) using the language reference (e.g. `ruby.md` for AR,
   `dotnet.md` for EF Core, `python.md` for SQLAlchemy).
-- This file focuses on **hand-written SQL in app code**, raw queries,
+- This file focuses on hand-written SQL in app code, raw queries,
   views, and stored procedures.
 
 ## High-signal review checks
 
-- **Parameterised queries**: every value derived from user input
+- Parameterised queries: every value derived from user input
   must use bind parameters, not string concatenation. String-built
   SQL is a Critical security finding regardless of how "trusted" the
   input looks.
 - **No `SELECT *` in app code**: explicit column lists keep the wire
   contract stable when the schema grows. `SELECT *` is fine in
   ad-hoc queries and tests.
-- **Indexes covering predicates**: `WHERE` columns, `JOIN` keys, and
+- Indexes covering predicates: `WHERE` columns, `JOIN` keys, and
   `ORDER BY` columns should be indexed (or the planner should pick a
   reasonable scan). Ask for the `EXPLAIN` plan when the query is on
   a hot path.
-- **Set-based, not row-by-row**: a loop in the application that
+- Set-based, not row-by-row: a loop in the application that
   fires one query per row is almost always wrong. Push the work into
   a single `INSERT ... SELECT`, `UPDATE ... FROM`, or `MERGE`.
-- **Deterministic ordering for pagination**: `ORDER BY created_at`
+- Deterministic ordering for pagination: `ORDER BY created_at`
   alone is not stable across rows with the same timestamp. Add a
   tiebreaker (`ORDER BY created_at, id`) or use keyset pagination.
-- **`OFFSET` for deep pagination**: scans + skips. Past the first
+- `OFFSET` for deep pagination: scans + skips. Past the first
   few pages, switch to keyset (cursor) pagination.
-- **`NULL` semantics**: `col = NULL` never matches; use `IS NULL` /
+- `NULL` semantics: `col = NULL` never matches; use `IS NULL` /
   `IS NOT NULL`. Aggregates ignore `NULL` (`COUNT(col)` ≠
   `COUNT(*)`); be explicit.
-- **`JOIN` types**: an unintended `LEFT JOIN` matched against a
+- `JOIN` types: an unintended `LEFT JOIN` matched against a
   non-null column in `WHERE` silently becomes an `INNER JOIN`. Spot
   filters on the right side of a left join.
-- **Transaction scope**: keep transactions short. Long transactions
+- Transaction scope: keep transactions short. Long transactions
   hold locks and bloat MVCC. `BEGIN ... call_external_api ... COMMIT`
   is a finding: pull the side effect outside.
-- **Lock escalation / hot rows**: `UPDATE` on a heavily-contended
+- Lock escalation / hot rows: `UPDATE` on a heavily-contended
   row, `SELECT FOR UPDATE` without a clear ordering, can deadlock.
   Note any new locking pattern.
-- **Aggregations**: `GROUP BY` columns must include every non-aggregated
+- Aggregations: `GROUP BY` columns must include every non-aggregated
   column in the `SELECT`. Some dialects allow it implicitly, but
   the result is undefined.
-- **Type coercion**: implicit casts in predicates can prevent index
+- Type coercion: implicit casts in predicates can prevent index
   use. `WHERE id = '123'` against an `integer` column may scan.
-- **Date/time**: store and compare in UTC; truncate explicitly
+- Date/time: store and compare in UTC; truncate explicitly
   (`date_trunc(...)`) rather than relying on session timezone.
-- **Materialised views and triggers**: any new trigger or
+- Materialised views and triggers: any new trigger or
   materialised view changes invariants on writes: call out the
   impact on existing call sites and refresh strategy.
 

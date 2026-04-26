@@ -47,12 +47,12 @@ When in doubt, route to the `data-first` skill.
 
 ## Type system
 
-- **Modern syntax follows declared support.** On Python 3.10+ projects, prefer
+- Modern syntax follows declared support. On Python 3.10+ projects, prefer
   `list[T]`, `dict[K, V]`, `X | None`. On Python 3.8/3.9-compatible projects,
   `typing.List`, `typing.Dict`, `Optional`, and `Union` may be required unless
   `from __future__ import annotations` and the project's tooling support the
   newer form.
-- **`dict[str, Any]` is a `TypedDict` waiting to be born.** The
+- `dict[str, Any]` is a `TypedDict` waiting to be born. The
   single most common type smell: flag it on sight.
 - `# type: ignore` without an error code → block.
 - `Any` silently disables checking on the value and everything
@@ -82,14 +82,14 @@ When in doubt, route to the `data-first` skill.
   domain outcomes is still a finding; define a named domain error or
   return a typed result.
 - Bare `except:` catches `BaseException` (`KeyboardInterrupt`,
-  `SystemExit`, `asyncio.CancelledError`). **Never acceptable.**
+  `SystemExit`, `asyncio.CancelledError`). Never acceptable.
   `except Exception:` is acceptable only at trust boundaries
   (request handler, top-level CLI, supervisor).
 - `raise X from e` to preserve the chain; `from None` only when
   deliberately hiding implementation detail; bare `raise` to
   re-raise the original. `raise X(...)` inside `except` already
   chains via `__context__`: don't accidentally suppress.
-- **Log-and-reraise is an antipattern**: `log.error(f"... {e}"); raise`
+- Log-and-reraise is an antipattern: `log.error(f"... {e}"); raise`
   loses the traceback and double-logs at the boundary. Either
   `log.exception("foo failed")` (full traceback, no re-raise) or
   re-raise, never both.
@@ -107,7 +107,7 @@ When in doubt, route to the `data-first` skill.
 
 ## Async / concurrency
 
-- **Blocking I/O in `async def` is the #1 production incident.**
+- Blocking I/O in `async def` is the #1 production incident.
   `requests.get`, `time.sleep`, `open().read()` block the loop for
   the whole RTT. Use `httpx.AsyncClient`, `await asyncio.sleep`,
   `await asyncio.to_thread(...)`.
@@ -154,10 +154,10 @@ When in doubt, route to the `data-first` skill.
 
 ## Security
 
-- **SQL injection**: every value derived from user input must use
+- SQL injection: every value derived from user input must use
   bind parameters. `cur.execute(f"... {x}")` and
   `text(f"... {x}")` are Critical even when `x` looks "validated".
-- **Command injection**: `subprocess.run([cmd, *args])` always;
+- Command injection: `subprocess.run([cmd, *args])` always;
   `shell=True` with non-literal command is Critical (Bandit `B602`).
 - `pickle` deserialisation of untrusted data is RCE by design. Use
   `json`, `msgpack(strict_map_key=True, raw=False)`, or Pydantic.

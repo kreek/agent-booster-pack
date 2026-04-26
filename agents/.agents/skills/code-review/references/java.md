@@ -24,20 +24,20 @@ When in doubt, route to the `data-first` skill.
 
 ## Tooling that should be passing
 
-- **Build**: `./mvnw verify` or `./gradlew check` runs
+- Build: `./mvnw verify` or `./gradlew check` runs
   compile + tests + static analysis.
-- **Format**: `spotless:check` (Maven) / `spotlessCheck` (Gradle).
-- **Static analysis**: `spotbugs`, `errorprone`, or PMD if the
+- Format: `spotless:check` (Maven) / `spotlessCheck` (Gradle).
+- Static analysis: `spotbugs`, `errorprone`, or PMD if the
   project uses them. New warnings introduced by the diff are
   findings.
-- **Coverage**: project-defined gate (JaCoCo). Don't drop coverage
+- Coverage: project-defined gate (JaCoCo). Don't drop coverage
   silently.
 - IDE warnings off / `@SuppressWarnings("...")` needs a reason in
   the comment.
 
 ## High-signal review checks
 
-- **Null safety**:
+- Null safety:
   - `Optional<T>` is for return types where absence is meaningful.
     Don't use `Optional<T>` as a field, parameter, or in a
     collection.
@@ -45,10 +45,10 @@ When in doubt, route to the `data-first` skill.
     empty collection.
   - `@Nullable` / `@NonNull` annotations help static analysis;
     new code should annotate boundaries.
-- **Resource closing**: `try-with-resources` for any `Closeable` /
+- Resource closing: `try-with-resources` for any `Closeable` /
   `AutoCloseable`. A new `InputStream`, `Connection`, or
   `PreparedStatement` opened with no scoped close is a finding.
-- **Exceptions**:
+- Exceptions:
   - Expected domain failures use named checked/unchecked exception
     types or explicit result variants, not generic
     `RuntimeException("message")`.
@@ -59,7 +59,7 @@ When in doubt, route to the `data-first` skill.
     e)`, not `new RuntimeException(msg)`).
   - Custom exceptions extend `RuntimeException` for unchecked,
     `Exception` for checked: pick deliberately.
-- **Concurrency**:
+- Concurrency:
   - Shared mutable state across threads needs `volatile`,
     `AtomicX`, `java.util.concurrent` collections, or a `Lock`:
     never plain `HashMap`.
@@ -68,29 +68,29 @@ When in doubt, route to the `data-first` skill.
     Prefer a private `final Object lock = new Object();`.
   - Virtual threads (Java 21+): blocking is fine, but synchronized
     blocks pin the carrier: prefer `ReentrantLock`.
-- **`equals` / `hashCode` / `toString`**: must move together.
+- `equals` / `hashCode` / `toString`: must move together.
   `record` gives them for free; manual overrides need tests.
   Inheritance + `equals` is a known minefield (see Effective Java).
-- **Spring `@Transactional`**:
+- Spring `@Transactional`:
   - Self-invocation (`this.method()`) bypasses the proxy and the
     transaction.
   - `@Transactional` on a private/protected method is silently a
     no-op.
   - Default rollback only on `RuntimeException`: checked exceptions
     don't roll back unless declared (`rollbackFor = ...`).
-- **Dependency injection**: prefer constructor injection over field
+- Dependency injection: prefer constructor injection over field
   injection (`@Autowired private Foo foo;`). Constructor-injected
   classes are testable without Spring; field-injected ones aren't.
-- **Logging**: SLF4J parameter form (`log.info("user {} did x",
+- Logging: SLF4J parameter form (`log.info("user {} did x",
   id)`) over string concatenation: lazy evaluation, no leak when
   level is off.
-- **Streams**: stateful lambda inside `map` / `filter` is a finding;
+- Streams: stateful lambda inside `map` / `filter` is a finding;
   parallel streams almost always need a justification (CPU-bound,
   no shared state, large enough to amortise the fork-join overhead).
-- **`Date` / `Calendar`**: stay in `java.time`: `Instant`,
+- `Date` / `Calendar`: stay in `java.time`: `Instant`,
   `LocalDate`, `ZonedDateTime`. Legacy `Date` in new code is a
   finding.
-- **Builds**: a new dependency in `pom.xml` / `build.gradle` should
+- Builds: a new dependency in `pom.xml` / `build.gradle` should
   match a real need; transitive bumps deserve a glance for known
   CVEs.
 

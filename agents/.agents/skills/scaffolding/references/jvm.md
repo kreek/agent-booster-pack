@@ -4,10 +4,10 @@ Use this before scaffolding fresh Java or Kotlin projects.
 
 ## Defaults
 
-- Build tool: Gradle with the **Kotlin DSL** (`build.gradle.kts`,
+- Build tool: Gradle with the Kotlin DSL (`build.gradle.kts`,
   `settings.gradle.kts`). Groovy DSL is legacy; use it only when an existing
   repo is pinned to it. Use Maven only when the repo is locked to it.
-- JDK baseline: target the current **LTS JDK** for new projects. Check the
+- JDK baseline: target the current LTS JDK for new projects. Check the
   OpenJDK LTS roadmap before picking; do not start a new project on a non-LTS
   line.
 - Kotlin compiler: K2 (the modern Kotlin compiler front-end) is the default for
@@ -30,13 +30,13 @@ Use this before scaffolding fresh Java or Kotlin projects.
   with AOT; Quarkus leans Jakarta-EE-aligned with dev-mode live reload.
 - Spring Boot for production-grade JVM services needing starters,
   auto-configuration, actuator/metrics/health, data integrations, and broad
-  enterprise conventions. **GraalVM native image support is GA** in Spring Boot;
+  enterprise conventions. GraalVM native image support is GA in Spring Boot;
   opt in when cold-start and memory budgets justify the build-time cost.
 
 ## Minimum Scaffold
 
 - Gradle wrapper, build file (Kotlin DSL), application plugin where appropriate,
-  one test target, and a **version catalog** (`gradle/libs.versions.toml`) for
+  one test target, and a version catalog (`gradle/libs.versions.toml`) for
   shared dependency versions.
 - Standard tasks: `test`, `check`, formatting/linting (Spotless/ktlint) where
   configured, and app run.

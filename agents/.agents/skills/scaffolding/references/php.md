@@ -12,15 +12,15 @@ Use this before scaffolding fresh PHP projects.
 - Lightweight/API default: Slim.
 - Robust/full-stack default: Laravel. Current Laravel ships a streamlined
   bootstrap/config layout and a first-party tooling stack you should opt into
-  when the shape fits: **Volt** (functional Livewire syntax), **Folio**
-  (page-based routing), **Reverb** (WebSocket server), and **Herd** (zero-config
+  when the shape fits: Volt (functional Livewire syntax), Folio
+  (page-based routing), Reverb (WebSocket server), and Herd (zero-config
   local dev environment for macOS/Windows).
 - Enterprise-grade alternative to Laravel: Symfony; pick it when
   components-first composition, long-term stability contracts, or existing
   Symfony ecosystem familiarity matters more than Laravel's defaults.
-- Testing default for new projects: **Pest** (built on PHPUnit, more expressive
+- Testing default for new projects: Pest (built on PHPUnit, more expressive
   spec-style syntax). Existing repos can keep PHPUnit.
-- Static analysis baseline in CI: **PHPStan**. Keep Psalm when taint analysis
+- Static analysis baseline in CI: PHPStan. Keep Psalm when taint analysis
   for security is the priority.
 - Do not scaffold raw PHP front-controller routing for apps unless the user asks
   or the project is a tiny script/library/teaching example.

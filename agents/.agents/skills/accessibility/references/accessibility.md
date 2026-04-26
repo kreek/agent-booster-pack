@@ -10,15 +10,15 @@ WCAG 2.2 AA is the floor. Depth reference for the rules summarised in
 W3C Recommendation; also published as ISO/IEC 40500. Quoted verbatim from
 https://www.w3.org/TR/WCAG22/ :
 
-> **Perceivable**: Information and user interface components must be
+> Perceivable: Information and user interface components must be
 > presentable to users in ways they can perceive.
 >
-> **Operable**: User interface components and navigation must be operable.
+> Operable: User interface components and navigation must be operable.
 >
-> **Understandable**: Information and the operation of user interface must be
+> Understandable: Information and the operation of user interface must be
 > understandable.
 >
-> **Robust**: Content must be robust enough that it can be interpreted reliably
+> Robust: Content must be robust enough that it can be interpreted reliably
 > by a wide variety of user agents, including assistive technologies.
 
 WCAG 2.2 is additive to 2.1. Removes the obsolete 4.1.1 Parsing success
@@ -95,7 +95,7 @@ Quoted from https://www.w3.org/WAI/ARIA/apg/practices/read-me-first/ :
 > behavior you require already built in, instead of re-purposing an element and
 > adding an ARIA role, state or property to make it accessible, then do so."
 
-WebAIM Million data: sites using ARIA average **41% more** detected
+WebAIM Million data: sites using ARIA average 41% more detected
 accessibility errors than those without. No ARIA is better than bad ARIA.
 https://webaim.org/projects/million/
 
@@ -126,7 +126,7 @@ Ref: https://www.w3.org/WAI/ARIA/apg/patterns/
   mouse is acceptable only with `:focus-visible` rings.
 - Implement skip links:
   `<a class="skip-link" href="#main">Skip to main content</a>`.
-- Use **roving tabindex** for composite widgets (tabs, listboxes, menus, radio
+- Use roving tabindex for composite widgets (tabs, listboxes, menus, radio
   groups).
 - Restore focus on modal close.
 
@@ -175,7 +175,7 @@ Refs:
 
 ## Inclusive design
 
-Microsoft's **Inclusive Design**: https://inclusive.microsoft.design/
+Microsoft's Inclusive Design: https://inclusive.microsoft.design/
 
 Principles:
 
@@ -183,7 +183,7 @@ Principles:
 2. Learn from diversity.
 3. Solve for one, extend to many.
 
-**Persona spectrum**: permanent, temporary, and situational variants of every
+Persona spectrum: permanent, temporary, and situational variants of every
 disability. Captions (designed for Deaf users) serve people in noisy bars,
 language learners, and parents with sleeping infants.
 

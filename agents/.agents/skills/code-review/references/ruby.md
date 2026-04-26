@@ -49,7 +49,7 @@ Ruby's culture leans heavily on objects with state. The
 
 - `{x:, y:}` hash shorthand (3.1+) is the dominant idiom now.
   `{name: name, email: email}` is needs-modernisation.
-- `case/in` is **exhaustive** (raises `NoMatchingPatternError`
+- `case/in` is exhaustive (raises `NoMatchingPatternError`
   without `else`); add `else` in user-facing logic. Hash patterns are
   partial: use `**nil` for closed matches. The pin operator `^` is
   mandatory when matching against an existing variable; bare names
@@ -73,7 +73,7 @@ Ruby's culture leans heavily on objects with state. The
 
 ## Performance and Object Shapes
 
-- **Lazy `||=` ivar memoisation creates many shapes per class.**
+- Lazy `||=` ivar memoisation creates many shapes per class.
   Five memoised ivars can produce 121 shapes; classes that exceed
   the limit fall back to a hash (`SHAPE_TOO_COMPLEX`). Eagerly init
   ivars in `initialize`.
@@ -102,33 +102,33 @@ Ruby's culture leans heavily on objects with state. The
 
 ## Rails 8 stack
 
-- **`params.expect` over `params.require(...).permit(...)`** in new
+- `params.expect` over `params.require(...).permit(...)` in new
   controllers. The bug it fixes: `?user=hello` returns a String for
   which `permit` raises `NoMethodError` → uncaught 500.
   `params.expect` enforces structure and yields a clean 400. Common
-  gotcha: arrays of hashes need **double brackets**:
+  gotcha: arrays of hashes need double brackets:
   `params.expect(post: [:title, comments: [[:body]]])`.
-- **Solid Queue** is the Rails 8 default ActiveJob backend.
+- Solid Queue is the Rails 8 default ActiveJob backend.
   DB-backed via `FOR UPDATE SKIP LOCKED`. Sweet spot under ~2k
   jobs/min; above that, Sidekiq still wins. For non-trivial
   workloads configure a `queue` database via Rails multi-DB.
-- **Solid Cache** is for fragment / HTTP caches: disk-backed,
+- Solid Cache is for fragment / HTTP caches: disk-backed,
   large-capacity, FIFO. Don't use it as a Redis substitute for
   rate-limit counters, leaderboards, distributed locks, or pub/sub.
-- **Solid Cable** is DB-backed pub-sub with ~0.1s polling. For
+- Solid Cable is DB-backed pub-sub with ~0.1s polling. For
   high-fanout chat / realtime, Postgres `LISTEN/NOTIFY` (`async`
   adapter) or Redis is still lower latency.
-- **Built-in `rate_limit to: 10, within: 3.minutes`** is backed by
+- Built-in `rate_limit to: 10, within: 3.minutes` is backed by
   `Rails.cache`: must use a distributed cache in multi-process
   production or each worker has its own counter. Pair with
   rack-attack for IP allow/blocklists.
-- **Native auth generator** (`bin/rails generate authentication`)
+- Native auth generator (`bin/rails generate authentication`)
   ships `User` + `Session` + `Current` + `Authentication` concern
-  with `has_secure_password` and DB-tracked sessions. It does **not**
+  with `has_secure_password` and DB-tracked sessions. It does not
   ship signup, OmniAuth, MFA, account locking, or password
   complexity: for those, Devise (batteries-included) or Rodauth
   (security-sensitive: TOTP/passkeys/WebAuthn).
-- **Rails 8.1**: ActiveJob Continuations (resumable multi-step jobs;
+- Rails 8.1: ActiveJob Continuations (resumable multi-step jobs;
   each `step` must remain idempotent), structured event reporting,
   `format.md`, `has_many :posts, deprecated: true`, Kamal secrets
   via credentials. `config/ci.rb` is the new convention for a
@@ -136,20 +136,20 @@ Ruby's culture leans heavily on objects with state. The
 
 ## ActiveRecord modern patterns
 
-- **`load_async`** helps when ≥2 independent slow queries run for
+- `load_async` helps when ≥2 independent slow queries run for
   the same request. Pool size **≥ `thread_count +
   global_executor_concurrency + 1`** in `database.yml`, or Puma
   threads starve. Don't `load_async` inside a transaction held by
   the calling thread: connection-pinning can deadlock.
-- **`normalizes`** (7.1) applies on assignment, persistence, *and*
+- `normalizes` (7.1) applies on assignment, persistence, *and*
   query. Migrating an existing column requires a backfill:
   `normalizes` doesn't retroactively rewrite stored data.
-- **`encrypts`**: default non-deterministic (random IV, not
+- `encrypts`: default non-deterministic (random IV, not
   queryable, highest security). `deterministic: true` is queryable
   but allows ciphertext correlation: flag on a non-queried column
   (over-permissive). Scheme switches without `previous:` orphan
   existing rows.
-- **`includes` / `preload` / `eager_load` / `joins`**:
+- `includes` / `preload` / `eager_load` / `joins`:
 
   | Method | Behavior | When |
   |---|---|---|
@@ -163,31 +163,31 @@ Ruby's culture leans heavily on objects with state. The
   `eager_load`. Use the hash form
   `where(comments: { flagged: true })` or
   `eager_load(:comments)` explicitly.
-- **Strict loading** in `:n_plus_one_only` mode: allows lazy load on
+- Strict loading in `:n_plus_one_only` mode: allows lazy load on
   single records, raises on collection iteration N+1. `:raise` in
   dev/test, `:log` in production until clean.
-- **Prosopite over Bullet** for N+1 detection: SQL-fingerprint
+- Prosopite over Bullet for N+1 detection: SQL-fingerprint
   pattern matching catches cases Bullet misses. Have Prosopite
   raise in test.
-- **`insert_all` / `upsert_all`** are 10–100× faster but bypass
+- `insert_all` / `upsert_all` are 10–100× faster but bypass
   validations, callbacks, and timestamps. Flag missing DB unique
   index when relying on `unique_by:`. `returning:` is Postgres-only.
-- **`enqueue_after_transaction_commit = :always`** (Rails 7.2
+- `enqueue_after_transaction_commit = :always` (Rails 7.2
   default) prevents the "background job runs against rolled-back
-  row" bug. **Don't make HTTP calls inside `transaction do`**: the
+  row" bug. Don't make HTTP calls inside `transaction do`: the
   row lock is held for the call duration.
-- **`strong_migrations`** in the Gemfile catches dangerous
+- `strong_migrations` in the Gemfile catches dangerous
   migrations (adding `NOT NULL` without default; `change_column`
   rewriting the table; `add_index` on a large table without
   `algorithm: :concurrently`). Defer to the `database` skill for
   production data risk.
-- **Composite primary keys** (7.1): insert-heavy workloads can
+- Composite primary keys (7.1): insert-heavy workloads can
   become *slower* due to a larger PK index: measure. `belongs_to`
   from a CPK model needs `query_constraints: [...]`.
 
 ## Security review checklist
 
-- **SQL injection**: ActiveRecord does **not** parameterise the
+- SQL injection: ActiveRecord does not parameterise the
   string forms of `where`, `find_by_sql`, `select`, `from`,
   `joins`, `group`, `having`, `order`, `reorder`, `pluck`, `lock`,
   `update_all`, `delete_all`, or the calculate family
@@ -195,49 +195,49 @@ Ruby's culture leans heavily on objects with state. The
   interpolation in those positions. `Arel.sql(user_input)` is an
   escape hatch: input must come from an explicit allow-list.
   `params[:sort]` flowing directly into `order` is the classic bug.
-- **IDOR is the most common Rails security bug in production.**
+- IDOR is the most common Rails security bug in production.
   `Document.find(params[:id])` instead of
   `current_user.documents.find(params[:id])` is Critical. Use
   `after_action :verify_authorized` and `:verify_policy_scoped`.
   Re-check authorisation in background jobs:
   `DocumentExportJob.perform_later(doc.id, current_user.id)` with
   a job that loads via `Document.find(doc_id)` is unscoped.
-- **Mass assignment**: never `permit!`. **Never permit** `:role`,
+- Mass assignment: never `permit!`. Never permit `:role`,
   `:admin`, `:owner_id`, `:account_id`, `:user_id`, `:type` (STI),
   `:approved`, or `:status` from form-driven controllers.
-- **XSS bypass list**: `.html_safe` on a user-controlled string
+- XSS bypass list: `.html_safe` on a user-controlled string
   (the most common Rails XSS vector); `raw`; `<%==`; `sanitize`
   without explicit `tags:` and `attributes:`; translation keys
   ending `_html` with default values from params; `to_json` in JS
   contexts without escape. Verify `rails-html-sanitizer ≥ 1.6.1`.
-- **Open redirect**: `redirect_to params[:next]` is the classic.
+- Open redirect: `redirect_to params[:next]` is the classic.
   Set `config.action_controller.raise_on_open_redirects = true`.
   Use `url_from(params[:return_to]) || root_path` and
   `redirect_back_or_to`. Hand-rolled "starts with `/`" checks are
   bypassed by `//evil.com` (protocol-relative URL).
-- **ActiveStorage**: prefer libvips via `image_processing` with
+- ActiveStorage: prefer libvips via `image_processing` with
   `ImageProcessing::Vips` and `variant_processor = :vips` (faster,
-  sandboxed, no shell-out). **Never pass params to `variant(...)`**:
+  sandboxed, no shell-out). Never pass params to `variant(...)`:
   allow-list transformations. Force `disposition: "attachment"` for
   non-images. Serve user uploads from a different origin so
   same-origin XSS can't reach the main app. Set `expires_in:` on
   signed_ids for sensitive content.
-- **Deserialisation**: flag `YAML.unsafe_load`, `Marshal.load`, and
+- Deserialisation: flag `YAML.unsafe_load`, `Marshal.load`, and
   `JSON.parse(input, create_additions: true)` on untrusted data.
   Verify `config.action_dispatch.cookies_serializer = :json`.
-- **JWT**: always pass `algorithm:` to `JWT.decode` (older
+- JWT: always pass `algorithm:` to `JWT.decode` (older
   `ruby-jwt` accepted `alg: none`); don't accept both RS256 and
   HS256 on the same endpoint (algorithm-confusion attack uses the
   public key as the HMAC secret); short TTL + opaque refresh
   tokens; no PII in the JWT (it's base64, not encrypted).
-- **`config.hosts`** empty in production by default: populate it,
+- `config.hosts` empty in production by default: populate it,
   or you're vulnerable to host-header poisoning (password-reset
   emails pointing to attacker domain).
-- **CORS**: anchor regex origins (`\Ahttps://example\.com\z`); never
+- CORS: anchor regex origins (`\Ahttps://example\.com\z`); never
   `origins '*'` with `credentials: true`.
-- **ReDoS**: Ruby 3.2+ has built-in `Regexp.timeout = 1.0`: set it
+- ReDoS: Ruby 3.2+ has built-in `Regexp.timeout = 1.0`: set it
   globally.
-- **Secrets**: `master.key` in git history is full secret
+- Secrets: `master.key` in git history is full secret
   compromise: rotate immediately. Don't load dotenv in production.
   Centralise `credentials.dig(:foo) || ENV['FOO_BAR']` in a single
   config wrapper.
@@ -248,13 +248,13 @@ Decision rule, simplest to most powerful:
 
 > HTML/CSS → Turbo Drive → Turbo Frames → Turbo Streams (refresh / morph) → Stimulus → custom JS
 
-- **Turbo 8 morphing** (`turbo-refresh-method=morph`) keys on stable
+- Turbo 8 morphing (`turbo-refresh-method=morph`) keys on stable
   `id` attributes. Generated `dom_id(record)` is fine; randomised
   container IDs break it. Use `data-turbo-permanent` on elements
   that must survive (`<audio>`, embedded payment forms). Morphing
   only fires when start and end URLs are identical; doesn't help on
   `redirect_to other_path`.
-- **Stimulus smells**: god controllers (20 targets, 15 actions);
+- Stimulus smells: god controllers (20 targets, 15 actions);
   DOM queries by class instead of `data-*-target`; cross-controller
   comms via DOM lookup instead of custom events
   (`this.dispatch("opened")`) and Outlets (3.2+); `setTimeout` /
@@ -277,15 +277,15 @@ Decision matrix for where logic lives:
 | Authorisation | Pundit (conservative) or action_policy (modern) |
 | Value objects | `Data.define` (3.2+) |
 
-- **Don't nest transactions**: use the `isolator` gem to detect
+- Don't nest transactions: use the `isolator` gem to detect
   non-atomic actions inside transactions.
-- **HTTP/jobs inside `transaction do`** → `enqueue_after_transaction_commit`
+- HTTP/jobs inside `transaction do` → `enqueue_after_transaction_commit`
   (Rails 7.2 default) or `after_commit_everywhere`.
-- **Concerns** named by domain trait (`Trashable`, `Searchable`),
+- Concerns named by domain trait (`Trashable`, `Searchable`),
   not by mechanism (`Validations`, `Callbacks`, `Scopes`).
 - Bag-of-params hashes; services without explicit return contracts;
   `Service.new(args).call` instead of `Service.call(args)`: flag.
-- **Modular monolith / Packwerk**: dependency enforcement is the
+- Modular monolith / Packwerk: dependency enforcement is the
   durable win; privacy enforcement often hurts readability. Default
   to monolith. Extract services when scaling profile, security
   domain, or team ownership genuinely diverges, not "to make
@@ -293,26 +293,26 @@ Decision matrix for where logic lives:
 
 ## Testing
 
-- **`before(:all)` doing DB writes**: transactional fixtures wrap
+- `before(:all)` doing DB writes: transactional fixtures wrap
   each example, not context. Records leak. Use `let_it_be`
   (TestProf): `let_it_be(:user, reload: true)` /
   `refind: true` / `freeze: true`.
-- **`let!` everywhere**: eager evaluation defeats laziness. Usually
+- `let!` everywhere: eager evaluation defeats laziness. Usually
   means the variable is used in every example; refactor to `before`
   or `let_it_be`.
-- **`expect_any_instance_of`** is a design smell. Inject the
+- `expect_any_instance_of` is a design smell. Inject the
   collaborator instead.
-- **Always enable** `verify_partial_doubles = true` and
+- Always enable `verify_partial_doubles = true` and
   `verify_doubled_constant_names = true`.
-- **factory_bot**: traits over factory proliferation (`:user` +
+- factory_bot: traits over factory proliferation (`:user` +
   `:admin`/`:active`, not `:admin_user`/`:active_admin_user`).
   `build_stubbed` is the right default for unit tests; `build` still
   calls `create` for associations: the trap that catches new users.
   CI Rake task running `FactoryBot.lint` catches factory rot.
-- **300+ system tests is a smell**: pull variations down to
+- 300+ system tests is a smell: pull variations down to
   request/model specs and keep ~15-30 happy-path smoke tests at
-  system level. **Cuprite** (Ferrum/CDP) or
-  **capybara-playwright-driver** (`:playwright`) over Selenium:
+  system level. Cuprite (Ferrum/CDP) or
+  capybara-playwright-driver (`:playwright`) over Selenium:
   faster and dramatically less flaky. Both expose race conditions
   Selenium was masking by being slow; fix in the test, not the
   driver: `expect(page).to have_css('.foo', text: 'bar')` over
@@ -322,18 +322,18 @@ Decision matrix for where logic lives:
   console errors loudly. Brittle CSS selector chains banned: use
   semantic locators (`click_on("Save")`, `fill_in("Email")`,
   role/aria queries, `data-testid` last-resort).
-- **WebMock**: `WebMock.disable_net_connect!(allow_localhost: true)`.
-  **VCR** for record/replay with
+- WebMock: `WebMock.disable_net_connect!(allow_localhost: true)`.
+  VCR for record/replay with
   `c.allow_http_connections_when_no_cassette = false` in CI.
-- **Order-dependent specs** (`config.order = :defined`): always
+- Order-dependent specs (`config.order = :defined`): always
   enable `:random` + `Kernel.srand config.seed`; bisect with
   `rspec --bisect`.
-- **`Timecop.freeze` without `Timecop.return`**: time leaks. Use
+- `Timecop.freeze` without `Timecop.return`: time leaks. Use
   the block form `freeze_time { ... }`.
 
 ## Type checking
 
-The 2025 convergence: **RBS as the syntax** in either engine.
+The 2025 convergence: RBS as the syntax in either engine.
 Sorbet accepts inline RBS comments behind a flag; rbs-inline merged
 into RBS 4.0. Inline `#:` annotations work in both ecosystems.
 
@@ -342,7 +342,7 @@ into RBS 4.0. Inline `#:` annotations work in both ecosystems.
   sweet spot, `strict` requires sigs on every method.
 - Steep for OSS gems and below-megacorp scale codebases; Steep 1.9+
   added type guards, flow-sensitive typing, safe-nav narrowing.
-- **`T.untyped` / `untyped` is the biggest red flag**: treat each
+- `T.untyped` / `untyped` is the biggest red flag: treat each
   like a TODO. Same for `T.must` / `T.cast` / `#: as !nil` as
   debugging crutches.
 - `Hash[String, untyped]` smell: better as a typed struct,

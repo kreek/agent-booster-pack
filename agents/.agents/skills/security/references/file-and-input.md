@@ -5,26 +5,26 @@ deserialising, unpacking, or persisting untrusted bytes.
 
 ## File upload
 
-- **Magic-byte check.** Validate file content type by reading the first
-  bytes with a maintained file-type detector; never trust `Content-Type` or
+- Magic-byte check. Validate file content type by reading the first bytes
+  with a maintained file-type detector; never trust `Content-Type` or
   extension alone. Reject anything that does not match the declared type.
-- **Re-encode where possible.** Server-side re-encode images (resize, drop
+- Re-encode where possible. Server-side re-encode images (resize, drop
   EXIF, normalise format) to strip smuggled scripts and PDFs. For documents,
   convert to a known format.
-- **Serve from a separate, cookieless origin.** A stored XSS in an uploaded
+- Serve from a separate, cookieless origin. A stored XSS in an uploaded
   SVG cannot reach the session cookie of the main app if the file is served
   from `usercontent.example.net`.
-- **Force `Content-Disposition: attachment`** for any type the user did not
+- Force `Content-Disposition: attachment` for any type the user did not
   explicitly choose to render inline.
-- **Block executable content types** by default: SVG, HTML, XHTML, EICAR,
+- Block executable content types by default: SVG, HTML, XHTML, EICAR,
   archives the app does not need to extract.
-- **Size limits** enforced at the proxy / server **before** buffering in
+- Size limits enforced at the proxy / server **before** buffering in
   memory. The application limit is too late.
-- **Antivirus / content scan** for risky types in regulated environments.
+- Antivirus / content scan for risky types in regulated environments.
   ClamAV in a sidecar is the cheap baseline.
-- **Random storage names.** Never use the user-supplied filename as the
+- Random storage names. Never use the user-supplied filename as the
   storage path. Map to a UUID; keep the original name only in metadata.
-- **MIME-sniffing defence.** Send `X-Content-Type-Options: nosniff` and
+- MIME-sniffing defence. Send `X-Content-Type-Options: nosniff` and
   serve with the correct `Content-Type`.
 
 ## Path traversal
@@ -90,8 +90,8 @@ generated parser or mature schema library, not hand-rolled type-checks.
 The "framework binds the request body to the entity" pattern. Top OWASP API
 risk.
 
-- Bind to a **DTO** with an explicit allowlist of fields, not directly to
-  the ORM entity. The DTO is the authority on what is bindable.
+- Bind to a DTO with an explicit allowlist of fields, not directly to the
+  ORM entity. The DTO is the authority on what is bindable.
 - Strong-parameters / `permit` / class-validator decorators per field.
 - Block fields like `is_admin`, `role`, `tenant_id`, `owner_id`, `id`,
   `created_at`, `password_hash`: the field types that should never be
@@ -113,15 +113,15 @@ risk.
 
 ## Other parser traps
 
-- **HTTP request smuggling / parser differentials.** If you sit behind a
+- HTTP request smuggling / parser differentials. If you sit behind a
   CDN / load balancer / app server pair, ensure both agree on
   `Transfer-Encoding` vs `Content-Length`. Misalignment lets an attacker
   smuggle a second request through the front-end.
-- **CRLF / header injection.** User input interpolated into `Set-Cookie`,
+- CRLF / header injection. User input interpolated into `Set-Cookie`,
   `Location`, custom headers must be CRLF-stripped (or rejected). Most
   framework cookie/header APIs do this; only the unsafe ones (writing
   raw bytes) are exposed.
-- **JSON / YAML parser quirks.** YAML `!!python/object` and similar tag
+- JSON / YAML parser quirks. YAML `!!python/object` and similar tag
   systems are deserialisation, not parsing; covered above. JSON: duplicate
   keys are parser-defined; pick a parser that rejects them or document the
   rule.

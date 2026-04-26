@@ -9,20 +9,20 @@ in API integrations come from these.
 - Use a maintained OAuth / OIDC client library or provider SDK. Do not
   hand-roll redirect handling, token exchange, token parsing, discovery,
   or JWKS validation.
-- **PKCE on every client.** Required for public clients (mobile, SPA, CLI),
+- PKCE on every client. Required for public clients (mobile, SPA, CLI),
   recommended for confidential clients. `S256` only; never `plain`.
-- **`state` parameter**: random per-request, bound to the user's session,
+- `state` parameter: random per-request, bound to the user's session,
   validated on callback. This is the CSRF protection for the redirect.
-- **`nonce`** for OIDC: random per-request, validated against the `nonce`
+- `nonce` for OIDC: random per-request, validated against the `nonce`
   claim in the ID token.
-- **Exact `redirect_uri` match.** Prefix matches and "any path under
+- Exact `redirect_uri` match. Prefix matches and "any path under
   example.com" rules are bugs. The authorisation server must do the exact
   match; client-side validation is a backstop.
-- **No tokens in URL fragments on the server.** If a token arrives in a
+- No tokens in URL fragments on the server. If a token arrives in a
   fragment, JavaScript reads it; never log the URL.
-- **Refresh-token rotation**: use one-shot refresh tokens; if a refresh
+- Refresh-token rotation: use one-shot refresh tokens; if a refresh
   token is reused, treat the family as compromised and revoke.
-- **Audience binding**: when calling a downstream API, the access token's
+- Audience binding: when calling a downstream API, the access token's
   `aud` must match that API. Avoid token confusion across resource servers.
 - Token storage: confidential client → server-side. Browser public clients
   with sensitive scopes should prefer a Backend-for-Frontend or
@@ -67,8 +67,8 @@ When you accept an ID token or access token:
 - Format: prefix + random ≥ 128-bit body (`sk_live_<32 base32 chars>`). The
   prefix lets scanners and humans recognise the key class without exposing
   the secret.
-- Store **hashes** (SHA-256 is fine here; it's a high-entropy secret, not
-  a password). Compare with constant-time equality.
+- Store hashes (SHA-256 is fine here; it's a high-entropy secret, not a
+  password). Compare with constant-time equality.
 - Show the full key once on creation; never again.
 - Bind to scope, environment, owner, expiry. Default expiry ≤ 1 year.
 - Rotate by issuing the new key, requiring both for a short overlap, then
@@ -98,15 +98,22 @@ scheme; provide a key-rotation flow.
 
 ## BOLA / BFLA (OWASP API Top 10)
 
-- **Broken Object Level Authorisation (BOLA):** every `findById` /
-  `getResource(id)` must include the actor's tenancy or ownership in the
-  query (`WHERE id = :id AND owner_id = :current_user`). Do not load then
-  check; load with the predicate. Tests must include "wrong tenant requests
-  resource that exists" and assert 404 (not 403, which leaks existence).
-- **Broken Function Level Authorisation (BFLA):** privileged endpoints
-  re-check the role at the handler, not only at the router. Default to
-  deny; a handler with no authz check is a bug.
-- **Mass assignment:** see `file-and-input.md`.
+### Broken Object Level Authorisation (BOLA)
+
+Every `findById` / `getResource(id)` must include the actor's tenancy or
+ownership in the query (`WHERE id = :id AND owner_id = :current_user`).
+Do not load then check; load with the predicate. Tests must include
+"wrong tenant requests resource that exists" and assert 404 (not 403,
+which leaks existence).
+
+### Broken Function Level Authorisation (BFLA)
+
+Privileged endpoints re-check the role at the handler, not only at the
+router. Default to deny; a handler with no authz check is a bug.
+
+### Mass assignment
+
+See `file-and-input.md`.
 
 ## Rate limiting
 

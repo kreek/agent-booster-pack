@@ -18,31 +18,31 @@ Use when reviewing Rust code in the diff. Apply this alongside the main
 
 ## High-signal review checks
 
-- **Error handling**: prefer `?` propagation with `Result` and concrete
+- Error handling: prefer `?` propagation with `Result` and concrete
   error enums (`thiserror` for libraries, `anyhow` only for app
   boundaries). Reject `.unwrap()` / `.expect()` in non-test code unless
   the invariant is provably enforced and commented.
-- **Panics**: indexing (`v[i]`), `unwrap`, `expect`, `unreachable!`,
+- Panics: indexing (`v[i]`), `unwrap`, `expect`, `unreachable!`,
   `todo!`, integer division, slice ranges. Each one needs a why.
-- **Async**: blocking work inside `async fn` (file I/O, `std::sync`
+- Async: blocking work inside `async fn` (file I/O, `std::sync`
   primitives, CPU-heavy loops) starves the runtime. Look for
   `std::thread::sleep`, blocking DB drivers, or `Mutex` held across
   `.await`.
-- **`Send + Sync`**: spawned futures and shared state must satisfy the
+- `Send + Sync`: spawned futures and shared state must satisfy the
   bounds. `Rc`, `RefCell`, raw pointers in spawned tasks are red flags.
-- **Lifetimes vs clones**: a sudden `.clone()` on a hot path is worth
+- Lifetimes vs clones: a sudden `.clone()` on a hot path is worth
   questioning, but so is a lifetime gymnastics that obscures intent.
   Pick the simpler shape unless benchmarks justify otherwise.
-- **`Drop` order and resource leaks**: scope guards, file handles,
+- `Drop` order and resource leaks: scope guards, file handles,
   network connections. `mem::forget`, `ManuallyDrop`, `Box::leak` need
   explicit justification.
-- **Unsafe**: every `unsafe` block needs a comment naming the
+- Unsafe: every `unsafe` block needs a comment naming the
   invariants the caller must uphold. New unsafe code without a safety
   comment is a blocker.
-- **Public API**: breaking changes to `pub` items in libraries trigger
+- Public API: breaking changes to `pub` items in libraries trigger
   a semver bump. Adding `#[non_exhaustive]` to enums/structs is a
   common forward-compatibility move worth checking.
-- **Allocations on hot paths**: `Vec::new` in a loop, `format!` for
+- Allocations on hot paths: `Vec::new` in a loop, `format!` for
   logging behind a level check, `String` cloning where `&str` would
   do. Match against the project's perf gates.
 

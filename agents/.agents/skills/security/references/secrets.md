@@ -7,7 +7,7 @@ how credentials are stored, how sessions are managed. Pair with
 
 ## Secrets architecture
 
-**Never** store secrets in:
+### Where secrets must not live
 
 - Source code or version control.
 - Environment variable files committed to repos (`.env`,
@@ -15,7 +15,7 @@ how credentials are stored, how sessions are managed. Pair with
 - Application logs, audit trails, or trace spans.
 - Client-side code or mobile apps (the binary can be unpacked).
 
-**Where secrets belong:**
+### Where secrets belong
 
 - Development: `.env` files in `.gitignore`, loaded via `direnv` or equivalent.
 - CI/CD: platform secret stores (GitHub Actions secrets, GitLab CI variables,
@@ -24,15 +24,19 @@ how credentials are stored, how sessions are managed. Pair with
   on GKE, SPIFFE/SPIRE for non-cloud. No static credential to rotate, no
   credential to leak.
 
-**Envelope encryption:** encrypt data with a data encryption key (DEK); encrypt
-the DEK with a key encryption key (KEK) managed by KMS. The plaintext DEK is
-never stored: only the encrypted envelope. Rotate KEKs regularly; re-wrapping
-DEKs does not require re-encrypting the underlying data.
+### Envelope encryption
 
-**Rotation:** tie the rotation cadence to the credential type and blast
-radius, not a fixed clock, but **make rotation a non-event** so any
-rotation is cheap when needed. If rotating is a crisis, the system is
-coupled to a specific credential instance.
+Encrypt data with a data encryption key (DEK); encrypt the DEK with a key
+encryption key (KEK) managed by KMS. The plaintext DEK is never stored:
+only the encrypted envelope. Rotate KEKs regularly; re-wrapping DEKs does
+not require re-encrypting the underlying data.
+
+### Rotation
+
+Tie the rotation cadence to the credential type and blast radius, not a
+fixed clock, but **make rotation a non-event** so any rotation is cheap
+when needed. If rotating is a crisis, the system is coupled to a specific
+credential instance.
 
 | Credential | Typical lifetime |
 |---|---|
@@ -57,19 +61,22 @@ trusting the token's own `alg` field. PASETO (Platform-Agnostic Security
 Tokens) sidesteps this by encoding the algorithm in the token version, with
 no `alg` field at all.
 
-**When PASETO is a fit:** new code, full control of issuer and verifier,
-mature library available in your language, no requirement to interoperate
-with a hosted IDP. Use `v4.local` for symmetric (issuer = verifier),
-`v4.public` for asymmetric (cross trust boundary).
+### When PASETO is a fit
 
-**When JWT is fine (and unavoidable):** any hosted identity provider
-(Auth0, Okta, Cognito, Clerk, WorkOS, Entra) emits JWTs; OIDC, SAML
-companion flows, federated SSO. The format is fine if you validate it
-correctly. See `api-and-auth.md` for the full validation checklist
-(JWKS pinning, `kid` handling, `alg` allowlist, `iss`/`aud`/`exp`/`nbf`
+New code, full control of issuer and verifier, mature library available in
+your language, no requirement to interoperate with a hosted IDP. Use
+`v4.local` for symmetric (issuer = verifier), `v4.public` for asymmetric
+(cross trust boundary).
+
+### When JWT is fine (and unavoidable)
+
+Any hosted identity provider (Auth0, Okta, Cognito, Clerk, WorkOS, Entra)
+emits JWTs; OIDC, SAML companion flows, federated SSO. The format is fine
+if you validate it correctly. See `api-and-auth.md` for the full validation
+checklist (JWKS pinning, `kid` handling, `alg` allowlist, `iss`/`aud`/`exp`/`nbf`
 checks, `nonce` for OIDC).
 
-**Common rules either way:**
+### Common rules either way
 
 - **Pin the allowed algorithm set in trusted configuration** (OIDC
   metadata, JWKS, server config). Reject anything else, including
@@ -78,20 +85,19 @@ checks, `nonce` for OIDC).
 - Never put sensitive data in the payload: JWT is base64-encoded, PASETO
   `*.public` is signed but not encrypted.
 
-**OAuth2 + OIDC** for federated identity. Never roll your own auth
-protocol; use the platform's maintained provider SDK or OIDC client
-library. See `api-and-auth.md` for client and server pitfalls (PKCE,
-`state`, `nonce`, `redirect_uri` exact match, refresh-token rotation,
-audience binding).
+OAuth2 + OIDC for federated identity. Never roll your own auth protocol;
+use the platform's maintained provider SDK or OIDC client library. See
+`api-and-auth.md` for client and server pitfalls (PKCE, `state`, `nonce`,
+`redirect_uri` exact match, refresh-token rotation, audience binding).
 
 ## Passwords
 
 NIST SP 800-63B-4 is the baseline; this list applies (and tightens)
 those rules.
 
-- Min length **≥ 15** for single-factor passwords. If the password is
-  only one factor in MFA, **≥ 8** is the NIST minimum. Max **≥ 64**.
-  Allow all printable Unicode including spaces.
+- Min length ≥ 15 for single-factor passwords. If the password is only
+  one factor in MFA, ≥ 8 is the NIST minimum. Max ≥ 64. Allow all
+  printable Unicode including spaces.
 - **Allow paste.** Password managers depend on it. Same for show-password
   toggles.
 - No composition rules (no forced uppercase / number / special).
@@ -104,11 +110,11 @@ those rules.
   password.
 - Store with a maintained password-hashing library using a memory-hard
   KDF. Current OWASP guidance:
-  - **argon2id (preferred):** `m = 19 MiB, t = 2, p = 1` minimum, or
+  - argon2id (preferred): `m = 19 MiB, t = 2, p = 1` minimum, or
     `m = 46 MiB, t = 1, p = 1`. Tune to ~250–500 ms per hash on
     production hardware.
-  - **scrypt:** `N = 2^17, r = 8, p = 1` minimum.
-  - **bcrypt:** OWASP minimum cost is ≥ 10; ABP prefers ≥ 12 when the
+  - scrypt: `N = 2^17, r = 8, p = 1` minimum.
+  - bcrypt: OWASP minimum cost is ≥ 10; ABP prefers ≥ 12 when the
     measured login latency budget allows it. Bcrypt truncates at 72
     bytes in most implementations, so prefer argon2id / scrypt for new
     systems. If forced to pre-hash for bcrypt compatibility, use a
@@ -133,13 +139,15 @@ those rules.
 - Enrollment flows: enforce MFA before step-up to any privileged action,
   not only at login.
 
-**Backup codes:** generate 8–10 single-use codes on enrolment; render
-once and require user acknowledgement. Store **hashed** at rest (SHA-256
-is fine, high-entropy secret). Mark each code consumed on use; allow
-regeneration which invalidates the previous set. Treat backup-code use
-as a security event (audit log + user notification).
+### Backup codes
 
-**WebAuthn server validation gotchas:**
+Generate 8–10 single-use codes on enrolment; render once and require user
+acknowledgement. Store hashed at rest (SHA-256 is fine, high-entropy
+secret). Mark each code consumed on use; allow regeneration which
+invalidates the previous set. Treat backup-code use as a security event
+(audit log + user notification).
+
+### WebAuthn server validation gotchas
 
 - Validate the `clientDataJSON.origin` against your expected origin
   exactly. Mismatches are spoofing attempts.
@@ -190,7 +198,7 @@ certificates.
 
 The modern way to remove static credentials from CI:
 
-- **Workload-identity federation:** GitHub Actions OIDC → AWS / GCP / Azure;
+- Workload-identity federation: GitHub Actions OIDC → AWS / GCP / Azure;
   GitLab JWT → cloud roles; Buildkite OIDC. The CI system mints a
   short-lived token at job time, the cloud trusts the issuer, no static
   key changes hands.

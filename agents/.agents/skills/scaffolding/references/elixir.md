@@ -5,12 +5,12 @@ Use this before scaffolding fresh Elixir projects.
 ## Defaults
 
 - Package/build tool: Mix with Hex dependencies and `mix.lock`.
-- Elixir features to rely on for new code: **type checking of function calls**,
-  **built-in JSON**, and `mix format --migrate` to carry older patterns forward.
-- Lightweight/API default: Plug running on **Bandit** (pure Elixir,
+- Elixir features to rely on for new code: type checking of function calls,
+  built-in JSON, and `mix format --migrate` to carry older patterns forward.
+- Lightweight/API default: Plug running on Bandit (pure Elixir,
   async-friendly, WebSocket-native) when the service is truly minimal.
-- Robust/full-stack default: Phoenix. Phoenix now uses **Bandit** as its default
-  web server; Cowboy is legacy. **LiveView is the default interactive tier**;
+- Robust/full-stack default: Phoenix. Phoenix now uses Bandit as its default
+  web server; Cowboy is legacy. LiveView is the default interactive tier;
   reach for channels only when LiveView is not the shape of the problem.
 - Do not hand-roll Cowboy/Bandit wiring for app scaffolds when Plug or Phoenix
   provides the conventions.

@@ -7,7 +7,7 @@ are not pinned here: check each project's release notes before committing.
 
 ## Svelte + SvelteKit: default
 
-Current Svelte uses **runes** (`$state`, `$derived`, `$effect`, `$props`,
+Current Svelte uses runes (`$state`, `$derived`, `$effect`, `$props`,
 `$bindable`) as its reactivity model.
 
 - Compile-time reactivity. No virtual DOM. Hello-world bundles in single-digit
@@ -55,7 +55,7 @@ Refs: https://react.dev/ · https://nextjs.org/
 
 Reasonable middle ground. Strong in APAC enterprise.
 
-- Watch for **Vapor Mode** (direct DOM compilation, no virtual DOM) in Vue's
+- Watch for Vapor Mode (direct DOM compilation, no virtual DOM) in Vue's
   roadmap; consult the Vue blog for its current stability tier before depending
   on it in production.
 

@@ -19,7 +19,7 @@ Classes are easy to reach for in TS and rarely the right tool. The
 - Make illegal states unrepresentable. `{ status: "ok"; value: T } |
   { status: "err"; error: E }` beats `T | null` plus an
   unrelated `error?: E`.
-- **Brand identity-ful primitives** (`UserId`, `OrderId`, `Cents`,
+- Brand identity-ful primitives (`UserId`, `OrderId`, `Cents`,
   `SafeHTML`) so the structural type system stops treating them as
   interchangeable strings/numbers.
 - Parse at the boundary into trusted internal shapes; let downstream
@@ -61,30 +61,30 @@ Classes are easy to reach for in TS and rarely the right tool. The
 }
 ```
 
-- **`strict`** is non-negotiable; **`noUncheckedIndexedAccess`** is
+- `strict` is non-negotiable; `noUncheckedIndexedAccess` is
   the new floor, catches an entire class of crashes by adding `|
   undefined` to indexed reads. Missing either in a new `tsconfig.json`
   is a blocker.
-- **`verbatimModuleSyntax`** forces explicit `import type` and pairs
+- `verbatimModuleSyntax` forces explicit `import type` and pairs
   with single-file transpilers (esbuild, swc, Babel). Pair with
   `@typescript-eslint/consistent-type-imports` for autofix.
-- **`exactOptionalPropertyTypes`** distinguishes "absent" from
+- `exactOptionalPropertyTypes` distinguishes "absent" from
   "present and undefined." Real bug catcher; real friction at
   edges where third-party libs assume looser semantics. Default on,
   defer at messy seams.
-- **`erasableSyntaxOnly`** (5.8+) forbids `enum`, `namespace`,
+- `erasableSyntaxOnly` (5.8+) forbids `enum`, `namespace`,
   parameter properties, and the legacy `<T>x` cast: required if
   you target Node 23+ type-stripping.
-- Module resolution matches the **runtime**, not the author. Library
+- Module resolution matches the runtime, not the author. Library
   shipping its own `.d.ts` → `module: nodenext` (so declarations
   work everywhere). Bundler-only project → `module: preserve` plus
   `moduleResolution: bundler`. `bundler` resolution can produce
   d.ts files that import without extensions, which Node consumers
-  cannot resolve: it is **infectious**.
+  cannot resolve: it is infectious.
 
 ## Type system
 
-- **`satisfies` vs `:` vs `as`**: three different tools.
+- `satisfies` vs `:` vs `as`: three different tools.
   `satisfies` (4.9+) validates a value against a type without
   widening it. A colon annotation widens. `as` lies. Reach for
   `satisfies` whenever you want literal types preserved while
@@ -95,7 +95,7 @@ Classes are easy to reach for in TS and rarely the right tool. The
   a TODO and a tracking issue. Use `unknown` at API boundaries
   (`JSON.parse`, `fetch().then(r => r.json())`, message-bus payloads,
   catch variables) and force callers to narrow.
-- **Branded types** must be reachable only through a validator.
+- Branded types must be reachable only through a validator.
   ```ts
   declare const brand: unique symbol;
   type Brand<T, B> = T & { readonly [brand]: B };
@@ -104,20 +104,20 @@ Classes are easy to reach for in TS and rarely the right tool. The
   The discipline is that the only constructor of a `UserId` is the
   validator. A naked `as UserId` cast is the bug branding was meant
   to prevent: block on sight.
-- **Discriminated unions, exhaustiveness, `never` sentinel.** Boolean
+- Discriminated unions, exhaustiveness, `never` sentinel. Boolean
   flags admit impossible states; literal-string tags do not.
   Required: the `default` arm of every `switch` over a closed union
   is `assertNever(x)` (or the inline `x satisfies never` form). The
   `@typescript-eslint/switch-exhaustiveness-check` rule must be on.
   Block missing exhaustiveness on every PR.
-- **Type predicates and assertion functions must not lie.** The
+- Type predicates and assertion functions must not lie. The
   compiler trusts the body absolutely. Block any `function isUser(v):
   v is User` whose body doesn't actually inspect every property it
   claims. TS 5.5 infers predicates from simple boolean arrows:
   watch the truthy-check trap: `filter(x => !!x)` on `(number |
   undefined)[]` doesn't infer because `0` is falsy. Use explicit
   `!== undefined` or `!= null`.
-- **Type assertions** are escape hatches with a guest list.
+- Type assertions are escape hatches with a guest list.
   Acceptable: test fixtures, narrowing after a runtime check the
   compiler can't follow, JSON parse plus validation, branding the
   output of a validator. **Always-flag the double cast `as unknown
@@ -125,27 +125,27 @@ Classes are easy to reach for in TS and rarely the right tool. The
   that is what it usually is. Same scrutiny for the non-null `!`
   operator on values that crossed an untrusted boundary (URL params,
   env vars, network input).
-- **Generics earn their keep, or get cut.** A type parameter must
-  appear in **at least two distinct positions** in the public
+- Generics earn their keep, or get cut. A type parameter must
+  appear in at least two distinct positions in the public
   signature, or it's doing nothing the caller can leverage. Block
   single-use generics (the "fancy `any`" anti-pattern). Warn on
   more than three or four type parameters on one signature.
-- **Inference helpers**: prefer `Awaited`, `ReturnType`, `Parameters`
+- Inference helpers: prefer `Awaited`, `ReturnType`, `Parameters`
   over restating types you already declared. Use `NoInfer<T>` (TS
   5.4+) when one parameter should drive inference and another
   should only be checked.
-- **`readonly` is a contract, not a freeze.** Default `readonly T[]`
+- `readonly` is a contract, not a freeze. Default `readonly T[]`
   for parameters when the function doesn't mutate: quiet
   correctness win. `Readonly<T>` is shallow; the standard library
   has no deep-readonly. Hand-rolled `DeepReadonly` breaks on
   classes, `Map`, `Set`, `Date`, branded types, and tanks
   type-check perf.
-- **Annotate boundaries, infer interiors.** Annotate function
+- Annotate boundaries, infer interiors. Annotate function
   parameters always; annotate return types of exported functions
   and any reachable public API surface; let inference handle local
   variables and trivial returns. `isolatedDeclarations` (TS 5.5+)
   enforces this for libraries needing parallelisable d.ts emit.
-- **`interface` vs `type`**: default to `type`. Switch to `interface`
+- `interface` vs `type`: default to `type`. Switch to `interface`
   for object shapes that other shapes will `extends` in deep
   inheritance chains (extension is cached by name; intersections
   recompute each time: matters in hot type-check paths). Two
@@ -155,8 +155,8 @@ Classes are easy to reach for in TS and rarely the right tool. The
 
 ## Anti-patterns in `.ts` files
 
-- **Numeric enums** admit out-of-domain values, leak runtime
-  objects, bloat bundles. **`const enum`** is incompatible with
+- Numeric enums admit out-of-domain values, leak runtime
+  objects, bloat bundles. `const enum` is incompatible with
   `isolatedModules` and `verbatimModuleSyntax`. Both are forbidden
   under `erasableSyntaxOnly`. Replace with literal unions or `as
   const` objects:
@@ -167,22 +167,22 @@ Classes are easy to reach for in TS and rarely the right tool. The
   String enums are tolerable in app code that doesn't target
   type-stripping runtimes; numeric enums and `const enum` are
   blockers.
-- **`namespace`** in `.ts` files: modules replaced these a decade
+- `namespace` in `.ts` files: modules replaced these a decade
   ago. Allowed in `.d.ts` for ambient declarations only.
-- **`@ts-ignore` without comment**: prefer `@ts-expect-error` with
+- `@ts-ignore` without comment: prefer `@ts-expect-error` with
   a reason; it auto-fails when the underlying issue is fixed.
 
 ## Error handling
 
-- **Catch variables are `unknown` under `useUnknownInCatchVariables`**
+- Catch variables are `unknown` under `useUnknownInCatchVariables`
   (which is in `strict`). Narrow before use. Block `catch (e: any)`
   and `catch (e)` treated as `Error` directly. Same for
   `Promise.prototype.catch(err => ...)` callbacks where `err` is
   implicitly `any`: enable
   `@typescript-eslint/use-unknown-in-catch-callback-variable`.
-- **Throwing string literals or plain objects** breaks `instanceof`
+- Throwing string literals or plain objects breaks `instanceof`
   and `cause` chaining. Block.
-- **Subclass `Error` with a `_tag` literal** for fast cross-realm
+- Subclass `Error` with a `_tag` literal for fast cross-realm
   narrowing (`instanceof` breaks across bundle boundaries with
   duplicate class identities):
   ```ts
@@ -194,14 +194,14 @@ Classes are easy to reach for in TS and rarely the right tool. The
     }
   }
   ```
-- **Always preserve `cause` when re-throwing for context.** Block
+- Always preserve `cause` when re-throwing for context. Block
   catching and re-throwing without `{ cause }`, or replacing the
   original with a generic message.
   ```ts
   try { await db.query(sql); }
   catch (cause) { throw new DatabaseError("Failed to load user", { cause }); }
   ```
-- **Don't throw on expected failures.** Throw for invariant
+- Don't throw on expected failures. Throw for invariant
   violations, programmer errors, and at framework boundaries that
   catch and map. Use `Result<T, E>` (or `neverthrow`) for expected
   failures the caller must handle: validation, parse, IO that may
@@ -219,21 +219,21 @@ Classes are easy to reach for in TS and rarely the right tool. The
   its proof in the type system so downstream code doesn't re-check.
   **Block every `as User` cast on JSON from the network or a
   database.**
-- The 2025-2026 lineup all implement **Standard Schema**, the
+- The 2025-2026 lineup all implement Standard Schema, the
   cross-library interface accepted by tRPC, Hono, TanStack Router,
   TanStack Form, and others.
 
   | Library | Best fit |
   |---|---|
-  | **Zod 4** | Default. APIs, tRPC, server validation. ~14× faster string and ~6.5× faster object than v3. |
-  | **Valibot 1.x** | Client, edge, bundle-sensitive (Workers, mobile). ~1.4 kB. |
-  | **ArkType 2** | Server, perf-critical, complex unions. JIT compiler, auto-discriminates. |
-  | **Effect Schema** | Apps already on Effect. |
-  | **TypeBox** | When you need JSON Schema (Fastify, OpenAPI). Fastest of all (function-constructor codegen). |
+  | Zod 4 | Default. APIs, tRPC, server validation. ~14× faster string and ~6.5× faster object than v3. |
+  | Valibot 1.x | Client, edge, bundle-sensitive (Workers, mobile). ~1.4 kB. |
+  | ArkType 2 | Server, perf-critical, complex unions. JIT compiler, auto-discriminates. |
+  | Effect Schema | Apps already on Effect. |
+  | TypeBox | When you need JSON Schema (Fastify, OpenAPI). Fastest of all (function-constructor codegen). |
 
-- **Validate at**: HTTP/RPC inbound, env vars, filesystem reads,
+- Validate at: HTTP/RPC inbound, env vars, filesystem reads,
   IPC, message queues, webhooks, LLM outputs, schemaless DB reads.
-  **Don't validate** pure internal function-to-function calls inside
+  Don't validate pure internal function-to-function calls inside
   the same trust boundary, or hot loops over data you parsed once.
 - One schema per direction: `CreateUserInput` differs from `User`.
   Compose with `.pick`, `.omit`, `.extend`. Warn on a single schema
@@ -250,22 +250,22 @@ Classes are easy to reach for in TS and rarely the right tool. The
 
 - Block `Promise.all` over user-facing batches where one failure
   shouldn't nuke the whole batch: use `allSettled` and aggregate.
-- **`AbortController` is the platform-standard cancellation API.**
-  A function that does async IO **must accept `signal?: AbortSignal`**
+- `AbortController` is the platform-standard cancellation API.
+  A function that does async IO must accept `signal?: AbortSignal`
   and pass it down. `AbortSignal.any([...])` and
   `AbortSignal.timeout(ms)` are baseline-supported across modern
   Node, browsers, Workers, Bun, and Deno. Block any long-running
   async API without a `signal` parameter: without it, React Strict
   Mode double-fires, race conditions on rapid input, and user
   navigation all leak.
-- **Floating promises are bugs.** Block them with
+- Floating promises are bugs. Block them with
   `@typescript-eslint/no-floating-promises` and
   `no-misused-promises`. The latter has the highest bug-yield of
   any rule in the plugin: catches `if (somePromise)`,
   `arr.forEach(async ...)`, `<button onClick={async () => {...}}>`.
-- **Serial `await` over independent IO** is the await-in-loop
+- Serial `await` over independent IO is the await-in-loop
   antipattern. `Promise.all`, or `p-limit` when you need throttling.
-- **`return promise` inside `try` without `await`**: the catch
+- `return promise` inside `try` without `await`: the catch
   never fires:
   ```ts
   try { return fetchData(); } catch (e) { log(e); }      // 🚩 catch never fires
@@ -273,14 +273,14 @@ Classes are easy to reach for in TS and rarely the right tool. The
   ```
   Enable `@typescript-eslint/return-await` (`"in-try-catch"` or
   `"always"`).
-- **`await using` and `Symbol.asyncDispose`** (TS 5.2+, ES2025) for
+- `await using` and `Symbol.asyncDispose` (TS 5.2+, ES2025) for
   files, DB connections, locks, spans, subscriptions. Warn on new
   code that hand-rolls `try/finally` for cleanup or forgets to
   release on the error path.
-- **`Promise.withResolvers`** (ES2024) replaces the
+- `Promise.withResolvers` (ES2024) replaces the
   `let resolve!: ...; new Promise(...)` dance for event-driven
   flows.
-- **Runtime gotchas**: Express 4 swallows async-handler rejections
+- Runtime gotchas: Express 4 swallows async-handler rejections
   (use `next(err)` or upgrade to Express 5); Cloudflare Workers
   kill floating promises when the isolate returns (use
   `event.waitUntil(promise)` for outliving work); DOM and
@@ -289,7 +289,7 @@ Classes are easy to reach for in TS and rarely the right tool. The
 
 ## Module boundaries
 
-- **Barrel files lose.** When you `import { Button } from '@/ui'`,
+- Barrel files lose. When you `import { Button } from '@/ui'`,
   Node, Vitest, and the TS language server walk the entire
   `index.ts`, parse and bind every re-exported file, and recurse.
   Bundlers can tree-shake the runtime output; the type checker,
@@ -297,18 +297,18 @@ Classes are easy to reach for in TS and rarely the right tool. The
   files in app code. Block `export *`: hides name collisions and
   breaks tree-shaking. Acceptable: a library's single public-API
   entry point with explicit named re-exports.
-- **`package.json#exports` is how you draw the public API.** Once
+- `package.json#exports` is how you draw the public API. Once
   set, anything not listed is unreachable
   (`ERR_PACKAGE_PATH_NOT_EXPORTED`). Block library publishing
   without `exports`. Block `types` listed after another condition:
   conditions are matched in object-key order and TypeScript ignores
   `types` unless first. Warn on an `./internal` subpath without
   SemVer explicitly excluded.
-- **Declaration files**: default to generated
+- Declaration files: default to generated
   (`tsc --emitDeclarationOnly`, `tsup --dts`, `tshy`). Block
   hand-edited `.d.ts` files alongside auto-generated ones: they
   drift.
-- **ESM-only is acceptable in 2026** for browser libraries, tools,
+- ESM-only is acceptable in 2026 for browser libraries, tools,
   CLIs, build plugins, anything where consumers can be assumed on
   Node ≥ 22.12 or a bundler. Dual-publish remains warranted for
   wide enterprise install bases on older Node, Jest setups still
@@ -320,24 +320,24 @@ Classes are easy to reach for in TS and rarely the right tool. The
 
 ## Library author concerns
 
-- **`attw` and `publint` in CI** for any published package.
+- `attw` and `publint` in CI for any published package.
   Non-negotiable.
-- **SemVer the type surface.** Block breaking type changes shipped
+- SemVer the type surface. Block breaking type changes shipped
   without a major version bump: narrowing return types, widening
   parameter types, removing overloads, renaming exported types,
   changing generic parameter defaults.
-- **`typescript` belongs in `peerDependencies`** with a range like
+- `typescript` belongs in `peerDependencies` with a range like
   `">=5.4 <6.0"`, not `dependencies`.
-- **Variance annotations** (`in`/`out`, TS 4.7+) are a library tool
+- Variance annotations (`in`/`out`, TS 4.7+) are a library tool
   for deeply recursive types: block in app code without a stated
   reason.
-- **Type-level tests**: block library code with non-trivial generics
+- Type-level tests: block library code with non-trivial generics
   that ships no type tests. Inferred types are part of the API.
   `expectTypeOf` (Vitest) is the best ergonomic fit.
 
 ## Lint stack
 
-- **typescript-eslint flat config** with
+- typescript-eslint flat config with
   `parserOptions.projectService: true` (stable v8, May 2024): uses
   the same `tsserverlibrary` ProjectService as VS Code, removes the
   need for `tsconfig.eslint.json`, supports project references,
@@ -365,14 +365,14 @@ Classes are easy to reach for in TS and rarely the right tool. The
     with `verbatimModuleSyntax`.
   - `no-misused-spread`: catches `{ ...promise }`,
     `{ ...mapInstance }`, `[...string]` (decomposes emojis).
-- **Biome vs ESLint**: Biome 2.x has type-aware rules built on a
+- Biome vs ESLint: Biome 2.x has type-aware rules built on a
   custom synthesizer (not `tsc`); coverage is roughly 75% of
   typescript-eslint for `no-floating-promises`. For
   production/library/safety-critical code, run Biome for format +
   syntactic + import sort, ESLint with `tseslint.configs.strictTypeChecked`
   for type-aware rules. Disable in ESLint anything Biome already
   covers.
-- **CI gates** (non-negotiable in this order):
+- CI gates (non-negotiable in this order):
   - `tsc --noEmit` (or `tsc -b`): reports errors ESLint never
     will (`exactOptionalPropertyTypes`, `verbatimModuleSyntax`).
   - `eslint --max-warnings 0`.
@@ -380,7 +380,7 @@ Classes are easy to reach for in TS and rarely the right tool. The
 
 ## Performance (type-check and bundle)
 
-- **Slow type offenders**, in frequency order: deep recursive
+- Slow type offenders, in frequency order: deep recursive
   conditionals walking string template types (fancy router types,
   ORM query builders); large unions intersected with each other
   (quadratic cost); string template explosion (`${A}-${B}` with
@@ -388,12 +388,12 @@ Classes are easy to reach for in TS and rarely the right tool. The
   of complex types packages; inferred return types of complex
   generics: annotating the return type often turns 80s into
   500ms.
-- **Diagnose** with `tsc --noEmit --extendedDiagnostics` and
+- Diagnose with `tsc --noEmit --extendedDiagnostics` and
   `tsc --generateTrace ./trace --incremental false`, then
   `npx @typescript/analyze-trace ./trace`. Warn on PRs adding
   generic helpers to public types without a before/after
   diagnostics run; reject regressions over 10% instantiations.
-- **Bundle size and types**: types are erased: period. But these
+- Bundle size and types: types are erased: period. But these
   emit runtime code: `enum` (numeric and string), `namespace` with
   values (IIFE), decorators with `emitDecoratorMetadata`, `class`
   (fine, just understand it). `import type` is fully erased;
@@ -404,7 +404,7 @@ Classes are easy to reach for in TS and rarely the right tool. The
 
 ## Dependency injection without a container
 
-The strong default in 2026 is **no container**. Module-level
+The strong default in 2026 is no container. Module-level
 factories returning bound functions are dominant in modern Node,
 Workers, and SvelteKit. Tests pass a stub object; no mocking
 framework needed.
@@ -441,7 +441,7 @@ export const createOrder = (deps: Deps) => async (input: NewOrder) => {
   expression: survives rename refactors. Block `vi.mocked`
   replaced with `as Mock` casts; `eslint-plugin-vitest`
   `prefer-vi-mocked` catches this.
-- **Fixture with `satisfies`**, not `:`. `satisfies User` preserves
+- Fixture with `satisfies`, not `:`. `satisfies User` preserves
   literal types where `: User` widens: affects readonly tuples and
   literal unions.
 

