@@ -36,12 +36,11 @@ Most edits are to skill bodies, the top-level `AGENTS.md` index, or the
   the shared `plugin/` root, and `plugin/.codex-plugin/plugin.json` exposes the
   same symlinked skills to Codex as a namespaced plugin. Keep the Codex
   marketplace and manifest in sync with Claude plugin packaging.
-- **Install layout**: `agents/` is a GNU Stow package. `stow --target="$HOME"
-  --ignore='^AGENTS\.md$' --ignore='^\.claude/CLAUDE\.md$' agents` links the
-  shared skills and commands. System `AGENTS.md` / `CLAUDE.md` files are not
-  part of ABP installation.
-  `setup.sh` then fans those out to per-tool locations and re-runs the
-  plugin-sync.
+- **Install layout**: `agents/` is a GNU Stow package. `./setup.sh` is the
+  one-click local installer: it explains the actions, asks for approval, runs
+  Stow to link the shared skills and commands under `~/.agents/`, fans those
+  out to per-tool locations, and re-runs the plugin-sync. System `AGENTS.md` /
+  `CLAUDE.md` files are not part of ABP installation.
 
 When you add, rename, or delete a skill or command, the canonical file under
 `agents/.agents/` is the only place to write. Everything else is
@@ -50,8 +49,8 @@ regenerated.
 ## Common commands
 
 ```sh
-# Re-sync plugin/ symlinks and per-tool fan-out after a skill is
-# added / renamed / removed. Idempotent.
+# Re-run the local installer, per-tool fan-out, and plugin sync after a
+# skill is added / renamed / removed. Idempotent.
 ./setup.sh
 
 # Just the plugin-sync (subset of setup.sh; safe to run standalone).

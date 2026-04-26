@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
-# Run after the Stow skills install to wire cross-agent skill symlinks.
+# One-click local installer for ABP's shared skills and agent compatibility links.
 set -euo pipefail
 
 usage() {
 	cat <<EOF
 Usage: ./setup.sh
 
-Wire ABP skills into local agent skill directories after:
-
-  stow --target="\$HOME" --ignore='^AGENTS\\.md\$' --ignore='^\\.claude/CLAUDE\\.md\$' agents
+Install ABP skills into ~/.agents and wire local agent compatibility links.
 
 Options:
   -h, --help Show this help.
@@ -31,6 +29,14 @@ fi
 
 AGENTS_SKILLS="$HOME/.agents/skills"
 AGENTS_COMMANDS="$HOME/.agents/commands"
+REPO_ROOT=$(cd "$(dirname "$0")" && pwd)
+STOW_COMMAND=(
+	stow
+	--target="$HOME"
+	--ignore='^AGENTS\.md$'
+	--ignore='^\.claude/CLAUDE\.md$'
+	agents
+)
 
 confirm() {
 	local prompt="$1"
@@ -49,21 +55,37 @@ confirm() {
 	esac
 }
 
-if [ ! -d "$AGENTS_SKILLS" ]; then
+require_stow() {
+	if command -v stow >/dev/null 2>&1; then
+		return
+	fi
+
 	cat >&2 <<EOF
-ERROR: $AGENTS_SKILLS is missing.
+ERROR: GNU Stow is required for local ABP installs.
 
-Run the skills install from the repo root first:
+Install it, then rerun ./setup.sh:
 
-  stow --target="\$HOME" --ignore='^AGENTS\\.md\$' --ignore='^\\.claude/CLAUDE\\.md\$' agents
-
-ABP uses skills and plugin metadata; system AGENTS.md / CLAUDE.md files are not
-part of the install.
+  macOS:          brew install stow
+  Debian/Ubuntu:  sudo apt install stow
+  Fedora:         sudo dnf install stow
 EOF
 	exit 1
-fi
+}
 
-AGENTS_SKILLS_REAL=$(cd "$AGENTS_SKILLS" && pwd -P)
+run_stow_install() {
+	echo ""
+	echo "Linking shared skills with GNU Stow..."
+	(cd "$REPO_ROOT" && "${STOW_COMMAND[@]}")
+
+	if [ ! -d "$AGENTS_SKILLS" ]; then
+		cat >&2 <<EOF
+ERROR: Stow finished, but $AGENTS_SKILLS was not created.
+
+Check the Stow output above for conflicts, then rerun ./setup.sh.
+EOF
+		exit 1
+	fi
+}
 
 points_into_agents_skills() {
 	case "$1" in
@@ -139,13 +161,13 @@ replace_directory_if_confirmed() {
 confirm_setup_start() {
 	cat <<EOF
 ABP setup will:
+  - run GNU Stow from this checkout to link shared skills into ~/.agents/skills
   - link ~/.claude/skills to ~/.agents/skills when safe
   - link individual ABP skills into ~/.codex/skills when Codex is installed
   - link individual ABP skills into ~/.codeium/windsurf/skills when Windsurf is installed
   - prune stale ABP-owned skill links and legacy command links
   - ask before replacing conflicting symlinks or moving real directories
   - sync plugin/ skill links when uv is available
-  - offer to enable this checkout's repo-local Git hooks
 
 It will not overwrite real skill directories or third-party symlinks without
 showing the exact path and asking again.
@@ -159,7 +181,11 @@ EOF
 	exit 1
 }
 
+require_stow
 confirm_setup_start
+run_stow_install
+
+AGENTS_SKILLS_REAL=$(cd "$AGENTS_SKILLS" && pwd -P)
 
 # Claude Code: symlink the whole skills dir
 CLAUDE_SKILLS="$HOME/.claude/skills"
@@ -284,7 +310,6 @@ prune_stale_command_links "$HOME/.codex/prompts"
 # Sync the in-repo Claude Code plugin for maintainers when uv is available.
 # End-user installs use the committed plugin symlinks and should not need Python
 # tooling just to fan out already-published skills.
-REPO_ROOT=$(cd "$(dirname "$0")" && pwd)
 GENERATE_PLUGIN="$REPO_ROOT/scripts/generate_plugin_symlinks.py"
 if [ -f "$GENERATE_PLUGIN" ] && command -v uv >/dev/null 2>&1; then
 	echo ""
@@ -293,24 +318,5 @@ elif [ -f "$GENERATE_PLUGIN" ]; then
 	echo ""
 	echo "uv not found; skipping maintainer-only plugin sync"
 fi
-
-enable_repo_hooks_if_confirmed() {
-	local hooks_dir="$REPO_ROOT/.githooks"
-
-	[ -x "$hooks_dir/pre-commit" ] || return 0
-	command -v git >/dev/null 2>&1 || return 0
-	git -C "$REPO_ROOT" rev-parse --git-dir >/dev/null 2>&1 || return 0
-
-	echo ""
-	if confirm "Enable ABP pre-commit checks for this checkout?"; then
-		git -C "$REPO_ROOT" config core.hooksPath .githooks
-		echo "Git hooks enabled for this checkout."
-	else
-		echo "Git hooks not enabled. To enable later, run:"
-		echo "  git config core.hooksPath .githooks"
-	fi
-}
-
-enable_repo_hooks_if_confirmed
 
 echo "Done."

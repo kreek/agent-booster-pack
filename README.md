@@ -81,14 +81,17 @@ sudo apt install stow
 sudo dnf install stow
 ```
 
-Clone and link the shared skills:
+Clone and run setup:
 
 ```sh
 git clone https://github.com/kreek/agent-booster-pack.git
 cd agent-booster-pack
 
-stow --target="$HOME" --ignore='^AGENTS\.md$' --ignore='^\.claude/CLAUDE\.md$' agents
+./setup.sh
 ```
+
+`./setup.sh` prints the actions it will take and asks for confirmation before
+making changes.
 
 ABP does not need to edit `~/AGENTS.md` or `~/.claude/CLAUDE.md`; agents
 discover skills from the shared skill directory and load each `SKILL.md` only
@@ -101,23 +104,15 @@ The manual install links:
 - `~/.agents/skills/`
 - `~/.agents/commands/`
 
-Run the local link helper only when you use a tool that needs compatibility
-symlinks:
-
-```sh
-./setup.sh
-```
-
-`./setup.sh` adds tool-specific links for agents that do not rely only on
-`~/.agents/skills/`:
+It also adds tool-specific links for agents that do not rely only on
+`~/.agents/skills/` when those tools are installed:
 
 - `~/.claude/skills/` points at `~/.agents/skills/`
 - `~/.codex/skills/<name>/` links each portable skill individually
 - `~/.codeium/windsurf/skills/<name>/` links each skill when Windsurf is present
 
-Pi, Cursor, Gemini CLI, OpenCode, GitHub Copilot CLI, and other tools that
-auto-discover `~/.agents/skills/` do not need `./setup.sh`. End-user installs do
-not need Python or uv.
+Pi, Cursor, Gemini CLI, OpenCode, GitHub Copilot CLI, and other tools can
+auto-discover `~/.agents/skills/`. End-user installs do not need Python or uv.
 
 ### Claude Code Plugin Install
 
