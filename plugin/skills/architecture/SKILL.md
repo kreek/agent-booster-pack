@@ -5,10 +5,13 @@ description: >-
   versus horizontal controller/service/repository/DTO layers, applying DDD
   tactical patterns (aggregates, repositories, factories, domain services),
   shaping bounded contexts, separating concerns that change for different
-  reasons, or hiding volatile design decisions behind small surfaces. Also use
-  when the user mentions domain-driven design, DDD, hexagonal architecture,
-  ports and adapters, clean architecture, layered architecture, vertical
-  slices, domain locality, coupling, or tangled modules.
+  reasons, defining contracts between internal boundaries, mapping data flow
+  through a component, or hiding volatile design decisions behind small
+  surfaces. Also use when the user mentions domain-driven design, DDD,
+  hexagonal architecture, ports and adapters, clean architecture, layered
+  architecture, vertical slices, domain locality, coupling, tangled modules,
+  schema/model mapping, or data flow between a service, client, domain model,
+  output shape, and render step.
 ---
 
 # Architecture
@@ -25,6 +28,11 @@ it changes, the structure is fighting the work.
 - Choosing between domain/feature-oriented organization and horizontal
   controller/service/repository/DTO layers.
 - Drawing module boundaries, bounded contexts, and public surfaces.
+- Defining internal boundary contracts: what shape crosses a
+  module/component boundary, what assumptions are guaranteed, and what
+  details stay hidden.
+- Mapping data flow inside a component from external/service payloads through
+  parsed internal shapes to output/render shapes.
 - Deciding whether DDD tactical patterns (aggregates, repositories,
   factories, domain services) earn their keep.
 - Reviewing code where one behavior is scattered across many files for no
@@ -52,12 +60,21 @@ it changes, the structure is fighting the work.
 4. Hide volatile design decisions behind small surfaces, not flowchart steps.
    Module boundaries are about what callers don't need to know, not about
    sequencing.
-5. Bounded contexts beat shared models. When two parts of the system mean
+5. Define contracts at internal boundaries. Each module/component boundary
+   should say what shape crosses it, what assumptions are guaranteed, and
+   what internal details must not leak. Public HTTP contracts belong to
+   `api`; exact parsed shapes and invariants belong to `data-first`.
+6. Bounded contexts beat shared models. When two parts of the system mean
    subtly different things by the same word, give each context its own type.
-6. Separate things that change for different reasons. A simple boundary
+7. Separate things that change for different reasons. A simple boundary
    reduces coordination between independent changes; an easy layer that every
    feature must cross usually increases it.
-7. Add a layer only when it represents a real boundary (process, deploy,
+8. Make component data flow explicit when a feature consumes external data.
+   Name where data enters, where it is parsed or normalized, which internal
+   shape owns domain meaning, and which output/view shape feeds presentation.
+   These are roles in the flow, not mandatory folders. Raw service payloads
+   should not leak past the trust boundary by accident.
+9. Add a layer only when it represents a real boundary (process, deploy,
    trust, persistence, transport) or removes proven duplication.
    Request middleware is a transport boundary; it should carry
    pipeline-wide concerns, not feature-specific business behavior.
@@ -67,11 +84,14 @@ it changes, the structure is fighting the work.
 1. Name the business capability and its transitions before drawing modules.
 2. Sketch the module surface from the caller's view: what it accepts, what
    it returns, what it must never expose.
-3. Group code by capability first; introduce horizontal layers only where a
+3. Sketch the internal data path: where external data enters, where it is
+   parsed into a trusted shape, where domain work happens, where output data
+   is shaped, and what the renderer/presenter receives.
+4. Group code by capability first; introduce horizontal layers only where a
    real technical boundary justifies them.
-4. For each cross-module call, ask whether the caller depends on a stable
+5. For each cross-module call, ask whether the caller depends on a stable
    contract or on internal shape. Stabilise the contract; hide the shape.
-5. Record the decisions that future readers can't recover from the code:
+6. Record the decisions that future readers can't recover from the code:
    why this boundary, why this shape, what alternative was rejected.
 
 ## Verification
@@ -82,6 +102,9 @@ it changes, the structure is fighting the work.
       correspond to real technical boundaries, not default ceremony.
 - [ ] DDD tactical patterns are applied where they earn their keep, not as
       decoration.
+- [ ] Component data flow has named ingress, parse, domain, output-shaping,
+      and render/presentation roles; raw external payloads do not leak past
+      the parse boundary.
 - [ ] Module surfaces hide volatile decisions; callers depend on the
       contract, not the internal shape.
 - [ ] Boundaries separate concerns that change independently; they are
@@ -94,7 +117,7 @@ it changes, the structure is fighting the work.
 ## Handoffs
 
 - Use `data-first` to design data shapes, invariants, and effect isolation
-  inside a module.
+  inside a module, including the exact parsed and output shapes.
 - Use `refactoring` to move existing code toward the chosen structure
   without changing behavior.
 - Use `api` when the boundary in question is a public HTTP contract.

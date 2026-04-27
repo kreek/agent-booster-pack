@@ -4,19 +4,20 @@ description:
   Best practices for designing and implementing REST/HTTP APIs. Use whenever the
   user is designing a new API, adding endpoints to an existing one, writing or
   editing an OpenAPI spec, deciding on URI structure or HTTP verbs, shaping JSON
-  request/response bodies, handling error responses and status codes, versioning
-  an API, adding pagination, choosing between API keys and OAuth, designing
-  webhooks, implementing idempotency keys, rate limiting, designing SSE or
-  subscription endpoints, or reviewing API code for consistency. Trigger even
-  when the user does not say "best practices", especially when they mention RFC
-  9457, Problem Details, cursor pagination, Sunset header, or Idempotency-Key.
+  request/response bodies, handling error responses and status codes, choosing
+  an API versioning shape, adding pagination, choosing between API keys and
+  OAuth, designing webhooks, implementing idempotency keys, rate limiting,
+  designing SSE or subscription endpoints, or reviewing API code for
+  consistency. Trigger even when the user does not say "best practices",
+  especially when they mention RFC 9457, Problem Details, cursor pagination,
+  Sunset header, or Idempotency-Key.
 ---
 
 # API
 
 ## Iron Law
 
-`DESIGN THE CONTRACT BEFORE THE IMPLEMENTATION. NEVER SHIP A SILENT BREAKING CHANGE.`
+`DESIGN THE CONTRACT BEFORE THE IMPLEMENTATION. DO NOT BREAK A PUBLISHED CONTRACT IN PLACE.`
 
 ## When to Use
 
@@ -47,9 +48,10 @@ description:
    behavior, and conflict semantics.
 5. List endpoints have bounded pagination and stable ordering.
 6. Compatibility is a feature: optional additive changes can evolve an
-   API without a major version; removals, renames, required additions,
-   status-code changes, and semantic changes are breaking. Hand off the
-   bump itself to `versioning`.
+   API without a new contract version; removals, renames, required
+   additions, status-code changes, and semantic changes need a
+   successor contract or deprecation path. Hand off the bump,
+   CHANGELOG, and deprecation primitives to `versioning`.
 7. Webhooks are APIs too: sign payloads, version events, and make
    receivers idempotent.
 
@@ -66,14 +68,14 @@ where the specific resource, actor, and contract are visible.
 
 ## API Evolution
 
-Optional additive changes can avoid major versioning only when existing
+Optional additive changes preserve the existing contract when existing
 calls keep working and existing consumers can ignore the new surface.
 Adding endpoints, optional query parameters, optional fields, and
 optional headers is usually evolutionary. Changing methods, status
 codes, header names/types, required fields, removals, or in-place
-renames is breaking. Rename by adding the successor, keeping the old
-name, and deprecating it. Prefer extensible object shapes over ordered
-or flat scalar payloads.
+renames breaks the existing contract. Rename by adding the successor,
+keeping the old name, and deprecating it. Prefer extensible object
+shapes over ordered or flat scalar payloads.
 
 ## HTTP Error Codes
 
@@ -99,7 +101,7 @@ server-origin failures into a client error.
    your service). Check compatibility: new optional fields, query
    parameters, headers, methods, and endpoints are usually safe;
    renames, removals, required additions, status-code changes, and
-   semantic changes are breaking.
+   semantic changes require a successor contract or deprecation path.
 3. For retryable public mutations, document the idempotency-key
    contract and prove duplicate submissions cannot create duplicate
    side effects.
@@ -128,8 +130,9 @@ server-origin failures into a client error.
       ignore new fields, parameters, headers, or endpoints still work.
 - [ ] Request and response bodies use extensible object shapes and
       specific field names rather than ordered or flat scalar payloads.
-- [ ] Breaking changes have versioning or deprecation with overlap and
-      successor guidance.
+- [ ] No existing contract is broken in place; incompatible changes
+      have a successor contract or deprecation path with overlap and
+      migration guidance.
 - [ ] Webhooks are signed, timestamped, replay-protected, and
       deduplicable.
 - [ ] Middleware is limited to transport-wide request-pipeline
