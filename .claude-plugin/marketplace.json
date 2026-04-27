@@ -1,5 +1,4 @@
 {
-  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "abp",
   "owner": {
     "name": "Alastair Dawson",
@@ -7,14 +6,14 @@
   },
   "metadata": {
     "description": "Agent Booster Pack: engineering-discipline skills for Claude Code.",
-    "version": "2.4.0",
+    "version": "3.0.0",
     "license": "MIT"
   },
   "plugins": [
     {
       "name": "abp",
       "description": "Portable, engineering-discipline skill pack: data, proof, tests, security, debugging, refactoring, and more.",
-      "version": "2.4.0",
+      "version": "3.0.0",
       "author": {
         "name": "Alastair Dawson"
       },

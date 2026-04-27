@@ -1,0 +1,4 @@
+interface:
+  display_name: "ABP: Data First"
+  short_description: "Shape data and effects first"
+  default_prompt: "Use $data-first to model data shapes, invariants, and boundaries before writing transformations."

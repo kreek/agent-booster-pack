@@ -1,0 +1,4 @@
+interface:
+  display_name: "ABP: Background Jobs"
+  short_description: "Design reliable async jobs"
+  default_prompt: "Use $background-jobs to review this worker or job queue design for retries, idempotency, and failure visibility."

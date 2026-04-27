@@ -1,1 +1,0 @@
-../../agents/.agents/commands/commit.md

@@ -1,0 +1,4 @@
+interface:
+  display_name: "ABP: Workflow"
+  short_description: "ABP entrypoint for any software engineering task"
+  default_prompt: "Use $workflow to enter ABP, name the risk profile, and select the skills that will yield a correct, idiomatic solution."

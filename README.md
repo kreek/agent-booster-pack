@@ -39,7 +39,7 @@ their preferences.
 
 Pick one installation method for each agent. Both the manual and plugin options
 provide the same ABP skills, so using both for the same agent can cause
-duplicate entries or commands. Prefer the Claude Code plugin for Claude Code
+duplicate entries. Prefer the Claude Code plugin for Claude Code
 and the Codex plugin for Codex because plugin installs provide package-level
 namespacing. Use the manual install for agents that read `~/.agents/skills/`
 or do not support plugins.
@@ -94,7 +94,6 @@ can live anywhere.
 The manual install links:
 
 - `~/.agents/skills/`
-- `~/.agents/commands/`
 
 It also adds tool-specific links for agents that do not rely only on
 `~/.agents/skills/` when those tools are installed:
@@ -124,9 +123,9 @@ plugin source:
 /plugin install /path/to/agent-booster-pack/plugin
 ```
 
-The plugin uses `plugin/.claude-plugin/plugin.json` and loads the shared skills
-from `plugin/skills/`, which are symlinks back to the canonical
-`agents/.agents/skills/` files.
+The plugin uses `plugin/.claude-plugin/plugin.json` and loads the generated
+skill mirror under `plugin/skills/`. Edit canonical skills under
+`agents/.agents/skills/`, then run `./setup.sh` to refresh the mirror.
 
 ### Codex Plugin Install
 
@@ -147,9 +146,9 @@ marketplace source:
 codex plugin marketplace add /path/to/agent-booster-pack
 ```
 
-The plugin uses `plugin/.codex-plugin/plugin.json` and loads the shared skills
-from `plugin/skills/`, which are symlinks back to the canonical
-`agents/.agents/skills/` files.
+The plugin uses `plugin/.codex-plugin/plugin.json` and loads the generated
+skill mirror under `plugin/skills/`. Edit canonical skills under
+`agents/.agents/skills/`, then run `./setup.sh` to refresh the mirror.
 
 ## Using ABP
 
@@ -161,9 +160,9 @@ You do not need to start from a special command. Make a natural-language
 request, and the agent can use [`workflow`][skill-workflow] plus the narrower
 skills needed for the work. You can also invoke a specific skill directly when
 you want a particular lens, such as `documentation` for README work or
-`code-review` for a diff. Some skills are intentionally user-invoked workflow
-commands, such as `commit`, because they package repository state and should run
-only when you ask for that action.
+`code-review` for a diff. Some skills, such as `commit`, are intentionally
+user-invoked workflows because they package repository state and should run only
+when you ask for that action.
 
 The skill pack is deliberately not a checklist library. It is a set of
 discipline-enforcing lenses, grouped by the kind of engineering pressure they
@@ -302,10 +301,9 @@ After adding or renaming a skill:
 ./setup.sh
 ```
 
-This reruns the per-agent symlink fan-out and the plugin sync (so
-`plugin/skills/<new-name>` is created and stale links are pruned). The
-`scripts/validate_skill_anatomy.py` script enforces the same drift check, so a
-plugin out of sync with `agents/.agents/skills/` will fail validation.
+This reruns the per-agent symlink fan-out for manual installs and refreshes
+the generated `plugin/skills/` mirror used by packaged Claude Code and Codex
+plugin installs.
 
 Then update:
 

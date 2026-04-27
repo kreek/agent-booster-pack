@@ -28,7 +28,6 @@ if [ "$#" -gt 0 ]; then
 fi
 
 AGENTS_SKILLS="$HOME/.agents/skills"
-AGENTS_COMMANDS="$HOME/.agents/commands"
 REPO_ROOT=$(cd "$(dirname "$0")" && pwd)
 STOW_COMMAND=(
 	stow
@@ -296,7 +295,7 @@ prune_stale_command_links() {
 		[ -L "$entry" ] || continue
 		link_target=$(readlink "$entry")
 		case "$link_target" in
-		"$AGENTS_COMMANDS"/* | "$HOME"/.agents/commands/*)
+		"$HOME"/.agents/commands/*)
 			rm "$entry"
 			echo "Removed legacy command link ${entry/#$HOME/~}"
 			;;

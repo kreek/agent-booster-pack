@@ -1,0 +1,4 @@
+interface:
+  display_name: "ABP: API"
+  short_description: "Design HTTP APIs and contracts"
+  default_prompt: "Use $api to review this API contract for compatibility and consistency."

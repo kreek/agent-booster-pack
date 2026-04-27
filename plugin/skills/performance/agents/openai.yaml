@@ -1,0 +1,4 @@
+interface:
+  display_name: "ABP: Performance"
+  short_description: "Measure and fix bottlenecks"
+  default_prompt: "Use $performance to define the metric, baseline, and profiling plan."

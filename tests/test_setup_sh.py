@@ -111,7 +111,7 @@ if [ -z "$target" ]; then
   echo "missing --target" >&2
   exit 2
 fi
-mkdir -p "$target/.agents/skills/testing" "$target/.agents/commands"
+mkdir -p "$target/.agents/skills/testing"
 printf '%s\\n' '---' 'name: testing' '---' > "$target/.agents/skills/testing/SKILL.md"
 echo "LINK: .agents => test fixture"
 """,

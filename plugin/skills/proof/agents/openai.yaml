@@ -1,0 +1,4 @@
+interface:
+  display_name: "ABP: Proof"
+  short_description: "Tie engineering claims to proof"
+  default_prompt: "Use $proof to turn these claims into proof contracts."

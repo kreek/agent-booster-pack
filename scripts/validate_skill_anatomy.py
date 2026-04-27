@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate Agent Booster Pack skill files and plugin symlink drift."""
+"""Validate Agent Booster Pack skill files and plugin mirror drift."""
 
 from __future__ import annotations
 
@@ -143,37 +143,52 @@ def repo_root_for_skills_dir(skills_dir: Path) -> Path:
 
 
 def validate_plugin_drift(skills_dir: Path) -> int:
-    """Check that plugin/skills symlinks resolve to canonical skill directories."""
+    """Check that plugin/skills mirrors canonical skill directories."""
     plugin_dir = plugin_skills_dir(skills_dir)
     if not plugin_dir.is_dir():
         return 0
 
     drift = 0
     for skill_dir in sorted(path for path in skills_dir.iterdir() if path.is_dir()):
-        link = plugin_dir / skill_dir.name
-        if not link.is_symlink():
+        mirror = plugin_dir / skill_dir.name
+        if not mirror.is_dir():
             print(
-                f"plugin drift: {link} missing -- "
+                f"plugin drift: {mirror} missing -- "
                 "run scripts/generate_plugin_symlinks.py"
             )
             drift += 1
             continue
 
-        try:
-            resolved = link.resolve(strict=True)
-        except FileNotFoundError:
-            resolved = link.resolve(strict=False)
+        for source_file in sorted(
+            path for path in skill_dir.rglob("*") if path.is_file()
+        ):
+            relative = source_file.relative_to(skill_dir)
+            mirror_file = mirror / relative
+            if not mirror_file.is_file():
+                print(f"plugin drift: {mirror_file} missing")
+                drift += 1
+                continue
+            if source_file.read_bytes() != mirror_file.read_bytes():
+                print(f"plugin drift: {mirror_file} differs from {source_file}")
+                drift += 1
 
-        expected = skill_dir.resolve()
-        if resolved != expected:
-            print(f"plugin drift: {link} resolves to {resolved} (expected {expected})")
+        for mirror_file in sorted(path for path in mirror.rglob("*") if path.is_file()):
+            relative = mirror_file.relative_to(mirror)
+            source_file = skill_dir / relative
+            if not source_file.is_file():
+                print(f"plugin drift: {mirror_file} has no canonical source")
+                drift += 1
+
+    for mirror in sorted(path for path in plugin_dir.iterdir() if path.is_dir()):
+        if not (skills_dir / mirror.name).is_dir():
+            print(f"plugin drift: {mirror} has no canonical skill")
             drift += 1
 
     if drift == 0:
-        print("plugin/ symlinks in sync with source")
+        print("plugin/ skill mirror in sync with source")
     else:
         print()
-        print(f"{drift} plugin symlink(s) drifted from source")
+        print(f"{drift} plugin mirror difference(s) found")
 
     return drift
 
@@ -210,13 +225,10 @@ def first_plugin_entry(marketplace: dict[str, Any]) -> dict[str, Any] | None:
 def validate_codex_plugin_package(skills_dir: Path) -> int:
     """Validate Codex plugin manifest and repo marketplace metadata."""
     root = repo_root_for_skills_dir(skills_dir)
-    plugin_root = root / "plugin"
-    if not plugin_root.is_dir():
-        return 0
 
     problems: list[str] = []
     marketplace_path = root / ".agents" / "plugins" / "marketplace.json"
-    manifest_path = plugin_root / ".codex-plugin" / "plugin.json"
+    manifest_path = root / "plugin" / ".codex-plugin" / "plugin.json"
 
     marketplace, problem = read_json_object(marketplace_path)
     if problem is not None:
@@ -314,6 +326,15 @@ def validate_codex_plugin_package(skills_dir: Path) -> int:
                 problems.append(
                     f"{manifest_path} version must match "
                     ".claude-plugin/marketplace.json metadata.version"
+                )
+            claude_entry = first_plugin_entry(claude_marketplace)
+            if claude_entry is None:
+                problems.append(
+                    ".claude-plugin/marketplace.json must include an 'abp' plugin entry"
+                )
+            elif claude_entry.get("source") != "./plugin":
+                problems.append(
+                    ".claude-plugin/marketplace.json abp.source must be './plugin'"
                 )
 
     if problems:

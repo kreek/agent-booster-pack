@@ -1,0 +1,4 @@
+interface:
+  display_name: "ABP: Git"
+  short_description: "Handle complex git workflows"
+  default_prompt: "Use $git to plan this rebase, conflict, or recovery operation."

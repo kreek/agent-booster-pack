@@ -20,40 +20,37 @@ Most edits are to skill bodies, the top-level `AGENTS.md` index, or the
 
 - **Canonical skills**: `agents/.agents/skills/<name>/SKILL.md`. Every skill
   lives here; siblings may add `agents/`, `references/`, and `scripts/`.
-- **Canonical commands**: `agents/.agents/commands/<name>.md` (shared command
-  prompts surfaced by every agent).
 - **Top-level index**: `agents/AGENTS.md`. Lists every skill with a one-line
   trigger for repo-maintainer reference. Normal ABP use relies on skill
   frontmatter, plugin metadata, and the `workflow` skill; users do not need to
   install or merge system instruction files.
-- **Claude Code plugin mirror**: `plugin/skills/<name>` and
-  `plugin/commands/<name>.md` are **relative symlinks** into
-  `agents/.agents/...`. They give Claude Code users the namespaced
-  `/abp:<skill>` slash commands via `.claude-plugin/marketplace.json`.
-  Never edit a `plugin/` SKILL: edit the canonical file. The symlink
-  resolves through.
-- **Codex plugin library**: `.agents/plugins/marketplace.json` points Codex at
-  the shared `plugin/` root, and `plugin/.codex-plugin/plugin.json` exposes the
-  same symlinked skills to Codex as a namespaced plugin. Keep the Codex
-  marketplace and manifest in sync with Claude plugin packaging.
+- **Claude Code plugin mirror**: `plugin/skills/<name>` contains generated
+  copies of canonical skills from `agents/.agents/skills/<name>`.
+  `.claude-plugin/marketplace.json` points Claude Code at the `plugin/` root,
+  where `plugin/.claude-plugin/plugin.json` exposes namespaced
+  `/abp:<skill>` slash commands.
+- **Codex plugin package**: `.agents/plugins/marketplace.json` points Codex at
+  the `plugin/` root, and `plugin/.codex-plugin/plugin.json` exposes the same
+  generated skill mirror to Codex as a plugin. Keep the Codex marketplace and
+  manifest in sync with Claude plugin packaging.
 - **Install layout**: `agents/` is a GNU Stow package. `./setup.sh` is the
   one-click local installer: it explains the actions, asks for approval, runs
-  Stow to link the shared skills and commands under `~/.agents/`, fans those
-  out to per-tool locations, and re-runs the plugin-sync. System `AGENTS.md` /
+  Stow to link the shared skills under `~/.agents/`, fans those out to
+  per-tool locations, and re-runs the plugin-sync. System `AGENTS.md` /
   `CLAUDE.md` files are not part of ABP installation.
 
-When you add, rename, or delete a skill or command, the canonical file under
-`agents/.agents/` is the only place to write. Everything else is
+When you add, rename, or delete a skill, the canonical file under
+`agents/.agents/skills/` is the only place to write. Everything else is
 regenerated.
 
 ## Common commands
 
 ```sh
-# Re-run the local installer, per-tool fan-out, and plugin sync after a
+# Re-run the local installer and per-tool fan-out after a
 # skill is added / renamed / removed. Idempotent.
 ./setup.sh
 
-# Just the plugin-sync (subset of setup.sh; safe to run standalone).
+# Refresh the generated plugin skill mirror.
 uv run python scripts/generate_plugin_symlinks.py
 
 # Validate every SKILL.md against the playbook anatomy (frontmatter,
@@ -135,8 +132,8 @@ Adding or renaming a skill needs four updates, in order:
    `[skill-<name>]:` reference link at the bottom.
 4. `workflow`: update the meta-skill only when the new or renamed skill changes
    the broad ABP routing workflow.
-5. `./setup.sh` to regenerate `plugin/skills/<name>` and prune stale
-   per-agent links. The validator's drift check fails CI/local runs if
+5. `./setup.sh` to regenerate `plugin/skills/<name>` and refresh per-agent
+   manual-install links. The validator's drift check fails CI/local runs if
    step 5 is skipped.
 
 Neighbouring skills may need their `Handoffs` updated when routing

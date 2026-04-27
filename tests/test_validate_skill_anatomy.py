@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -165,6 +165,25 @@ def make_codex_plugin_package(
         manifest_path.parent.mkdir(parents=True, exist_ok=True)
         manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
 
+        claude_marketplace = {
+            "name": "abp",
+            "metadata": {
+                "version": "2.0.0",
+            },
+            "plugins": [
+                {
+                    "name": "abp",
+                    "version": "2.0.0",
+                    "source": "./plugin",
+                }
+            ],
+        }
+        claude_marketplace_path = root / ".claude-plugin" / "marketplace.json"
+        claude_marketplace_path.parent.mkdir(parents=True, exist_ok=True)
+        claude_marketplace_path.write_text(
+            json.dumps(claude_marketplace), encoding="utf-8"
+        )
+
 
 def describe_validate_skill_anatomy_cli():
     def it_runs_its_self_test_successfully():
@@ -173,23 +192,23 @@ def describe_validate_skill_anatomy_cli():
         assert result.returncode == 0
         assert result.stdout.strip() == "self-test ok"
 
-    def it_passes_when_skill_anatomy_and_plugin_links_are_valid(tmp_path: Path):
+    def it_passes_when_skill_anatomy_and_plugin_mirror_are_valid(tmp_path: Path):
         skills_dir = tmp_path / "agents" / ".agents" / "skills"
         make_skill(skills_dir, "good")
         plugin_skills = tmp_path / "plugin" / "skills"
         plugin_skills.mkdir(parents=True)
-        link = plugin_skills / "good"
-        link.symlink_to("../../agents/.agents/skills/good")
+        shutil.copytree(skills_dir / "good", plugin_skills / "good")
         make_codex_plugin_package(tmp_path)
 
         result = run_script(skills_dir)
 
         assert result.returncode == 0
         assert "all skills conform to the anatomy" in result.stdout
-        assert "plugin/ symlinks in sync with source" in result.stdout
+        assert "plugin/ skill mirror in sync with source" in result.stdout
         assert "codex plugin package valid" in result.stdout
-        assert link.resolve() == (skills_dir / "good").resolve()
-        assert os.readlink(link) == "../../agents/.agents/skills/good"
+        assert (plugin_skills / "good" / "SKILL.md").read_text(encoding="utf-8") == (
+            skills_dir / "good" / "SKILL.md"
+        ).read_text(encoding="utf-8")
 
     def it_reports_skill_anatomy_findings(tmp_path: Path):
         skills_dir = tmp_path / "agents" / ".agents" / "skills"
@@ -217,7 +236,7 @@ def describe_validate_skill_anatomy_cli():
         assert "bad-tripwires/SKILL.md" in result.stdout
         assert "Tripwires table must use" in result.stdout
 
-    def it_reports_plugin_drift_when_a_skill_link_is_missing(tmp_path: Path):
+    def it_reports_plugin_drift_when_a_skill_mirror_is_missing(tmp_path: Path):
         skills_dir = tmp_path / "agents" / ".agents" / "skills"
         make_skill(skills_dir, "good")
         (tmp_path / "plugin" / "skills").mkdir(parents=True)
@@ -229,14 +248,14 @@ def describe_validate_skill_anatomy_cli():
         assert "all skills conform to the anatomy" in result.stdout
         assert "plugin drift:" in result.stdout
         assert "plugin/skills/good missing" in result.stdout
-        assert "1 plugin symlink(s) drifted from source" in result.stdout
+        assert "1 plugin mirror difference(s) found" in result.stdout
 
     def it_reports_missing_codex_marketplace_when_plugin_exists(tmp_path: Path):
         skills_dir = tmp_path / "agents" / ".agents" / "skills"
         make_skill(skills_dir, "good")
         plugin_skills = tmp_path / "plugin" / "skills"
         plugin_skills.mkdir(parents=True)
-        (plugin_skills / "good").symlink_to("../../agents/.agents/skills/good")
+        shutil.copytree(skills_dir / "good", plugin_skills / "good")
         make_codex_plugin_package(tmp_path, include_marketplace=False)
 
         result = run_script(skills_dir)
@@ -251,7 +270,7 @@ def describe_validate_skill_anatomy_cli():
         make_skill(skills_dir, "good")
         plugin_skills = tmp_path / "plugin" / "skills"
         plugin_skills.mkdir(parents=True)
-        (plugin_skills / "good").symlink_to("../../agents/.agents/skills/good")
+        shutil.copytree(skills_dir / "good", plugin_skills / "good")
         make_codex_plugin_package(tmp_path, marketplace_source_path="./plugins/abp")
 
         result = run_script(skills_dir)
@@ -264,7 +283,7 @@ def describe_validate_skill_anatomy_cli():
         make_skill(skills_dir, "good")
         plugin_skills = tmp_path / "plugin" / "skills"
         plugin_skills.mkdir(parents=True)
-        (plugin_skills / "good").symlink_to("../../agents/.agents/skills/good")
+        shutil.copytree(skills_dir / "good", plugin_skills / "good")
         make_codex_plugin_package(
             tmp_path,
             include_policy=False,
@@ -282,7 +301,7 @@ def describe_validate_skill_anatomy_cli():
         make_skill(skills_dir, "good")
         plugin_skills = tmp_path / "plugin" / "skills"
         plugin_skills.mkdir(parents=True)
-        (plugin_skills / "good").symlink_to("../../agents/.agents/skills/good")
+        shutil.copytree(skills_dir / "good", plugin_skills / "good")
         make_codex_plugin_package(tmp_path, manifest_skills_path="./not-skills/")
 
         result = run_script(skills_dir)
