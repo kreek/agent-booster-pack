@@ -51,6 +51,51 @@ pack with the same directory name can collide. `./setup.sh` asks before
 replacing real directories or third-party symlinks, but package/plugin
 installs are the safer distribution path when your agent supports them.
 
+### Claude Code Plugin Install
+
+Use this when you want Claude Code to load ABP as a namespaced plugin and show
+skills as `/abp:<skill>`.
+
+```sh
+# Inside Claude Code:
+/plugin marketplace add kreek/agent-booster-pack
+/plugin install abp@abp
+```
+
+For local development against a working tree, add the repo directory as a local
+plugin source:
+
+```sh
+/plugin install /path/to/agent-booster-pack/plugin
+```
+
+The plugin uses `plugin/.claude-plugin/plugin.json` and loads the generated
+skill mirror under `plugin/skills/`. Edit canonical skills under
+`agents/.agents/skills/`, then run `./setup.sh` to refresh the mirror.
+
+### Codex Plugin Install
+
+Use this when you want Codex to install ABP from this repo's
+[Codex marketplace metadata][codex-plugins].
+
+```sh
+codex plugin marketplace add kreek/agent-booster-pack
+```
+
+Then open Codex's plugin directory and install **Agent Booster Pack** from the
+ABP marketplace.
+
+For local development against a working tree, add the repo directory as a local
+marketplace source:
+
+```sh
+codex plugin marketplace add /path/to/agent-booster-pack
+```
+
+The plugin uses `plugin/.codex-plugin/plugin.json` and loads the generated
+skill mirror under `plugin/skills/`. Edit canonical skills under
+`agents/.agents/skills/`, then run `./setup.sh` to refresh the mirror.
+
 ### Manual Skills Installation
 
 Use this method if your agent reads `~/.agents/skills/`, or if you want to share one skills directory across several tools. For example, I switch between Codex, Claude, and Pi, so installing ABP for all of them with one command is simpler.
@@ -104,51 +149,6 @@ It also adds tool-specific links for agents that do not rely only on
 
 Pi, Cursor, Gemini CLI, OpenCode, GitHub Copilot CLI, and other tools can
 auto-discover `~/.agents/skills/`. End-user installs do not need Python or uv.
-
-### Claude Code Plugin Install
-
-Use this when you want Claude Code to load ABP as a namespaced plugin and show
-skills as `/abp:<skill>`.
-
-```sh
-# Inside Claude Code:
-/plugin marketplace add kreek/agent-booster-pack
-/plugin install abp@abp
-```
-
-For local development against a working tree, add the repo directory as a local
-plugin source:
-
-```sh
-/plugin install /path/to/agent-booster-pack/plugin
-```
-
-The plugin uses `plugin/.claude-plugin/plugin.json` and loads the generated
-skill mirror under `plugin/skills/`. Edit canonical skills under
-`agents/.agents/skills/`, then run `./setup.sh` to refresh the mirror.
-
-### Codex Plugin Install
-
-Use this when you want Codex to install ABP from this repo's
-[Codex marketplace metadata][codex-plugins].
-
-```sh
-codex plugin marketplace add kreek/agent-booster-pack
-```
-
-Then open Codex's plugin directory and install **Agent Booster Pack** from the
-ABP marketplace.
-
-For local development against a working tree, add the repo directory as a local
-marketplace source:
-
-```sh
-codex plugin marketplace add /path/to/agent-booster-pack
-```
-
-The plugin uses `plugin/.codex-plugin/plugin.json` and loads the generated
-skill mirror under `plugin/skills/`. Edit canonical skills under
-`agents/.agents/skills/`, then run `./setup.sh` to refresh the mirror.
 
 ## Using ABP
 
