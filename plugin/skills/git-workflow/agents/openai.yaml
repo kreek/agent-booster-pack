@@ -1,0 +1,4 @@
+interface:
+  display_name: "ABP: Git Workflow"
+  short_description: "Shape branches, history, and commits"
+  default_prompt: "Use $git-workflow to inspect the working tree, plan safe git operations, and package coherent commits."

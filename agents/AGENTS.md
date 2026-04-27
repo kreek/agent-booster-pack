@@ -106,11 +106,11 @@ failures.
 - `database`: use when changing schemas, migrations, indexes, queries,
   transactions, transactional outbox, connection pools, deletion semantics, or
   production data access.
-- `deployment`: use when reducing release/deployment toil: CI/CD checks,
-  release checklists, rollout plans, rollback notes, feature-flag plans, or
-  deploy-time database coordination. It must not execute release actions or
-  mutate shared environments: deploys, rollbacks, promotions, approvals,
-  production config changes, or feature-flag flips.
+- `release`: use when preparing versions, CHANGELOG entries, deprecations,
+  release notes, tags, CI/CD checks, rollout plans, rollback notes,
+  feature-flag plans, or deploy-time coordination. It must not execute release
+  actions or mutate shared environments: deploys, rollbacks, promotions,
+  approvals, production config changes, or feature-flag flips.
 
 ### Correctness And Change Control
 
@@ -123,10 +123,9 @@ recoverable, and understandable.
   owns complexity findings in diffs: hidden mutable state, tangled effects,
   unnecessary layers, scattered behavior, and broad abstractions.
 - `proof`: use when engineering claims need explicit proof obligations: data
-  invariant, boundary, executable check, and evidence. Also use it before
-  claiming work is complete, fixed, ready to commit, ready for a PR, or passing.
-- `testing`: use when adding, reviewing, or fixing tests; deciding what to mock;
-  proving caller-visible behavior; addressing flakes or overspecified tests.
+  invariant, boundary, executable check, and evidence. Also use it for
+  behavior-focused tests, and before claiming work is complete, fixed, ready to
+  commit, ready for a PR, or passing.
 - `error-handling`: use when designing error types, propagation, retries,
   remote-call timeouts, circuit breakers, crash boundaries, user-facing
   messages, or recovery behavior.
@@ -144,19 +143,14 @@ operability, scalability, and performance after the core model is sound.
 - `observability`: use when adding or reviewing logs, metrics, traces,
   dependency health, health checks, dashboards, SLOs, alerts, or telemetry
   redaction.
-- `realtime`: use when designing event streams, live updates, pub/sub,
-  subscriptions, SSE, WebSockets, Kafka, Kinesis, Redis Streams, consumer
-  groups, offsets, lag, replay, retention, partitions, ordering, delivery
-  guarantees, or stream backpressure.
-- `background-jobs`: use when designing or reviewing background jobs, async
-  workers, schedulers, retries, job payloads, dead jobs, queue priority, worker
-  concurrency, or Sidekiq/Celery/BullMQ/RQ/Oban-style task processors.
-- `concurrency`: use when writing async, threaded, actor, channel, lock, queue,
-  cancellation, or backpressure-sensitive code.
+- `async-systems`: use when designing or reviewing async/threaded work,
+  actors, channels, locks, cancellation, queues, worker pools, background jobs,
+  schedulers, retries, event streams, live updates, pub/sub, SSE, WebSockets,
+  Kafka, Kinesis, Redis Streams, ordering, delivery guarantees, replay, or
+  backpressure.
 - `performance`: use when optimising or diagnosing latency, throughput, p99s,
-  CPU, memory, allocations, I/O, or resource saturation.
-- `caching`: use when adding caches, choosing TTL/invalidation, preventing
-  stampedes, using Redis/Memcached/CDNs, or debugging stale data.
+  CPU, memory, allocations, I/O, resource saturation, cache strategy,
+  invalidation, stampede prevention, Redis/Memcached/CDNs, or stale data.
 - `api`: use when designing REST/HTTP APIs, OpenAPI, status codes, pagination,
   idempotency keys, rate limits, versioning, or webhooks.
 
@@ -184,13 +178,10 @@ organized, not what the code should do.
   framework/runtime defaults, adding baseline tooling (linter, formatter, type
   check, test runner, coverage) to a project that lacks it, or setting up
   initial CI config.
-- `git`: use when rebasing, bisecting, resolving conflicts, splitting/squashing
-  commits, recovering history, or cleaning branch history.
-- `commit`: use when grouping a messy working tree, proposing commit splits,
-  writing commit messages, or committing approved changes.
-- `versioning`: use when bumping a version manifest, editing a CHANGELOG,
-  deprecating or removing a public symbol/endpoint/flag, classifying a
-  change as breaking/additive/fix, or preparing a release tag.
+- `git-workflow`: use when rebasing, bisecting, resolving conflicts,
+  splitting/squashing commits, recovering history, cleaning branch history,
+  grouping a messy working tree, proposing commit splits, writing commit
+  messages, or committing approved changes.
 
 Proof obligations override style, aesthetics, and weak local conventions. If a
 behavior, invariant, contract, root-cause, or refactor-safety claim cannot be
@@ -275,7 +266,7 @@ tests. Test-first is optional; test-at-all is not.
 - Internal helpers and persistence modules do not need their own tests when
   outer-boundary tests exercise them. They do need tests when the logic is
   non-trivial in isolation: parsers, state machines, pure algorithms.
-- Load the `testing` skill before authoring tests. Do not skip it.
+- Load the `proof` skill before authoring tests. Do not skip it.
 - If the working directory is empty, lacks a project manifest, or has no
   test/lint/typecheck baseline, load `scaffolding` before creating feature code.
 - When starting a new project or adding quality tooling to one that lacks it,

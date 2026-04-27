@@ -1,9 +1,6 @@
 ---
 name: proof
-description: >-
-  Use to turn engineering claims into proof obligations for invariants,
-  behavior changes, API contracts, bug fixes, refactors, acceptance, and
-  completion claims.
+description: Use for proof and tests, claims, invariants, behavior specs, edge cases, and evidence.
 ---
 
 # Proof
@@ -20,13 +17,18 @@ description: >-
   passing.
 - Turning a data-first design into concrete invariants and executable
   checks.
+- Adding or reviewing behavior-focused tests that prove a feature, bug
+  fix, refactor, flaky test fix, or untested behavior.
+- Deciding what deserves coverage and which boundary the proof should
+  enter through.
 
 ## When NOT to Use
 
 - Pure formatting, typo fixes, or mechanical file moves with no behavior,
   data, or contract claim.
-- Commit grouping after evidence already exists; use `commit`.
-- Test-shape decisions only; use `testing`.
+- Commit grouping after evidence already exists; use `git-workflow`.
+- Load testing, profiling, or benchmark design; use `performance`.
+- Pure toolchain setup; use `scaffolding`.
 
 ## Core Ideas
 
@@ -40,6 +42,17 @@ description: >-
    helper-level checks.
 5. A completion claim is still an engineering claim. Passing checks are
    only relevant when they prove the latest request was actually satisfied.
+6. Test behavior, not implementation: assertions describe what a
+   caller observes. Enter at the outermost practical boundary: HTTP,
+   CLI, UI, public API, or module facade.
+7. One test covers one behavior; if the name needs "and", split it.
+8. Prefer real collaborators until they cross a true system boundary.
+   Mock only at edges: clock, network, third-party service, process,
+   filesystem, or expensive infrastructure not under test.
+9. A good test would survive a full implementation swap that preserves
+   the contract.
+10. Flaky tests are bugs in the test, code, or environment; do not
+    hide them with sleeps or retries.
 
 ## Proof Contract
 
@@ -62,9 +75,12 @@ For every non-trivial engineering claim, record:
    maintainability.
 2. For each remaining claim, fill the Proof Contract before declaring
    the work complete.
-3. Run the check fresh after the final edit when the environment permits it.
-   If it can't run,
-   state the missing dependency and mark the claim unproven.
+3. When a claim needs a test, name the behavior in caller language.
+   Arrange only the state a real caller needs; act once; assert on
+   externally visible state, output, response, event, or error.
+4. Run the check fresh after the final edit when the environment
+   permits it. If it can't run, state the missing dependency and mark
+   the claim unproven.
 
 ## Before Saying Done
 
@@ -86,6 +102,14 @@ For every non-trivial engineering claim, record:
       refactor claim has a Proof Contract.
 - [ ] At least one check enters through the outermost practical
       boundary and would fail if the claim were false.
+- [ ] Test names read as behavior statements when nested labels are
+      combined.
+- [ ] Assertions are about observable outcomes, not private methods or
+      call choreography.
+- [ ] Mocks appear only at true system boundaries or have a documented
+      reason.
+- [ ] Tests would survive a contract-preserving implementation swap.
+- [ ] Tests are order-independent and do not rely on arbitrary sleeps.
 - [ ] Evidence names the exact command, test, observed result, or
       blocker.
 - [ ] Completion claims are based on checks or inspections run after the final
@@ -103,13 +127,18 @@ For every non-trivial engineering claim, record:
 | "I ran it manually" | Capture the command, observed output, and claim it proves. | The manual inspection is the only possible check and is reported as such. |
 | "Should be fine" / "I think this works" | Convert the thought into a named Proof Contract. | Exploratory analysis that is not claiming correctness. |
 | "Refactor only, no behavior change" | Provide before/after preservation evidence or mark unproven. | Mechanical rename verified by diff/tooling with no behavior surface. |
+| "Too simple to test" | Write the smallest behavior test that would fail if the code did nothing. | Pure formatting, copy, or generated metadata changes. |
+| "Already covered by another test" | Name the existing behavior test or add the missing assertion. | The named test enters through the same caller boundary and would fail for this bug. |
+| "Mock is faster than a fixture" | Use the real collaborator unless it crosses a true system boundary. | Clock, network, third-party service, process, filesystem, or expensive infrastructure. |
+| "I'll add tests after the feature lands" | Add the behavior assertion before claiming the feature is done. | Exploratory spike explicitly marked as not complete. |
 
 ## Handoffs
 
 - Use `data-first` to shape invariants and make invalid states
   unrepresentable.
-- Use `testing` to choose proof boundaries and test names.
 - Use `debugging` when the proof depends on root-cause evidence.
 - Use `api` when the claim is a public contract.
 - Use `refactoring` when the proof is behavior preservation through
   structural change.
+- Use `security` when proof requires abuse cases or trust-boundary
+  checks.

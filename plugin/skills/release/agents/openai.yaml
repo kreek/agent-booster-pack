@@ -1,0 +1,4 @@
+interface:
+  display_name: "ABP: Release"
+  short_description: "Plan versions, changelogs, and rollout"
+  default_prompt: "Use $release to classify the version impact, update release notes, and prepare rollout and rollback checks without mutating shared environments."

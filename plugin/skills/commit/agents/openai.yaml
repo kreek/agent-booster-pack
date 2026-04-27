@@ -1,4 +1,0 @@
-interface:
-  display_name: "ABP: Commit"
-  short_description: "Group changes into clean commits"
-  default_prompt: "Use $commit to group this working tree into coherent commits."

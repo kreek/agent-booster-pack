@@ -1,4 +1,0 @@
-interface:
-  display_name: "ABP: Realtime"
-  short_description: "Design streams and live events"
-  default_prompt: "Use $realtime to start with polling, SSE, or WebSockets for live UI updates, and require explicit delivery, ordering, replay, and backpressure reasons before choosing Kafka, Kinesis, Redis Streams, or another broker."

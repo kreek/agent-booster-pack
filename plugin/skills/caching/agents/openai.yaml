@@ -1,4 +1,0 @@
-interface:
-  display_name: "ABP: Caching"
-  short_description: "Design caches and invalidation"
-  default_prompt: "Use $caching to design the invalidation and stampede strategy."

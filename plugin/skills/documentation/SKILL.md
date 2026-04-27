@@ -1,9 +1,6 @@
 ---
 name: documentation
-description: >-
-  Use to write or review docs: READMEs, ADRs, runbooks, API docs, tutorials,
-  requirements, acceptance criteria, user stories, reference material, and
-  code comments.
+description: Use for documentation, READMEs, guides, ADRs, runbooks, API docs, comments, and structure.
 ---
 
 # Documentation
@@ -24,8 +21,7 @@ description: >-
 ## When NOT to Use
 
 - API contract design; use `api`.
-- Release coordination or changelog process; use `deployment` or
-  `versioning`.
+- Release coordination or changelog process; use `release`.
 - Alert mechanics and dashboards; use `observability`.
 
 ## Core Ideas
@@ -91,10 +87,9 @@ description: >-
 
 - Use `api` for OpenAPI and wire-contract shape.
 - Use `observability` for alert/runbook signal definitions.
-- Use `git` or `commit` when documenting commit/PR history or release
-  notes.
-- Use `versioning` for CHANGELOG hygiene and migration notes that ship
-  with a release.
+- Use `git-workflow` when documenting commit/PR history.
+- Use `release` for CHANGELOG hygiene, release notes, and migration
+  notes that ship with a release.
 - Use `proof` when acceptance criteria need to become completion
   evidence.
 

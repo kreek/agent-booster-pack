@@ -1,9 +1,6 @@
 ---
 name: refactoring
-description: >-
-  Use for behavior-preserving code change: legacy refactors, large renames,
-  module extraction, migrations, strangler patterns, branch by abstraction,
-  and untangling mixed concerns.
+description: Use for refactoring, behavior-preserving change, legacy seams, tests, and safe rewrites.
 ---
 
 # Refactoring
@@ -20,9 +17,9 @@ description: >-
 
 ## When NOT to Use
 
-- Behavior-first feature work; use `testing`.
-- Commit grouping after changes already exist; use `commit`.
-- Git history surgery; use `git`.
+- Behavior-first feature work; use `proof`.
+- Commit grouping or git history surgery after changes already exist;
+  use `git-workflow`.
 
 ## Core Ideas
 
@@ -88,8 +85,8 @@ description: >-
 
 - Use `proof` when refactor safety depends on explicit preservation
   evidence.
-- Use `testing` for characterization and boundary tests.
-- Use `commit` to group resulting changes cleanly.
+- Use `proof` for characterization and boundary tests.
+- Use `git-workflow` to group resulting changes cleanly.
 - Use `data-first` when the refactor is mainly about untangling
   effects or domain shape.
 - Use `architecture` when the refactor is about module boundaries,

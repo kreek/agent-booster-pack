@@ -1,9 +1,6 @@
 ---
 name: observability
-description: >-
-  Use for observability: logs, metrics, traces, health checks, dashboards,
-  alerts, SLOs/SLIs, error budgets, OpenTelemetry, incidents, cardinality, and
-  burn-rate alerts.
+description: Use for observability, logs, metrics, traces, health checks, dashboards, alerts, and SLOs.
 ---
 
 # Observability
@@ -22,7 +19,7 @@ description: >-
 
 - Local-only scripts or libraries with no operational surface.
 - Error type design; use `error-handling`.
-- Deployment sequencing; use `deployment`.
+- Release sequencing; use `release`.
 
 ## Core Ideas
 
@@ -82,9 +79,9 @@ deferred. Before real users, promote the path to the full checklist.
 ## Handoffs
 
 - Use `documentation` for runbook shape.
-- Use `realtime` for stream lag, fanout, replay, consumer group, and
+- Use `async-systems` for stream lag, fanout, replay, consumer group, and
   delivery semantics before instrumenting them.
-- Use `deployment` for rollout gates and production verification.
+- Use `release` for rollout gates and production verification.
 - Use `error-handling` for remote dependency timeout, retry, and
   circuit-breaker behavior before instrumenting it.
 

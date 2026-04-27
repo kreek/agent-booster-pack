@@ -132,4 +132,4 @@ Run on the image being promoted; gate the deploy on results.
 - `dep-audit.md` for application dependency scanning.
 - `secrets-scan.md` for credential leak detection.
 - `secrets.md` for where credentials and keys belong.
-- `deployment` skill for rollout strategy and migration coordination.
+- `release` skill for rollout strategy and migration coordination.

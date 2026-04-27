@@ -8,18 +8,25 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- BREAKING: Skills are consolidated to reduce Codex skill-list context
+  pressure: `git` + `commit` -> `git-workflow`, `deployment` +
+  `versioning` -> `release`, `concurrency` + `realtime` +
+  `background-jobs` -> `async-systems`, `caching` -> `performance`,
+  and `testing` -> `proof`.
 - Versioning guidance now treats optional additive public-surface changes as
-  minor unless they force existing callers to change or accept new semantics.
+  minor unless they force existing callers to change or accept new semantics;
+  this guidance now lives in `release`.
 - Workflow completion guidance now requires agents to explain what they changed,
   why it improves on the previous state, and/or what it enables next.
 - Git workflow guidance now recommends a separate worktree when parallel
   work is expected, or when an in-flight branch has work that overlaps
-  with or should stay separate from a new task.
+  with or should stay separate from a new task; this guidance now lives
+  in `git-workflow`.
+- Skill frontmatter descriptions may now be up to 120 characters each, with a
+  2,000-character pack-wide description budget enforced by the validator.
 
 ### Fixed
 
-- Skill frontmatter descriptions are now capped at 200 characters and shortened
-  across the pack so Codex has less pre-load context pressure.
 - `./setup.sh` now prunes legacy ABP-owned `~/.codex/skills/` links when the
   ABP Codex plugin is installed and warns that Codex can still duplicate ABP
   via direct `~/.agents/skills/` discovery if both install paths stay enabled.

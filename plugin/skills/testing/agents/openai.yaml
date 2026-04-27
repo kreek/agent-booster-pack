@@ -1,4 +1,0 @@
-interface:
-  display_name: "ABP: Testing"
-  short_description: "Write behavior-focused tests"
-  default_prompt: "Use $testing to add tests that prove the caller-visible behavior."

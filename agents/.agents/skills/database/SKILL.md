@@ -1,8 +1,6 @@
 ---
 name: database
-description: >-
-  Use for database schemas, migrations, indexes, EXPLAIN, query optimization,
-  isolation, outbox/CDC, soft delete, N+1s, pooling, online DDL, and locks.
+description: Use for databases, schemas, migrations, indexes, transactions, query plans, and locking.
 ---
 
 # Database
@@ -20,8 +18,8 @@ description: >-
 ## When NOT to Use
 
 - API contract design; use `api`.
-- Rollout sequencing outside the database; pair with `deployment`.
-- Cache freshness and invalidation; use `caching`.
+- Rollout sequencing outside the database; pair with `release`.
+- Cache freshness and invalidation; use `performance`.
 
 ## Core Ideas
 
@@ -88,12 +86,12 @@ description: >-
 
 ## Handoffs
 
-- Use `deployment` for deploy ordering, rollback rehearsal, and feature
+- Use `release` for deploy ordering, rollback rehearsal, and feature
   flags.
 - Use `performance` when query work is part of a measured
   latency/throughput change.
 - Use `observability` for migration and query dashboards/alerts.
-- Use `realtime` or `background-jobs` for stream or worker consumer
+- Use `async-systems` for stream or worker consumer
   semantics after the durable handoff exists.
 - Use `security` when the schema touches credentials, secrets, tokens,
   MFA factors, or sensitive PII. Password hashing parameters and

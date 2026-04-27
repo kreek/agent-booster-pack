@@ -83,7 +83,8 @@ changes.
 Every `SKILL.md` must have:
 
 - Frontmatter with kebab-case `name:` and a trigger-focused `description:`
-  no longer than 200 characters, because agents may load every description
+  no longer than 120 characters, and the pack-wide canonical description total
+  must stay under 2,000 characters, because agents may load every description
   before selecting a skill body.
 - Required sections: `## When to Use`, `## When NOT to Use`,
   `## Verification`.

@@ -1,9 +1,6 @@
 ---
 name: api
-description: >-
-  Use for REST/HTTP API design and implementation: endpoints, OpenAPI,
-  methods, JSON shapes, errors, status codes, pagination, auth, webhooks,
-  idempotency, rate limits, and versioning.
+description: Use for HTTP APIs, OpenAPI, request/response shape, status codes, auth, and webhooks.
 ---
 
 # API
@@ -44,7 +41,7 @@ description: >-
    API without a new contract version; removals, renames, required
    additions, status-code changes, and semantic changes need a
    successor contract or deprecation path. Hand off the bump,
-   CHANGELOG, and deprecation primitives to `versioning`.
+   CHANGELOG, and deprecation primitives to `release`.
 7. Webhooks are APIs too: sign payloads, version events, and make
    receivers idempotent.
 
@@ -149,11 +146,11 @@ server-origin failures into a client error.
 - Use `architecture` when deciding whether request middleware is a real
   transport boundary or just a horizontal layer that scatters feature
   behavior.
-- Use `realtime` for SSE/subscription transport and event-stream
+- Use `async-systems` for SSE/subscription transport and event-stream
   semantics.
-- Use `background-jobs` or `realtime` for idempotent async consumers
-  and delivery guarantees.
-- Use `versioning` for the actual bump, CHANGELOG, and deprecation
+- Use `async-systems` for idempotent async consumers and delivery
+  guarantees.
+- Use `release` for the actual bump, CHANGELOG, and deprecation
   primitives.
 - Use `documentation` when deciding where API docs live; generated
   contract reference is the source of truth.

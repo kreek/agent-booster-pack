@@ -1,9 +1,6 @@
 ---
 name: accessibility
-description: >-
-  Use for accessibility in UI, web, app, or document work: WCAG, ARIA,
-  semantics, keyboard flow, focus, contrast, motion, labels, forms, and custom
-  controls.
+description: Use for accessible UI, WCAG, ARIA, keyboard, focus, contrast, and inclusive states.
 ---
 
 # Accessibility
@@ -82,7 +79,7 @@ description: >-
 
 - Use `ui-design` for visual hierarchy, layout, design systems, and
   component composition.
-- Use `testing` for browser automation around accessibility-critical
+- Use `proof` for browser automation around accessibility-critical
   flows.
 - Use `documentation` when writing accessibility statements,
   design-system guidance, or remediation notes.

@@ -1,9 +1,6 @@
 ---
 name: debugging
-description: >-
-  Use to investigate bugs, reproduce flaky issues, find root causes, choose
-  debugging tools, structure post-mortems, or replace random changes with a
-  systematic approach.
+description: Use to debug failures, reproduce symptoms, isolate causes, inspect evidence, and fix bugs.
 ---
 
 # Debugging
@@ -22,7 +19,7 @@ description: >-
 - Planned refactors with no failing behavior; use `refactoring`.
 - Performance investigation where the symptom is slowness; use
   `performance`.
-- Git-history regression search mechanics; pair with `git`.
+- Git-history regression search mechanics; pair with `git-workflow`.
 
 ## Core Ideas
 
@@ -75,8 +72,8 @@ description: >-
 ## Handoffs
 
 - Use `proof` when a fix claim needs explicit evidence.
-- Use `testing` for the regression test shape.
-- Use `git` for `git bisect`, reflog recovery, or conflict-heavy
+- Use `proof` for the regression test shape.
+- Use `git-workflow` for `git bisect`, reflog recovery, or conflict-heavy
   debugging.
 - Use `observability` when the right evidence must come from logs,
   metrics, traces, or incident timelines.

@@ -1,9 +1,6 @@
 ---
 name: security
-description: >-
-  Use for security-sensitive work: authn/authz, secrets, crypto, input
-  validation, dependency risk, OWASP, threat modeling, supply chain, SBOMs,
-  signing, sessions, and trust boundaries.
+description: Use for security, auth, secrets, crypto, input validation, dependency risk, and trust boundaries.
 ---
 
 # Security
@@ -141,7 +138,7 @@ platform-specific guidance, since the threat model differs.
   query / migration safety.
 - `observability`: log redaction patterns, security-event alert design,
   audit-log integrity.
-- `deployment`: CI/CD identity, secret scope, signed artifacts,
+- `release`: CI/CD identity, secret scope, signed artifacts,
   migration coordination, rollback during a security incident.
 - Specialist static-analysis tools (Semgrep, CodeQL, dependency
   provenance) for high-risk codebases.

@@ -1,9 +1,6 @@
 ---
 name: workflow
-description: >-
-  Master entrypoint for ABP. Use at the start of software engineering tasks to
-  identify risk, choose the smallest useful skill set, and prove the work
-  before claiming completion.
+description: Use first to route ABP work, choose skills, sequence handoffs, and define verification.
 ---
 
 # Workflow
@@ -45,8 +42,8 @@ description: >-
 3. Start from the software risk: correctness, data, security,
    operability, performance, accessibility, or change safety.
 4. Prefer simple over easy: name what is being tangled together
-   (data, effects, time, ownership, transport, persistence, UI state,
-   deployment, or compatibility) before choosing the implementation path.
+  (data, effects, time, ownership, transport, persistence, UI state,
+   release, or compatibility) before choosing the implementation path.
 5. Load only the skills that materially change the work. Do not turn
    skill use into a checklist ritual.
 6. Before claiming done, use `proof` to connect the completion claim to
@@ -90,16 +87,16 @@ description: >-
    - model any feature/domain data and invariants with `data-first`
      (first after scaffolding when specs are clear);
    - choose boundaries with `architecture`;
-   - prove behavior with `testing` and `proof`;
+   - prove behavior with `proof`;
    - investigate causes with `debugging`;
    - review diffs with `code-review`;
    - gate safety with `security` or `database`, and reduce release
-     toil/risk with `deployment`;
-   - improve operations with `observability`, `performance`,
-     `caching`, `realtime`, `background-jobs`, or `concurrency`;
+     toil/risk with `release`;
+   - improve operations with `observability`, `performance`, or
+     `async-systems`;
    - improve user and maintainer surfaces with `api`,
      `documentation`, `ui-design`, or `accessibility`;
-   - package repository work with `git`, `commit`, or `versioning`;
+   - package repository work with `git-workflow` or `release`;
    - start new projects or missing tooling with `scaffolding`.
 5. Load those skills and follow their workflows. If two skills
    conflict, prefer safety, data integrity, correctness, proof, and
@@ -137,7 +134,7 @@ description: >-
 | "I'll just code it" | Name the risk profile and load the smallest useful skill set first. | None: even trivial edits enter; they may exit at step 1 with no skills. |
 | "I'll infer the product behavior" | Draft likely acceptance criteria, then ask the user to confirm or correct the ambiguous parts before editing. | Mechanical edits or explicit implementation-only tasks with no behavior choice. |
 | "Use every skill to be safe" | Pick the few skills that change the outcome. | Explicit audit/review request across the whole pack. |
-| "This helper/layer/global will make it easy" | Name what it couples and route to `data-first`, `architecture`, `refactoring`, or `concurrency` before adding it. | Thin adapter required by an existing framework or public API. |
+| "This helper/layer/global will make it easy" | Name what it couples and route to `data-first`, `architecture`, `refactoring`, or `async-systems` before adding it. | Thin adapter required by an existing framework or public API. |
 | "I'll branch at commit time" | Branch, or use a worktree for parallel or in-flight branch separation, before editing so the diff, tests, and commits belong to one scoped change. | Read-only research or a task explicitly done outside Git. |
 | "I'll make it flexible for later" | Build the direct requested behavior; add flexibility only when current acceptance or risk needs it. | Public library/API design where extension points are part of the requirement. |
 | "I'll preserve old behavior just in case" | Ask whether backward compatibility is required before adding shims or dual paths. | Existing public contract or migration policy already requires compatibility. |

@@ -1,9 +1,6 @@
 ---
 name: code-review
-description: >-
-  Use to review local diffs, staged changes, branches, PRs, review comments,
-  or agent-generated code for correctness, regressions, missing proof, and
-  merge readiness.
+description: Use to review diffs and PRs for bugs, regressions, edge cases, proof, and merge readiness.
 ---
 
 # Code Review
@@ -21,8 +18,7 @@ description: >-
 
 ## When NOT to Use
 
-- Commit grouping only; use `commit`.
-- Git history repair, rebases, conflicts, or force-push decisions; use `git`.
+- Commit grouping or git history repair only; use `git-workflow`.
 - A narrow domain-only review where a specialist skill is sufficient
   (`security`, `database`, `api`, `accessibility`).
 
@@ -74,10 +70,10 @@ description: >-
 4. Load triggered domain skills as mandatory lenses. Always include a
    security pass for any auth, trust-boundary, input, dependency, secret,
    crypto, logging-redaction, or user-controlled-sink concern. Add others
-   as triggered: `database`, `api`, `testing`, `proof`, `data-first`,
-   `architecture`, `error-handling`, `concurrency`, `deployment`,
+   as triggered: `database`, `api`, `proof`, `data-first`,
+   `architecture`, `error-handling`, `async-systems`, `release`,
    `observability`, `ui-design`, `accessibility`, `documentation`,
-   `performance`, `caching`, `realtime`.
+   `performance`.
 5. Check in this order: correctness → data integrity → security → error
    handling → tests → observability → compatibility → performance →
    maintainability. Sweep for harmful duplication, orphaned code,
@@ -160,9 +156,9 @@ findings, not before.
 - Use `database` for migrations, locking, transactions, schema, indexes,
   or production data access.
 - Use `proof` when review claims need explicit proof obligations.
-- Use `testing` for test quality, missing behavior coverage, mocks, or
-  flakes.
-- Use `git` for branch mechanics and `commit` for packaging accepted
+- Use `proof` for proof obligations, test quality, missing behavior
+  coverage, mocks, or flakes.
+- Use `git-workflow` for branch mechanics and packaging accepted
   fixes.
 
 ## References

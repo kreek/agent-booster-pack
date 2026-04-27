@@ -20,7 +20,8 @@ REQUIRED_SECTIONS = (
     "When NOT to Use",
     "Verification",
 )
-MAX_DESCRIPTION_LENGTH = 200
+MAX_DESCRIPTION_LENGTH = 120
+MAX_TOTAL_DESCRIPTION_LENGTH = 2000
 
 NAME_RE = re.compile(r"^name:\s+[a-z][a-z0-9-]*\s*$", re.MULTILINE)
 DESCRIPTION_RE = re.compile(r"^description:", re.MULTILINE)
@@ -143,10 +144,30 @@ def validate_skill_file(path: Path) -> SkillFinding | None:
 def validate_skills(skills_dir: Path) -> list[SkillFinding]:
     """Validate all SKILL.md files under a skills directory."""
     findings: list[SkillFinding] = []
+    total_description_length = 0
     for skill_file in sorted(skills_dir.glob("*/SKILL.md")):
+        body = skill_file.read_text(encoding="utf-8")
+        head = "\n".join(body.splitlines()[:30])
+        description = frontmatter_description(head)
+        if description is not None:
+            total_description_length += len(description)
+
         finding = validate_skill_file(skill_file)
         if finding is not None:
             findings.append(finding)
+
+    if total_description_length > MAX_TOTAL_DESCRIPTION_LENGTH:
+        findings.append(
+            SkillFinding(
+                path=skills_dir / "SKILL_DESCRIPTIONS",
+                problems=(
+                    "frontmatter description total too long "
+                    f"({total_description_length} > "
+                    f"{MAX_TOTAL_DESCRIPTION_LENGTH} characters)",
+                ),
+            )
+        )
+
     return findings
 
 
@@ -444,6 +465,27 @@ Stuff.
 - "Probably fine"
 """,
         )
+        long_description = "x" * 100
+        for index in range(21):
+            write_fixture(
+                tmp / f"budget-{index}" / "SKILL.md",
+                f"""---
+name: budget-{index}
+description: {long_description}
+---
+
+# Budget {index}
+
+## When to Use
+- trigger
+
+## When NOT to Use
+- other
+
+## Verification
+- [ ] check
+""",
+            )
 
         findings = validate_skills(tmp)
         rendered = "\n".join(
@@ -459,6 +501,7 @@ Stuff.
             "Common Rationalizations",
             "Red Flags",
             "Trigger | Do this instead | False alarm",
+            "description total too long",
         ):
             if expected not in rendered:
                 print(

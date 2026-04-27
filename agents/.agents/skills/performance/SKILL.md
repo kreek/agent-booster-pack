@@ -1,9 +1,6 @@
 ---
 name: performance
-description: >-
-  Use for performance work: slowness, profiling, flame graphs,
-  micro-benchmarks, latency, p99, allocation rate, pprof, py-spy, perf, and
-  async-profiler.
+description: Use for performance, profiling, latency, throughput, allocation, caching, and hot paths.
 ---
 
 # Performance
@@ -17,13 +14,18 @@ description: >-
 - Diagnosing slowness, optimizing latency/throughput/allocation,
   reading profiles, designing benchmarks, investigating p99/p99.9, or
   deciding whether a performance change is worth it.
+- Adding, reviewing, tuning, or debugging application, database,
+  Redis/Memcached, CDN, browser, or edge caches.
+- Investigating stale data, stampedes, hot keys, cache misses, or
+  cache-related latency.
 
 ## When NOT to Use
 
 - Concurrency correctness without measured slowness; use
-  `concurrency`.
+  `async-systems`.
 - Database query safety without profiling context; use `database`.
-- Caching design; use `caching`.
+- HTTP API cache semantics unrelated to storage or performance; use
+  `api`.
 
 ## Core Ideas
 
@@ -35,14 +37,27 @@ description: >-
    network wait are different problems.
 6. Micro-benchmarks prove local mechanics, not end-to-end wins.
 7. Keep complexity only when the measured gain justifies it.
+8. No invalidation story, no cache.
+9. Cache keys encode freshness, tenant, permissions, locale, and
+   version where those affect the value.
+10. Prefer event/key-based expiration for correctness; use TTL as a
+    safety net, not the primary truth.
+11. Every hot key needs stampede protection.
+12. Layered caches need explicit ownership so stale data cannot hide
+    in an outer layer.
+13. Never put secrets or raw PII in keys or values unless the cache is
+    treated as sensitive storage.
 
 ## Workflow
 
 1. Define the metric: p99 latency, throughput, CPU time, allocation
    rate, memory, or error budget impact. Capture baseline with
    production-shaped data and concurrency.
-2. Profile to find the dominant bottleneck. Make one change.
-3. Re-measure under the same conditions. Check adjacent regressions:
+2. Profile to find the dominant bottleneck. If caching is considered,
+   state the value being cached, source of truth, invalidation trigger,
+   TTL/jitter, stampede policy, stale tolerance, and cache metrics.
+3. Make one change.
+4. Re-measure under the same conditions. Check adjacent regressions:
    memory, error rate, tail latency, CPU, maintainability.
 
 ## Verification
@@ -55,14 +70,28 @@ description: >-
 - [ ] Load generator avoids coordinated omission for latency work.
 - [ ] Adjacent metrics did not regress enough to erase the win.
 - [ ] Added complexity is justified by measured improvement.
+- [ ] Cache invalidation owner, trigger, and stale tolerance are
+      documented where caching is involved.
+- [ ] Cache keys include all inputs that change the value and avoid
+      secrets/raw PII.
+- [ ] TTL has jitter where many entries can expire together.
+- [ ] Hot keys are protected by singleflight, locking, probabilistic
+      early refresh, or equivalent.
+- [ ] Negative caching is intentional and bounded.
+- [ ] Cache metrics exist for hit rate, miss latency, eviction rate,
+      memory, and refresh errors.
+- [ ] Tests cover stale data and invalidation, not only the warm-cache
+      happy path.
 
 ## Handoffs
 
 - Use `database` for query plans, indexes, and migration risk.
 - Use `observability` for production validation and continuous
   profiling.
-- Use `caching` only after measurement shows repeated expensive work
-  or I/O.
+- Use `security` when cache keys/values can include tenant data,
+  secrets, authorization context, or personal data.
+- Use `error-handling` when cached data participates in remote-call
+  retry or fallback behavior.
 
 ## References
 
@@ -70,3 +99,7 @@ description: >-
 - USE method: <https://www.brendangregg.com/usemethod.html>
 - Coordinated omission:
   <https://groups.google.com/g/mechanical-sympathy/c/icNZJejUHfE/m/BfDekfBEs_sJ>
+- RFC 5861 stale-while-revalidate:
+  <https://datatracker.ietf.org/doc/html/rfc5861>
+- Cache stampede prevention:
+  <https://cseweb.ucsd.edu/~avattani/papers/cache_stampede.pdf>

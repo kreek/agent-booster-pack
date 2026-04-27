@@ -49,7 +49,14 @@ codex plugin marketplace add kreek/agent-booster-pack
 ```
 
 Then open Codex's plugin directory and install **Agent Booster Pack** from the
-ABP marketplace.
+ABP marketplace:
+
+```text
+/plugins
+Arrow down to Agent Booster Pack
+Enter
+Select Install
+```
 
 ### Manual Skills Installation
 
@@ -132,9 +139,9 @@ You do not need to start from a special command. Make a natural-language
 request, and the agent can use [`workflow`][skill-workflow] plus the narrower
 skills needed for the work. You can also invoke a specific skill directly when
 you want a particular lens, such as `documentation` for README work or
-`code-review` for a diff. Some skills, such as `commit`, are intentionally
-user-invoked workflows because they package repository state and should run only
-when you ask for that action.
+`code-review` for a diff. Some skills, such as `git-workflow`, are
+intentionally user-invoked workflows because they package repository state and
+should run only when you ask for that action.
 
 The skill pack is deliberately not a checklist library. It is a set of
 discipline-enforcing lenses, grouped by the kind of engineering pressure they
@@ -154,15 +161,14 @@ apply:
 - [`architecture`][skill-architecture]: module boundaries, domain/feature
   locality versus horizontal layers, DDD tactical patterns, and concerns that
   change independently.
-- [`proof`][skill-proof]: explicit proof obligations for behavior, contracts,
-  invariants, root causes, refactor safety, and completion claims.
+- [`proof`][skill-proof]: proof obligations and behavior-focused tests for
+  claims about behavior, contracts, invariants, root causes, refactor safety,
+  and completion.
 
 ### Correctness and change
 
 - [`code-review`][skill-code-review]: risk-focused review of diffs, branches, PRs,
   requested changes, and agent-generated code.
-- [`testing`][skill-testing]: behavior-focused tests that prove caller-visible
-  contracts without overspecifying implementation.
 - [`debugging`][skill-debugging]: root-cause investigation for bugs, flakes,
   regressions, and unexplained symptoms.
 - [`refactoring`][skill-refactoring]: structure changes that preserve behavior
@@ -178,25 +184,20 @@ apply:
 - [`database`][skill-database]: schemas, migrations, indexes, queries,
   transactions, transactional outbox, deletion semantics, and production data
   access.
-- [`deployment`][skill-deployment]: release toil reduction, CI/CD checks,
-  rollout plans, rollback notes, feature-flag plans, and deploy-time
-  coordination; agents prepare, humans mutate shared environments.
+- [`release`][skill-release]: version bumps, CHANGELOG hygiene, deprecations,
+  release notes, CI/CD gates, rollout plans, rollback notes, and feature flags;
+  agents prepare, humans mutate shared environments.
 
 ### Production quality
 
 - [`observability`][skill-observability]: logs, metrics, traces, dependency
   health, health checks, dashboards, SLOs, alerts, and telemetry quality.
-- [`realtime`][skill-realtime]: event streams, live updates, pub/sub,
-  subscriptions, delivery guarantees, ordering, and replay.
-- [`background-jobs`][skill-background-jobs]: async workers, schedulers,
-  retries, job payloads, dead jobs, queue priority, and worker failure
-  visibility.
-- [`concurrency`][skill-concurrency]: async, threads, actors, channels, locks,
-  cancellation, queues, and backpressure.
+- [`async-systems`][skill-async-systems]: async tasks, threads, locks,
+  channels, background jobs, queues, workers, retries, live updates, streams,
+  pub/sub, ordering, replay, delivery guarantees, and backpressure.
 - [`performance`][skill-performance]: latency, throughput, p99s, CPU, memory,
-  allocations, I/O, and resource saturation.
-- [`caching`][skill-caching]: cache strategy, invalidation, stampede prevention,
-  Redis, Memcached, CDNs, and stale data.
+  allocations, I/O, resource saturation, cache strategy, invalidation, stampede
+  prevention, and stale data.
 
 ### Public/user surfaces
 
@@ -211,12 +212,9 @@ apply:
 
 ### Project and repo workflow
 
-- [`git`][skill-git]: rebases, conflict resolution, bisects, history recovery,
-  branch cleanup, and PR history.
-- [`commit`][skill-commit]: working-tree grouping, commit splits, concise commit
-  messages, and approved commits.
-- [`versioning`][skill-versioning]: version bumps, CHANGELOG hygiene,
-  deprecation policy, breaking-change classification, and release tags.
+- [`git-workflow`][skill-git-workflow]: branch hygiene, working-tree grouping,
+  commit splits, concise commit messages, rebases, conflicts, bisects, history
+  recovery, and PR history.
 - [`scaffolding`][skill-scaffolding]: new projects, baseline tooling,
   package-manager defaults, test runners, linting, and CI. Greenfield stack
   picks come from the typed template catalog described below.
@@ -233,29 +231,23 @@ Shared language defaults live in
 
 [skill-accessibility]: agents/.agents/skills/accessibility/SKILL.md
 [skill-api]: agents/.agents/skills/api/SKILL.md
-[skill-background-jobs]: agents/.agents/skills/background-jobs/SKILL.md
-[skill-caching]: agents/.agents/skills/caching/SKILL.md
-[skill-commit]: agents/.agents/skills/commit/SKILL.md
-[skill-concurrency]: agents/.agents/skills/concurrency/SKILL.md
+[skill-async-systems]: agents/.agents/skills/async-systems/SKILL.md
 [skill-architecture]: agents/.agents/skills/architecture/SKILL.md
 [skill-data-first]: agents/.agents/skills/data-first/SKILL.md
 [skill-database]: agents/.agents/skills/database/SKILL.md
 [skill-debugging]: agents/.agents/skills/debugging/SKILL.md
-[skill-deployment]: agents/.agents/skills/deployment/SKILL.md
 [skill-documentation]: agents/.agents/skills/documentation/SKILL.md
 [skill-error-handling]: agents/.agents/skills/error-handling/SKILL.md
 [skill-ui-design]: agents/.agents/skills/ui-design/SKILL.md
-[skill-git]: agents/.agents/skills/git/SKILL.md
+[skill-git-workflow]: agents/.agents/skills/git-workflow/SKILL.md
 [skill-observability]: agents/.agents/skills/observability/SKILL.md
 [skill-performance]: agents/.agents/skills/performance/SKILL.md
 [skill-proof]: agents/.agents/skills/proof/SKILL.md
-[skill-realtime]: agents/.agents/skills/realtime/SKILL.md
+[skill-release]: agents/.agents/skills/release/SKILL.md
 [skill-refactoring]: agents/.agents/skills/refactoring/SKILL.md
 [skill-code-review]: agents/.agents/skills/code-review/SKILL.md
 [skill-scaffolding]: agents/.agents/skills/scaffolding/SKILL.md
 [skill-security]: agents/.agents/skills/security/SKILL.md
-[skill-testing]: agents/.agents/skills/testing/SKILL.md
-[skill-versioning]: agents/.agents/skills/versioning/SKILL.md
 [skill-workflow]: agents/.agents/skills/workflow/SKILL.md
 [backstage-templates]: https://backstage.io/docs/features/software-templates/
 [stacks-dir]: agents/.agents/skills/scaffolding/references/stacks/

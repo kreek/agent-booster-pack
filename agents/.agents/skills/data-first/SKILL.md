@@ -1,9 +1,6 @@
 ---
 name: data-first
-description: >-
-  Use for data modeling and invariants: domain fields, states, transitions,
-  parsing boundaries, value objects, immutability, illegal states, shared
-  mutable state, and effect boundaries.
+description: Use for data-first design, models, invariants, state transitions, parsing, and effects.
 ---
 
 # Data First
@@ -100,10 +97,10 @@ the type forces care. Load the right reference when either appears in the diff.
   layering decisions are in scope, especially when the question is what
   changes together rather than what data shape is valid.
 - Use `proof` when data claims need explicit proof obligations.
-- Use `testing` to prove domain behavior through public boundaries.
+- Use `proof` to prove domain behavior through public boundaries.
 - Use `error-handling` for parse failures, Result/Either shape, and error
   context.
-- Use `concurrency` when mutable places or ownership cross task/thread
+- Use `async-systems` when mutable places or ownership cross task/thread
   boundaries.
 
 ## References

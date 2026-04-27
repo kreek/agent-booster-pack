@@ -1,9 +1,6 @@
 ---
 name: scaffolding
-description: >-
-  Use to bootstrap projects or missing baseline tooling: package manager,
-  lint, format, type/syntax checks, tests, coverage, CI, package scripts, and
-  greenfield stack defaults.
+description: Use for scaffolding, new projects, package setup, quality tooling, CI, and repo structure.
 ---
 
 # Scaffolding
@@ -23,8 +20,8 @@ and run the baseline without local knowledge.
 ## When NOT to Use
 
 - Adding a feature to an already healthy project; use the domain
-  skill plus `testing`.
-- Deployment pipeline beyond baseline CI; use `deployment`.
+  skill plus `proof`.
+- Release pipeline beyond baseline CI; use `release`.
 - Detailed UI design choices after the framework is chosen; use
   `ui-design`.
 
@@ -149,8 +146,8 @@ to the full checklist.
 
 - Use `data-first` immediately after scaffolding when specs are clear
   and the next step is feature/domain data modeling.
-- Use `testing` for the first real feature test.
-- Use `deployment` when CI becomes release/deploy automation.
+- Use `proof` for the first real feature test.
+- Use `release` when CI becomes release/deploy automation.
 - Use `security` when adding dependency audits, secret scanning,
   signing, or supply-chain gates.
 

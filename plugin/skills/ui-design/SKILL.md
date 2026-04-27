@@ -1,9 +1,6 @@
 ---
 name: ui-design
-description: >-
-  Use for frontend UI work: pages, components, layout, typography, color,
-  motion, responsive behavior, component APIs, CSS, design tokens, dark mode,
-  Tailwind, and shadcn/ui.
+description: Use for frontend UI, layouts, components, responsive behavior, visual design, and usability.
 ---
 
 # UI Design
@@ -24,7 +21,7 @@ Design quality comes from priority, restraint, and verification, not decoration.
 
 - Backend API shape; use `api`.
 - Accessibility-specific implementation or review; use `accessibility`.
-- Frontend runtime debugging or tests only; pair with `testing` and browser
+- Frontend runtime debugging or tests only; pair with `proof` and browser
   tooling.
 - Performance profiling beyond UI design choices; use `performance`.
 
@@ -64,7 +61,7 @@ Design quality comes from priority, restraint, and verification, not decoration.
 
 ## Handoffs
 
-- Use `testing` for UI behavior tests and browser-verified flows.
+- Use `proof` for UI behavior tests and browser-verified flows.
 - Use `accessibility` for WCAG, ARIA, semantic HTML, keyboard, focus, contrast,
   screen-reader, and inclusive-design work.
 - Use `performance` for measured Core Web Vitals or rendering regressions.

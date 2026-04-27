@@ -1,9 +1,6 @@
 ---
 name: error-handling
-description: >-
-  Use for error design and propagation: exceptions vs Result/Either, domain
-  errors, wrapping context, retries, timeouts, circuit breakers, bulkheads,
-  panics, and user-facing errors.
+description: Use for error handling, error types, propagation, retries, user messages, and recovery.
 ---
 
 # Error Handling

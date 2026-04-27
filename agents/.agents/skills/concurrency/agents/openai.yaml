@@ -1,4 +1,0 @@
-interface:
-  display_name: "ABP: Concurrency"
-  short_description: "Design async and threaded code"
-  default_prompt: "Use $concurrency to review this async design for lifetimes and backpressure."

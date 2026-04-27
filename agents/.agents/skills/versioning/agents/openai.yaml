@@ -1,4 +1,0 @@
-interface:
-  display_name: "ABP: Versioning"
-  short_description: "Bump versions, write CHANGELOG, manage deprecations"
-  default_prompt: "Use $versioning to plan the version bump, CHANGELOG, and any deprecation policy for this change."

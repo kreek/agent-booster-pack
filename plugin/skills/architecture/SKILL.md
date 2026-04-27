@@ -1,9 +1,6 @@
 ---
 name: architecture
-description: >-
-  Use for module boundaries, ownership, dependency direction, domain locality,
-  DDD, hexagonal/clean architecture, vertical slices, contracts, coupling, and
-  package structure.
+description: Use for architecture decisions, module boundaries, coupling, layering, and system shape.
 ---
 
 # Architecture
