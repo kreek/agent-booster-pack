@@ -155,6 +155,8 @@ to the full checklist.
 
 ## Handoffs
 
+- Use `data-first` immediately after scaffolding when specs are clear
+  and the next step is feature/domain data modeling.
 - Use `testing` for the first real feature test.
 - Use `deployment` when CI becomes release/deploy automation.
 - Use `security` when adding dependency audits, secret scanning,

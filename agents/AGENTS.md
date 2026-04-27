@@ -84,9 +84,10 @@ the higher-priority concerns.
 Use these before choosing abstractions or control flow for non-trivial code.
 They shape the problem, not just the implementation.
 
-- `data-first`: use when designing state, data shapes, inputs, invariants, or
-  effects; when deciding what should be a value vs a mutable place; or when
-  reviewing code that mixes I/O with pure logic.
+- `data-first`: use for any data modeling work: domain data, fields, states,
+  inputs, invariants, allowed combinations, transitions, or effects. Use it
+  first after scaffolding when specs are clear and the next step is shaping
+  feature data.
 - `architecture`: use when deciding module boundaries, organizing code by
   domain/feature versus horizontal layers, applying DDD tactical patterns, or
   shaping bounded contexts.

@@ -176,8 +176,9 @@ apply:
 
 ### Foundational design
 
-- [`data-first`][skill-data-first]: data shapes, state transitions, invariants,
-  effects, and parse-at-boundary discipline.
+- [`data-first`][skill-data-first]: any data modeling work, especially domain
+  data, fields, states, allowed combinations, transitions, effects, and the
+  first design pass after scaffolding when specs are clear.
 - [`architecture`][skill-architecture]: module boundaries, domain/feature
   locality versus horizontal layers, and DDD tactical patterns.
 - [`proof`][skill-proof]: explicit proof obligations for behavior, contracts,

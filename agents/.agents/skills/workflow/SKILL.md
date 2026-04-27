@@ -84,7 +84,8 @@ description: >-
    `main` or `master`, create or request a short topic branch using the
    repo's naming convention. Do not wait until commit time to branch.
 4. Select the smallest useful skill set:
-   - shape data and invariants with `data-first`;
+   - model any feature/domain data and invariants with `data-first`
+     (first after scaffolding when specs are clear);
    - choose boundaries with `architecture`;
    - prove behavior with `testing` and `proof`;
    - investigate causes with `debugging`;

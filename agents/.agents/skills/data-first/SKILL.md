@@ -1,10 +1,12 @@
 ---
 name: data-first
-description:
-  Use when designing data shapes, state transitions, invariants, value objects,
-  or choosing records/classes/tuples/maps; when deciding what should be a value
-  vs a mutable place; when reasoning about side effects; or when reviewing code
-  that mixes I/O with pure logic. Also use when the user mentions immutability,
+description: >-
+  Use for any data modeling work: deciding domain data, fields, states,
+  statuses, allowed combinations, transitions, validation/parsing boundaries,
+  value objects, or records/classes/tuples/maps. Also use as the first design
+  step after scaffolding when the specs are clear, before feature code hardens
+  around weak data shapes. Use when reviewing unclear models, shared mutable
+  state, mixed I/O and business logic, or when the user mentions immutability,
   parse-don't-validate, illegal states, values vs places, functional core /
   imperative shell, effect coloring, or premature abstraction.
 ---
@@ -20,8 +22,11 @@ will construct it.
 
 ## When to Use
 
-- Designing domain data, state transitions, validation boundaries, value
-  objects, functional cores, or effect isolation.
+- Any data modeling: domain data, fields, states, statuses, allowed
+  combinations, state transitions, validation boundaries, value objects,
+  functional cores, or effect isolation.
+- Immediately after scaffolding when the specs are clear and the next
+  step is shaping feature/domain data before implementation.
 - Reviewing code where I/O, mutation, and business rules are tangled.
 
 ## When NOT to Use
