@@ -18,7 +18,7 @@ description: >-
 
 ## Iron Law
 
-`ORGANIZE BY WHAT CHANGES TOGETHER. NEVER SCATTER ONE BEHAVIOR ACROSS LAYERS BY DEFAULT.`
+`ORGANIZE BY WHAT CHANGES TOGETHER. BOUNDARIES EXPOSE CONTRACTS, NOT INTERNAL STEPS.`
 
 If a single feature requires editing four files in four directories every time
 it changes, the structure is fighting the work.

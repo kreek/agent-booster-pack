@@ -14,7 +14,7 @@ description: >-
 
 ## Iron Law
 
-`AGENTS PREPARE RELEASES; HUMANS MUTATE SHARED ENVIRONMENTS.`
+`REDUCE RELEASE TOIL; HUMANS MUTATE SHARED ENVIRONMENTS.`
 
 No agent may approve, promote, deploy, roll back, change production flags, or
 mutate shared environments. The skill exists to reduce release toil for the

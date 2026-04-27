@@ -13,7 +13,7 @@ description: >-
 
 ## Iron Law
 
-`EVERY ELEMENT EARNS ITS PLACE. DELETE UNTIL REMOVING A THING HURTS THE INTERFACE.`
+`START FROM THE USER TASK AND HIERARCHY; EVERY ELEMENT EARNS ITS PLACE.`
 
 Design quality comes from priority, restraint, and verification, not decoration.
 
