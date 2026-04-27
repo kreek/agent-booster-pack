@@ -49,28 +49,32 @@ description: >-
    Skills should make decisions reviewable, not hide them.
 3. Start from the software risk: correctness, data, security,
    operability, performance, accessibility, or change safety.
-4. Load only the skills that materially change the work. Do not turn
+4. Prefer simple over easy: name what is being tangled together
+   (data, effects, time, ownership, transport, persistence, UI state,
+   deployment, or compatibility) before choosing the implementation path.
+5. Load only the skills that materially change the work. Do not turn
    skill use into a checklist ritual.
-5. Before claiming done, use `proof` to connect the completion claim to
+6. Before claiming done, use `proof` to connect the completion claim to
    fresh evidence.
-6. Use the coding agent's own judgment and built-in tools for
+7. Use the coding agent's own judgment and built-in tools for
    delegation, parallelism, and sub-agents. ABP skills guide
    engineering quality and risk; they do not replace the runtime's
    native planning or task-dispatch behavior.
-7. Prefer direct, explicit, established code that follows the repo's
+8. Prefer direct, explicit, established code that follows the repo's
    house style. Avoid clever one-liners, speculative abstractions,
    unnecessary dependencies, and future-proofing.
-8. Keep implementation shape easy to reason about: small functions,
+9. Keep implementation shape easy to reason about: small functions,
    guard clauses, low nesting, one responsibility per function, and
    feature/domain locality before horizontal layering.
-9. Treat compatibility, rollout risk, and extra edge-case machinery as
+10. Treat compatibility, rollout risk, and extra edge-case machinery as
    product decisions. Ask before adding shims, retries, fallback paths,
    or backward-compatible behavior the user did not request.
 
 ## Workflow
 
 1. State the user-visible goal and the risk profile to the user in one
-   or two sentences, so they can correct course before any code lands.
+   or two sentences, including any obvious coupling or complexity risk,
+   so they can correct course before any code lands.
 2. Check acceptance clarity before editing. For feature work, bug
    fixes, PRD/spec work, refactors, or behavior-affecting changes,
    draft the acceptance criteria the work appears to require. If
@@ -90,7 +94,8 @@ description: >-
    - prove behavior with `testing` and `proof`;
    - investigate causes with `debugging`;
    - review diffs with `code-review`;
-   - gate safety with `security`, `database`, or `deployment`;
+   - gate safety with `security` or `database`, and reduce release
+     toil/risk with `deployment`;
    - improve operations with `observability`, `performance`,
      `caching`, `realtime`, `background-jobs`, or `concurrency`;
    - improve user and maintainer surfaces with `api`,
@@ -127,6 +132,7 @@ description: >-
 | "I'll just code it" | Name the risk profile and load the smallest useful skill set first. | None: even trivial edits enter; they may exit at step 1 with no skills. |
 | "I'll infer the product behavior" | Draft likely acceptance criteria, then ask the user to confirm or correct the ambiguous parts before editing. | Mechanical edits or explicit implementation-only tasks with no behavior choice. |
 | "Use every skill to be safe" | Pick the few skills that change the outcome. | Explicit audit/review request across the whole pack. |
+| "This helper/layer/global will make it easy" | Name what it couples and route to `data-first`, `architecture`, `refactoring`, or `concurrency` before adding it. | Thin adapter required by an existing framework or public API. |
 | "I'll branch at commit time" | Branch before editing so the diff, tests, and commits belong to one scoped change. | Read-only research or a task explicitly done outside Git. |
 | "I'll make it flexible for later" | Build the direct requested behavior; add flexibility only when current acceptance or risk needs it. | Public library/API design where extension points are part of the requirement. |
 | "I'll preserve old behavior just in case" | Ask whether backward compatibility is required before adding shims or dual paths. | Existing public contract or migration policy already requires compatibility. |
@@ -138,9 +144,22 @@ description: >-
 ## Handoffs
 
 - Use `proof` before claiming completion.
+- Use `data-first` when complexity starts with unclear data shape,
+  invalid states, parsing, mutation, or domain effects.
+- Use `architecture` when complexity starts with boundaries, ownership,
+  layering, locality, or decisions that change at different rates.
+- Use `refactoring` when the complexity already exists and must be
+  separated without changing behavior.
 - Use `code-review` for independent risk review of diffs, PRs, or
   agent-generated code.
 - Use `scaffolding` when a project lacks baseline tooling.
 - Use `documentation` when writing user-facing or maintainer-facing
   explanations of how ABP or a project should be used, including
   requirements and acceptance criteria.
+
+## References
+
+- "Simple Made Easy": <https://www.youtube.com/watch?v=SxdOUGdseq4>
+- "Out of the Tar Pit":
+  <https://curtclifton.net/papers/MoseleyMarks06a.pdf>
+- _Grokking Simplicity_: <https://www.manning.com/books/grokking-simplicity>

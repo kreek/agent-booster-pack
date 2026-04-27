@@ -77,7 +77,8 @@ the higher-priority concerns.
 - `workflow`: use as the ABP entrypoint when deciding which skills apply to a
   task, especially for broad feature work, bug fixes, reviews, refactors,
   scaffolding, performance work, security-sensitive changes, or production
-  readiness work.
+  readiness work. It carries the broad simplicity lens: identify what is being
+  coupled before picking narrower skills.
 
 ### Foundational Design
 
@@ -90,7 +91,8 @@ They shape the problem, not just the implementation.
   feature data.
 - `architecture`: use when deciding module boundaries, organizing code by
   domain/feature versus horizontal layers, applying DDD tactical patterns, or
-  shaping bounded contexts.
+  shaping bounded contexts; also use when concerns that change independently
+  are being coupled or split.
 
 ### Safety Gates
 
@@ -104,8 +106,11 @@ failures.
 - `database`: use when changing schemas, migrations, indexes, queries,
   transactions, transactional outbox, connection pools, deletion semantics, or
   production data access.
-- `deployment`: use when changing pipelines, release steps, rollout strategy,
-  rollback paths, feature flags, or deploy-time database coordination.
+- `deployment`: use when reducing release/deployment toil: CI/CD checks,
+  release checklists, rollout plans, rollback notes, feature-flag plans, or
+  deploy-time database coordination. It must not execute release actions or
+  mutate shared environments: deploys, rollbacks, promotions, approvals,
+  production config changes, or feature-flag flips.
 
 ### Correctness And Change Control
 
@@ -114,7 +119,9 @@ recoverable, and understandable.
 
 - `code-review`: use when reviewing local diffs, branches, GitHub PRs,
   agent-generated code, requested changes, or review comments; use it as the
-  generic code-review entrypoint before loading narrower domain lenses.
+  generic code-review entrypoint before loading narrower domain lenses. It
+  owns complexity findings in diffs: hidden mutable state, tangled effects,
+  unnecessary layers, scattered behavior, and broad abstractions.
 - `proof`: use when engineering claims need explicit proof obligations: data
   invariant, boundary, executable check, and evidence. Also use it before
   claiming work is complete, fixed, ready to commit, ready for a PR, or passing.
@@ -211,8 +218,9 @@ effects at the boundary.
 - Make illegal states unrepresentable: prefer sum types over stringly-typed
   flags.
 - Default to immutability; mutate only where the performance case is clear.
-- Use the `data-first` skill for the full canon on modelling state, values,
-  effects, and invariants.
+- Use `data-first` for data modeling, values, states, effects, and invariants;
+  use `architecture`, `refactoring`, and `code-review` for broader simplicity
+  questions about boundaries, tangled concerns, and review risk.
 
 ## Code Structure
 

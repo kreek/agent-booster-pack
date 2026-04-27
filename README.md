@@ -170,8 +170,9 @@ apply:
 
 ### Entry point
 
-- [`workflow`][skill-workflow]: choose the right ABP skills for the task, keep
-  the work scoped, and connect completion claims to proof.
+- [`workflow`][skill-workflow]: choose the right ABP skills for the task, name
+  what is being coupled, keep the work scoped, and connect completion claims to
+  proof.
 
 ### Foundational design
 
@@ -179,7 +180,8 @@ apply:
   data, fields, states, allowed combinations, transitions, effects, and the
   first design pass after scaffolding when specs are clear.
 - [`architecture`][skill-architecture]: module boundaries, domain/feature
-  locality versus horizontal layers, and DDD tactical patterns.
+  locality versus horizontal layers, DDD tactical patterns, and concerns that
+  change independently.
 - [`proof`][skill-proof]: explicit proof obligations for behavior, contracts,
   invariants, root causes, refactor safety, and completion claims.
 
@@ -204,8 +206,9 @@ apply:
 - [`database`][skill-database]: schemas, migrations, indexes, queries,
   transactions, transactional outbox, deletion semantics, and production data
   access.
-- [`deployment`][skill-deployment]: CI/CD, rollout strategy, rollback paths,
-  feature flags, and deploy-time coordination.
+- [`deployment`][skill-deployment]: release toil reduction, CI/CD checks,
+  rollout plans, rollback notes, feature-flag plans, and deploy-time
+  coordination; agents prepare, humans mutate shared environments.
 
 ### Production quality
 

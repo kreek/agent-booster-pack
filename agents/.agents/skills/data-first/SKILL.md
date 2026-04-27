@@ -54,9 +54,9 @@ will construct it.
 7. Effects (async, exceptions, I/O, ambient mutation, shared places) are
    contagious; keep them at the imperative shell so the functional core stays
    pure and composable.
-8. Hide volatile design decisions behind small surfaces, not flowchart steps.
-9. Discover abstractions; don't invent them. Three similar lines beats a
-   premature abstraction.
+8. Discover model abstractions from repeated domain meaning. Do not invent
+   generic wrappers, base classes, or helper layers before the data says they
+   pay for themselves.
 
 ## Workflow
 
@@ -92,7 +92,6 @@ the type forces care. Load the right reference when either appears in the diff.
       results.
 - [ ] Core tests run without mocks, monkey-patches, databases, network, or
       global time.
-- [ ] Module boundaries hide volatile decisions, not merely sequential steps.
 - [ ] Effects are explicit in function names, return types, or call sites and
       stay at the shell.
 - [ ] Every non-trivial invariant or transition has proof evidence, or the
@@ -103,7 +102,8 @@ the type forces care. Load the right reference when either appears in the diff.
 ## Handoffs
 
 - Use `architecture` when module boundaries, domain/feature locality, or
-  layering decisions are in scope.
+  layering decisions are in scope, especially when the question is what
+  changes together rather than what data shape is valid.
 - Use `proof` when data claims need explicit proof obligations.
 - Use `testing` to prove domain behavior through public boundaries.
 - Use `error-handling` for parse failures, Result/Either shape, and error
@@ -123,12 +123,6 @@ the type forces care. Load the right reference when either appears in the diff.
   <https://fsharpforfunandprofit.com/posts/designing-with-types-making-illegal-states-unrepresentable/>
 - "Railway Oriented Programming":
   <https://fsharpforfunandprofit.com/rop/>
-- "Boundaries":
-  <https://www.destroyallsoftware.com/talks/boundaries>
-- "Out of the Tar Pit":
-  <https://curtclifton.net/papers/MoseleyMarks06a.pdf>
 - "What Color is Your Function?":
   <https://journal.stuffwithstuff.com/2015/02/01/what-color-is-your-function/>
-- "Simple Made Easy": <https://www.youtube.com/watch?v=SxdOUGdseq4>
 - "The Value of Values": <https://www.infoq.com/presentations/Value-Values/>
-- _Grokking Simplicity_: <https://www.manning.com/books/grokking-simplicity>

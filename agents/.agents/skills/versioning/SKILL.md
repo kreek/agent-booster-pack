@@ -24,7 +24,8 @@ description:
 ## When NOT to Use
 
 - Internal refactors with no caller-visible impact; use `refactoring`.
-- Rollout, feature flags, release coordination; use `deployment`.
+- Rollout toil, feature-flag planning, release coordination, or
+  human-run deployment checklists; use `deployment`.
 - Commit-message format alone; use `commit`.
 
 ## Core Ideas
@@ -123,8 +124,9 @@ Follow Keep a Changelog: `Added`, `Changed`, `Deprecated`, `Removed`,
 
 - Use `commit` for Conventional Commits format and splitting the
   version-bump commit cleanly.
-- Use `deployment` once the tag is in place: rollout, feature flags,
-  and release coordination are deployment's territory.
+- Use `deployment` once the tag is in place to prepare rollout
+  checklists, feature-flag plans, rollback notes, and release
+  coordination; a human still mutates shared environments.
 - Use `documentation` for migration guides and reference docs that
   move on a major bump.
 - Use `api` for HTTP API design specifics (URL versioning vs header,

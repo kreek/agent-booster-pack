@@ -1,13 +1,14 @@
 ---
 name: architecture
-description:
+description: >-
   Use when deciding module boundaries, organizing code by domain/feature
   versus horizontal controller/service/repository/DTO layers, applying DDD
   tactical patterns (aggregates, repositories, factories, domain services),
-  shaping bounded contexts, or hiding volatile design decisions behind small
-  surfaces. Also use when the user mentions domain-driven design, DDD,
-  hexagonal architecture, ports and adapters, clean architecture, layered
-  architecture, vertical slices, or domain locality.
+  shaping bounded contexts, separating concerns that change for different
+  reasons, or hiding volatile design decisions behind small surfaces. Also use
+  when the user mentions domain-driven design, DDD, hexagonal architecture,
+  ports and adapters, clean architecture, layered architecture, vertical
+  slices, domain locality, coupling, or tangled modules.
 ---
 
 # Architecture
@@ -53,7 +54,10 @@ it changes, the structure is fighting the work.
    sequencing.
 5. Bounded contexts beat shared models. When two parts of the system mean
    subtly different things by the same word, give each context its own type.
-6. Add a layer only when it represents a real boundary (process, deploy,
+6. Separate things that change for different reasons. A simple boundary
+   reduces coordination between independent changes; an easy layer that every
+   feature must cross usually increases it.
+7. Add a layer only when it represents a real boundary (process, deploy,
    trust, persistence, transport) or removes proven duplication.
    Request middleware is a transport boundary; it should carry
    pipeline-wide concerns, not feature-specific business behavior.
@@ -80,6 +84,8 @@ it changes, the structure is fighting the work.
       decoration.
 - [ ] Module surfaces hide volatile decisions; callers depend on the
       contract, not the internal shape.
+- [ ] Boundaries separate concerns that change independently; they are
+      not merely steps in a flowchart.
 - [ ] Bounded contexts are explicit where the same word means different
       things in different parts of the system.
 - [ ] Architectural decisions whose rationale isn't recoverable from the
