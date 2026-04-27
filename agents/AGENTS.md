@@ -337,8 +337,9 @@ tests. Test-first is optional; test-at-all is not.
 
 - When explaining code or summarising work: give a concise high-level
   introduction first, then build knowledge from there.
-- For new code and edits: explain why the new approach is better than what it
-  replaced and what it enables.
+- At the end of a turn or agent loop for new code and edits, explain what was
+  built or changed, why the new approach is better than what it replaced, and/or
+  what it enables going forward.
 - If you cannot explain how the change improves the system and what it enables
   next, treat that as an AI-coding-agent smell: pause and consider a simpler or
   better-scoped solution.

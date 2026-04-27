@@ -113,7 +113,11 @@ description: >-
    needs them. Implement the happy path first, then the edge cases
    required by security, data safety, compatibility, or acceptance.
 7. Finish by naming what was proven, what remains unproven, and what a
-   human should review or decide.
+   human should review or decide. Also explain what was built or
+   changed, why it is better than what it replaced, and/or what it
+   enables going forward. If that explanation is weak, pause and
+   consider whether the change is too broad, too clever, or not yet
+   justified.
 
 ## Verification
 
@@ -127,6 +131,8 @@ description: >-
       unproven.
 - [ ] Human decisions and tradeoffs are surfaced instead of buried in
       implementation details.
+- [ ] The final response explains the change's value or future
+      enablement, not only the files touched.
 
 ## Tripwires
 
@@ -143,6 +149,7 @@ description: >-
 | "The agent will decide acceptance" | Ask or infer caller-visible acceptance criteria and prove them with `proof`. | User explicitly says they will verify acceptance themselves. |
 | "This is only docs" | Check whether the docs change behavior, install path, commands, or user expectations. | Pure typo with no procedural meaning. |
 | "Production hardening later" | Route deploy, observability, security, data, and rollback risks now if real users are in scope. | Prototype clearly marked as disposable. |
+| "I'll just list files changed" | Explain why the change improves the system or what it enables next, tied to the user's goal. | Mechanical typo or formatting-only edit. |
 
 ## Handoffs
 

@@ -8,6 +8,8 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- Workflow completion guidance now requires agents to explain what they changed,
+  why it improves on the previous state, and/or what it enables next.
 - Git workflow guidance now recommends a separate worktree when parallel
   work is expected, or when an in-flight branch has work that overlaps
   with or should stay separate from a new task.
