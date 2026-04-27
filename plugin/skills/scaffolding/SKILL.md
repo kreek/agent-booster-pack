@@ -1,17 +1,9 @@
 ---
 name: scaffolding
 description: >-
-  Use when bootstrapping a new project, scaffolding a new repo, initialising a
-  new application from scratch, or adding baseline tooling: package manager,
-  linter, formatter, type or syntax checker, test runner, code coverage: to a
-  project that lacks it. Also use when setting up initial CI, defining standard
-  package scripts (test, lint, format, typecheck), or picking defaults for a
-  greenfield project. Also use when the current directory is empty or lacks a
-  recognizable project manifest, test runner, package/build configuration, or
-  baseline quality commands. Covers TypeScript/Node, Python, Java, Kotlin,
-  Ruby, Go, Rust, C#, F#, Elixir, and Clojure (see `references/stacks/`
-  for the canonical list; Kotlin source is also selectable on Java
-  templates via the `language_flavor` axis).
+  Use to bootstrap projects or missing baseline tooling: package manager,
+  lint, format, type/syntax checks, tests, coverage, CI, package scripts, and
+  greenfield stack defaults.
 ---
 
 # Scaffolding

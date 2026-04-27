@@ -1,13 +1,9 @@
 ---
 name: deployment
 description: >-
-  Use when reducing release/deployment toil without mutating shared
-  environments: designing CI/CD checks, approval gates, rollback runbooks,
-  release checklists, feature-flag plans, progressive-delivery guardrails,
-  deploy notes, or migration rollout coordination. Also use when the user
-  mentions blue-green, canary, Flagger, Argo Rollouts, OpenFeature, or
-  error-budget-driven releases. Do not use to execute deployments, rollbacks,
-  promotions, approvals, production config changes, or feature-flag flips.
+  Use for deployment planning without mutating shared environments: CI/CD
+  checks, approvals, rollback runbooks, release checklists, feature flags,
+  canaries, and rollout coordination.
 ---
 
 # Deployment Toil Reduction

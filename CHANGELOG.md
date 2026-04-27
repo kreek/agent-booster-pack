@@ -8,11 +8,21 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- Versioning guidance now treats optional additive public-surface changes as
+  minor unless they force existing callers to change or accept new semantics.
 - Workflow completion guidance now requires agents to explain what they changed,
   why it improves on the previous state, and/or what it enables next.
 - Git workflow guidance now recommends a separate worktree when parallel
   work is expected, or when an in-flight branch has work that overlaps
   with or should stay separate from a new task.
+
+### Fixed
+
+- Skill frontmatter descriptions are now capped at 200 characters and shortened
+  across the pack so Codex has less pre-load context pressure.
+- `./setup.sh` now prunes legacy ABP-owned `~/.codex/skills/` links when the
+  ABP Codex plugin is installed and warns that Codex can still duplicate ABP
+  via direct `~/.agents/skills/` discovery if both install paths stay enabled.
 
 ## [2.2.0] (2026-04-26)
 

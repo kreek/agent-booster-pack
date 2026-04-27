@@ -1,14 +1,9 @@
 ---
 name: data-first
 description: >-
-  Use for any data modeling work: deciding domain data, fields, states,
-  statuses, allowed combinations, transitions, validation/parsing boundaries,
-  value objects, or records/classes/tuples/maps. Also use as the first design
-  step after scaffolding when the specs are clear, before feature code hardens
-  around weak data shapes. Use when reviewing unclear models, shared mutable
-  state, mixed I/O and business logic, or when the user mentions immutability,
-  parse-don't-validate, illegal states, values vs places, functional core /
-  imperative shell, effect coloring, or premature abstraction.
+  Use for data modeling and invariants: domain fields, states, transitions,
+  parsing boundaries, value objects, immutability, illegal states, shared
+  mutable state, and effect boundaries.
 ---
 
 # Data First

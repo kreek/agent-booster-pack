@@ -1,13 +1,9 @@
 ---
 name: error-handling
-description:
-  Use when designing error types, deciding between exceptions and Result/Either
-  types, keeping errors inside their domain boundary, wrapping errors with
-  context, deciding whether to retry or fail, setting remote-call timeouts or
-  retry budgets, choosing circuit breakers or bulkheads, writing user-facing
-  error messages, or handling panics vs recoverable errors. Also use when the
-  user asks why errors are getting swallowed, or how to propagate errors without
-  losing context.
+description: >-
+  Use for error design and propagation: exceptions vs Result/Either, domain
+  errors, wrapping context, retries, timeouts, circuit breakers, bulkheads,
+  panics, and user-facing errors.
 ---
 
 # Error Handling

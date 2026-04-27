@@ -1,6 +1,6 @@
 {
   "name": "abp",
-  "version": "3.4.0",
+  "version": "3.4.1",
   "description": "Agent Booster Pack (engineering-discipline skill pack): data, proof, tests, security, debugging, refactoring, and more.",
   "author": {
     "name": "Alastair Dawson"

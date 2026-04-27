@@ -1,12 +1,9 @@
 ---
 name: refactoring
 description: >-
-  Use when refactoring legacy code, doing a large rename or module extraction,
-  migrating from one framework to another, or when someone mentions strangler
-  fig, branch by abstraction, or is about to do a big-bang rewrite. Also use
-  when existing code needs concerns untangled without changing behavior:
-  business logic mixed with transport/persistence, hidden mutable state,
-  oversized services, broad helper layers, or unclear ownership.
+  Use for behavior-preserving code change: legacy refactors, large renames,
+  module extraction, migrations, strangler patterns, branch by abstraction,
+  and untangling mixed concerns.
 ---
 
 # Refactoring

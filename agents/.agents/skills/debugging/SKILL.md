@@ -1,10 +1,9 @@
 ---
 name: debugging
-description:
-  Use when investigating a bug, trying to reproduce a flaky issue, diagnosing a
-  heisenbug, structuring a post-mortem, or deciding whether to use a debugger vs
-  print-style instrumentation. Also use when the user is stuck on a problem and
-  needs a systematic approach rather than random changes.
+description: >-
+  Use to investigate bugs, reproduce flaky issues, find root causes, choose
+  debugging tools, structure post-mortems, or replace random changes with a
+  systematic approach.
 ---
 
 # Debugging

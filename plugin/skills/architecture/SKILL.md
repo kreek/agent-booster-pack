@@ -1,17 +1,9 @@
 ---
 name: architecture
 description: >-
-  Use when deciding module boundaries, organizing code by domain/feature
-  versus horizontal controller/service/repository/DTO layers, applying DDD
-  tactical patterns (aggregates, repositories, factories, domain services),
-  shaping bounded contexts, separating concerns that change for different
-  reasons, defining contracts between internal boundaries, mapping data flow
-  through a component, or hiding volatile design decisions behind small
-  surfaces. Also use when the user mentions domain-driven design, DDD,
-  hexagonal architecture, ports and adapters, clean architecture, layered
-  architecture, vertical slices, domain locality, coupling, tangled modules,
-  schema/model mapping, or data flow between a service, client, domain model,
-  output shape, and render step.
+  Use for module boundaries, ownership, dependency direction, domain locality,
+  DDD, hexagonal/clean architecture, vertical slices, contracts, coupling, and
+  package structure.
 ---
 
 # Architecture

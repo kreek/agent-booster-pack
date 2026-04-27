@@ -1,10 +1,9 @@
 ---
 name: performance
-description:
-  Use when optimising performance, diagnosing slowness, reading flame graphs,
-  deciding what to optimise, running micro-benchmarks, or when the user mentions
-  profilers (pprof, py-spy, perf, async-profiler), tail latency, p99, or
-  allocation rate.
+description: >-
+  Use for performance work: slowness, profiling, flame graphs,
+  micro-benchmarks, latency, p99, allocation rate, pprof, py-spy, perf, and
+  async-profiler.
 ---
 
 # Performance

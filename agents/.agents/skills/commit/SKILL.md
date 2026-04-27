@@ -1,10 +1,8 @@
 ---
 name: commit
-description:
-  Use when asked to organise a messy working tree into clean commits, review
-  uncommitted changes and propose a logical grouping, or create concise commit
-  messages for staged changes. Also use when the user says "commit this", "clean
-  up my commits", or asks to split changes into separate commits.
+description: >-
+  Use to organize a messy working tree into clean commits, group uncommitted
+  or staged changes, split commits, or write concise commit messages.
 ---
 
 # Commit

@@ -1,16 +1,9 @@
 ---
 name: api
-description:
-  Best practices for designing and implementing REST/HTTP APIs. Use whenever the
-  user is designing a new API, adding endpoints to an existing one, writing or
-  editing an OpenAPI spec, deciding on URI structure or HTTP verbs, shaping JSON
-  request/response bodies, handling error responses and status codes, choosing
-  an API versioning shape, adding pagination, choosing between API keys and
-  OAuth, designing webhooks, implementing idempotency keys, rate limiting,
-  designing SSE or subscription endpoints, or reviewing API code for
-  consistency. Trigger even when the user does not say "best practices",
-  especially when they mention RFC 9457, Problem Details, cursor pagination,
-  Sunset header, or Idempotency-Key.
+description: >-
+  Use for REST/HTTP API design and implementation: endpoints, OpenAPI,
+  methods, JSON shapes, errors, status codes, pagination, auth, webhooks,
+  idempotency, rate limits, and versioning.
 ---
 
 # API

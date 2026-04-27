@@ -1,11 +1,9 @@
 ---
 name: security
-description:
-  Use when touching authentication, authorisation, secrets management,
-  cryptography, input validation, or dependency updates; when reviewing code for
-  OWASP Top 10 risks; when discussing threat modelling, supply chain security,
-  zero trust, SBOMs, or signing artifacts. Also use before merging any PR that
-  changes auth flows, session handling, or trust boundaries.
+description: >-
+  Use for security-sensitive work: authn/authz, secrets, crypto, input
+  validation, dependency risk, OWASP, threat modeling, supply chain, SBOMs,
+  signing, sessions, and trust boundaries.
 ---
 
 # Security

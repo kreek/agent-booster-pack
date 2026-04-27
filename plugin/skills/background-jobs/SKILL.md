@@ -1,11 +1,8 @@
 ---
 name: background-jobs
-description:
-  Use when designing, implementing, or reviewing background jobs, async workers,
-  job queues, schedulers, delayed jobs, periodic jobs, task processors, or queue
-  consumers. Also use when the user mentions Sidekiq, Celery, BullMQ, RQ, Oban,
-  Faktory, Resque, delayed jobs, cron workers, retries, dead jobs, poison jobs,
-  job uniqueness, queue priority, worker concurrency, or job payload design.
+description: >-
+  Use for background jobs, async workers, queues, schedulers, retries, dead or
+  poison jobs, uniqueness, priorities, worker concurrency, and job payloads.
 ---
 
 # Background Jobs

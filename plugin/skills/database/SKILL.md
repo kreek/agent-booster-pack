@@ -1,11 +1,8 @@
 ---
 name: database
-description:
-  Use when designing database schemas, running migrations, optimising queries,
-  analysing EXPLAIN output, choosing indexes, deciding on transaction isolation
-  levels, designing transactional outbox/CDC handoff, or debating soft delete.
-  Also use when the user mentions N+1 queries, connection pooling, online DDL,
-  expand-contract, or locking concerns.
+description: >-
+  Use for database schemas, migrations, indexes, EXPLAIN, query optimization,
+  isolation, outbox/CDC, soft delete, N+1s, pooling, online DDL, and locks.
 ---
 
 # Database

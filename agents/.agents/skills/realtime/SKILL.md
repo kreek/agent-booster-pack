@@ -1,13 +1,9 @@
 ---
 name: realtime
-description: >
-  Use when designing, implementing, or reviewing realtime/evented systems:
-  events, streams, pub/sub, subscriptions, fanout, SSE, WebSockets, Kafka,
-  Kinesis, Redis Streams, consumer groups, offsets, lag, replay, retention,
-  partitions, shards, ordering, delivery guarantees, backpressure, poison
-  messages, DLQs, or event schemas. Trigger whenever the user mentions realtime,
-  live updates, event-driven architecture, streaming consumers, message brokers,
-  event buses, event sourcing, or "exactly once".
+description: >-
+  Use for realtime and evented systems: streams, pub/sub, SSE, WebSockets,
+  Kafka, Kinesis, Redis Streams, fanout, offsets, ordering, delivery,
+  backpressure, DLQs, and schemas.
 ---
 
 # Realtime

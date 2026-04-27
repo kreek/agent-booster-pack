@@ -1,11 +1,9 @@
 ---
 name: caching
-description:
-  Use when adding a cache, choosing between TTL-based and event-based
-  invalidation, picking cache-aside vs read-through vs write-through, preventing
-  cache stampede or thundering herd, designing layered caches, or debugging
-  stale data issues. Also use when the user mentions Redis, Memcached, CDN
-  caching, or asks why users are seeing outdated data.
+description: >-
+  Use for cache design or bugs: TTL vs event invalidation, cache-aside,
+  read/write-through, stampede prevention, layered caches, Redis, Memcached,
+  CDNs, and stale data.
 ---
 
 # Caching

@@ -1,13 +1,9 @@
 ---
 name: workflow
 description: >-
-  Master entrypoint for Agent Booster Pack. Load at the start of every
-  software engineering task: feature work, bug fixes, prototyping, working
-  from a PRD or tech spec, refactoring, code review, scaffolding, performance
-  work, security-sensitive changes, production readiness work, config or CI
-  edits, dependency bumps, infra-as-code changes, exploratory research, and
-  read-only code questions all qualify. Use this skill to identify the risk
-  profile and select the narrower ABP skills that should guide the work.
+  Master entrypoint for ABP. Use at the start of software engineering tasks to
+  identify risk, choose the smallest useful skill set, and prove the work
+  before claiming completion.
 ---
 
 # Workflow

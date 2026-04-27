@@ -50,6 +50,11 @@ Manual installs use the flat Agent Skills directory layout, so another skill
 pack with the same directory name can collide. `./setup.sh` asks before
 replacing real directories or third-party symlinks, but package/plugin
 installs are the safer distribution path when your agent supports them.
+When the ABP Codex plugin is installed, `./setup.sh` removes legacy ABP-owned
+links from `~/.codex/skills/` instead of recreating them. Codex can also
+discover `~/.agents/skills/` directly, so do not keep both the shared manual
+install and the Codex plugin enabled for Codex unless you want duplicate ABP
+skills.
 
 ### Claude Code Plugin Install
 
@@ -144,7 +149,9 @@ It also adds tool-specific links for agents that do not rely only on
 `~/.agents/skills/` when those tools are installed:
 
 - `~/.claude/skills/` points at `~/.agents/skills/`
-- `~/.codex/skills/<name>/` links each portable skill individually
+- `~/.codex/skills/<name>/` links each portable skill individually, unless the
+  ABP Codex plugin is installed; this legacy pruning does not disable Codex's
+  direct discovery of `~/.agents/skills/`
 - `~/.codeium/windsurf/skills/<name>/` links each skill when Windsurf is present
 
 Pi, Cursor, Gemini CLI, OpenCode, GitHub Copilot CLI, and other tools can
@@ -152,9 +159,10 @@ auto-discover `~/.agents/skills/`. End-user installs do not need Python or uv.
 
 ## Using ABP
 
-Skills are progressive context: agents see only `name` and `description` until a
-task triggers a skill, then load the matching `SKILL.md` for the sharper rule,
-workflow, and proof check needed for the work in front of them.
+Skills are progressive context: agents see only `name` and a concise
+`description` until a task triggers a skill, then load the matching `SKILL.md`
+for the sharper rule, workflow, and proof check needed for the work in front of
+them.
 
 You do not need to start from a special command. Make a natural-language
 request, and the agent can use [`workflow`][skill-workflow] plus the narrower
@@ -350,6 +358,8 @@ stow --target="$HOME" -D agents
 ```
 
 Manual cleanup may still be needed for tool-specific symlinks under
-`~/.claude/skills/`, `~/.codex/skills/`, and `~/.codeium/windsurf/skills/`. If you installed the Claude Code
-plugin, also run `/plugin uninstall abp@abp` and (optionally)
-`/plugin marketplace remove abp` from inside Claude Code.
+`~/.claude/skills/`, `~/.codex/skills/`, and `~/.codeium/windsurf/skills/`. If
+you installed the Claude Code plugin, also run `/plugin uninstall abp@abp` and
+(optionally) `/plugin marketplace remove abp` from inside Claude Code. If you
+installed the Codex plugin, remove it from Codex's plugin UI or marketplace
+commands as well.

@@ -1,11 +1,9 @@
 ---
 name: concurrency
-description:
-  Use when writing multi-threaded code, picking async/await vs threads vs
-  actors, choosing lock types, preventing deadlocks, designing message-passing
-  or channel-based systems, or handling backpressure. Also use when the user
-  mentions race conditions, goroutines, virtual threads, the actor model, or
-  asks why their async code is blocking.
+description: >-
+  Use for concurrency design and bugs: async, threads, actors, locks,
+  deadlocks, races, message passing, channels, goroutines, virtual threads,
+  and backpressure.
 ---
 
 # Concurrency

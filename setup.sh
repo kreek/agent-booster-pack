@@ -163,6 +163,8 @@ ABP setup will:
   - run GNU Stow from this checkout to link shared skills into ~/.agents/skills
   - link ~/.claude/skills to ~/.agents/skills when safe
   - link individual ABP skills into ~/.codex/skills when Codex is installed
+    without the ABP Codex plugin, or prune those legacy links when the plugin
+    is present
   - link individual ABP skills into ~/.codeium/windsurf/skills when Windsurf is installed
   - prune stale ABP-owned skill links and legacy command links
   - ask before replacing conflicting symlinks or moving real directories
@@ -243,8 +245,53 @@ link_skills_per_agent() {
 	done
 }
 
+remove_abp_skill_links() {
+	local label="$1"
+	local target_dir="$2"
+	if [ ! -d "$target_dir" ]; then
+		return
+	fi
+
+	for skill_dir in "$AGENTS_SKILLS"/*/; do
+		local skill_name
+		local target
+		local current_target
+		skill_name=$(basename "$skill_dir")
+		target="$target_dir/$skill_name"
+
+		if [ ! -L "$target" ]; then
+			continue
+		fi
+
+		current_target=$(readlink "$target")
+		if points_into_agents_skills "$current_target"; then
+			rm "$target"
+			echo "$label: removed manual skill link $skill_name (plugin installed)"
+		fi
+	done
+}
+
+codex_abp_plugin_installed() {
+	local manifest
+	for manifest in "$HOME"/.codex/plugins/cache/abp/*/*/.codex-plugin/plugin.json \
+		"$HOME"/.codex/plugins/cache/abp/*/.codex-plugin/plugin.json; do
+		[ -f "$manifest" ] && return 0
+	done
+	return 1
+}
+
 # Codex CLI: ~/.codex/skills/
-link_skills_per_agent "Codex" "$HOME/.codex/skills"
+if codex_abp_plugin_installed; then
+	echo "Codex: ABP plugin installed; pruning manual ABP skill links"
+	remove_abp_skill_links "Codex" "$HOME/.codex/skills"
+	cat <<EOF
+Codex: ABP is also linked into ~/.agents/skills by this manual install.
+Codex can discover ~/.agents/skills directly, so keep either the manual install
+or the Codex plugin enabled, not both, to avoid duplicate ABP skills.
+EOF
+else
+	link_skills_per_agent "Codex" "$HOME/.codex/skills"
+fi
 
 # Windsurf (Codeium Cascade): ~/.codeium/windsurf/skills/
 link_skills_per_agent "Windsurf" "$HOME/.codeium/windsurf/skills"

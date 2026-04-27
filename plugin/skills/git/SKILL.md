@@ -1,10 +1,9 @@
 ---
 name: git
 description: >-
-  Use when doing non-trivial git work: interactive rebase, conflict resolution,
-  bisecting to find regressions, squashing or splitting commits, recovering from
-  a bad merge or force push, cleaning up branch history, or writing PR
-  descriptions. Also use when the user asks how to undo something in git.
+  Use for non-trivial git work: rebase, conflicts, bisect, squash/split,
+  recovery from bad merges or force pushes, branch cleanup, undoing changes,
+  and PR descriptions.
 ---
 
 # Git

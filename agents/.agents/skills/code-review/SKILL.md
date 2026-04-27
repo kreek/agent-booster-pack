@@ -1,13 +1,9 @@
 ---
 name: code-review
 description: >-
-  Use when performing code review of local diffs, staged changes, branches,
-  GitHub pull requests, or agent-generated code; when asked to review a PR,
-  inspect requested changes, fetch review comments, address review feedback on
-  the user's own PR, or decide whether code is ready to merge. Also use before
-  merging broad changes when no narrower domain skill fully covers the review,
-  or when a diff may add complexity through hidden mutable state, tangled
-  effects, unnecessary layers, scattered behavior, or broad abstractions.
+  Use to review local diffs, staged changes, branches, PRs, review comments,
+  or agent-generated code for correctness, regressions, missing proof, and
+  merge readiness.
 ---
 
 # Code Review

@@ -20,6 +20,7 @@ REQUIRED_SECTIONS = (
     "When NOT to Use",
     "Verification",
 )
+MAX_DESCRIPTION_LENGTH = 200
 
 NAME_RE = re.compile(r"^name:\s+[a-z][a-z0-9-]*\s*$", re.MULTILINE)
 DESCRIPTION_RE = re.compile(r"^description:", re.MULTILINE)
@@ -63,6 +64,32 @@ def body_without_reference_sections(body: str) -> str:
     return "\n".join(kept)
 
 
+def frontmatter_description(head: str) -> str | None:
+    """Return the normalized frontmatter description when present."""
+    lines = head.splitlines()
+    description: list[str] = []
+    in_description = False
+
+    for line in lines:
+        if line.startswith("description:"):
+            in_description = True
+            value = line.split(":", 1)[1].strip()
+            if value and value not in {">", ">-", "|", "|-"}:
+                description.append(value)
+            continue
+
+        if in_description:
+            if line.startswith("  "):
+                description.append(line.strip())
+                continue
+            break
+
+    if not in_description:
+        return None
+
+    return " ".join(description)
+
+
 def validate_skill_file(path: Path) -> SkillFinding | None:
     """Validate one SKILL.md file and return findings when it fails."""
     body = path.read_text(encoding="utf-8")
@@ -71,8 +98,14 @@ def validate_skill_file(path: Path) -> SkillFinding | None:
 
     if not NAME_RE.search(head):
         problems.append("frontmatter missing name or not kebab-case")
-    if not DESCRIPTION_RE.search(head):
+    description = frontmatter_description(head)
+    if description is None:
         problems.append("frontmatter missing description")
+    elif len(description) > MAX_DESCRIPTION_LENGTH:
+        problems.append(
+            "frontmatter description too long "
+            f"({len(description)} > {MAX_DESCRIPTION_LENGTH} characters)"
+        )
 
     for heading in REQUIRED_SECTIONS:
         if not section_re(heading).search(body):
@@ -387,7 +420,11 @@ description: Ok
             tmp / "bad" / "SKILL.md",
             """---
 name: bad
-description: Not good
+description: >-
+  This description is intentionally much too long for the skill routing surface
+  because Codex and other agents load all skill descriptions before deciding
+  which full skill body to request, so verbose trigger prose creates avoidable
+  context pressure.
 ---
 
 # Bad
@@ -417,6 +454,7 @@ Stuff.
             "bad/SKILL.md",
             "When to Use",
             "Verification",
+            "description too long",
             "per <expert>",
             "Common Rationalizations",
             "Red Flags",

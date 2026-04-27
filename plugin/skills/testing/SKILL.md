@@ -1,16 +1,9 @@
 ---
 name: testing
 description: >-
-  Best practices for writing behavior-focused tests from the caller's point of
-  view. Use when writing tests, reviewing tests, adding coverage for a feature,
-  deciding what to test or skip, naming tests, picking what to mock, or fixing
-  flaky or over-specified test suites. Language and framework agnostic: any
-  spec-style framework with describe/context/it blocks (RSpec, Vitest, Jest,
-  Mocha, Pest, pytest-describe, etc.). Focuses on test boundaries, assertions,
-  mocks, and flake resistance, not framework internals. Trigger even when the
-  user does not say "behavior-driven" or "BDD", especially for prompts about
-  adding tests, choosing what to test, fixing flaky tests, choosing mocks,
-  writing specs, or deciding whether something is worth testing.
+  Use for behavior-focused tests: adding or reviewing coverage, choosing test
+  boundaries, assertions, names, mocks, spec style, flake fixes, and avoiding
+  over-specified tests.
 ---
 
 # Testing

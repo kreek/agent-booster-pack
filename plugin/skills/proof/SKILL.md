@@ -1,13 +1,9 @@
 ---
 name: proof
-description:
-  Use when turning engineering claims into explicit proof obligations,
-  especially for data invariants, behavior changes, API contracts, refactors,
-  bug fixes, completion checks, or any work where the agent must show evidence
-  instead of claiming correctness. Also use before saying work is done, fixed,
-  ready to commit, ready for a PR, or passing; when the user mentions proofs,
-  evidence, invariants, boundary tests, acceptance, or claims that need to be
-  demonstrated.
+description: >-
+  Use to turn engineering claims into proof obligations for invariants,
+  behavior changes, API contracts, bug fixes, refactors, acceptance, and
+  completion claims.
 ---
 
 # Proof

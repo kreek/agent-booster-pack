@@ -1,12 +1,9 @@
 ---
 name: observability
-description:
-  Use when adding logging, metrics, traces, health checks, dashboards, or
-  alerts; when discussing dependency health, SLOs, SLIs, error budgets, RED,
-  USE, or Four Golden Signals; when instrumenting with OpenTelemetry; when
-  diagnosing production incidents; or when the user mentions structured logging,
-  semantic logging, log levels, cardinality, exemplars, or multi-window
-  burn-rate alerting.
+description: >-
+  Use for observability: logs, metrics, traces, health checks, dashboards,
+  alerts, SLOs/SLIs, error budgets, OpenTelemetry, incidents, cardinality, and
+  burn-rate alerts.
 ---
 
 # Observability

@@ -1,12 +1,9 @@
 ---
 name: versioning
-description:
-  Use when bumping a version number in pyproject.toml, package.json,
-  Cargo.toml, gemspec, build.gradle, *.csproj, marketplace.json, or any
-  release manifest; when adding or editing a CHANGELOG / release notes;
-  when deprecating or removing a public API; when tagging a release;
-  when reviewing a PR that changes any of the above; or when deciding
-  whether a change is breaking, additive, or a fix.
+description: >-
+  Use for version and release-surface changes: manifests, CHANGELOG entries,
+  release notes, tags, deprecations, removals, and deciding major/minor/patch
+  impact.
 ---
 
 # Versioning
@@ -39,22 +36,29 @@ description:
 2. Pre-1.0 is *not* a license to break callers without warning. Treat
    `0.X.0` as the project's working "major" and document the policy
    in `README.md`.
-3. Every deprecation ships in a minor with a removal version named
+3. Additive and optional public-surface changes are usually minor, not
+   major, when existing callers can keep using the old contract without
+   changing code or receiving different semantics. Follow the same
+   compatibility lens as `api`: additions that force clients to send,
+   handle, or interpret new data are breaking even if they look
+   additive.
+4. Every deprecation ships in a minor with a removal version named
    in the warning, then removes in a later major. One full minor
    cycle is the minimum gap.
-4. CHANGELOG entries describe what users will *notice when they
+5. CHANGELOG entries describe what users will *notice when they
    upgrade*, not what the code changed. If an entry could be read off
    `git log --oneline` and mean the same thing, it's in the wrong
    document.
-5. Manifest version, CHANGELOG release header, and tag must agree.
-   When ambiguous, default to the higher bump.
+6. Manifest version, CHANGELOG release header, and tag must agree.
+   When a compatibility question remains after checking caller impact,
+   default to the higher plausible bump.
 
 ## Classification
 
 | Bump | Trigger |
 |---|---|
-| major | Removing or renaming a public symbol / endpoint / flag / config key. Changing a return type, error type, status code, or required argument. Tightening a type or constraint that previously accepted more inputs. Making an optional field required. Reversing a documented invariant. |
-| minor | Adding a new symbol, endpoint, flag, optional argument, or optional field. Loosening a constraint. Adding a new error variant in a position callers don't pattern-match exhaustively. Marking something `@deprecated`. |
+| major | Removing or renaming a public symbol / endpoint / flag / config key. Changing a return type, error type, status code, or required argument. Tightening a type or constraint that previously accepted more inputs. Making an optional field required. Reversing a documented invariant. Any change that requires existing callers to change code or accept different semantics. |
+| minor | Adding a new symbol, endpoint, flag, optional argument, or optional field that existing callers can ignore. Loosening a constraint. Adding a new error variant in a position callers don't pattern-match exhaustively. Marking something `@deprecated`. |
 | patch | Bug fixes that restore documented behavior. Performance improvements. Internal refactors with no caller-visible effect. Docs, build, dependency bumps with no public-surface impact. |
 
 Conventional Commits map: `fix:` → patch, `feat:` → minor, `feat!:` /

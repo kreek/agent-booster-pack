@@ -36,8 +36,9 @@ Most edits are to skill bodies, the top-level `AGENTS.md` index, or the
 - **Install layout**: `agents/` is a GNU Stow package. `./setup.sh` is the
   one-click local installer: it explains the actions, asks for approval, runs
   Stow to link the shared skills under `~/.agents/`, fans those out to
-  per-tool locations, and re-runs the plugin-sync. System `AGENTS.md` /
-  `CLAUDE.md` files are not part of ABP installation.
+  per-tool locations, prunes manual Codex links when the ABP Codex plugin is
+  installed, and re-runs the plugin-sync. System `AGENTS.md` / `CLAUDE.md`
+  files are not part of ABP installation.
 
 When you add, rename, or delete a skill, the canonical file under
 `agents/.agents/skills/` is the only place to write. Everything else is
@@ -81,7 +82,9 @@ changes.
 
 Every `SKILL.md` must have:
 
-- Frontmatter with kebab-case `name:` and a trigger-focused `description:`.
+- Frontmatter with kebab-case `name:` and a trigger-focused `description:`
+  no longer than 200 characters, because agents may load every description
+  before selecting a skill body.
 - Required sections: `## When to Use`, `## When NOT to Use`,
   `## Verification`.
 - Optional section: `## Tripwires` when a skill has known agent failure modes.
@@ -132,9 +135,9 @@ Adding or renaming a skill needs four updates, in order:
    `[skill-<name>]:` reference link at the bottom.
 4. `workflow`: update the meta-skill only when the new or renamed skill changes
    the broad ABP routing workflow.
-5. `./setup.sh` to regenerate `plugin/skills/<name>` and refresh per-agent
-   manual-install links. The validator's drift check fails CI/local runs if
-   step 5 is skipped.
+5. `./setup.sh` to regenerate `plugin/skills/<name>` and refresh or prune
+   per-agent manual-install links. The validator's drift check fails CI/local
+   runs if step 5 is skipped.
 
 Neighbouring skills may need their `Handoffs` updated when routing
 changes. Do not duplicate skill prose between files.

@@ -1,13 +1,9 @@
 ---
 name: accessibility
-description:
-  Use when designing, implementing, reviewing, or testing accessibility for web,
-  frontend, document, or app interfaces. Also use when the work touches WCAG
-  2.2, ARIA, semantic HTML, keyboard navigation, focus management, screen
-  readers, contrast, reduced motion, forced colors, captions, labels, forms,
-  modals, menus, tabs, custom controls, or inclusive design. Trigger for any
-  user-facing UI change where accessibility can be affected, even when the user
-  does not mention accessibility.
+description: >-
+  Use for accessibility in UI, web, app, or document work: WCAG, ARIA,
+  semantics, keyboard flow, focus, contrast, motion, labels, forms, and custom
+  controls.
 ---
 
 # Accessibility

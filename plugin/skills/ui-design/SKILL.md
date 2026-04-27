@@ -1,12 +1,9 @@
 ---
 name: ui-design
 description: >-
-  Use when building or materially changing frontend interfaces: pages,
-  components, layouts, typography, colour systems, motion, or responsive
-  behavior. Also use when picking a frontend framework, designing a component
-  API, writing CSS from scratch, setting up design tokens, configuring dark
-  mode, or shaping component states. Also use when the user mentions OKLCH,
-  container queries, View Transitions, shadcn/ui, Tailwind, or design tokens.
+  Use for frontend UI work: pages, components, layout, typography, color,
+  motion, responsive behavior, component APIs, CSS, design tokens, dark mode,
+  Tailwind, and shadcn/ui.
 ---
 
 # UI Design

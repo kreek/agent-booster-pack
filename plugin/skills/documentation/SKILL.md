@@ -1,12 +1,9 @@
 ---
 name: documentation
 description: >-
-  Use when writing or reviewing documentation: READMEs, architecture notes,
-  ADRs, runbooks, API docs, module-level docs, tutorials, how-to guides,
-  requirements, acceptance criteria, user stories, reference material, or code
-  comments. Also use when the user mentions ADRs, runbooks, doc rot, MkDocs,
-  Material for MkDocs, Diátaxis, progressive disclosure, or whether to write
-  prose or rely on types/tests.
+  Use to write or review docs: READMEs, ADRs, runbooks, API docs, tutorials,
+  requirements, acceptance criteria, user stories, reference material, and
+  code comments.
 ---
 
 # Documentation
