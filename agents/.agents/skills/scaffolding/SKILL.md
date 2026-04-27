@@ -57,28 +57,18 @@ Before creating files or running generator commands:
 
 ## Project-Specific Defaults
 
-These are non-default defaults the pack prescribes:
+For greenfield app scaffolding, match the request to a stack preset
+in `references/stacks/index.yaml`. Each preset names required and optional
+axes (backend, frontend, database, background jobs) and the tooling
+that goes with the stack. Confirm the preset and the required
+choices with the user before creating files.
 
-- Fresh Node: pnpm + `pnpm-lock.yaml` (not npm + `package-lock.json`,
-  even with zero dependencies).
-- Fresh Python: uv (not raw pip/venv, even when uv isn't
-  preinstalled).
-- Fresh TypeScript web app (no explicit hosting constraint):
-  Cloudflare Workers + Hono. Confirm before locking it in. Use Render,
-  Fly.io, AWS, GCP, Azure, containers, or a VPS only when the user
-  requests them or the app needs long-running processes, unsupported
-  native deps, special networking, region/data residency, conventional
-  Node server semantics, or managed services outside Cloudflare.
-- Fresh frontend, small/demo/prototype: Alpine.js. Larger app:
-  Svelte/SvelteKit. Confirm framework choice with the user before
-  scaffolding. If the user asks for React or Next.js, use it but
-  briefly explain why Alpine or Svelte/SvelteKit would normally be the
-  lower-complexity default. Don't treat server-rendered HTML with
-  inline JavaScript inside the backend entrypoint as the default
-  "minimal" frontend.
-- Large project documentation: Material for MkDocs by default,
-  regardless of app language or framework, unless the repo/user/
-  publishing constraint chooses another.
+For documentation tooling on a large project, default to Material
+for MkDocs unless the repo/user/publishing constraint chooses
+another, regardless of app language or framework.
+
+Package-manager defaults (pnpm, uv, bundler, cargo, etc.) come from
+`AGENTS.md` and apply even with zero dependencies.
 
 ## Core Ideas
 
@@ -111,11 +101,10 @@ These are non-default defaults the pack prescribes:
    state the package manager before running any scaffold or install
    command. Read the relevant ecosystem reference.
 2. For web work, state whether this is a prototype, scaffold, or
-   production-bound app. For frontend without an existing framework,
-   propose Alpine.js (small/demo) or Svelte/SvelteKit (larger), explain
-   in one sentence, confirm before creating files. For TypeScript web
-   apps without an existing runtime/host, propose Cloudflare Workers +
-   Hono, confirm before creating deploy/runtime files.
+   production-bound app. Match the request to a stack preset in
+   `references/stacks/index.yaml`, name the preset and any required choices
+   (database, hosting adapter, etc.), and confirm with the user
+   before creating runtime/deploy files.
 3. Choose minimal standard tooling for install, format, lint,
    typecheck, test, and coverage. Add scripts/commands with consistent
    names. Add one smoke test and ensure it can fail and pass.
@@ -131,18 +120,16 @@ These are non-default defaults the pack prescribes:
       requested.
 - [ ] Standard commands exist and pass: `test`, `lint`,
       `format --check`, `typecheck`, `coverage` where applicable.
-- [ ] Frontend framework choice was confirmed when no existing
-      framework or explicit user request was present; small
-      interactive frontend apps use Alpine.js rather than ad hoc
-      inline JavaScript in the backend entrypoint.
 - [ ] Web work was classified as prototype, scaffold, or
       production-bound app before files were created. Prototype mode
       was named explicitly and included an upgrade path.
-- [ ] TypeScript web runtime/host choice was confirmed when no
-      existing deployment constraint or explicit user request was
-      present.
-- [ ] Fresh web app scaffolds use a mature framework with conventions,
-      or document the explicit exception.
+- [ ] A stack preset from `references/stacks/index.yaml` was matched and
+      named, and its required choices were confirmed with the user
+      before runtime/deploy files were created. Where no preset
+      fit, the explicit fallback was named.
+- [ ] Fresh web app scaffolds use a mature framework with
+      conventions, not a hand-rolled HTTP server or inline JS in a
+      backend entrypoint.
 - [ ] Relevant ecosystem reference was read, or the ecosystem was not
       covered and current official/project sources were searched.
 - [ ] One smoke test proves the test runner and build/import path.
@@ -168,6 +155,10 @@ to the full checklist.
 
 ## References
 
+- `references/stacks/index.yaml`: named stack presets for common app
+  archetypes (Edge API, Fullstack, Python Web, Static Site, Small
+  Frontend) with required and optional configuration axes
+  (backend, frontend, database, background jobs).
 - `references/node-typescript.md`: pnpm, Hono, Cloudflare Workers,
   SvelteKit.
 - `references/frontend.md`: Alpine.js + HTMX, SvelteKit, Astro,
