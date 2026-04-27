@@ -21,20 +21,6 @@ In practice, ABP guides agents to:
 * Fix and update code by addressing the root cause, not just the symptoms.
 * Organize your work into clear, reviewable changes that people can trust and maintain.
 
-## What Makes ABP Unique
-
-ABP is designed to manage risk in software projects and guide agents to write production grade code. ABP treats the agent as a coding partner, not a replacement for people. Humans bring judgment, review, decision-making, and context to the process, so these skills guide agents to make clear, reviewable changes and provide evidence, instead of trying to take you out of the loop.
-
-ABP assumes coding agents already know the basics of coding, planning, and using tools, and that syntax is handled by linters, formatters, type checkers, and test suites. The skills do not cover those areas. Instead, ABP works by adding focused skills that provide extra engineering support when needed, without changing agent internals.
-
-ABP requires proof, not TDD. During exploratory iteration, agents can discover
-the shape first, then attach tests, contracts, command output, or other
-evidence before claiming the work is done.
-
-For greenfield scaffolding, ABP uses editable [Backstage Software
-Templates][backstage-templates] YAML files so teams can tune stack presets to
-their preferences.
-
 ## Installation
 
 Pick one installation method for each agent. Both the manual and plugin options
@@ -67,17 +53,6 @@ skills as `/abp:<skill>`.
 /plugin install abp@abp
 ```
 
-For local development against a working tree, add the repo directory as a local
-plugin source:
-
-```sh
-/plugin install /path/to/agent-booster-pack/plugin
-```
-
-The plugin uses `plugin/.claude-plugin/plugin.json` and loads the generated
-skill mirror under `plugin/skills/`. Edit canonical skills under
-`agents/.agents/skills/`, then run `./setup.sh` to refresh the mirror.
-
 ### Codex Plugin Install
 
 Use this when you want Codex to install ABP from this repo's
@@ -89,17 +64,6 @@ codex plugin marketplace add kreek/agent-booster-pack
 
 Then open Codex's plugin directory and install **Agent Booster Pack** from the
 ABP marketplace.
-
-For local development against a working tree, add the repo directory as a local
-marketplace source:
-
-```sh
-codex plugin marketplace add /path/to/agent-booster-pack
-```
-
-The plugin uses `plugin/.codex-plugin/plugin.json` and loads the generated
-skill mirror under `plugin/skills/`. Edit canonical skills under
-`agents/.agents/skills/`, then run `./setup.sh` to refresh the mirror.
 
 ### Manual Skills Installation
 
@@ -156,6 +120,20 @@ It also adds tool-specific links for agents that do not rely only on
 
 Pi, Cursor, Gemini CLI, OpenCode, GitHub Copilot CLI, and other tools can
 auto-discover `~/.agents/skills/`. End-user installs do not need Python or uv.
+
+## What Makes ABP Unique
+
+ABP is designed to manage risk in software projects and guide agents to write production grade code. ABP treats the agent as a coding partner, not a replacement for people. Humans bring judgment, review, decision-making, and context to the process, so these skills guide agents to make clear, reviewable changes and provide evidence, instead of trying to take you out of the loop.
+
+ABP assumes coding agents already know the basics of coding, planning, and using tools, and that syntax is handled by linters, formatters, type checkers, and test suites. The skills do not cover those areas. Instead, ABP works by adding focused skills that provide extra engineering support when needed, without changing agent internals.
+
+ABP requires proof, not TDD. During exploratory iteration, agents can discover
+the shape first, then attach tests, contracts, command output, or other
+evidence before claiming the work is done.
+
+For greenfield scaffolding, ABP uses editable [Backstage Software
+Templates][backstage-templates] YAML files so teams can tune stack presets to
+their preferences.
 
 ## Using ABP
 
@@ -350,6 +328,28 @@ The hook blocks commits on `main`/`master`, checks the staged diff, and runs the
 repo validation commands relevant to staged files. It is a deterministic safety
 net for any coding agent that uses Git; it does not replace the `proof` skill's
 requirement to show acceptance evidence before claiming work is done.
+
+### Local Plugin Development
+
+Use these only when testing a local checkout as a plugin source. General users
+should use the marketplace plugin install commands above.
+
+For Claude Code:
+
+```sh
+/plugin install /path/to/agent-booster-pack/plugin
+```
+
+For Codex:
+
+```sh
+codex plugin marketplace add /path/to/agent-booster-pack
+```
+
+The Claude Code plugin uses `plugin/.claude-plugin/plugin.json`; the Codex
+plugin uses `plugin/.codex-plugin/plugin.json`. Both load the generated skill
+mirror under `plugin/skills/`. Edit canonical skills under
+`agents/.agents/skills/`, then run `./setup.sh` to refresh the mirror.
 
 ## Remove
 
