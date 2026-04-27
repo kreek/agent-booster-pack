@@ -34,9 +34,10 @@ will construct it.
 ## Core Ideas
 
 1. Decide data shapes and invariants before writing transformations.
-2. Distinguish identity, state, value, and time. Prefer immutable values and
-   plain data shapes (records, sums, maps) over classes that bundle behaviour
-   with mutable state. A class wrapping pure functions is a module.
+2. Distinguish identity, state, value, and time. Prefer immutable values,
+   composition, and plain data shapes (records, sums, maps) over inheritance
+   hierarchies or classes that bundle behaviour with mutable state. A class
+   wrapping pure functions is a module.
 3. Split code into data, calculations, and actions; maximize data/calculations
    and minimize actions.
 4. Parse at boundaries into trusted internal shapes; do not pass raw external

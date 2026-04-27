@@ -202,6 +202,9 @@ effects at the boundary.
 
 - Separate data from logic from I/O. Pure functions must not produce side
   effects.
+- Prefer composition over inheritance. Build behavior from small data
+  transformations and explicit interfaces; reach for inheritance only when an
+  existing framework or interop boundary requires it.
 - Parse inputs into typed structures at trust boundaries; reject invalid data
   early.
 - Make illegal states unrepresentable: prefer sum types over stringly-typed
@@ -213,7 +216,7 @@ effects at the boundary.
 ## Code Structure
 
 - Unix philosophy: each function does one thing well. Prefer composition over
-  monoliths.
+  inheritance, ceremony, and monoliths.
 - Keep functions short (~25–30 lines). If you need to scroll, it's probably two
   functions.
 - Keep nesting under three levels. Extract or early-return before a fourth.
