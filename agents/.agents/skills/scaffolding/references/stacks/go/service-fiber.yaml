@@ -18,6 +18,13 @@ metadata:
     - go
     - service
     - fiber
+  links:
+    - url: https://docs.gofiber.io/
+      title: Fiber
+    - url: https://gorm.io/
+      title: GORM
+    - url: https://go.dev/doc/modules/
+      title: Go modules
 spec:
   owner: abp
   type: service

@@ -13,6 +13,15 @@ metadata:
     - web
     - phoenix
     - liveview
+  links:
+    - url: https://hexdocs.pm/phoenix/
+      title: Phoenix
+    - url: https://hexdocs.pm/phoenix_live_view/
+      title: Phoenix LiveView
+    - url: https://hexdocs.pm/bandit/
+      title: Bandit
+    - url: https://hexdocs.pm/oban/
+      title: Oban
 spec:
   owner: abp
   type: website

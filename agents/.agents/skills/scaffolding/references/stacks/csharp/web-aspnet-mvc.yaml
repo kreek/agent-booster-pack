@@ -14,6 +14,15 @@ metadata:
     - aspnet
     - mvc
     - blazor
+  links:
+    - url: https://learn.microsoft.com/en-us/aspnet/core/
+      title: ASP.NET Core
+    - url: https://learn.microsoft.com/en-us/aspnet/core/blazor/
+      title: Blazor
+    - url: https://learn.microsoft.com/en-us/aspnet/core/blazor/components/render-modes
+      title: Blazor render modes (incl. Static SSR)
+    - url: https://learn.microsoft.com/en-us/nuget/consume-packages/central-package-management
+      title: Central Package Management
 spec:
   owner: abp
   type: website

@@ -11,6 +11,13 @@ metadata:
     - ruby
     - lightweight-api
     - sinatra
+  links:
+    - url: https://sinatrarb.com/
+      title: Sinatra
+    - url: https://bundler.io/
+      title: Bundler
+    - url: https://rspec.info/
+      title: RSpec
 spec:
   owner: abp
   type: service

@@ -11,6 +11,15 @@ metadata:
     - python
     - lightweight-api
     - fastapi
+  links:
+    - url: https://fastapi.tiangolo.com/
+      title: FastAPI
+    - url: https://docs.astral.sh/uv/
+      title: uv
+    - url: https://docs.pytest.org/
+      title: pytest
+    - url: https://docs.astral.sh/ruff/
+      title: ruff
 spec:
   owner: abp
   type: service

@@ -11,6 +11,13 @@ metadata:
     - go
     - lightweight-api
     - stdlib
+  links:
+    - url: https://pkg.go.dev/net/http
+      title: net/http
+    - url: https://go.dev/blog/routing-enhancements
+      title: Routing enhancements in net/http (ServeMux)
+    - url: https://go.dev/doc/modules/
+      title: Go modules
 spec:
   owner: abp
   type: service

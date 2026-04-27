@@ -12,6 +12,15 @@ metadata:
     - ruby
     - web
     - rails
+  links:
+    - url: https://guides.rubyonrails.org/
+      title: Rails Guides
+    - url: https://kamal-deploy.org/
+      title: Kamal
+    - url: https://bundler.io/
+      title: Bundler
+    - url: https://hotwired.dev/
+      title: Hotwire / Turbo
 spec:
   owner: abp
   type: website

@@ -12,6 +12,15 @@ metadata:
     - fsharp
     - lightweight-api
     - giraffe
+  links:
+    - url: https://giraffe.wiki/
+      title: Giraffe
+    - url: https://fsharp.org/
+      title: F#
+    - url: https://fsprojects.github.io/fantomas/
+      title: Fantomas
+    - url: https://github.com/haf/expecto
+      title: Expecto
 spec:
   owner: abp
   type: service

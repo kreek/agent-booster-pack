@@ -13,6 +13,15 @@ metadata:
     - web
     - saturn
     - giraffe
+  links:
+    - url: https://saturnframework.org/
+      title: Saturn
+    - url: https://giraffe.wiki/
+      title: Giraffe
+    - url: https://fsharp.org/
+      title: F#
+    - url: https://fsprojects.github.io/fantomas/
+      title: Fantomas
 spec:
   owner: abp
   type: website

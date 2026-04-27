@@ -11,6 +11,15 @@ metadata:
     - python
     - web
     - django
+  links:
+    - url: https://docs.djangoproject.com/
+      title: Django
+    - url: https://docs.astral.sh/uv/
+      title: uv
+    - url: https://pytest-django.readthedocs.io/
+      title: pytest-django
+    - url: https://docs.astral.sh/ruff/
+      title: ruff
 spec:
   owner: abp
   type: website

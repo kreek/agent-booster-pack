@@ -20,9 +20,12 @@ spec:
     # Python
     - ./python/api-fastapi.yaml
     - ./python/web-django.yaml
-    # Java (JVM — Java or Kotlin source)
+    # Java (JVM — Java-first frameworks; also support Kotlin source via language_flavor)
     - ./java/api-javalin.yaml
     - ./java/service-spring-boot.yaml
+    # Kotlin (Kotlin-first frameworks — coroutine-native, Kotlin DSL routing)
+    - ./kotlin/api-ktor.yaml
+    - ./kotlin/service-ktor.yaml
     # Ruby
     - ./ruby/api-sinatra.yaml
     - ./ruby/web-rails.yaml
@@ -53,6 +56,7 @@ spec:
     fresh-python-web: api-fastapi
     fresh-small-frontend: frontend-spa
     fresh-java-service: api-javalin
+    fresh-kotlin-service: api-ktor
     fresh-ruby-service: api-sinatra
     fresh-go-service: api-go-stdlib
     fresh-rust-service: api-axum

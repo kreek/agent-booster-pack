@@ -11,6 +11,15 @@ metadata:
     - typescript
     - lightweight-api
     - cloudflare
+  links:
+    - url: https://hono.dev/docs/getting-started/cloudflare-workers
+      title: Hono on Cloudflare Workers
+    - url: https://developers.cloudflare.com/workers/framework-guides/web-apps/more-web-frameworks/hono/
+      title: Cloudflare Workers — Hono guide
+    - url: https://pnpm.io/
+      title: pnpm
+    - url: https://vitest.dev/
+      title: Vitest
 spec:
   owner: abp
   type: service

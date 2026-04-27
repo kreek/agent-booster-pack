@@ -8,8 +8,10 @@ description: >-
   package scripts (test, lint, format, typecheck), or picking defaults for a
   greenfield project. Also use when the current directory is empty or lacks a
   recognizable project manifest, test runner, package/build configuration, or
-  baseline quality commands. Covers Node, Python, Rust, Go, Ruby, Java/Kotlin,
-  Swift, .NET, Elixir, and PHP.
+  baseline quality commands. Covers TypeScript/Node, Python, Java, Kotlin,
+  Ruby, Go, Rust, C#, F#, Elixir, and Clojure (see `references/stacks/`
+  for the canonical list; Kotlin source is also selectable on Java
+  templates via the `language_flavor` axis).
 ---
 
 # Scaffolding
@@ -41,8 +43,11 @@ Before creating files or running generator commands:
 1. Identify the ecosystem and existing manifest/lockfile. If no
    existing package-manager choice, select the `AGENTS.md` default
    and state it before proceeding.
-2. Read the relevant `references/` ecosystem file before choosing
-   framework, commands, file layout, or generator.
+2. Read `references/language-defaults.md` for the language's
+   cross-cutting stance (runtime, tooling posture, deprecated
+   conventions to avoid), then look up the relevant Backstage
+   Template under `references/stacks/<language>/` for framework,
+   axes, and `metadata.links` to authoritative docs.
 3. For web work, classify the request before choosing files:
    local prototype/spike, new app scaffold, or production-bound app.
    Static HTML/CSS/JS is acceptable for a local throwaway prototype or
@@ -99,7 +104,9 @@ Package-manager defaults (pnpm, uv, bundler, cargo, etc.) come from
 
 1. Detect language, framework, and existing conventions. Select and
    state the package manager before running any scaffold or install
-   command. Read the relevant ecosystem reference.
+   command. Read `references/language-defaults.md` for the
+   cross-cutting stance and the relevant template under
+   `references/stacks/<language>/` for stack picks.
 2. For web work, state whether this is a prototype, scaffold, or
    production-bound app. Match the request to a stack preset in
    `references/stacks/index.yaml`, name the preset and any required choices
@@ -155,23 +162,14 @@ to the full checklist.
 
 ## References
 
-- `references/stacks/index.yaml`: named stack presets for common app
-  archetypes (Edge API, Fullstack, Python Web, Static Site, Small
-  Frontend) with required and optional configuration axes
-  (backend, frontend, database, background jobs).
-- `references/node-typescript.md`: pnpm, Hono, Cloudflare Workers,
-  SvelteKit.
-- `references/frontend.md`: Alpine.js + HTMX, SvelteKit, Astro,
-  React/Next exceptions.
-- `references/python.md`: uv, FastAPI, Litestar, Django.
-- `references/jvm.md`: Gradle (Kotlin DSL), Javalin, Ktor, Micronaut,
-  Quarkus, Spring Boot.
-- `references/ruby.md`: Bundler, Sinatra, Hanami, Roda, Rails, Kamal.
-- `references/go.md`: Go modules, stdlib net/http, Chi, Gin, Fiber.
-- `references/rust.md`: Cargo, Axum, Actix Web, SeaORM, Leptos.
-- `references/swift.md`: SwiftPM, Hummingbird, Vapor, Apple native
-  templates, Swift Testing.
-- `references/dotnet.md`: dotnet/NuGet, ASP.NET Core Minimal APIs,
-  MVC/Razor/Blazor.
-- `references/elixir.md`: Mix/Hex, Plug/Bandit, Phoenix.
-- `references/php.md`: Composer, Slim, Laravel, Symfony, Pest.
+- `references/stacks/index.yaml`: Backstage Software Template
+  catalog of named stack presets (lightweight + larger backend per
+  language, plus TypeScript fullstack/static-site/frontend).
+  Each template carries its own `metadata.links` to authoritative
+  framework / runtime / tooling docs.
+- `references/language-defaults.md`: cross-cutting language and
+  runtime stances that apply beyond any single template (uv
+  philosophy, modern `net/http` ServeMux, K2 Kotlin compiler,
+  Native AOT limits and F#-specific dynamic-code constraints,
+  Phoenix on Bandit, deps.edn for Clojure, etc.). Languages
+  mirror the catalog under `references/stacks/`.

@@ -14,6 +14,15 @@ metadata:
     - lightweight-api
     - ring
     - reitit
+  links:
+    - url: https://github.com/ring-clojure/ring/wiki
+      title: Ring
+    - url: https://cljdoc.org/d/metosin/reitit/
+      title: Reitit
+    - url: https://clojure.org/guides/deps_and_cli
+      title: deps.edn / Clojure CLI
+    - url: https://github.com/lambdaisland/kaocha
+      title: Kaocha
 spec:
   owner: abp
   type: service

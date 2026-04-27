@@ -223,11 +223,25 @@ apply:
 - [`versioning`][skill-versioning]: version bumps, CHANGELOG hygiene,
   deprecation policy, breaking-change classification, and release tags.
 - [`scaffolding`][skill-scaffolding]: new projects, baseline tooling,
-  package-manager defaults, test runners, linting, and CI. It includes
-  opinionated defaults for TypeScript APIs on Cloudflare Workers with Hono,
-  larger frontend apps with SvelteKit, quick-to-build typed Python APIs with
-  FastAPI and the Python ecosystem, or high-performance Rust web services with
-  Axum.
+  package-manager defaults, test runners, linting, and CI. Greenfield stack
+  picks come from the typed template catalog described below.
+
+#### Stack scaffolding via Backstage Software Templates
+
+This is one place ABP diverges from most skill libraries. Greenfield stack
+picks live as a [Backstage Software Templates][backstage-templates] catalog
+under [`scaffolding/references/stacks/`][stacks-dir] — 24 typed templates
+across TypeScript, Python, Java, Kotlin, Ruby, Go, Rust, C#, F#, Elixir,
+and Clojure, each pairing a lightweight microservice option with a larger
+backend.
+Parameters use JSON Schema (`required`, `default`, `enum` + `enumNames`) so
+the agent loads structured choices for backend, frontend, database,
+background jobs, auth, and observability rather than re-parsing prose every
+time. The index is a Backstage Location entity; each template's
+`metadata.links` points at authoritative framework docs. Cross-cutting
+language posture (uv philosophy, modern `net/http` ServeMux, K2 Kotlin,
+Native AOT limits, Approachable Concurrency, `deps.edn`, etc.) lives in
+[`scaffolding/references/language-defaults.md`][language-defaults].
 
 [skill-accessibility]: agents/.agents/skills/accessibility/SKILL.md
 [skill-api]: agents/.agents/skills/api/SKILL.md
@@ -255,6 +269,9 @@ apply:
 [skill-testing]: agents/.agents/skills/testing/SKILL.md
 [skill-versioning]: agents/.agents/skills/versioning/SKILL.md
 [skill-workflow]: agents/.agents/skills/workflow/SKILL.md
+[backstage-templates]: https://backstage.io/docs/features/software-templates/
+[stacks-dir]: agents/.agents/skills/scaffolding/references/stacks/
+[language-defaults]: agents/.agents/skills/scaffolding/references/language-defaults.md
 [codex-plugins]: https://developers.openai.com/codex/plugins/build
 [pi-skills]: https://www.mintlify.com/badlogic/pi-mono/coding-agent/skills
 

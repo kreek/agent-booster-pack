@@ -12,6 +12,15 @@ metadata:
     - lightweight-api
     - aspnet
     - minimal-api
+  links:
+    - url: https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis/overview
+      title: ASP.NET Core Minimal APIs
+    - url: https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/
+      title: Native AOT
+    - url: https://learn.microsoft.com/en-us/nuget/consume-packages/central-package-management
+      title: Central Package Management
+    - url: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
+      title: .NET support policy
 spec:
   owner: abp
   type: service

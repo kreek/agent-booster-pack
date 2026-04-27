@@ -11,6 +11,11 @@ metadata:
     - typescript
     - static-site
     - astro
+  links:
+    - url: https://docs.astro.build/
+      title: Astro
+    - url: https://pnpm.io/
+      title: pnpm
 spec:
   owner: abp
   type: website

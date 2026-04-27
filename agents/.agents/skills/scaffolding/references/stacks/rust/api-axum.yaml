@@ -12,6 +12,13 @@ metadata:
     - rust
     - lightweight-api
     - axum
+  links:
+    - url: https://docs.rs/axum/
+      title: Axum
+    - url: https://tokio.rs/
+      title: Tokio
+    - url: https://doc.rust-lang.org/cargo/
+      title: Cargo
 spec:
   owner: abp
   type: service

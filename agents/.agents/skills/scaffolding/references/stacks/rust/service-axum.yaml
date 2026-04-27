@@ -12,6 +12,17 @@ metadata:
     - rust
     - service
     - axum
+  links:
+    - url: https://docs.rs/axum/
+      title: Axum
+    - url: https://docs.rs/tower-http/
+      title: tower-http
+    - url: https://www.sea-ql.org/SeaORM/
+      title: SeaORM
+    - url: https://github.com/launchbadge/sqlx
+      title: sqlx
+    - url: https://opentelemetry.io/docs/languages/rust/
+      title: OpenTelemetry Rust
 spec:
   owner: abp
   type: service

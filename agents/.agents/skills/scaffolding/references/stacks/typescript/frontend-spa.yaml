@@ -12,6 +12,15 @@ metadata:
   tags:
     - typescript
     - frontend-spa
+  links:
+    - url: https://alpinejs.dev/
+      title: Alpine.js
+    - url: https://htmx.org/
+      title: HTMX
+    - url: https://vite.dev/
+      title: Vite
+    - url: https://svelte.dev/
+      title: Svelte
 spec:
   owner: abp
   type: website
@@ -45,6 +54,8 @@ spec:
             - web-rails
             - api-javalin
             - service-spring-boot
+            - api-ktor
+            - service-ktor
             - api-go-stdlib
             - service-fiber
             - api-axum
@@ -66,6 +77,8 @@ spec:
             - 'web-rails — Ruby on Rails (Hotwire available natively)'
             - 'api-javalin — Java/Kotlin Javalin'
             - 'service-spring-boot — Java/Kotlin Spring Boot'
+            - 'api-ktor — Kotlin Ktor (coroutine-first)'
+            - 'service-ktor — Kotlin Ktor + Koin/Exposed/OTel stack'
             - 'api-go-stdlib — Go net/http'
             - 'service-fiber — Go Fiber (Express-style middleware, FastHTTP)'
             - 'api-axum — Rust Axum'

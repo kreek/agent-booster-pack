@@ -1,52 +1,54 @@
 apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
 metadata:
-  name: api-javalin
-  title: Java — Javalin (lightweight)
+  name: api-ktor
+  title: Kotlin — Ktor (lightweight)
   description: |
-    Compact JVM HTTP API with minimal framework surface (Java or
-    Kotlin source). Pairs well with Gradle Kotlin DSL and JUnit 5.
-    Pick this when simple blocking code, fast startup, and a small
-    concept count are valuable.
+    Coroutine-native Kotlin HTTP service built on Ktor + Netty.
+    Pick this for Kotlin-first APIs where coroutine ergonomics,
+    Kotlin DSL routing, and a small framework surface matter
+    more than enterprise conventions.
   tags:
-    - java
+    - kotlin
     - lightweight-api
-    - javalin
+    - ktor
   links:
-    - url: https://javalin.io/documentation
-      title: Javalin
+    - url: https://ktor.io/
+      title: Ktor
     - url: https://docs.gradle.org/current/userguide/kotlin_dsl.html
       title: Gradle Kotlin DSL primer
     - url: https://kotlinlang.org/docs/home.html
       title: Kotlin
-    - url: https://junit.org/junit5/docs/current/user-guide/
-      title: JUnit 5
+    - url: https://github.com/JetBrains/Exposed
+      title: Exposed
 spec:
   owner: abp
   type: service
   parameters:
     - title: Stack Configuration
       required:
-        - language_flavor
+        - engine
         - database
       properties:
         backend:
           title: Backend
           type: string
-          const: javalin
+          const: ktor
         frontend:
           title: Frontend
           type: string
           const: api-only
-        language_flavor:
-          title: Language
+        engine:
+          title: HTTP Engine
           type: string
           enum:
-            - kotlin
-            - java
+            - netty
+            - cio
+            - jetty
           enumNames:
-            - 'Kotlin — recommended for new code'
-            - 'Java — when the team is Java-only'
+            - 'Netty — default; production-grade async I/O'
+            - 'CIO — pure-Kotlin coroutine I/O, smaller dependency'
+            - 'Jetty — when an existing JEE-shape deployment is required'
         database:
           title: Database
           type: string
@@ -65,16 +67,16 @@ spec:
         persistence:
           title: Persistence Library
           type: string
-          default: jdbi
+          default: exposed
           enum:
-            - jdbi
-            - jooq
             - exposed
+            - jooq
+            - jdbi
             - none
           enumNames:
-            - 'JDBI — SQL with object mapping (Kotlin/Java)'
+            - 'Exposed — JetBrains Kotlin SQL framework (DAO + DSL)'
             - 'jOOQ — typesafe SQL DSL'
-            - 'Exposed — Kotlin SQL framework'
+            - 'JDBI — SQL with object mapping'
             - 'None — raw JDBC'
         background_jobs:
           title: Background Jobs
@@ -92,33 +94,38 @@ spec:
           default: none
           enum:
             - none
-            - jwt-handler
+            - ktor-jwt
+            - ktor-sessions
           enumNames:
             - 'None'
-            - 'JWT — javalin-jwt-handler'
+            - 'JWT — ktor-server-auth-jwt'
+            - 'Sessions — ktor-server-sessions'
         observability:
           title: Observability
           type: string
-          default: none
+          default: call-logging
           enum:
-            - none
+            - call-logging
             - opentelemetry
+            - none
           enumNames:
+            - 'ktor-server-call-logging — request/response logging'
+            - 'OpenTelemetry — call-logging + otel SDK'
             - 'None'
-            - 'OpenTelemetry'
   tooling:
     package_manager: gradle
     build_dsl: kotlin
-    language_flavor: kotlin-or-java
-    test_runner: junit5
-    lint_format: ktlint-or-spotless
+    language_flavor: kotlin
+    test_runner: junit5-or-kotest
+    lint_format: ktlint
     runtime_cli: gradle
   smoke_test: |
-    GET /health returns 200. One JUnit 5 test starts the Javalin app
-    on a random port via Javalin.create() + Test factory and asserts
-    the response status.
+    GET /health returns 200. One JUnit 5 (or Kotest) test uses
+    Ktor's testApplication { client.get(...) } harness to invoke
+    the route in-process and asserts the response.
   switch_when: |
-    Need auto-config / starters / actuator / data integrations /
-    enterprise conventions → service-spring-boot. Coroutine-native
-    async / multiplatform Kotlin → Ktor (future sibling). Cold-start
-    / native-image fit → Micronaut or Quarkus (future siblings).
+    Need richer service stack (DI via Koin, Exposed by default,
+    OpenTelemetry baseline, structured auth) → service-ktor.
+    Want Java-first conventions (auto-config, starters, actuator,
+    Spring Data) with Kotlin source → java/service-spring-boot
+    (set language_flavor: kotlin).

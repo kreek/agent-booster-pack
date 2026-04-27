@@ -13,6 +13,15 @@ metadata:
     - lightweight-api
     - plug
     - bandit
+  links:
+    - url: https://hexdocs.pm/plug/
+      title: Plug
+    - url: https://hexdocs.pm/bandit/
+      title: Bandit
+    - url: https://hexdocs.pm/mix/
+      title: Mix
+    - url: https://hexdocs.pm/ecto/
+      title: Ecto
 spec:
   owner: abp
   type: service

@@ -10,6 +10,15 @@ metadata:
     - typescript
     - fullstack
     - sveltekit
+  links:
+    - url: https://svelte.dev/docs/kit
+      title: SvelteKit
+    - url: https://pnpm.io/
+      title: pnpm
+    - url: https://vitest.dev/
+      title: Vitest
+    - url: https://playwright.dev/
+      title: Playwright
 spec:
   owner: abp
   type: website
