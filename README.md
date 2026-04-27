@@ -23,24 +23,9 @@ In practice, ABP guides agents to:
 
 ## Installation
 
-Pick one installation method for each agent. Both the manual and plugin options
-provide the same ABP skills, so using both for the same agent can cause
-duplicate entries. Prefer the Claude Code plugin for Claude Code
-and the Codex plugin for Codex because plugin installs provide package-level
-namespacing. Use the manual install for agents that read `~/.agents/skills/`
-or do not support plugins.
-
-ABP keeps canonical skill names clean (`testing`, `security`,
-`accessibility`, etc.) so plugin users get natural names like `/abp:testing`.
-Manual installs use the flat Agent Skills directory layout, so another skill
-pack with the same directory name can collide. `./setup.sh` asks before
-replacing real directories or third-party symlinks, but package/plugin
-installs are the safer distribution path when your agent supports them.
-When the ABP Codex plugin is installed, `./setup.sh` removes legacy ABP-owned
-links from `~/.codex/skills/` instead of recreating them. Codex can also
-discover `~/.agents/skills/` directly, so do not keep both the shared manual
-install and the Codex plugin enabled for Codex unless you want duplicate ABP
-skills.
+Pick one method per agent. Prefer the plugin for Claude Code and Codex; use the
+manual install for agents that read `~/.agents/skills/` or do not support
+plugins.
 
 ### Claude Code Plugin Install
 
