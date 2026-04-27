@@ -10,6 +10,8 @@
 
 A portable skill library focused on engineering quality that helps coding agents create software that is effective, correct, safe, accessible, maintainable, and performant.
 
+[Installation](#installation)
+
 Agent Booster Pack is based on my 25 years of software engineering experience, from startups to large organizations. It offers portable skills for agents that use the Agent Skills layout, such as Codex, Claude Code, Pi, Cursor, Gemini CLI, GitHub Copilot CLI, OpenCode, and Windsurf. The pack helps agents follow workflows that lead to simpler designs, clear data models, reliable behavior, safer production systems, user-friendly interfaces, and changes that are easy for humans to review and maintain.
 
 In practice, ABP guides agents to:
@@ -23,9 +25,8 @@ In practice, ABP guides agents to:
 
 ## Installation
 
-Pick one method per agent. Prefer the plugin for Claude Code and Codex; use the
-manual install for agents that read `~/.agents/skills/` or do not support
-plugins.
+Prefer the plugin for Claude Code and Codex. Use the manual install for agents
+that read `~/.agents/skills/` or do not support plugins.
 
 ### Claude Code Plugin Install
 
