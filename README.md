@@ -27,6 +27,14 @@ ABP is designed to manage risk in software projects and guide agents to write pr
 
 ABP assumes coding agents already know the basics of coding, planning, and using tools, and that syntax is handled by linters, formatters, type checkers, and test suites. The skills do not cover those areas. Instead, ABP works by adding focused skills that provide extra engineering support when needed, without changing agent internals.
 
+ABP requires proof, not TDD. During exploratory iteration, agents can discover
+the shape first, then attach tests, contracts, command output, or other
+evidence before claiming the work is done.
+
+For greenfield scaffolding, ABP uses editable [Backstage Software
+Templates][backstage-templates] YAML files so teams can tune stack presets to
+their preferences.
+
 ## Installation
 
 Pick one installation method for each agent. Both the manual and plugin options provide the same ABP skills, so using both for the same agent can cause duplicate entries or commands. Use the Claude Code plugin for Claude Code, the Codex plugin for Codex, and the manual install for agents that read ~/.agents/skills/ or do not support plugins.
@@ -228,19 +236,12 @@ apply:
 
 #### Stack scaffolding via Backstage Software Templates
 
-This is one place ABP diverges from most skill libraries. Greenfield stack
-picks live as a [Backstage Software Templates][backstage-templates] catalog
-under [`scaffolding/references/stacks/`][stacks-dir] — 24 typed templates
-across TypeScript, Python, Java, Kotlin, Ruby, Go, Rust, C#, F#, Elixir,
-and Clojure, each pairing a lightweight microservice option with a larger
-backend.
-Parameters use JSON Schema (`required`, `default`, `enum` + `enumNames`) so
-the agent loads structured choices for backend, frontend, database,
-background jobs, auth, and observability rather than re-parsing prose every
-time. The index is a Backstage Location entity; each template's
-`metadata.links` points at authoritative framework docs. Cross-cutting
-language posture (uv philosophy, modern `net/http` ServeMux, K2 Kotlin,
-Native AOT limits, Approachable Concurrency, `deps.edn`, etc.) lives in
+Greenfield stack picks live as editable [Backstage Software
+Templates][backstage-templates] YAML files under
+[`scaffolding/references/stacks/`][stacks-dir]. Tune those files to match
+your preferred frameworks, databases, auth, background jobs, and
+observability choices; `./setup.sh` links them rather than regenerating them.
+Shared language defaults live in
 [`scaffolding/references/language-defaults.md`][language-defaults].
 
 [skill-accessibility]: agents/.agents/skills/accessibility/SKILL.md
