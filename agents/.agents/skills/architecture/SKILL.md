@@ -55,6 +55,8 @@ it changes, the structure is fighting the work.
    subtly different things by the same word, give each context its own type.
 6. Add a layer only when it represents a real boundary (process, deploy,
    trust, persistence, transport) or removes proven duplication.
+   Request middleware is a transport boundary; it should carry
+   pipeline-wide concerns, not feature-specific business behavior.
 
 ## Workflow
 

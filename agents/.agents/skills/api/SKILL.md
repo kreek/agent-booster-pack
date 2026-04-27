@@ -53,6 +53,17 @@ description:
 7. Webhooks are APIs too: sign payloads, version events, and make
    receivers idempotent.
 
+## Request Pipeline and Middleware
+
+Move behavior into middleware only when it is a transport-wide request
+pipeline concern with the same rule for many routes: request IDs,
+logging, tracing, CORS, security headers, body parsing, authentication
+context, coarse rate limiting, or final error-shape translation.
+Middleware may establish context and reject requests that fail a global
+gate, but endpoint-specific validation, resource ownership, privileged
+authorisation, and domain invariants stay in handlers or domain code
+where the specific resource, actor, and contract are visible.
+
 ## API Evolution
 
 Optional additive changes can avoid major versioning only when existing
@@ -92,7 +103,10 @@ server-origin failures into a client error.
 3. For retryable public mutations, document the idempotency-key
    contract and prove duplicate submissions cannot create duplicate
    side effects.
-4. For each public contract change, record a Proof Contract: contract
+4. For request-pipeline concerns, decide whether the behavior belongs in
+   middleware, an edge/gateway, or the endpoint handler. Keep
+   route-specific business rules out of global middleware.
+5. For each public contract change, record a Proof Contract: contract
    claim, data invariant, public boundary, check, evidence. Add
    contract or behavior tests at the outermost boundary; update
    generated/source-of-truth docs only.
@@ -118,6 +132,10 @@ server-origin failures into a client error.
       successor guidance.
 - [ ] Webhooks are signed, timestamped, replay-protected, and
       deduplicable.
+- [ ] Middleware is limited to transport-wide request-pipeline
+      concerns; endpoint-specific validation, ownership checks,
+      privileged authorisation, and domain invariants stay at the
+      route/domain boundary.
 - [ ] Tests exercise the public boundary, not only internal handlers;
       every public contract claim has proof evidence or is reported as
       unproven.
@@ -129,7 +147,12 @@ server-origin failures into a client error.
   error contract, or when designing remote-call timeouts, retry
   budgets, and circuit breakers behind the API.
 - Use `security` for authn/authz, input trust, SSRF, secrets, and data
-  exposure.
+  exposure; prefer the framework's middleware for global browser and
+  transport controls, but keep resource-specific authorisation in the
+  handler/domain path.
+- Use `architecture` when deciding whether request middleware is a real
+  transport boundary or just a horizontal layer that scatters feature
+  behavior.
 - Use `realtime` for SSE/subscription transport and event-stream
   semantics.
 - Use `background-jobs` or `realtime` for idempotent async consumers
@@ -146,6 +169,10 @@ server-origin failures into a client error.
   decision tree.
 - `references/api-evolution.md`: optional additive API evolution and
   extensibility guidance.
+- `../security/references/web-app.md`: CSRF middleware, security
+  headers, and CORS.
+- `../security/references/api-and-auth.md`: handler-level
+  authorisation caveats for privileged endpoints.
 - Idempotency-Key draft:
   <https://datatracker.ietf.org/doc/draft-ietf-httpapi-idempotency-key-header/>
 - RateLimit headers draft:
