@@ -31,7 +31,8 @@ description:
 1. Inspect before touching: status, staged state, diff stats, recent
    log. Read the actual diffs before grouping.
 2. Never commit on `main` or `master`; create or switch to a topic
-   branch first.
+   branch first. Use or request a separate worktree when new work should
+   stay independent from an in-flight branch.
 3. Group by meaning, not by file type or convenience. Keep code, tests,
    and docs together when they describe one behavior. Split refactors,
    formatting, generated output, and behavior changes.
@@ -49,12 +50,14 @@ description:
    branch.
 2. Read diffs for staged and unstaged changes. Detect hazards:
    conflicts, secrets, generated churn, mixed changes in one file,
-   unrelated staged work.
+   unrelated staged work, or unrelated in-flight work that belongs in
+   another branch or worktree.
 3. Propose commits with subject, files, and why. For an explicit
    commit request with an obvious single group, state the group and
    proceed. Stage named files and commit one group at a time after
-   approval. Verify log, status, branch, and file membership after
-   each commit.
+   approval. Recommend a separate branch or worktree for work that
+   should remain independent from the current commit series. Verify log,
+   status, branch, and file membership after each commit.
 
 ## Verification
 

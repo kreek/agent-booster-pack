@@ -83,9 +83,13 @@ description: >-
    revise. Use `documentation` for PRDs, specs, issues, user stories,
    or other requirements artifacts that need clearer wording.
 3. For feature work, bug fixes, refactors, dependency changes, or other
-   repo mutations, check the current branch before editing. If on
-   `main` or `master`, create or request a short topic branch using the
-   repo's naming convention. Do not wait until commit time to branch.
+   repo mutations, check the current branch and working tree before
+   editing. If on `main` or `master`, create or request a short topic
+   branch using the repo's naming convention. If parallel work is
+   expected, or the current branch has in-flight work that overlaps with
+   or should stay separate from the new task, create or request a new
+   worktree with its own topic branch. Do not wait until commit time to
+   isolate the change.
 4. Select the smallest useful skill set:
    - model any feature/domain data and invariants with `data-first`
      (first after scaffolding when specs are clear);
@@ -132,7 +136,7 @@ description: >-
 | "I'll infer the product behavior" | Draft likely acceptance criteria, then ask the user to confirm or correct the ambiguous parts before editing. | Mechanical edits or explicit implementation-only tasks with no behavior choice. |
 | "Use every skill to be safe" | Pick the few skills that change the outcome. | Explicit audit/review request across the whole pack. |
 | "This helper/layer/global will make it easy" | Name what it couples and route to `data-first`, `architecture`, `refactoring`, or `concurrency` before adding it. | Thin adapter required by an existing framework or public API. |
-| "I'll branch at commit time" | Branch before editing so the diff, tests, and commits belong to one scoped change. | Read-only research or a task explicitly done outside Git. |
+| "I'll branch at commit time" | Branch, or use a worktree for parallel or in-flight branch separation, before editing so the diff, tests, and commits belong to one scoped change. | Read-only research or a task explicitly done outside Git. |
 | "I'll make it flexible for later" | Build the direct requested behavior; add flexibility only when current acceptance or risk needs it. | Public library/API design where extension points are part of the requirement. |
 | "I'll preserve old behavior just in case" | Ask whether backward compatibility is required before adding shims or dual paths. | Existing public contract or migration policy already requires compatibility. |
 | "ABP should decide sub-agent dispatch" | Use the agent runtime's native judgment and tools for delegation; use ABP only to shape the engineering risks each task must respect. | The user explicitly asks to design a delegation policy for this repo. |

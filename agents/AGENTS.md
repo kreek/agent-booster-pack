@@ -287,10 +287,16 @@ tests. Test-first is optional; test-at-all is not.
 ## Git
 
 - Branch per change when the workflow supports it or the user asks. Never commit
-  directly to `main`/`master`; if branch creation is outside the agent's current
-  authority, keep changes uncommitted and say so.
+  directly to `main`/`master`; if branch or worktree creation is outside the
+  agent's current authority, keep changes uncommitted and say so.
 - If already on `main`/`master`, create or request a topic branch before editing
   when the task is more than read-only inspection.
+- Use or request a separate worktree when parallel work is expected, or when the
+  current branch already has in-flight work that overlaps with or should stay
+  separate from the new task. Each worktree still gets its own topic branch.
+- Do not mix unrelated edits, stash active work, or switch away from a dirty
+  branch just to make progress unless the user explicitly asks for that
+  workflow.
 - Branch names use a type prefix: `feature/`, `fix/`, `refactor/`, `chore/`
   (e.g. `fix/null-on-login`).
 - One logical change per commit; keep commits atomic. If the subject needs

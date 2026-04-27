@@ -6,6 +6,12 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- Git workflow guidance now recommends a separate worktree when parallel
+  work is expected, or when an in-flight branch has work that overlaps
+  with or should stay separate from a new task.
+
 ## [2.2.0] (2026-04-26)
 
 ### Added
