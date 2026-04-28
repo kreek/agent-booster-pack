@@ -25,8 +25,8 @@ In practice, ABP guides agents to:
 
 ## Installation
 
-Prefer the plugin for Claude Code and Codex. Use the manual install for agents
-that read `~/.agents/skills/` or do not support plugins.
+Prefer the plugin install method for Claude Code, Codex, and Pi. Use the manual install for agents
+that can read `~/.agents/skills/` or do not support plugins.
 
 ### Claude Code Plugin Install
 
