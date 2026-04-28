@@ -131,7 +131,7 @@ drifting from canon.
 From inside `pi/`:
 
 ```sh
-npm publish --access public
+npm publish
 ```
 
 `prepack` runs `npm run build` automatically, so the tarball includes the
