@@ -30,8 +30,7 @@ that can read `~/.agents/skills/` or do not support plugins.
 
 ### Claude Code Plugin Install
 
-Use this when you want Claude Code to load ABP as a namespaced plugin and show
-skills as `/abp:<skill>`.
+Run `claude` from your terminal to open it, then add the marketplace and install. 
 
 ```sh
 # Inside Claude Code:
@@ -41,15 +40,13 @@ skills as `/abp:<skill>`.
 
 ### Codex Plugin Install
 
-Use this when you want Codex to install ABP from this repo's
-[Codex marketplace metadata][codex-plugins].
+Add the marketplace.
 
 ```sh
 codex plugin marketplace add kreek/agent-booster-pack
 ```
 
-Then open Codex's plugin directory and install **Agent Booster Pack** from the
-ABP marketplace:
+Then open Codex's plugin directory and install **Agent Booster Pack**.
 
 ```text
 /plugins
@@ -60,8 +57,7 @@ Select Install
 
 ### Pi Package Install
 
-Use this when you want Pi to load ABP as a first-class package instead of
-relying on the shared `~/.agents/skills/` discovery path.
+Install as a Pi plugin via NPM.
 
 ```sh
 pi install npm:pi-agent-booster-pack
