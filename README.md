@@ -58,6 +58,24 @@ Enter
 Select Install
 ```
 
+### Pi Package Install
+
+Use this when you want Pi to load ABP as a first-class package instead of
+relying on the shared `~/.agents/skills/` discovery path.
+
+```sh
+pi install npm:pi-agent-booster-pack
+```
+
+Then in Pi:
+
+```text
+/reload
+```
+
+See [`pi/README.md`](pi/README.md) for local-checkout installs and the build
+pipeline.
+
 ### Manual Skills Installation
 
 Use this method if your agent reads `~/.agents/skills/`, or if you want to share one skills directory across several tools. For example, I switch between Codex, Claude, and Pi, so installing ABP for all of them with one command is simpler.
@@ -270,7 +288,8 @@ After adding or renaming a skill:
 
 This reruns the per-agent symlink fan-out for manual installs and refreshes
 the generated `plugin/skills/` mirror used by packaged Claude Code and Codex
-plugin installs.
+plugin installs. The Pi package's `pi/skills/` is built from canonical at
+`npm pack` time via `pi/scripts/build-skills.mjs`, not committed.
 
 Then update:
 
@@ -282,6 +301,8 @@ Then update:
   repo-root [`AGENTS.md`](AGENTS.md#pack-versioning-marketplacejson--pluginjson)
 - `.agents/plugins/marketplace.json` and `plugin/.codex-plugin/plugin.json`
   when Codex plugin metadata or packaged skill content changes
+- `pi/package.json` when Pi package metadata or version changes (the
+  `scripts/release.sh` script bumps it in lockstep with the other manifests)
 
 Run the Python checks before publishing script updates:
 

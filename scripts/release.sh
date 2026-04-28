@@ -88,6 +88,7 @@ echo "==> bumping manifest versions to $version"
 bump_json ".claude-plugin/marketplace.json" '.metadata.version = $v | .plugins[0].version = $v'
 bump_json "plugin/.claude-plugin/plugin.json" '.version = $v'
 bump_json "plugin/.codex-plugin/plugin.json" '.version = $v'
+bump_json "pi/package.json" '.version = $v'
 
 echo "==> promoting CHANGELOG [Unreleased] section to [$version]"
 if grep -q "^## \[Unreleased\]" CHANGELOG.md; then
@@ -122,12 +123,12 @@ uv run refcheck . --no-color
 if $dry_run; then
   echo
   echo "==> dry run complete; no commit, no tag, manifests reverted"
-  git checkout -- .claude-plugin/marketplace.json plugin/.claude-plugin/plugin.json plugin/.codex-plugin/plugin.json CHANGELOG.md 2>/dev/null || true
+  git checkout -- .claude-plugin/marketplace.json plugin/.claude-plugin/plugin.json plugin/.codex-plugin/plugin.json pi/package.json CHANGELOG.md 2>/dev/null || true
   exit 0
 fi
 
 echo "==> committing release"
-git add CHANGELOG.md .claude-plugin/marketplace.json plugin/.claude-plugin/plugin.json plugin/.codex-plugin/plugin.json
+git add CHANGELOG.md .claude-plugin/marketplace.json plugin/.claude-plugin/plugin.json plugin/.codex-plugin/plugin.json pi/package.json
 git commit -m "chore: release v$version"
 git tag -a "v$version" -m "v$version"
 
