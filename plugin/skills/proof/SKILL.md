@@ -132,6 +132,15 @@ For every non-trivial engineering claim, record:
 | "Mock is faster than a fixture" | Use the real collaborator unless it crosses a true system boundary. | Clock, network, third-party service, process, filesystem, or expensive infrastructure. |
 | "I'll add tests after the feature lands" | Add the behavior assertion before claiming the feature is done. | Exploratory spike explicitly marked as not complete. |
 
+## Runtime Extensions
+
+When this skill runs inside Pi with the `pi-proof` extension loaded, its
+`/proof` command runs a red-green-refactor cycle. Use it when behavior
+tests are the right vehicle for showing the work. This skill still owns
+the broader proof contract — data invariants, root cause, refactor safety,
+completion checks, and any other evidence — and pi-proof's cycle output
+counts toward whichever claims it actually covers.
+
 ## Handoffs
 
 - Use `data-first` to shape invariants and make invalid states
@@ -142,3 +151,7 @@ For every non-trivial engineering claim, record:
   structural change.
 - Use `security` when proof requires abuse cases or trust-boundary
   checks.
+
+## References
+
+- `pi-proof` extension: https://github.com/kreek/pi-proof
