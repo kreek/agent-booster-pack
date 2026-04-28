@@ -86,8 +86,16 @@ Package-manager defaults (pnpm, uv, bundler, cargo, etc.) come from
 6. CI runs the same commands developers run locally. `.gitignore`
    excludes generated output, dependencies, local env files, IDE
    state, and secrets.
-7. README says what it is, how to run it, and how to test it.
-8. The first real feature should not need tooling decisions.
+7. Create `.env.example` (committed) and `.env` (gitignored) from day
+   one, even when there are no secrets yet. Both start with a header
+   comment explaining the pattern: `.env` is for local-dev secrets
+   only, never committed; `.env.example` lists the keys the app reads
+   with placeholder values; production secrets come from a secrets
+   manager, not this file. Loading mechanism follows the language
+   default (Node `--env-file`, `python-dotenv` via `uv`, `direnv`,
+   etc.) — pick one and document it in the README.
+8. README says what it is, how to run it, and how to test it.
+9. The first real feature should not need tooling decisions.
 
 ## Workflow
 
@@ -131,8 +139,12 @@ Package-manager defaults (pnpm, uv, bundler, cargo, etc.) come from
 - [ ] One smoke test proves the test runner and build/import path.
 - [ ] CI runs the same checks on push/PR and gates merge.
 - [ ] `.gitignore` excludes dependencies, build output, env files,
-      IDE state, and secrets; no secrets are committed; `.env.example`
-      uses placeholders only.
+      IDE state, and secrets; no secrets are committed.
+- [ ] `.env.example` exists with a header comment explaining the
+      pattern and lists every key the app reads with placeholder
+      values only. `.env` is gitignored and never committed, even
+      when empty. README names the loader (`--env-file`, dotenv,
+      direnv, etc.).
 - [ ] README includes purpose, install/run, and test commands.
 - [ ] Large projects use or explicitly defer Material for MkDocs.
 
