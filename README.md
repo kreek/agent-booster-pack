@@ -8,20 +8,20 @@
   </picture>
 </p>
 
-A portable skill library focused on engineering quality that helps coding agents create software that is effective, correct, safe, accessible, maintainable, and performant.
+Agent Booster Pack helps coding agents produce code that is well-organized, low in complexity and side effects, and is secure and performant.
 
 [Installation](#installation)
 
-Agent Booster Pack is based on my 25 years of software engineering experience, from startups to large organizations. It offers portable skills for agents that use the Agent Skills layout, such as Codex, Claude Code, Pi, Cursor, Gemini CLI, GitHub Copilot CLI, OpenCode, and Windsurf. The pack helps agents follow workflows that lead to simpler designs, clear data models, reliable behavior, safer production systems, user-friendly interfaces, and changes that are easy for humans to review and maintain.
+ABP is a portable skill library that works with Codex, Claude Code, Pi, Cursor, Gemini CLI, GitHub Copilot CLI, OpenCode, and Windsurf via the Agent Skills layout. It is based on 25 years of software engineering experience, from startups to large organizations.
 
 In practice, ABP guides agents to:
 
-* Focus on the data model first: make values, states, and rules clear, limit side effects, and keep state changes at the edges of the system.
-* Instead of relying on what seems correct, use tests, contracts, logs, and visible checks to prove your code works.
-* Plan for more than just the launch and basic version. Focus on observability, reliability, safe deployment, and having a rollback plan.
-* See security, data safety, and accessibility as essential parts of engineering, not just nice extras.
-* Fix and update code by addressing the root cause, not just the symptoms.
-* Organize your work into clear, reviewable changes that people can trust and maintain.
+* Model data first: make values, states, and rules clear, limit side effects, and keep state changes at the edges of the system.
+* Show their work: use tests, contracts, logs, and visible checks to prove code works rather than relying on what seems correct.
+* Plan beyond launch: invest in observability, reliability, safe deployment, and a rollback plan.
+* Treat security, data safety, and accessibility as essential parts of engineering, not nice extras.
+* Fix root causes, not symptoms.
+* Organize work into clear, reviewable changes that humans can trust and maintain.
 
 ## Installation
 
