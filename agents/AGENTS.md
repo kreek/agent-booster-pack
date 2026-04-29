@@ -237,74 +237,55 @@ effects at the boundary.
   refactor when you see real semantic duplication. Three similar lines beats a
   premature abstraction.
 
-## File and Code Changes
+## Working with the agent harness
 
-- Preserve unrelated user changes; never revert work you did not make.
-- Avoid destructive commands (`rm -rf`, `git reset --hard`, force-updating
-  branches) unless asked.
-- Create no commits, branches, or pull requests unless explicitly asked.
-- Comments only when the _why_ is non-obvious; never describe what the code
+ABP rides on top of modern coding-agent harnesses (Claude Code, Codex, Cursor,
+Copilot, Gemini CLI, OpenCode, Pi, Windsurf). Those harnesses already enforce
+the table-stakes basics: prefer `rg` over `grep`, preserve unrelated user
+changes, no destructive commands without ask (`rm -rf`, `git reset --hard`,
+force-push, branch delete), no commit/branch/PR creation without ask, narrow
+→ broad validation, do not add a formatter or test runner to a repo that
+lacks one, no `--no-verify`, no commits on `main`/`master`. Treat that as the
+floor. The rules below extend it with ABP doctrine; they do not restate it.
+
+- Comments only when the *why* is non-obvious; never describe what the code
   already says.
-
-## Search and Inspection
-
-- Use `rg` for text search and `rg --files` for file discovery.
-- Read the smallest relevant set of files before editing.
 - When a project has its own `AGENTS.md`, treat it as additive and more
-  specific. It controls project conventions and local commands, but it does not
-  erase these global safety, proof, validation, and user-change-preservation
+  specific. It controls project conventions and local commands, but it does
+  not erase the global safety, proof, validation, and user-change-preservation
   rules.
 
-## Validation
+## Validation and proof
 
-Validation is part of the work. A change is not complete until the relevant
-checks have run, or the exact blocker is reported.
+A change is not complete until the relevant check has run or the exact
+blocker is reported. A feature is not complete until its user-observable
+behaviors are exercised by tests; test-first is optional, test-at-all is not.
 
-- Run the narrowest relevant validation first, then broaden only if needed.
-- Use the project's existing test, lint, and build commands.
-- If validation cannot be run, say so and explain why.
-
-## Done means proven
-
-A feature is not complete until its user-observable behaviors are exercised by
-tests. Test-first is optional; test-at-all is not.
-
-- Identify the outermost boundary the user reaches: HTTP endpoint, UI
-  interaction, CLI invocation, public API. That is where tests enter.
-- Write at least one `when X, Y happens` test per user-visible behavior. A
-  feature with three endpoints and five distinct behaviors across them needs
-  five tests, not one.
+- Tests enter at the outermost boundary the user reaches: HTTP endpoint, UI
+  interaction, CLI invocation, public API.
+- At least one `when X, Y happens` test per user-visible behavior. A feature
+  with three endpoints and five distinct behaviors across them needs five
+  tests, not one.
 - Internal helpers and persistence modules do not need their own tests when
-  outer-boundary tests exercise them. They do need tests when the logic is
-  non-trivial in isolation: parsers, state machines, pure algorithms.
-- Load the `proof` skill before authoring tests. Do not skip it.
-- If the working directory is empty, lacks a project manifest, or has no
-  test/lint/typecheck baseline, load `scaffolding` before creating feature code.
-- When starting a new project or adding quality tooling to one that lacks it,
-  load the `scaffolding` skill so linter, formatter, type check, test runner,
-  and coverage are all in place before feature work begins.
-- If you cannot run the tests in the sandbox (missing deps, no DB, no network),
-  say so and name what would be needed. Do not quietly ship untested code.
+  outer-boundary tests exercise them; they do need tests when the logic is
+  non-trivial in isolation (parsers, state machines, pure algorithms).
+- Load the `proof` skill before authoring tests.
+- If the working directory has no test/lint/typecheck baseline, load
+  `scaffolding` before creating feature code.
+- If the relevant check cannot run (missing deps, no DB, no network), say so
+  and name what would be needed. Do not quietly ship untested code.
 
-## Git
+## Git (ABP additions)
 
-- Branch per change when the workflow supports it or the user asks. Never commit
-  directly to `main`/`master`; if branch or worktree creation is outside the
-  agent's current authority, keep changes uncommitted and say so.
-- If already on `main`/`master`, create or request a topic branch before editing
-  when the task is more than read-only inspection.
-- Use or request a separate worktree when parallel work is expected, or when the
-  current branch already has in-flight work that overlaps with or should stay
-  separate from the new task. Each worktree still gets its own topic branch.
-- Do not mix unrelated edits, stash active work, or switch away from a dirty
-  branch just to make progress unless the user explicitly asks for that
-  workflow.
+The harness baseline above already covers no-commit-on-main, atomic commits,
+no force-push, no skipping hooks, and no commit/branch creation without ask.
+ABP adds:
+
 - Branch names use a type prefix: `feature/`, `fix/`, `refactor/`, `chore/`
   (e.g. `fix/null-on-login`).
-- One logical change per commit; keep commits atomic. If the subject needs
-  "and", split it.
-- Commit messages: imperative mood, first line ≤72 chars, explain _why_ not
-  _what_.
+- Use or request a separate worktree when parallel work is expected, or when
+  the current branch already has in-flight work that should stay separate.
+  Each worktree still gets its own topic branch.
 - Review your own staged diff before every commit: catch debug prints, dead
   code, stale paths, and stray changes before anyone else sees them.
 - Commit only after the relevant proof or acceptance check is current. If a
@@ -313,27 +294,7 @@ tests. Test-first is optional; test-at-all is not.
   early.
 - Delete merged branches locally and remotely; stale branches obscure active
   work.
-- Don't commit generated artifacts, build output, IDE settings, or OS files;
-  they belong in `.gitignore`.
 - Never add Co-Authored-By, generated-by, or AI-attribution trailers.
-- Never skip pre-commit hooks (`--no-verify`).
-- Never force-push unless explicitly requested.
-
-## Tool-Use Etiquette
-
-**Allowed without prompt:**
-
-- Read files, grep/rg, list directories, `git status`/`diff`/`log`
-- Run linters, formatters, type checkers on edited files
-- Run a single targeted test or the test runner scoped to changed files
-
-**Ask first:**
-
-- Package installs or lockfile changes
-- `git push`, force-push, branch delete, tag creation
-- `rm`, `chmod`, or any destructive filesystem op outside the working tree
-- Full test suite if it takes >30s
-- Network calls to services not documented in this file
 
 ## Communication
 

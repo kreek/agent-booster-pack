@@ -34,34 +34,27 @@ description: Use first to route ABP work, choose skills, sequence handoffs, and 
 
 ## Core Ideas
 
-1. ABP is progressive enhancement for coding agents. The agent already
-   knows how to code; ABP adds engineering quality pressure when a
-   risk trigger makes that quality concern matter to the next action.
-2. Humans stay in the loop for goals, tradeoffs, scope, and acceptance.
-   Skills should make decisions reviewable, not hide them.
-3. Start from the quality and risk profile: correctness, data integrity,
+ABP is progressive enhancement for coding agents: the harness already knows
+how to code, scope work, plan, and validate. ABP adds engineering quality
+pressure when a risk trigger makes a quality concern matter to the next
+action. Skills are not a ritual; load them only when they change the
+outcome.
+
+1. Start from the quality and risk profile: correctness, data integrity,
    security, operability, performance, accessibility, compatibility, or
    change safety.
-4. Prefer simple over easy: name what is being tangled together
-   (data, effects, time, ownership, transport, persistence, UI state,
-   release, or compatibility) before choosing the implementation path.
-5. Load only the skills that materially change the work. Do not turn
-   skill use into a checklist ritual.
-6. Before claiming done, use `proof` to connect the completion claim to
+2. Prefer simple over easy: name what is being tangled together (data,
+   effects, time, ownership, transport, persistence, UI state, release,
+   or compatibility) before choosing the implementation path.
+3. Before claiming done, use `proof` to connect the completion claim to
    fresh evidence.
-7. Use the coding agent's own judgment and built-in tools for
-   delegation, parallelism, and sub-agents. ABP skills guide
-   engineering quality and risk; they do not replace the runtime's
-   native planning or task-dispatch behavior.
-8. Treat Handoffs as graph edges, not a role hierarchy. A skill can
-   route to any other skill when that quality concern becomes relevant.
-9. Prefer direct, explicit, established code that follows the repo's
-   house style. Avoid clever one-liners, speculative abstractions,
-   unnecessary dependencies, and future-proofing.
-10. Keep implementation shape easy to reason about: small functions,
-   guard clauses, low nesting, one responsibility per function, and
-   feature/domain locality before horizontal layering.
-11. Treat compatibility, rollout risk, and extra edge-case machinery as
+4. Use the coding agent's own judgment and built-in tools for delegation,
+   parallelism, and sub-agents. ABP skills guide engineering quality and
+   risk; they do not replace the runtime's native planning or task-dispatch
+   behavior.
+5. Treat Handoffs as graph edges, not a role hierarchy. A skill can route
+   to any other skill when that quality concern becomes relevant.
+6. Treat compatibility, rollout risk, and extra edge-case machinery as
    product decisions. Ask before adding shims, retries, fallback paths,
    or backward-compatible behavior the user did not request.
 
@@ -70,22 +63,17 @@ description: Use first to route ABP work, choose skills, sequence handoffs, and 
 1. State the user-visible goal and the quality and risk profile to the
    user in one or two sentences, including any obvious coupling or
    complexity risk, so they can correct course before any code lands.
-2. Check acceptance clarity before editing. For feature work, bug
-   fixes, PRD/spec work, refactors, or behavior-affecting changes,
-   draft the acceptance criteria the work appears to require. If
-   behavior, scope, data shape, compatibility, UX, safety, or
-   verification is ambiguous, ask a focused question and offer a
-   concrete proposed acceptance criterion the user can accept or
-   revise. Use `documentation` for PRDs, specs, issues, user stories,
-   or other requirements artifacts that need clearer wording.
-3. For feature work, bug fixes, refactors, dependency changes, or other
-   repo mutations, check the current branch and working tree before
-   editing. If on `main` or `master`, create or request a short topic
-   branch using the repo's naming convention. If parallel work is
-   expected, or the current branch has in-flight work that overlaps with
-   or should stay separate from the new task, create or request a new
-   worktree with its own topic branch. Do not wait until commit time to
-   isolate the change.
+2. Check acceptance clarity before editing. For feature work, bug fixes,
+   PRD/spec work, refactors, or behavior-affecting changes, draft the
+   acceptance criteria the work appears to require. If behavior, scope,
+   data shape, compatibility, UX, safety, or verification is ambiguous,
+   ask a focused question and offer a concrete proposed acceptance
+   criterion the user can accept or revise. Use `documentation` for PRDs,
+   specs, issues, user stories, or other requirements artifacts.
+3. Use a separate worktree (each with its own topic branch) when parallel
+   work is expected, or when the current branch has in-flight work that
+   should stay separate. Do not wait until commit time to isolate the
+   change. (Branch-per-change and no-edits-on-main are harness baseline.)
 4. Select the smallest useful skill set by quality concern and risk
    trigger:
    - whiteboard non-trivial changes with `whiteboarding` before drafting
@@ -101,23 +89,18 @@ description: Use first to route ABP work, choose skills, sequence handoffs, and 
      toil/risk with `release`;
    - improve operations with `observability`, `performance`, or
      `async-systems`;
-   - improve user and maintainer surfaces with `api`,
-     `documentation`, `ui-design`, or `accessibility`;
+   - improve user and maintainer surfaces with `api`, `documentation`,
+     `ui-design`, or `accessibility`;
    - package repository work with `git-workflow` or `release`;
    - start new projects or missing tooling with `scaffolding`.
-5. Load those skills and follow their workflows. If two skills
-   conflict, prefer safety, data integrity, correctness, proof, and
-   user trust over convenience or style.
-6. Keep the work scoped. Add dependencies, abstractions, and rollout
-   machinery only when the task, acceptance criteria, or quality and risk
-   profile needs them. Implement the happy path first, then the edge
-   cases required by security, data safety, compatibility, or acceptance.
-7. Finish by naming what was proven, what remains unproven, and what a
-   human should review or decide. Also explain what was built or
-   changed, why it is better than what it replaced, and/or what it
-   enables going forward. If that explanation is weak, pause and
-   consider whether the change is too broad, too clever, or not yet
-   justified.
+5. Load those skills and follow their workflows. If two skills conflict,
+   prefer safety, data integrity, correctness, proof, and user trust over
+   convenience or style.
+6. Finish by naming what was proven, what remains unproven, and what a
+   human should review or decide. Explain what was built or changed, why
+   it is better than what it replaced, and/or what it enables next. If
+   that explanation is weak, pause and consider whether the change is too
+   broad, too clever, or not yet justified.
 
 ## Verification
 

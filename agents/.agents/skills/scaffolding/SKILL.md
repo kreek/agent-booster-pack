@@ -66,28 +66,23 @@ Package-manager defaults (pnpm, uv, bundler, cargo, etc.) come from
 
 ## Core Ideas
 
+The harness baseline already covers: prefer established/boring tech, prefer
+framework defaults over hand-rolled, do not add a formatter or test runner
+to a repo that lacks one (the inverse here: when scaffolding, you _do_ add
+them — that is the point of this skill). ABP adds:
+
 1. Pick one package manager and commit its lockfile. Use the modern
-   ecosystem default from `AGENTS.md` even with zero dependencies;
-   built-in defaults only where they're still strongest (Cargo for
-   Rust, Go modules for Go).
-2. Standardize task names: `test`, `lint`, `format`, `typecheck`,
-   `coverage` where applicable.
-3. Prefer framework defaults over hand-rolled HTTP/app shells. Choose
-   the smallest mature framework that fits. If the language, runtime,
-   app shape, or current ecosystem state isn't covered by the
-   `references/`, search the web and prefer current official/project
-   sources before choosing. Explain the chosen default in one
-   sentence.
-4. Prefer established, boring technology. Use built-in platform
-   features when they are sufficient; add packages when they remove
-   real complexity or supply mature conventions the project needs.
-5. Add one smoke test that proves the runner, import path, and build
-   system work together.
-6. CI runs the same commands developers run locally. `.gitignore`
-   excludes generated output, dependencies, local env files, IDE
-   state, and secrets.
-7. README says what it is, how to run it, and how to test it.
-8. The first real feature should not need tooling decisions.
+   ecosystem default from `AGENTS.md` (pnpm/uv/etc.) even with zero
+   dependencies; only fall back to built-ins where they are still strongest
+   (Cargo for Rust, Go modules for Go).
+2. Standardize task names: `test`, `lint`, `format`, `typecheck`, `coverage`
+   where applicable. CI runs the same commands developers run locally.
+3. If the language, runtime, app shape, or current ecosystem state isn't
+   covered by `references/`, search current official/project sources before
+   choosing; explain the chosen default in one sentence.
+4. Add one smoke test that proves the runner, import path, and build system
+   work together. The first real feature should not need tooling decisions.
+5. README says what it is, how to run it, and how to test it.
 
 ## Workflow
 

@@ -11,8 +11,7 @@ description: Use to review diffs and PRs for bugs, regressions, edge cases, proo
 
 ## When to Use
 
-- Local review of unstaged, staged, branch, or patch diffs.
-- GitHub PR review through `gh`.
+- Diff review (local, branch, or GitHub PR via `gh`).
 - Review-comment follow-up on the user's own PRs.
 - Agent-generated code review before merge or handoff.
 
@@ -24,34 +23,29 @@ description: Use to review diffs and PRs for bugs, regressions, edge cases, proo
 
 ## Core Ideas
 
-1. Review the changed *behavior*, not just the changed lines. Read enough
-   surrounding code to understand call sites, invariants, ownership, and
-   existing conventions.
-2. Findings must be reproducible from the diff, surrounding code, tests, or
-   documented contract. A comment is useful only when it names a concrete
-   defect, the impact, and the change that would remove the risk.
-3. Safety and correctness outrank maintainability; maintainability outranks
-   style. Every review includes a security pass, even when the diff doesn't
-   look security-focused.
-4. Every non-trivial "looks fine" claim needs proof evidence or must be
+The harness baseline for review is already: findings first, ordered by
+severity, with file/line anchors; review behavior, not just lines; correctness
+outranks style; do not invent issues. ABP adds:
+
+1. Every review includes a security pass, even when the diff doesn't look
+   security-focused.
+2. Every non-trivial "looks fine" claim needs proof evidence or must be
    scoped as unproven.
-5. Identify declared runtime and toolchain constraints (manifests, lockfiles,
+3. Identify declared runtime and toolchain constraints (manifests, lockfiles,
    CI, framework versions, support policy) before applying language advice.
    Repository compatibility wins over language-reference defaults.
-6. Duplication and dead code are review risks: they hide divergent behavior,
+4. Duplication and dead code are review risks: they hide divergent behavior,
    stale invariants, unreachable branches, and untested paths. For removals
    and refactors, verify old paths were fully removed or intentionally
    preserved, and that callers reach the intended path.
-7. AI-generated code is untrusted until behavior, tests, and
+5. AI-generated code is untrusted until behavior, tests, and
    security-sensitive paths are verified.
-8. Review comments should be sparse, specific, and actionable.
-9. Maintainability findings are valid when complexity creates real risk:
+6. Maintainability findings are valid when complexity creates real risk:
    deep nesting, long functions, hidden mutable state, clever expressions,
-   unnecessary indirection, or code organized so one behavior is scattered
-   across unrelated places.
-10. Simpler-looking code is not automatically simpler. Fewer files, shared
-    helpers, or a new layer are findings when they couple concerns that change
-    independently or hide state/effects from callers.
+   unnecessary indirection, or behavior scattered across unrelated places.
+7. Simpler-looking code is not automatically simpler. Fewer files, shared
+   helpers, or a new layer are findings when they couple concerns that change
+   independently or hide state/effects from callers.
 
 ## Workflow
 
@@ -68,23 +62,18 @@ description: Use to review diffs and PRs for bugs, regressions, edge cases, proo
    `sql.md`). Defer recommendations incompatible with the repo's
    declared toolchain.
 4. Load triggered domain skills as mandatory lenses. Always include a
-   security pass for any auth, trust-boundary, input, dependency, secret,
+   `security` pass for any auth, trust-boundary, input, dependency, secret,
    crypto, logging-redaction, or user-controlled-sink concern. Add others
-   as triggered: `database`, `api`, `proof`, `data-first`,
-   `architecture`, `error-handling`, `async-systems`, `release`,
-   `observability`, `ui-design`, `accessibility`, `documentation`,
-   `performance`.
-5. Check in this order: correctness → data integrity → security → error
-   handling → tests → observability → compatibility → performance →
-   maintainability. Sweep for harmful duplication, orphaned code,
-   unreachable branches, dead feature flags, unused public surface, and
-   stale tests/docs/config. For maintainability, ask what independent
-   concerns the diff couples or separates.
+   as triggered: `database`, `api`, `proof`, `data-first`, `architecture`,
+   `error-handling`, `async-systems`, `release`, `observability`,
+   `ui-design`, `accessibility`, `documentation`, `performance`.
+5. Sweep for harmful duplication, orphaned code, unreachable branches, dead
+   feature flags, unused public surface, and stale tests/docs/config. For
+   maintainability, ask what independent concerns the diff couples or
+   separates.
 6. Don't review generated, vendored, or lockfile churn as if it were
    hand-written; sample only enough to detect obvious risk. If the diff
    is too large, review by risk area and state the partial scope.
-7. Report findings first, ordered by severity. If none, say so and name
-   residual risk or missing verification.
 
 ## Addressing Review Feedback
 
@@ -101,19 +90,15 @@ description: Use to review diffs and PRs for bugs, regressions, edge cases, proo
 
 ## Finding Format
 
-Lead with findings, ordered by severity:
-
-| Severity | Use for |
-|---|---|
-| Critical | Exploitable security issue, data loss, broken auth, destructive migration, production outage risk. |
-| High | Incorrect behavior, broken contract, missing authorization, race, serious regression, untested risky path. |
-| Medium | Maintainability, error handling, observability, compatibility, or test gap likely to cause future defects. |
-| Low | Non-blocking clarity issue. Skip unless asked. |
-
-Each finding includes: file/line or PR thread anchor, issue, impact,
-concrete fix direction, evidence or missing proof. Use questions only
-for ambiguity that blocks a finding or fix. Put summaries after
-findings, not before.
+Each finding includes: file/line or PR thread anchor, issue, impact, concrete
+fix direction, and evidence or missing proof. Severity tags ABP uses on top
+of the harness's severity ordering: **Critical** for exploitable security,
+data loss, broken auth, destructive migration, or production outage risk;
+**High** for incorrect behavior, broken contract, missing authorization,
+race, or serious regression; **Medium** for maintainability, error handling,
+observability, compatibility, or test gaps likely to cause future defects;
+**Low** for non-blocking clarity issues — skip unless asked. Use questions
+only for ambiguity that blocks a finding or fix.
 
 ## Verification
 

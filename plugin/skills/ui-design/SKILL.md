@@ -27,37 +27,42 @@ Design quality comes from priority, restraint, and verification, not decoration.
 
 ## Core Ideas
 
-1. Start from the user's task and hierarchy, not from visual style.
-2. One screen has one primary action and a clear information order.
-3. Use a small token system for spacing, type, color, radius, and motion.
-4. Accessibility is a design input: keyboard, focus, contrast, reduced motion,
-   touch target, and screen-reader flow.
-5. Component APIs express intent and state, not implementation convenience.
-6. Modern CSS should reduce JavaScript and layout hacks when browser support
+The harness baseline for frontend already covers: avoid generic AI-look
+decoration, vary typography away from default stacks, do not rely on flat
+single-color backgrounds, ensure pages load on both desktop and mobile,
+preserve established patterns inside an existing design system. ABP adds:
+
+1. One screen has one primary action and a clear information order.
+2. Use a small token system for spacing, type, color, radius, and motion.
+   Apply tokens consistently; avoid stray one-off values.
+3. Accessibility is a design input — not a later review pass: keyboard,
+   focus, contrast, reduced motion, touch target, and screen-reader flow.
+4. Component APIs express intent and state, not implementation convenience.
+5. Modern CSS should reduce JavaScript and layout hacks when browser support
    allows it.
-7. Remove generic AI-look decoration unless it serves the product or workflow.
 
 ## Workflow
 
-1. Identify the user, task, device constraints, and primary action.
-2. Choose existing framework/design-system patterns before inventing new ones.
-3. Define hierarchy, layout, states, empty/error/loading behavior, and
+1. Identify the user, task, device constraints, and primary action. Choose
+   existing framework/design-system patterns before inventing new ones.
+2. Define hierarchy, layout, states, empty/error/loading behavior, and
    responsive rules.
-4. Apply tokens consistently; avoid stray one-off values.
-5. Verify with real rendering, keyboard navigation, contrast, and reduced-motion
-   behavior.
-6. Remove elements that do not change comprehension, trust, or actionability.
+3. Apply tokens consistently; remove elements that do not change
+   comprehension, trust, or actionability.
+4. Verify with real rendering, keyboard navigation, contrast, and
+   reduced-motion behavior.
 
 ## Verification
 
-- [ ] Hierarchy survives a squint/blur test.
-- [ ] One primary action is visually dominant per screen.
-- [ ] Text fits at mobile and desktop sizes without overlap or truncation
-      surprises.
-- [ ] Reduced-motion preference is honored.
+- [ ] Hierarchy survives a squint/blur test, and one primary action is
+      visually dominant per screen.
+- [ ] Token system covers spacing, type, color, radius, motion; no stray
+      one-off values in committed CSS.
+- [ ] Accessibility inputs were considered at design time, not patched after:
+      keyboard reach, focus order, contrast, reduced motion, touch target,
+      screen-reader flow.
 - [ ] UI states exist for loading, empty, error, disabled, and success where
       applicable.
-- [ ] Stray decoration is removed unless its absence makes the interface worse.
 
 ## Handoffs
 
