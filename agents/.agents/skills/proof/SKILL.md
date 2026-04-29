@@ -143,6 +143,8 @@ counts toward whichever claims it actually covers.
 
 ## Handoffs
 
+- Use `whiteboarding` to convert the artifact's *Proof obligations*
+  section into Proof Contracts before claiming completion.
 - Use `data-first` to shape invariants and make invalid states
   unrepresentable.
 - Use `debugging` when the proof depends on root-cause evidence.

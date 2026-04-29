@@ -93,6 +93,8 @@ the type forces care. Load the right reference when either appears in the diff.
 
 ## Handoffs
 
+- Use `whiteboarding` upstream to enumerate the contracts whose data shape
+  you are modeling, before formalizing invariants here.
 - Use `architecture` when module boundaries, domain/feature locality, or
   layering decisions are in scope, especially when the question is what
   changes together rather than what data shape is valid.

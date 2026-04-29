@@ -105,6 +105,8 @@ it changes, the structure is fighting the work.
 
 ## Handoffs
 
+- Use `whiteboarding` upstream to map the terrain — current and proposed
+  contracts — before deciding module boundaries.
 - Use `data-first` to design data shapes, invariants, and effect isolation
   inside a module, including the exact parsed and output shapes.
 - Use `refactoring` to move existing code toward the chosen structure
