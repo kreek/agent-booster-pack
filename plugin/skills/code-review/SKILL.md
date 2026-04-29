@@ -136,9 +136,9 @@ only for ambiguity that blocks a finding or fix.
 
 ## Handoffs
 
-- Use `whiteboarding` to compare the diff against the artifact's
-  *Surface after* section and catch plan-to-code divergence; missing or
-  contradicted contracts are blocking findings.
+- Use `whiteboarding` to compare the diff against the agreed RFC/ADR and
+  catch plan-to-code divergence; missing or contradicted contracts are
+  blocking findings.
 - Use `security` for auth, trust boundaries, secrets, crypto,
   dependencies, or injection risks.
 - Use `database` for migrations, locking, transactions, schema, indexes,

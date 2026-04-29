@@ -94,12 +94,13 @@ the higher-priority concerns.
 Use these before choosing abstractions or control flow for non-trivial code.
 They shape the problem, not just the implementation.
 
-- `whiteboarding`: use to map current and proposed contracts (function
-  signatures, exported types, schemas, events/queues, CLI flags, config keys,
-  file formats) and reach shared understanding with the human before any
-  non-trivial code lands. Mandatory when more than one contract changes, when
-  a new public surface is added, or when a module boundary is crossed.
-  Upstream of `data-first` and `architecture`.
+- `whiteboarding`: use for collaborative design discussions that map current
+  and proposed contracts (function signatures, exported types, schemas,
+  events/queues, CLI flags, config keys, file formats), constraints, tradeoffs,
+  and open questions before any non-trivial code lands, then capture the agreed
+  result as an RFC or ADR. Mandatory when more than one contract changes, when
+  a new public surface is added, or when a module boundary is crossed. Upstream
+  of `data-first` and `architecture`, not a substitute for built-in plan mode.
 - `data-first`: use for any data modeling work: domain data, fields, states,
   inputs, invariants, allowed combinations, transitions, or effects. Use it
   first after scaffolding when specs are clear and the next step is shaping
