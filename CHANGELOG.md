@@ -13,6 +13,9 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `versioning` -> `release`, `concurrency` + `realtime` +
   `background-jobs` -> `async-systems`, `caching` -> `performance`,
   and `testing` -> `proof`.
+- ABP routing doctrine is now described as quality-driven and risk-triggered:
+  `workflow` is the entry point, `proof` is both the completion gate and a
+  proof-work skill, and other skills are peers selected by quality concern.
 - Versioning guidance now treats optional additive public-surface changes as
   minor unless they force existing callers to change or accept new semantics;
   this guidance now lives in `release`.

@@ -55,6 +55,16 @@ Enter
 Select Install
 ```
 
+To update an existing ABP marketplace install, refresh the marketplace before
+opening the plugin directory:
+
+```sh
+codex plugin marketplace upgrade abp
+```
+
+Then open `/plugins`, select **Agent Booster Pack**, and update or reinstall it
+if Codex shows an available update.
+
 ### Pi Package Install
 
 Install as a Pi plugin via NPM.
@@ -130,7 +140,12 @@ auto-discover `~/.agents/skills/`. End-user installs do not need Python or uv.
 
 ## What Makes ABP Unique
 
-ABP is designed to manage risk in software projects and guide agents to write production grade code. ABP treats the agent as a coding partner, not a replacement for people. Humans bring judgment, review, decision-making, and context to the process, so these skills guide agents to make clear, reviewable changes and provide evidence, instead of trying to take you out of the loop.
+ABP is designed to improve engineering quality by routing agents toward the
+software risks that matter for the task in front of them. ABP treats the agent
+as a coding partner, not a replacement for people. Humans bring judgment,
+review, decision-making, and context to the process, so these skills guide
+agents to make clear, reviewable changes and provide evidence, instead of
+trying to take you out of the loop.
 
 ABP assumes coding agents already know the basics of coding, planning, and using tools, and that syntax is handled by linters, formatters, type checkers, and test suites. The skills do not cover those areas. Instead, ABP works by adding focused skills that provide extra engineering support when needed, without changing agent internals.
 
@@ -157,15 +172,36 @@ you want a particular lens, such as `documentation` for README work or
 intentionally user-invoked workflows because they package repository state and
 should run only when you ask for that action.
 
-The skill pack is deliberately not a checklist library. It is a set of
-discipline-enforcing lenses, grouped by the kind of engineering pressure they
-apply:
+### How ABP routes work
 
-### Entry point
+ABP is quality-driven and risk-triggered. Quality is the goal: correct, simple,
+maintainable, secure, accessible, observable, and performant software. Risk is
+the trigger: the signal that a quality concern matters enough to change what the
+agent does next.
+
+The routing model is:
+
+1. Use [`workflow`][skill-workflow] as the default entry point to name the goal,
+   quality and risk profile, scope, selected skills, and proof plan.
+2. Use [`proof`][skill-proof] before completion claims. `proof` is also the main
+   skill when the user asks for tests, proof contracts, or evidence.
+3. Select other skills as peers by quality concern and risk trigger. Their
+   groups are navigation aids for humans, not dispatch priority.
+4. Follow Handoffs as the routing graph, and load `references/` files only when
+   a selected skill asks for deeper detail.
+
+The skill pack is deliberately not a checklist library. It is a set of
+discipline-enforcing lenses, grouped by the kind of engineering quality pressure
+they apply:
+
+### Always-on routing and proof
 
 - [`workflow`][skill-workflow]: choose the right ABP skills for the task, name
   what is being coupled, keep the work scoped, and connect completion claims to
   proof.
+- [`proof`][skill-proof]: proof obligations and behavior-focused tests for
+  claims about behavior, contracts, invariants, root causes, refactor safety,
+  and completion.
 
 ### Foundational design
 
@@ -175,14 +211,11 @@ apply:
 - [`architecture`][skill-architecture]: module boundaries, domain/feature
   locality versus horizontal layers, DDD tactical patterns, and concerns that
   change independently.
-- [`proof`][skill-proof]: proof obligations and behavior-focused tests for
-  claims about behavior, contracts, invariants, root causes, refactor safety,
-  and completion.
 
 ### Correctness and change
 
-- [`code-review`][skill-code-review]: risk-focused review of diffs, branches, PRs,
-  requested changes, and agent-generated code.
+- [`code-review`][skill-code-review]: quality-focused review of diffs, branches,
+  PRs, requested changes, and agent-generated code.
 - [`debugging`][skill-debugging]: root-cause investigation for bugs, flakes,
   regressions, and unexplained symptoms.
 - [`refactoring`][skill-refactoring]: structure changes that preserve behavior

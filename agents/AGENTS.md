@@ -67,6 +67,11 @@ Skills are progressive context. Use this file as the index; load the relevant
 `SKILL.md` before applying a skill, and do not duplicate skill bodies here. When
 a task matches a skill trigger, loading that skill is mandatory, not optional.
 
+ABP routing is quality-driven and risk-triggered. Quality is the goal; risk is
+the signal that a quality concern matters enough to change the next action.
+Groups below are navigation aids for humans, not dispatch priority. Skills route
+through their trigger text and Handoffs graph.
+
 When multiple skills apply, load the smallest useful set. If skills conflict,
 resolve in this order: security/privacy/data-loss prevention, correctness and
 domain invariants, production safety, performance, maintainability/readability,
@@ -79,6 +84,10 @@ the higher-priority concerns.
   scaffolding, performance work, security-sensitive changes, or production
   readiness work. It carries the broad simplicity lens: identify what is being
   coupled before picking narrower skills.
+- `proof`: use as the completion gate before claiming work is complete, fixed,
+  ready to commit, ready for a PR, or passing. Also use it as the main skill
+  when the requested work is tests, proof contracts, behavior evidence, or
+  coverage decisions.
 
 ### Foundational Design
 
@@ -122,10 +131,6 @@ recoverable, and understandable.
   generic code-review entrypoint before loading narrower domain lenses. It
   owns complexity findings in diffs: hidden mutable state, tangled effects,
   unnecessary layers, scattered behavior, and broad abstractions.
-- `proof`: use when engineering claims need explicit proof obligations: data
-  invariant, boundary, executable check, and evidence. Also use it for
-  behavior-focused tests, and before claiming work is complete, fixed, ready to
-  commit, ready for a PR, or passing.
 - `error-handling`: use when designing error types, propagation, retries,
   remote-call timeouts, circuit breakers, crash boundaries, user-facing
   messages, or recovery behavior.
