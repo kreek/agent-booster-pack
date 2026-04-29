@@ -205,6 +205,10 @@ they apply:
 
 ### Foundational design
 
+- [`whiteboarding`][skill-whiteboarding]: map current and proposed contracts
+  (signatures, schemas, events, CLI, config, types) and reach shared
+  understanding before any non-trivial code lands; mandatory upstream of
+  `data-first` and `architecture` when more than one contract changes.
 - [`data-first`][skill-data-first]: any data modeling work, especially domain
   data, fields, states, allowed combinations, transitions, effects, and the
   first design pass after scaffolding when specs are clear.
@@ -278,6 +282,7 @@ Shared language defaults live in
 
 [skill-accessibility]: agents/.agents/skills/accessibility/SKILL.md
 [skill-api]: agents/.agents/skills/api/SKILL.md
+[skill-whiteboarding]: agents/.agents/skills/whiteboarding/SKILL.md
 [skill-async-systems]: agents/.agents/skills/async-systems/SKILL.md
 [skill-architecture]: agents/.agents/skills/architecture/SKILL.md
 [skill-data-first]: agents/.agents/skills/data-first/SKILL.md

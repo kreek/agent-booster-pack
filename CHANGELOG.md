@@ -16,6 +16,10 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - ABP routing doctrine is now described as quality-driven and risk-triggered:
   `workflow` is the entry point, `proof` is both the completion gate and a
   proof-work skill, and other skills are peers selected by quality concern.
+- Adds `whiteboarding` skill: a mandatory pre-code artifact that maps current
+  and proposed contracts (function signatures, schemas, events, CLI, config,
+  types) and surfaces resolved decisions and open questions before any
+  non-trivial change. `architecture` is now downstream of `whiteboarding`.
 - Versioning guidance now treats optional additive public-surface changes as
   minor unless they force existing callers to change or accept new semantics;
   this guidance now lives in `release`.

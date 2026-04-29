@@ -88,6 +88,9 @@ description: Use first to route ABP work, choose skills, sequence handoffs, and 
    isolate the change.
 4. Select the smallest useful skill set by quality concern and risk
    trigger:
+   - whiteboard non-trivial changes with `whiteboarding` before drafting
+     code; map current and proposed contracts and resolve open questions
+     before invoking design-pass skills;
    - model any feature/domain data and invariants with `data-first`
      (first after scaffolding when specs are clear);
    - choose boundaries with `architecture`;
@@ -150,6 +153,9 @@ description: Use first to route ABP work, choose skills, sequence handoffs, and 
 
 ## Handoffs
 
+- Use `whiteboarding` to map current and proposed contracts before any
+  non-trivial change, ahead of `data-first`, `architecture`, and
+  surface-specific design skills.
 - Use `proof` before claiming completion.
 - Use `data-first` when complexity starts with unclear data shape,
   invalid states, parsing, mutation, or domain effects.
