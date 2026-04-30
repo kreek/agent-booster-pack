@@ -1,0 +1,25 @@
+{
+  "name": "agent-booster-pack-eval",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "eval": "tsx eval.ts",
+    "experiment": "tsx eval.ts experiment codex-abp",
+    "experiment:smoke": "tsx eval.ts experiment codex-abp-smoke",
+    "experiment:core": "tsx eval.ts experiment codex-abp-core",
+    "experiment:all": "tsx eval.ts experiment codex-abp-all",
+    "list": "tsx eval.ts list",
+    "test": "vitest run test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "pi-do-eval": "file:../../pi-extensions/pi-do-eval"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.2.1"
+  }
+}
