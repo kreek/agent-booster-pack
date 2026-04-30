@@ -29,7 +29,7 @@ const expectedReadmeSkills = [
   "git-workflow",
   "scaffolding",
 ] as const;
-const checkedFixtureExtensions = new Set([".html", ".js", ".json", ".md", ".sql", ".txt"]);
+const checkedFixtureExtensions = new Set([".html", ".js", ".json", ".md", ".sql", ".txt", ".ts"]);
 
 function getSuite(name: string) {
   const suite = config.suites[name];
@@ -99,10 +99,14 @@ describe("ABP eval config", () => {
   it("defines lightweight, core, and all-skills suites", () => {
     expect(Object.keys(config.suites).sort()).toEqual(["allSkills", "core", "engineeringMaturity", "smoke"]);
     expect(Object.keys(config.experiments).sort()).toEqual([
+      "allSkills",
       "codex-abp",
       "codex-abp-all",
       "codex-abp-core",
       "codex-abp-smoke",
+      "core",
+      "engineeringMaturity",
+      "smoke",
     ]);
 
     const smoke = getSuite("smoke");
@@ -116,6 +120,28 @@ describe("ABP eval config", () => {
       new Set(["proof-first-bugfix", "security-boundary-fix", "design-decision-record", "debugging-regression"]),
     );
     expect(getSuite("engineeringMaturity")).toEqual(allSkills);
+    for (const entry of allSkills) {
+      expect(entry.variant).toBe("default");
+    }
+  });
+
+  it("uses the standard pi-do-eval launcher contract for suite entries and trial discovery", () => {
+    for (const [suiteName, entries] of Object.entries(config.suites)) {
+      expect(entries.length, suiteName).toBeGreaterThan(0);
+      for (const entry of entries) {
+        expect(entry).toEqual(
+          expect.objectContaining({
+            trial: expect.any(String),
+            variant: "default",
+          }),
+        );
+        expect(fs.existsSync(path.join(evalDir, "trials", entry.trial, "config.ts"))).toBe(true);
+      }
+    }
+
+    const evalSource = fs.readFileSync(path.join(evalDir, "eval.ts"), "utf-8");
+    expect(evalSource).toContain('command === "bench"');
+    expect(evalSource).toContain("resolveBenchmarkExperimentName");
   });
 
   it("covers every README skill without putting skill names in trial prompts or starter files", () => {
@@ -130,6 +156,7 @@ describe("ABP eval config", () => {
     for (const entry of allSkills) {
       const taskPath = path.join(evalDir, "trials", entry.trial, "task.md");
       expectNeutralFixtureContent(taskPath);
+      expectNeutralFixtureContent(path.join(evalDir, "trials", entry.trial, "config.ts"));
       for (const fixturePath of collectCheckedFiles(path.join(evalDir, "trials", entry.trial, "scaffold"))) {
         expectNeutralFixtureContent(fixturePath);
       }

@@ -36,6 +36,7 @@ const RUNS_DIR = path.join(import.meta.dirname, "runs");
 
 interface RunTrialOptions {
   profile: ExecutionProfile;
+  variant?: string;
   suite?: string;
   suiteRunId?: string;
   epoch?: number;
@@ -83,6 +84,27 @@ function getExperiment(experimentName: string): ExperimentConfig {
     fail(`Unknown experiment "${experimentName}". Available: ${Object.keys(config.experiments).join(", ")}`);
   }
   return experiment;
+}
+
+function resolveBenchmarkExperimentName(suiteName: string): string {
+  const exact = config.experiments[suiteName];
+  if (exact?.suite === suiteName) return suiteName;
+
+  const matches = Object.entries(config.experiments).filter(([, experiment]) => experiment.suite === suiteName);
+  if (matches.length === 1) return matches[0]?.[0] ?? suiteName;
+
+  const available = Object.keys(config.suites).join(", ");
+  fail(
+    matches.length === 0
+      ? `Unknown suite "${suiteName}". Available: ${available}`
+      : `Suite "${suiteName}" has multiple experiments; add an experiment named "${suiteName}" to make bench launch unambiguous`,
+  );
+}
+
+function assertSupportedVariant(trialName: string, variant: string): void {
+  if (variant !== "default") {
+    fail(`Trial "${trialName}" only supports variant "default"; received "${variant}"`);
+  }
 }
 
 function profileWorkerSnapshot(profile: ExecutionProfile): ModelConfig {
@@ -152,6 +174,8 @@ function trialPrompt(trialName: string): string {
 }
 
 async function runTrial(trialName: string, opts: RunTrialOptions): Promise<{ report: EvalReport; runDir: string }> {
+  const variant = opts.variant ?? "default";
+  assertSupportedVariant(trialName, variant);
   const runId = generateRunId();
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
   const runName = [timestamp, runId].join("-");
@@ -191,7 +215,7 @@ async function runTrial(trialName: string, opts: RunTrialOptions): Promise<{ rep
       meta: {
         runId,
         trial: trialName,
-        variant: "default",
+        variant,
         agentSnapshot,
         ...(opts.suite ? { suite: opts.suite, suiteRunId: opts.suiteRunId } : {}),
         ...(opts.epoch ? { epoch: opts.epoch, totalEpochs: opts.totalEpochs } : {}),
@@ -250,7 +274,7 @@ async function runTrial(trialName: string, opts: RunTrialOptions): Promise<{ rep
     meta: {
       runId,
       trial: trialName,
-      variant: "default",
+      variant,
       workerModel,
       ...(judgeResult && config.judge?.model ? { judgeModel: config.judge.model } : {}),
       startedAt: new Date(result.session.startTime).toISOString(),
@@ -274,6 +298,53 @@ async function runTrial(trialName: string, opts: RunTrialOptions): Promise<{ rep
   return { report, runDir: path.basename(runDir) };
 }
 
+async function runSuiteForProfile(
+  suiteName: string,
+  profile: ExecutionProfile,
+  options: { suiteRunId: string; label: string; epochs?: number; judge?: boolean },
+): Promise<ProfileSuiteReport> {
+  const entries = getSuiteEntries(suiteName);
+  const globalEpochs = options.epochs ?? config.epochs ?? 1;
+  const allResults: Array<{ report: EvalReport; runDir: string }> = [];
+  let maxEpochs = 1;
+
+  console.log(`\n=== ${options.label}: ${profile.label} ===\n`);
+  for (const entry of entries) {
+    assertSupportedVariant(entry.trial, entry.variant);
+    const epochs = entry.epochs ?? globalEpochs;
+    maxEpochs = Math.max(maxEpochs, epochs);
+    for (let epoch = 1; epoch <= epochs; epoch++) {
+      allResults.push(
+        await runTrial(entry.trial, {
+          profile,
+          variant: entry.variant,
+          suite: suiteName,
+          suiteRunId: options.suiteRunId,
+          ...(epochs > 1 ? { epoch, totalEpochs: epochs } : {}),
+          ...(options.judge !== undefined ? { judge: options.judge } : {}),
+        }),
+      );
+    }
+  }
+
+  const suiteReport = createSuiteReport(
+    suiteName,
+    options.suiteRunId,
+    allResults,
+    new Date().toISOString(),
+    maxEpochs > 1 ? maxEpochs : undefined,
+    profile.id,
+  );
+  writeSuiteReport(suiteReport, RUNS_DIR);
+  updateSuiteIndex(RUNS_DIR);
+  if (suiteReport.aggregated) {
+    console.log(`\n--- Aggregated Results [${profile.id}] ---`);
+    for (const entry of suiteReport.aggregated) printAggregatedSummary(entry);
+  }
+
+  return { profile, report: suiteReport };
+}
+
 async function runExperiment(experimentName: string): Promise<void> {
   const experiment = getExperiment(experimentName);
   if (new Set(experiment.profiles).size !== experiment.profiles.length) {
@@ -283,8 +354,6 @@ async function runExperiment(experimentName: string): Promise<void> {
     fail(`Experiment "${experimentName}" baseline must be one of its profiles`);
   }
 
-  const entries = getSuiteEntries(experiment.suite);
-  const globalEpochs = experiment.epochs ?? config.epochs ?? 1;
   const benchRunId = `bench-${Date.now()}-${safeName(experimentName)}`;
   const benchStartedAt = new Date().toISOString();
   const profileReports: ProfileSuiteReport[] = [];
@@ -292,41 +361,14 @@ async function runExperiment(experimentName: string): Promise<void> {
   for (const profileId of experiment.profiles) {
     const profile = getProfile(profileId);
     const suiteRunId = `suite-${Date.now()}-${safeName(experimentName)}-${safeName(profile.id)}`;
-    const allResults: Array<{ report: EvalReport; runDir: string }> = [];
-    let maxEpochs = 1;
-
-    console.log(`\n=== Experiment ${experimentName}: ${profile.label} ===\n`);
-    for (const entry of entries) {
-      const epochs = entry.epochs ?? globalEpochs;
-      maxEpochs = Math.max(maxEpochs, epochs);
-      for (let epoch = 1; epoch <= epochs; epoch++) {
-        allResults.push(
-          await runTrial(entry.trial, {
-            profile,
-            suite: experiment.suite,
-            suiteRunId,
-            ...(epochs > 1 ? { epoch, totalEpochs: epochs } : {}),
-            judge: hasFlag("judge"),
-          }),
-        );
-      }
-    }
-
-    const suiteReport = createSuiteReport(
-      experiment.suite,
-      suiteRunId,
-      allResults,
-      new Date().toISOString(),
-      maxEpochs > 1 ? maxEpochs : undefined,
-      profile.id,
+    profileReports.push(
+      await runSuiteForProfile(experiment.suite, profile, {
+        suiteRunId,
+        label: `Experiment ${experimentName}`,
+        ...(experiment.epochs !== undefined ? { epochs: experiment.epochs } : {}),
+        judge: hasFlag("judge"),
+      }),
     );
-    writeSuiteReport(suiteReport, RUNS_DIR);
-    updateSuiteIndex(RUNS_DIR);
-    if (suiteReport.aggregated) {
-      console.log(`\n--- Aggregated Results [${profile.id}] ---`);
-      for (const entry of suiteReport.aggregated) printAggregatedSummary(entry);
-    }
-    profileReports.push({ profile, report: suiteReport });
   }
 
   const benchReport = createProfileBenchReport(
@@ -357,21 +399,46 @@ function listConfig(): void {
   }
 }
 
+async function runSuiteCommand(suiteName: string, profileId: string): Promise<void> {
+  const profile = getProfile(profileId);
+  const suiteRunId = `suite-${Date.now()}-${safeName(suiteName)}-${safeName(profile.id)}`;
+  await runSuiteForProfile(suiteName, profile, {
+    suiteRunId,
+    label: `Suite ${suiteName}`,
+    judge: hasFlag("judge"),
+  });
+}
+
 const command = process.argv[2] ?? "list";
 
 if (command === "list") {
   listConfig();
 } else if (command === "run") {
   const trial = getFlag("trial");
+  const suite = process.argv[3] && !process.argv[3].startsWith("--") ? process.argv[3] : undefined;
   const profileId = getFlag("profile") ?? "codexWithAbpSkills";
-  if (!trial) fail("Usage: npm run eval -- run --trial <trial> --profile <profile>");
-  await runTrial(trial, { profile: getProfile(profileId), judge: hasFlag("judge") });
+  if (trial) {
+    await runTrial(trial, {
+      profile: getProfile(profileId),
+      variant: getFlag("variant") ?? "default",
+      judge: hasFlag("judge"),
+    });
+  } else if (suite) {
+    await runSuiteCommand(suite, profileId);
+  } else {
+    fail("Usage: npm run eval -- run <suite> [--profile <profile>] [--judge]");
+  }
+} else if (command === "bench") {
+  const suite = process.argv[3] && !process.argv[3].startsWith("--") ? process.argv[3] : "allSkills";
+  await runExperiment(resolveBenchmarkExperimentName(suite));
 } else if (command === "experiment") {
   await runExperiment(process.argv[3] && !process.argv[3].startsWith("--") ? process.argv[3] : "codex-abp");
 } else {
   console.log("Usage:");
   console.log("  npm run list");
-  console.log("  npm run eval -- run --trial <trial> --profile <profile> [--judge]");
+  console.log("  npm run eval -- run <suite> [--profile <profile>] [--judge]");
+  console.log("  npm run eval -- run --trial <trial> [--variant default] [--profile <profile>] [--judge]");
+  console.log("  npm run eval -- bench <suite> [--judge]");
   console.log("  npm run experiment -- [--judge]");
   process.exit(1);
 }

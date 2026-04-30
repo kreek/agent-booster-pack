@@ -14,50 +14,59 @@ const sharedCodexAgent: EvalConfig["profiles"][string]["agent"] = {
 
 const proofFirstBugfix = {
   trial: "proof-first-bugfix",
+  variant: "default",
   priority: "core",
   skills: ["workflow", "proof", "data-first", "refactoring"],
 } satisfies EvalConfig["suites"][string][number];
 
 const securityBoundaryFix = {
   trial: "security-boundary-fix",
+  variant: "default",
   priority: "core",
   skills: ["workflow", "proof", "security"],
 } satisfies EvalConfig["suites"][string][number];
 
 const designDecisionRecord = {
   trial: "design-decision-record",
+  variant: "default",
   priority: "core",
   skills: ["workflow", "whiteboarding", "architecture", "documentation"],
 } satisfies EvalConfig["suites"][string][number];
 
 const debuggingRegression = {
   trial: "debugging-regression",
+  variant: "default",
   priority: "core",
   skills: ["workflow", "debugging", "code-review", "proof"],
 } satisfies EvalConfig["suites"][string][number];
 
 const apiErrorContract = {
   trial: "api-error-contract",
+  variant: "default",
   skills: ["api", "error-handling", "security", "documentation"],
 } satisfies EvalConfig["suites"][string][number];
 
 const databaseReleaseSafety = {
   trial: "database-release-safety",
+  variant: "default",
   skills: ["database", "release", "data-first"],
 } satisfies EvalConfig["suites"][string][number];
 
 const observableAsyncWorker = {
   trial: "observable-async-worker",
+  variant: "default",
   skills: ["observability", "async-systems", "performance"],
 } satisfies EvalConfig["suites"][string][number];
 
 const accessibleUiState = {
   trial: "accessible-ui-state",
+  variant: "default",
   skills: ["ui-design", "accessibility"],
 } satisfies EvalConfig["suites"][string][number];
 
 const scaffoldRepoWorkflow = {
   trial: "scaffold-repo-workflow",
+  variant: "default",
   skills: ["scaffolding", "git-workflow", "documentation", "proof"],
 } satisfies EvalConfig["suites"][string][number];
 
@@ -122,6 +131,26 @@ const config: EvalConfig = {
     engineeringMaturity: allSkills,
   },
   experiments: {
+    smoke: {
+      suite: "smoke",
+      profiles: ["codexBaseline", "codexWithAbpSkills"],
+      baseline: "codexBaseline",
+    },
+    core: {
+      suite: "core",
+      profiles: ["codexBaseline", "codexWithAbpSkills"],
+      baseline: "codexBaseline",
+    },
+    allSkills: {
+      suite: "allSkills",
+      profiles: ["codexBaseline", "codexWithAbpSkills"],
+      baseline: "codexBaseline",
+    },
+    engineeringMaturity: {
+      suite: "engineeringMaturity",
+      profiles: ["codexBaseline", "codexWithAbpSkills"],
+      baseline: "codexBaseline",
+    },
     "codex-abp-smoke": {
       suite: "smoke",
       profiles: ["codexBaseline", "codexWithAbpSkills"],

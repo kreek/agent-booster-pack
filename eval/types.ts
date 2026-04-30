@@ -2,6 +2,7 @@ import type { BudgetConfig, ExecutionProfile } from "pi-do-eval";
 
 export interface SuiteEntry {
   trial: string;
+  variant: "default";
   skills: string[];
   priority?: "core" | "supporting";
   epochs?: number;

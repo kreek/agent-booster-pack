@@ -5,6 +5,10 @@
   "type": "module",
   "scripts": {
     "eval": "tsx eval.ts",
+    "bench": "tsx eval.ts bench allSkills",
+    "bench:smoke": "tsx eval.ts bench smoke",
+    "bench:core": "tsx eval.ts bench core",
+    "bench:all": "tsx eval.ts bench allSkills",
     "experiment": "tsx eval.ts experiment codex-abp",
     "experiment:smoke": "tsx eval.ts experiment codex-abp-smoke",
     "experiment:core": "tsx eval.ts experiment codex-abp-core",

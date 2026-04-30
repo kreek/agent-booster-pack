@@ -59,6 +59,11 @@ npm run experiment:core
 npm run experiment:all
 npm run experiment
 npm run experiment -- --judge
+npm run bench:smoke
+npm run bench:core
+npm run bench:all
+npm run eval -- bench smoke
+npm run eval -- run smoke --profile codexWithAbpSkills
 npm run eval -- run --trial proof-first-bugfix --profile codexWithAbpSkills
 npm test
 npm run typecheck
