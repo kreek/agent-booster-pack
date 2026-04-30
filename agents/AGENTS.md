@@ -261,6 +261,10 @@ floor. The rules below extend it with ABP doctrine; they do not restate it.
 A change is not complete until the relevant check has run or the exact
 blocker is reported. A feature is not complete until its user-observable
 behaviors are exercised by tests; test-first is optional, test-at-all is not.
+A non-trivial change is not complete until a `code-review` pass has run
+against the diff: self-review on agent-generated code reliably surfaces
+bugs, dead code, coupling, and missed edge cases that the implementation
+pass overlooks, and is part of the completion gate, not an optional add-on.
 
 - Tests enter at the outermost boundary the user reaches: HTTP endpoint, UI
   interaction, CLI invocation, public API.

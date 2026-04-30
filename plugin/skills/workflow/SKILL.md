@@ -96,7 +96,13 @@ outcome.
 5. Load those skills and follow their workflows. If two skills conflict,
    prefer safety, data integrity, correctness, proof, and user trust over
    convenience or style.
-6. Finish by naming what was proven, what remains unproven, and what a
+6. After any non-trivial implementation, run a `code-review` pass on your
+   own diff before invoking `proof` or claiming done. Treat
+   agent-generated code as untrusted: a second pass by the same agent
+   reliably surfaces bugs, dead code, coupling, and missed edge cases the
+   implementation pass overlooks. Trivial edits that exited at step 1 may
+   skip this.
+7. Finish by naming what was proven, what remains unproven, and what a
    human should review or decide. Explain what was built or changed, why
    it is better than what it replaced, and/or what it enables next. If
    that explanation is weak, pause and consider whether the change is too
@@ -133,6 +139,7 @@ outcome.
 | "This is only docs" | Check whether the docs change behavior, install path, commands, or user expectations. | Pure typo with no procedural meaning. |
 | "Production hardening later" | Route deploy, observability, security, data, and rollback risks now if real users are in scope. | Prototype clearly marked as disposable. |
 | "I'll just list files changed" | Explain why the change improves the system or what it enables next, tied to the user's goal. | Mechanical typo or formatting-only edit. |
+| "I just wrote it, I know it's fine" | Run a `code-review` pass on the diff before invoking `proof` or claiming done; self-review on agent-generated code reliably catches issues the implementation pass missed. | Trivial edits (typos, formatting, mechanical metadata) that exited at workflow step 1. |
 
 ## Handoffs
 
