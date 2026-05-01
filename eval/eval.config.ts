@@ -175,6 +175,10 @@ const config: EvalConfig = {
       baseline: "codexBaseline",
     },
   },
+  judge: {
+    provider: "openai-codex",
+    model: "gpt-5.4",
+  },
   timeouts: {
     workerMs: 15 * 60 * 1000,
     inactivityMs: 2 * 60 * 1000,
@@ -185,6 +189,7 @@ const config: EvalConfig = {
     maxToolCalls: 200,
     maxBlockedCalls: 0,
   },
+  defaultLaunchType: "bench",
 };
 
 export default config;

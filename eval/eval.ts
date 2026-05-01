@@ -379,7 +379,7 @@ async function runExperiment(experimentName: string): Promise<void> {
         suiteRunId,
         label: `Experiment ${experimentName}`,
         ...(experiment.epochs !== undefined ? { epochs: experiment.epochs } : {}),
-        judge: hasFlag("judge"),
+        judge: !hasFlag("no-judge"),
       }),
     );
   }
@@ -418,7 +418,7 @@ async function runSuiteCommand(suiteName: string, profileId: string): Promise<vo
   await runSuiteForProfile(suiteName, profile, {
     suiteRunId,
     label: `Suite ${suiteName}`,
-    judge: hasFlag("judge"),
+    judge: !hasFlag("no-judge"),
   });
 }
 
@@ -434,7 +434,7 @@ if (command === "list") {
     await runTrial(trial, {
       profile: getProfile(profileId),
       variant: getFlag("variant") ?? "default",
-      judge: hasFlag("judge"),
+      judge: !hasFlag("no-judge"),
     });
   } else if (suite) {
     await runSuiteCommand(suite, profileId);
@@ -449,9 +449,9 @@ if (command === "list") {
 } else {
   console.log("Usage:");
   console.log("  npm run list");
-  console.log("  npm run eval -- run <suite> [--profile <profile>] [--judge]");
-  console.log("  npm run eval -- run --trial <trial> [--variant default] [--profile <profile>] [--judge]");
-  console.log("  npm run eval -- bench <suite> [--judge]");
-  console.log("  npm run experiment -- [--judge]");
+  console.log("  npm run eval -- run <suite> [--profile <profile>] [--no-judge]");
+  console.log("  npm run eval -- run --trial <trial> [--variant default] [--profile <profile>] [--no-judge]");
+  console.log("  npm run eval -- bench <suite> [--no-judge]");
+  console.log("  npm run experiment -- [--no-judge]");
   process.exit(1);
 }

@@ -33,4 +33,5 @@ export interface EvalConfig {
     judgeMs?: number;
   };
   budgets?: BudgetConfig;
+  defaultLaunchType?: "suite" | "trial" | "bench";
 }
