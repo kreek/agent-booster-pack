@@ -1,13 +1,14 @@
 # Agent Booster Pack Evals
 
 This eval suite benchmarks whether Codex behaves better when the Agent Booster
-Pack skills are available as a project layer.
+Pack is installed as a Codex plugin.
 
 The experiments compare:
 
-- `codexBaseline`: Codex with an isolated home and no ABP layer.
-- `codexWithAbpSkills`: the same Codex model with `agents/.agents/skills`
-  copied into the trial workdir at `.codex/skills`.
+- `codexBaseline`: Codex with an isolated, freshly-authed home and no plugins.
+- `codexWithAbpSkills`: the same Codex model with the local repo registered
+  as a codex plugin marketplace and the `abp@abp` plugin enabled — the same
+  flow a real user gets after `codex plugin marketplace add`.
 
 Suites:
 
@@ -16,9 +17,11 @@ Suites:
 - `allSkills`: a larger suite intended to exercise every ABP skill listed in
   the README at least once.
 
-The suite uses deterministic hidden checks plus optional judge scoring. The
-hidden checks make sure the task still works even if the agent edits visible
-tests.
+The suite uses deterministic hidden checks plus an LLM judge that scores
+engineering maturity, proof quality, simplicity, and risk handling. Hidden
+checks make sure the task still works even if the agent edits visible tests.
+The judge runs by default; pass `--no-judge` for a fast, deterministic-only
+run during local development.
 
 Trial prompts are intentionally neutral: they describe the product or
 maintenance task without naming ABP, skills, or the quality lens being scored.
@@ -53,21 +56,26 @@ from `~/.codex/auth.json`. Each run gets a temporary isolated Codex home.
 ## Commands
 
 ```sh
-npm run list
-npm run experiment:smoke
-npm run experiment:core
-npm run experiment:all
-npm run experiment
-npm run experiment -- --judge
-npm run bench:smoke
-npm run bench:core
-npm run bench:all
-npm run eval -- bench smoke
+npm run list                       # show trials, suites, experiments
+npm run experiment:smoke           # run baseline vs ABP on the smoke suite
+npm run experiment:core            # run baseline vs ABP on the core suite
+npm run experiment:all             # run baseline vs ABP across every skill
+npm run experiment                 # alias for the codex-abp experiment
+npm run experiment -- --no-judge   # skip the judge for a faster dev run
+
+npm run bench:smoke                # bench mode for one suite
 npm run eval -- run smoke --profile codexWithAbpSkills
-npm run eval -- run --trial proof-first-bugfix --profile codexWithAbpSkills
+npm run eval -- run --trial proof-first-bugfix --profile codexBaseline
+
 npm test
 npm run typecheck
 ```
+
+The launcher card in the pi-do-eval UI defaults to the **Bench** tab for this
+project (set via `defaultLaunchType: "bench"` in `eval.config.ts`) — that's
+where the cross-profile comparison view lives. The **Regression** sidebar tab
+shows each profile's runs over time as a separate timeline, since two
+profiles with different layers can't share a single drift line.
 
 Results are written under `~/.cache/agent-booster-pack/eval/runs/` (override
 with `ABP_EVAL_RUNS_DIR`). The in-repo `eval/runs/` is a symlink into that

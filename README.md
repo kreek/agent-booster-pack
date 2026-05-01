@@ -157,6 +157,15 @@ For greenfield scaffolding, ABP uses editable [Backstage Software
 Templates][backstage-templates] YAML files so teams can tune stack presets to
 their preferences.
 
+## Evaluation
+
+ABP ships an eval suite under [`eval/`](eval/README.md) that benchmarks Codex
+with and without the ABP plugin against shared engineering tasks. The current
+smoke trial shows a +17 lift on the proof-first bugfix task; the LLM judge
+adds engineering-maturity, proof-quality, simplicity, and risk-handling
+scores on top of deterministic hidden tests. See `eval/README.md` for the
+trial catalog and `npm run` commands.
+
 ## Using ABP
 
 Skills are progressive context: agents see only `name` and a concise
