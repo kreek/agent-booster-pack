@@ -69,4 +69,8 @@ npm test
 npm run typecheck
 ```
 
-Results are written under `eval/runs/`.
+Results are written under `~/.cache/agent-booster-pack/eval/runs/` (override
+with `ABP_EVAL_RUNS_DIR`). The in-repo `eval/runs/` is a symlink into that
+cache so the pi-do-eval UI can serve them. Trial workdirs live outside the
+repo to keep codex's ancestor walk from auto-discovering ABP skills into the
+baseline profile.

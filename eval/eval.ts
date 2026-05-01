@@ -1,4 +1,5 @@
 import * as fs from "node:fs";
+import * as os from "node:os";
 import * as path from "node:path";
 import type {
   AgentSnapshot,
@@ -32,7 +33,19 @@ import maturityPlugin from "./plugins/engineering-maturity.js";
 import type { ExperimentConfig, ModelConfig, SuiteEntry } from "./types.js";
 
 const TRIALS_DIR = path.join(import.meta.dirname, "trials");
-const RUNS_DIR = path.join(import.meta.dirname, "runs");
+const RUNS_DIR = resolveRunsDir();
+
+function resolveRunsDir(): string {
+  // Trial workdirs must live outside the agent-booster-pack repo so codex's
+  // ancestor walk can't auto-discover the repo's AGENTS.md and skill library
+  // and thereby leak ABP doctrine into the baseline profile.
+  const override = process.env["ABP_EVAL_RUNS_DIR"];
+  const target = override
+    ? path.resolve(override)
+    : path.join(os.homedir(), ".cache", "agent-booster-pack", "eval", "runs");
+  fs.mkdirSync(target, { recursive: true });
+  return target;
+}
 
 interface RunTrialOptions {
   profile: ExecutionProfile;
