@@ -12,7 +12,7 @@ Agent Booster Pack helps coding agents produce code that is well-organized, low 
 
 [Installation](#installation)
 
-ABP is a portable skill library that works with Codex, Claude Code, Pi, Cursor, Gemini CLI, GitHub Copilot CLI, OpenCode, and Windsurf via the Agent Skills layout. It is based on 25 years of software engineering experience, from startups to large organizations.
+Drawn from 25 years of software engineering across startups and large organizations, ABP is a portable skill library that works with Codex, Claude Code, Pi, Cursor, Gemini CLI, GitHub Copilot CLI, OpenCode, and Windsurf via the Agent Skills layout.
 
 In practice, ABP guides agents to:
 
