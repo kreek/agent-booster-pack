@@ -62,28 +62,30 @@ function expectNeutralFixtureContent(filePath: string): void {
 }
 
 describe("ABP eval config", () => {
-  it("defines a baseline Codex profile and a Codex profile with the ABP skills layer", () => {
+  it("defines a baseline Codex profile and a Codex profile with the ABP plugin", () => {
     const baseline = config.profiles["codexBaseline"];
     const withAbp = config.profiles["codexWithAbpSkills"];
     if (!baseline || !withAbp) throw new Error("Expected Codex profiles");
 
     expect(baseline.agent.harness).toBe("codex");
     expect(baseline.factors.layers).toEqual([]);
+    expect(baseline.agent.codex?.pluginMarketplaces ?? []).toEqual([]);
+
     expect(withAbp.agent.harness).toBe("codex");
     expect(withAbp.factors.layers).toEqual([
       expect.objectContaining({
-        id: "agent-booster-pack-skills",
-        kind: "skill-library",
+        id: "abp",
+        kind: "plugin",
         runtime: "codex",
       }),
     ]);
-    expect(withAbp.setup?.layers?.[0]).toEqual(
-      expect.objectContaining({
-        source: "../agents/.agents/skills",
-        mode: "copy",
-      }),
+    const marketplaceSource = withAbp.agent.codex?.pluginMarketplaces?.[0];
+    expect(marketplaceSource, "ABP profile must register the local repo as a codex plugin marketplace").toBeDefined();
+    expect(fs.existsSync(path.resolve(marketplaceSource ?? ""))).toBe(true);
+    expect(fs.existsSync(path.join(marketplaceSource ?? "", "plugin", ".codex-plugin", "plugin.json"))).toBe(true);
+    expect(withAbp.agent.codex?.extraArgs).toEqual(
+      expect.arrayContaining(["-c", expect.stringContaining('plugins."abp@abp".enabled=true')]),
     );
-    expect(fs.existsSync(path.resolve(evalDir, withAbp.setup?.layers?.[0]?.source ?? ""))).toBe(true);
   });
 
   it("makes the Codex ABP experiment compare against an explicit baseline", () => {

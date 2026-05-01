@@ -1,14 +1,28 @@
+import * as path from "node:path";
 import type { EvalConfig } from "./types.js";
 
 const provider = process.env["ABP_EVAL_PROVIDER"] ?? "openai";
 const model = process.env["ABP_EVAL_MODEL"] ?? "gpt-5.4";
 
-const sharedCodexAgent: EvalConfig["profiles"][string]["agent"] = {
+const ABP_REPO_ROOT = path.resolve(import.meta.dirname, "..");
+
+const baselineCodexAgent: EvalConfig["profiles"][string]["agent"] = {
   harness: "codex",
   provider,
   model,
   codex: {
     isolateHome: true,
+  },
+};
+
+const abpCodexAgent: EvalConfig["profiles"][string]["agent"] = {
+  harness: "codex",
+  provider,
+  model,
+  codex: {
+    isolateHome: true,
+    pluginMarketplaces: [ABP_REPO_ROOT],
+    extraArgs: ["-c", 'plugins."abp@abp".enabled=true'],
   },
 };
 
@@ -86,7 +100,7 @@ const config: EvalConfig = {
     codexBaseline: {
       id: "codexBaseline",
       label: "Codex baseline",
-      agent: sharedCodexAgent,
+      agent: baselineCodexAgent,
       factors: {
         harness: "codex",
         provider,
@@ -97,28 +111,17 @@ const config: EvalConfig = {
     codexWithAbpSkills: {
       id: "codexWithAbpSkills",
       label: "Codex + ABP skills",
-      agent: sharedCodexAgent,
+      agent: abpCodexAgent,
       factors: {
         harness: "codex",
         provider,
         model,
         layers: [
           {
-            id: "agent-booster-pack-skills",
-            kind: "skill-library",
+            id: "abp",
+            kind: "plugin",
             runtime: "codex",
             capabilities: skillLayerCapabilities,
-          },
-        ],
-      },
-      setup: {
-        layers: [
-          {
-            id: "agent-booster-pack-skills",
-            kind: "skill-library",
-            runtime: "codex",
-            source: "../agents/.agents/skills",
-            mode: "copy",
           },
         ],
       },
