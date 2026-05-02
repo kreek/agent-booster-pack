@@ -75,10 +75,12 @@ For every non-trivial engineering claim, record:
    maintainability.
 2. For each remaining claim, fill the Proof Contract before declaring
    the work complete.
-3. When a claim needs a test, name the behavior in caller language.
+3. Load `references/recipes.md` when the proof shape is unclear or
+   domain-specific.
+4. When a claim needs a test, name the behavior in caller language.
    Arrange only the state a real caller needs; act once; assert on
    externally visible state, output, response, event, or error.
-4. Run the check fresh after the final edit when the environment
+5. Run the check fresh after the final edit when the environment
    permits it. If it can't run, state the missing dependency and mark
    the claim unproven.
 
@@ -156,4 +158,5 @@ counts toward whichever claims it actually covers.
 
 ## References
 
+- Proof recipes: `references/recipes.md`.
 - `pi-proof` extension: https://github.com/kreek/pi-proof

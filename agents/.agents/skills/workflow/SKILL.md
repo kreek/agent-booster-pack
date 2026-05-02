@@ -75,7 +75,24 @@ outcome.
    should stay separate. Do not wait until commit time to isolate the
    change. (Branch-per-change and no-edits-on-main are harness baseline.)
 4. Select the smallest useful skill set by quality concern and risk
-   trigger:
+   trigger. Use this matrix only for risks that are actually present;
+   do not load every row:
+   - behavior or contract change -> `proof`, `code-review`;
+   - auth, secrets, trust boundary, or user-controlled input ->
+     `security`, `proof`;
+   - persisted data, migrations, transactions, or deletion ->
+     `database`, `release`, `proof`;
+   - async work, retries, queues, workers, streams, or concurrency ->
+     `async-systems`, `observability`, `proof`;
+   - public HTTP/API/wire shape -> `api`, `error-handling`,
+     `proof`;
+   - UI or interaction flow -> `ui-design`, `accessibility`,
+     `proof`;
+   - requirements, ADRs, runbooks, public docs, or maintainer docs ->
+     `documentation`;
+   - repository setup, staging, commits, or history ->
+     `scaffolding`, `git-workflow`.
+   Then refine with the Handoffs graph:
    - whiteboard non-trivial changes with `whiteboarding` before drafting
      code; map current and proposed contracts and resolve open questions
      before invoking design-pass skills;
@@ -96,12 +113,12 @@ outcome.
 5. Load those skills and follow their workflows. If two skills conflict,
    prefer safety, data integrity, correctness, proof, and user trust over
    convenience or style.
-6. After any non-trivial implementation, run a `code-review` pass on your
-   own diff before invoking `proof` or claiming done. Treat
-   agent-generated code as untrusted: a second pass by the same agent
-   reliably surfaces bugs, dead code, coupling, and missed edge cases the
-   implementation pass overlooks. Trivial edits that exited at step 1 may
-   skip this.
+6. For non-trivial implementation, follow the named completion loop:
+   implement -> self-review diff -> fix findings -> proof -> final scoped
+   claim. Treat agent-generated code as untrusted: a second pass by the
+   same agent reliably surfaces bugs, dead code, coupling, and missed
+   edge cases the implementation pass overlooks. Trivial edits that
+   exited at step 1 may skip this.
 7. Finish by naming what was proven, what remains unproven, and what a
    human should review or decide. Explain what was built or changed, why
    it is better than what it replaced, and/or what it enables next. If
@@ -130,6 +147,9 @@ outcome.
       reported as unproven. Refactors and reorganisations counted by the
       diff do not require enumeration; only behavior-bearing
       elaborations do.
+- [ ] Non-trivial implementation followed the completion loop:
+      implement -> self-review diff -> fix findings -> proof -> final
+      scoped claim.
 - [ ] Human decisions and tradeoffs are surfaced instead of buried in
       implementation details.
 - [ ] The final response explains the change's value or future
