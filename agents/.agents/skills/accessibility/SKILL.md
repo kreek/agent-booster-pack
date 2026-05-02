@@ -50,7 +50,8 @@ description: Use for accessible UI, WCAG, ARIA, keyboard, focus, contrast, and i
    custom controls. Check labels, accessible names, headings,
    landmarks, form errors, status messages, and live regions.
 3. Verify contrast, reflow, target size, reduced motion, forced
-   colors, and text spacing.
+   colors, text spacing, dragging alternatives, redundant entry, and
+   authentication flows that must not depend on cognitive tests.
 4. Run automated checks, then perform manual keyboard testing. Add
    screen-reader testing for custom controls, dialogs, menus, tabs,
    forms, and live updates. Record remaining accessibility risks as
@@ -67,6 +68,8 @@ description: Use for accessible UI, WCAG, ARIA, keyboard, focus, contrast, and i
       modal/overlay close.
 - [ ] Text contrast, non-text contrast, target size, and reflow are
       checked.
+- [ ] Dragging has a single-pointer alternative; multi-step flows avoid
+      redundant entry; authentication does not require cognitive tests.
 - [ ] Forms have labels, grouped controls where needed, and
       field-linked errors.
 - [ ] Reduced motion, forced colors, contrast preferences, and dark
