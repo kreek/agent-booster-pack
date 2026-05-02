@@ -22,6 +22,7 @@ spec:
     - ./python/web-django.yaml
     # Java (JVM — Java-first frameworks; also support Kotlin source via language_flavor)
     - ./java/api-javalin.yaml
+    - ./java/service-quarkus.yaml
     - ./java/service-spring-boot.yaml
     # Kotlin (Kotlin-first frameworks — coroutine-native, Kotlin DSL routing)
     - ./kotlin/api-ktor.yaml

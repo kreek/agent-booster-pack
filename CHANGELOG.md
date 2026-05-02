@@ -6,6 +6,13 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- `scaffolding` now ships a `java/service-quarkus` Backstage stack template
+  for native-ready JVM services with Quarkus REST, CDI, Gradle, JUnit 5,
+  RestAssured, Panache, observability, auth, scheduler, and native-image
+  choices.
+
 ### Changed
 
 - BREAKING: Skills are consolidated to reduce Codex skill-list context

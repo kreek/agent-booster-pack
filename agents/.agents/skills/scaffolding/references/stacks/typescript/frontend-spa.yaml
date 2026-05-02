@@ -53,6 +53,7 @@ spec:
             - api-sinatra
             - web-rails
             - api-javalin
+            - service-quarkus
             - service-spring-boot
             - api-ktor
             - service-ktor
@@ -76,6 +77,7 @@ spec:
             - 'api-sinatra — Ruby Sinatra'
             - 'web-rails — Ruby on Rails (Hotwire available natively)'
             - 'api-javalin — Java/Kotlin Javalin'
+            - 'service-quarkus — Java/Kotlin Quarkus'
             - 'service-spring-boot — Java/Kotlin Spring Boot'
             - 'api-ktor — Kotlin Ktor (coroutine-first)'
             - 'service-ktor — Kotlin Ktor + Koin/Exposed/OTel stack'

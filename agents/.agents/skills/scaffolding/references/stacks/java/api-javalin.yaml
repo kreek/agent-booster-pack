@@ -121,4 +121,5 @@ spec:
     Need auto-config / starters / actuator / data integrations /
     enterprise conventions → service-spring-boot. Coroutine-native
     async / multiplatform Kotlin → Ktor (future sibling). Cold-start
-    / native-image fit → Micronaut or Quarkus (future siblings).
+    / native-image fit → service-quarkus. Compile-time DI without
+    Quarkus extension conventions → Micronaut (future sibling).

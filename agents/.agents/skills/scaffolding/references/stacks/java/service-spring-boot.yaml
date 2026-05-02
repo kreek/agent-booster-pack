@@ -138,5 +138,6 @@ spec:
     integration test boots the context and asserts the response.
   switch_when: |
     Compact API with minimal concepts → api-javalin. Cold-start
-    optimization / native image as primary goal → Quarkus or
-    Micronaut (future siblings).
+    optimization / native image as primary goal → service-quarkus.
+    Compile-time DI without Quarkus extension conventions →
+    Micronaut (future sibling).

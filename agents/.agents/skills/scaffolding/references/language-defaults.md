@@ -32,8 +32,8 @@ live in `AGENTS.md`.
 
 ## Java
 
-The `java/` catalog covers Java-first frameworks (Javalin, Spring
-Boot). Both Java and Kotlin source are supported via the
+The `java/` catalog covers Java-first frameworks (Javalin, Quarkus,
+Spring Boot). Both Java and Kotlin source are supported via the
 `language_flavor` parameter — pick `java/` when the framework
 itself is Java-shaped. For Kotlin-first frameworks (coroutine-
 native Ktor, Kotlin DSL routing) see the `kotlin/` catalog and
@@ -55,7 +55,7 @@ The `kotlin/` catalog covers Kotlin-first frameworks (Ktor); the
 same build-tooling stance as Java applies (Gradle Kotlin DSL, JDK
 LTS, version catalog). Use the `java/` templates with
 `language_flavor: kotlin` when you want Kotlin source against a
-Java-shaped framework (Javalin, Spring Boot).
+Java-shaped framework (Javalin, Quarkus, Spring Boot).
 
 - Kotlin compiler: K2 (modern front-end) is the default for new
   Kotlin projects.
@@ -63,7 +63,8 @@ Java-shaped framework (Javalin, Spring Boot).
   async code; avoid mixing with raw threads or callback-style APIs
   unless interop with a Java library forces it.
 - DI: pick Koin or Kodein when DI is wanted; Spring DI only when
-  picking a Spring template. Ktor itself stays DI-agnostic.
+  picking a Spring template; Quarkus CDI only when picking a Quarkus
+  template. Ktor itself stays DI-agnostic.
 - Persistence: Exposed (JetBrains' Kotlin SQL framework) is the
   Kotlin-native default; jOOQ when a typesafe SQL DSL is the
   priority; JDBI when SQL-with-object-mapping is enough.
