@@ -114,11 +114,16 @@ outcome.
    prefer safety, data integrity, correctness, proof, and user trust over
    convenience or style.
 6. For non-trivial implementation, follow the named completion loop:
-   implement -> self-review diff -> fix findings -> proof -> final scoped
-   claim. Treat agent-generated code as untrusted: a second pass by the
-   same agent reliably surfaces bugs, dead code, coupling, and missed
-   edge cases the implementation pass overlooks. Trivial edits that
-   exited at step 1 may skip this.
+   implement -> self-review diff -> fix findings -> documentation
+   check -> proof -> final scoped claim. The documentation check asks
+   whether changed behavior, setup, config, APIs, operations, domain
+   rules, or maintainer expectations need updated docs, examples, or
+   explanatory comments before proof. Treat agent-generated code as
+   untrusted: a second pass by the same agent reliably surfaces bugs,
+   dead code, coupling, and missed edge cases the implementation pass
+   overlooks. Trivial edits, one-liners, typo fixes, formatting, and
+   mechanical metadata changes that exited at step 1 skip this loop;
+   do not spend tokens manufacturing a documentation check for them.
 7. Finish by naming what was proven, what remains unproven, and what a
    human should review or decide. Explain what was built or changed, why
    it is better than what it replaced, and/or what it enables next. If
@@ -148,8 +153,12 @@ outcome.
       diff do not require enumeration; only behavior-bearing
       elaborations do.
 - [ ] Non-trivial implementation followed the completion loop:
-      implement -> self-review diff -> fix findings -> proof -> final
-      scoped claim.
+      implement -> self-review diff -> fix findings -> documentation
+      check -> proof -> final scoped claim.
+- [ ] When the completion loop applied, documentation needs were
+      checked after review: changed behavior, setup, config, APIs,
+      operations, domain rules, and maintainer expectations either have
+      the right source of truth or were explicitly left unchanged.
 - [ ] Human decisions and tradeoffs are surfaced instead of buried in
       implementation details.
 - [ ] The final response explains the change's value or future

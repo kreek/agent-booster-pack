@@ -111,6 +111,10 @@ subdirectory under `skills/`. Each subdirectory is one skill, with a
 `SKILL.md` that has YAML frontmatter (`name`, `description`) and a body Pi
 loads when the skill description matches a task. No code runs.
 
+Future Pi runtime hooks or gates can enforce that ABP workflow phases such as
+code review, documentation checks, and proof actually run. This package
+currently ships the skills doctrine only; it does not implement those gates.
+
 ## Build pipeline
 
 `skills/` is a build artifact, not a checked-in mirror.

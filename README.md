@@ -395,6 +395,15 @@ plugin uses `plugin/.codex-plugin/plugin.json`. Both load the generated skill
 mirror under `plugin/skills/`. Edit canonical skills under
 `agents/.agents/skills/`, then run `./setup.sh` to refresh the mirror.
 
+### Runtime Gates
+
+ABP skills define the doctrine. Runtime hooks or gates can enforce that
+workflow phases such as code review, documentation checks, and proof actually
+run before completion. The Pi package is the most likely future enforcement
+surface for those gates. Claude plugin support should be treated as
+conditional on what the Claude Code plugin format exposes; the current plugin
+package documents and ships skills rather than implementing hook enforcement.
+
 ## Remove
 
 ```sh

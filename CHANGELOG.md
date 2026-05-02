@@ -41,6 +41,9 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `api` now treats continuation tokens such as cursors, page tokens, sync
   tokens, and resume tokens as caller input and requires explicit
   invalid-token behavior instead of silent position fallback.
+- `workflow` now includes a documentation check in the completion loop, and
+  `documentation` clarifies when explanatory comments should capture
+  non-obvious why/how context without encouraging comment-count targets.
 
 ### Fixed
 

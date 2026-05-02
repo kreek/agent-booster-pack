@@ -36,8 +36,13 @@ description: Use for documentation, READMEs, guides, ADRs, runbooks, API docs, c
 4. Write the why, context, and tradeoffs; let code/tests/schemas prove
    mechanics.
 5. Delete stale docs when you cannot fix them now.
-6. Comments explain non-obvious intent, constraints, or hazards, not
-   line-by-line behavior.
+6. Comments explain why and how when that context is not obvious from
+   names, types, schemas, tests, or local structure. Comment
+   non-obvious business rules, domain constraints, safety invariants,
+   protocol or lifecycle assumptions, and workarounds. Prefer encoding
+   the rule in a name, type, function, schema, or test first; add a
+   comment when the reason still is not locally obvious. Avoid
+   comment-count targets and line-by-line narration.
 7. Runbooks are operational artifacts: symptom, diagnosis,
    remediation, verification, escalation.
 8. Large project documentation uses Material for MkDocs by default,
@@ -76,7 +81,9 @@ description: Use for documentation, READMEs, guides, ADRs, runbooks, API docs, c
 - [ ] ADRs record one accepted decision with consequences.
 - [ ] Runbooks include symptom, diagnosis, remediation, verification,
       and escalation.
-- [ ] Comments explain why; obvious what-comments are removed.
+- [ ] Comments explain non-obvious why/how context for business rules,
+      domain constraints, safety invariants, protocol/lifecycle
+      assumptions, and workarounds; obvious what-comments are removed.
 - [ ] Stale sections are deleted or marked with a tracked rewrite
       owner.
 - [ ] Requirements and acceptance criteria name caller-visible
