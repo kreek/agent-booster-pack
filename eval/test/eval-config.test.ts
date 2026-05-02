@@ -1,9 +1,13 @@
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
+import type { EvalSession, VerifyResult } from "pi-do-eval";
 import { describe, expect, it } from "vitest";
 import config from "../eval.config.js";
-import maturityPlugin from "../plugins/engineering-maturity.js";
+import maturityPlugin, {
+  extractFinalAssistantText,
+  extractInitialUserPrompt,
+} from "../plugins/engineering-maturity.js";
 
 const evalDir = path.resolve(import.meta.dirname, "..");
 const expectedReadmeSkills = [
@@ -61,6 +65,35 @@ function expectNeutralFixtureContent(filePath: string): void {
   expect(content, filePath).not.toMatch(/\b(ABP|Agent Booster Pack|skills?)\b/i);
 }
 
+function messageLine(role: "user" | "assistant", text: string): string {
+  return JSON.stringify({
+    type: "message",
+    message: {
+      role,
+      content: [{ type: "text", text }],
+    },
+  });
+}
+
+function stubSession(rawLines: string[], overrides: Partial<EvalSession> = {}): EvalSession {
+  return {
+    toolCalls: [],
+    fileWrites: [],
+    pluginEvents: [],
+    rawLines,
+    startTime: 1,
+    endTime: 2,
+    exitCode: 0,
+    tokenUsage: { input: 0, output: 0 },
+    parseWarnings: 0,
+    ...overrides,
+  };
+}
+
+function routingVerify(): VerifyResult {
+  return { passed: true, output: "routing", metrics: { routingTrial: 1, routingCase: 1 } };
+}
+
 describe("ABP eval config", () => {
   it("defines a baseline Codex profile and a Codex profile with the ABP plugin", () => {
     const baseline = config.profiles["codexBaseline"];
@@ -98,16 +131,28 @@ describe("ABP eval config", () => {
     );
   });
 
+  it("adds a routing experiment that compares ABP against the same baseline", () => {
+    const experiment = config.experiments["codex-abp-routing"];
+    if (!experiment) throw new Error("Expected codex-abp-routing experiment");
+    expect(experiment.baseline).toBe("codexBaseline");
+    expect(experiment.profiles).toEqual(["codexBaseline", "codexWithAbpSkills"]);
+    expect(config.suites[experiment.suite]?.map((entry) => entry.trial)).toEqual(
+      getSuite("routing").map((entry) => entry.trial),
+    );
+  });
+
   it("defines lightweight, core, and all-skills suites", () => {
-    expect(Object.keys(config.suites).sort()).toEqual(["allSkills", "core", "engineeringMaturity", "smoke"]);
+    expect(Object.keys(config.suites).sort()).toEqual(["allSkills", "core", "engineeringMaturity", "routing", "smoke"]);
     expect(Object.keys(config.experiments).sort()).toEqual([
       "allSkills",
       "codex-abp",
       "codex-abp-all",
       "codex-abp-core",
+      "codex-abp-routing",
       "codex-abp-smoke",
       "core",
       "engineeringMaturity",
+      "routing",
       "smoke",
     ]);
 
@@ -122,6 +167,12 @@ describe("ABP eval config", () => {
       new Set(["proof-first-bugfix", "security-boundary-fix", "design-decision-record", "debugging-regression"]),
     );
     expect(getSuite("engineeringMaturity")).toEqual(allSkills);
+    expect(getSuite("routing").map((entry) => entry.trial)).toEqual([
+      "routing-checkout-payment",
+      "routing-worker-retry",
+      "routing-settings-copy",
+      "routing-customer-email-migration",
+    ]);
     for (const entry of allSkills) {
       expect(entry.variant).toBe("default");
     }
@@ -144,6 +195,7 @@ describe("ABP eval config", () => {
     const evalSource = fs.readFileSync(path.join(evalDir, "eval.ts"), "utf-8");
     expect(evalSource).toContain('command === "bench"');
     expect(evalSource).toContain("resolveBenchmarkExperimentName");
+    expect(evalSource).toContain("persistAssistantFinal");
   });
 
   it("covers every README skill without putting skill names in trial prompts or starter files", () => {
@@ -162,6 +214,23 @@ describe("ABP eval config", () => {
       for (const fixturePath of collectCheckedFiles(path.join(evalDir, "trials", entry.trial, "scaffold"))) {
         expectNeutralFixtureContent(fixturePath);
       }
+    }
+  });
+
+  it("keeps routing trial prompts neutral and read-only", () => {
+    for (const entry of getSuite("routing")) {
+      const trialDir = path.join(evalDir, "trials", entry.trial);
+      expectNeutralFixtureContent(path.join(trialDir, "task.md"));
+      expectNeutralFixtureContent(path.join(trialDir, "config.ts"));
+      for (const fixturePath of collectCheckedFiles(path.join(trialDir, "scaffold"))) {
+        expectNeutralFixtureContent(fixturePath);
+      }
+
+      const marker = JSON.parse(fs.readFileSync(path.join(trialDir, "scaffold", ".abp-eval-kind.json"), "utf-8")) as {
+        kind?: unknown;
+      };
+      expect(marker).toEqual({ kind: "routing", case: expect.any(Number) });
+      expect(fs.existsSync(path.join(trialDir, "scaffold", "package.json"))).toBe(false);
     }
   });
 
@@ -198,5 +267,109 @@ describe("ABP eval config", () => {
     expect(maturityPlugin.classifyFile?.("test/cart.test.js")).toBe("test");
     expect(maturityPlugin.classifyFile?.("src/cart.js")).toBe("source");
     expect(maturityPlugin.classifyFile?.("README.md")).toBe("documentation");
+  });
+
+  it("extracts final assistant text from session lines for read-only routing scoring", () => {
+    const rawLines = [
+      messageLine("user", "# Checkout Payment Change Triage\n\nDo not edit files."),
+      messageLine("assistant", "First draft"),
+      messageLine("assistant", "Final routing note"),
+    ];
+
+    expect(extractInitialUserPrompt(rawLines)).toContain("Checkout Payment Change Triage");
+    expect(extractFinalAssistantText(rawLines)).toBe("Final routing note");
+  });
+
+  it("extracts final assistant text from Codex agent-message events", () => {
+    const rawLines = [
+      JSON.stringify({ type: "item.completed", item: { type: "agent_message", text: "Intermediate note" } }),
+      JSON.stringify({ type: "item.completed", item: { type: "agent_message", text: "Final Codex note" } }),
+    ];
+
+    expect(extractFinalAssistantText(rawLines)).toBe("Final Codex note");
+  });
+
+  it("rewards routing answers that include expected lenses, exclusions, evidence, and loop", () => {
+    const finalAnswer = [
+      "Goal: add saved payment methods to checkout without weakening account or payment behavior.",
+      "Risk profile: sensitive payment data, stored token references, a public account contract, and gradual rollout.",
+      "Apply workflow, data-first, security, database, api, release, proof, and code-review.",
+      "Exclusions:",
+      "1. Broad wallet management UX beyond what checkout needs now.",
+      "2. Provider abstraction, multi-provider generalization, and new external dependencies.",
+      "Evidence plan: contract tests, negative trust-boundary cases, migration validation, and rollout/rollback checks.",
+      "Completion loop: implement -> self-review diff -> fix findings -> proof -> final scoped claim.",
+    ].join("\n");
+    const session = stubSession([
+      messageLine("user", "# Checkout Payment Change Triage\n\nDo not edit files."),
+      messageLine("assistant", finalAnswer),
+    ]);
+
+    const result = maturityPlugin.scoreSession(session, routingVerify());
+
+    expect(result.scores["routing"]).toBeGreaterThanOrEqual(90);
+    expect(result.scores["exclusions"]).toBe(100);
+    expect(result.scores["proof_plan"]).toBe(100);
+    expect(result.scores["no_file_writes"]).toBe(100);
+    expect(result.findings).toEqual([]);
+  });
+
+  it("does not reward generic routing words as domain lenses", () => {
+    const finalAnswer = [
+      "Goal: keep checkout safe.",
+      "Risk profile: payment, database, API, release, and code-review all matter.",
+      "State, evidence, and tests are mentioned here as generic words, not as selected lenses.",
+      "Exclude broad wallet management UX.",
+      "Exclude provider abstraction.",
+      "Completion loop: implement -> self-review diff -> fix findings -> proof -> final scoped claim.",
+    ].join("\n");
+    const session = stubSession([
+      messageLine("user", "# Checkout Payment Change Triage\n\nDo not edit files."),
+      messageLine("assistant", finalAnswer),
+    ]);
+
+    const result = maturityPlugin.scoreSession(session, routingVerify());
+
+    expect(result.findings).toContain("Missing expected routing lens: data modeling.");
+    expect(result.findings).toContain("Missing expected routing lens: proof.");
+  });
+
+  it("scores post-write self-review and proof commands for implementation trials", () => {
+    const session = stubSession([], {
+      fileWrites: [{ timestamp: 10, path: "src/cart.js", tool: "edit", labels: ["source"] }],
+      toolCalls: [
+        { timestamp: 11, name: "exec_command", arguments: { cmd: "git diff -- src/cart.js" }, resultText: "", wasBlocked: false },
+        { timestamp: 12, name: "exec_command", arguments: { cmd: "npm test" }, resultText: "", wasBlocked: false },
+      ],
+    });
+
+    const result = maturityPlugin.scoreSession(session, { passed: true, output: "ok", metrics: {} });
+
+    expect(result.scores["self_review"]).toBe(100);
+    expect(result.scores["proof"]).toBe(75);
+    expect(result.findings).not.toContain("No post-change self-review inspection was detected.");
+    expect(result.findings).not.toContain("No post-change proof command was detected.");
+  });
+
+  it("does not count edited file content as post-write review or proof commands", () => {
+    const session = stubSession([], {
+      fileWrites: [{ timestamp: 10, path: "src/cart.js", tool: "edit", labels: ["source"] }],
+      toolCalls: [
+        {
+          timestamp: 11,
+          name: "Edit",
+          arguments: { filePath: "src/cart.js", newString: 'const note = "git diff && npm test";' },
+          resultText: "",
+          wasBlocked: false,
+        },
+      ],
+    });
+
+    const result = maturityPlugin.scoreSession(session, { passed: true, output: "ok", metrics: {} });
+
+    expect(result.scores["self_review"]).toBe(35);
+    expect(result.scores["proof"]).toBe(45);
+    expect(result.findings).toContain("No post-change self-review inspection was detected.");
+    expect(result.findings).toContain("No post-change proof command was detected.");
   });
 });

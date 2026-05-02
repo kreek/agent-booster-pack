@@ -12,6 +12,7 @@
     "experiment": "tsx eval.ts experiment codex-abp",
     "experiment:smoke": "tsx eval.ts experiment codex-abp-smoke",
     "experiment:core": "tsx eval.ts experiment codex-abp-core",
+    "experiment:routing": "tsx eval.ts experiment codex-abp-routing",
     "experiment:all": "tsx eval.ts experiment codex-abp-all",
     "list": "tsx eval.ts list",
     "test": "vitest run test",

@@ -29,7 +29,7 @@ import {
   writeReport,
   writeSuiteReport,
 } from "./framework.js";
-import maturityPlugin from "./plugins/engineering-maturity.js";
+import maturityPlugin, { extractFinalAssistantText } from "./plugins/engineering-maturity.js";
 import type { ExperimentConfig, ModelConfig, SuiteEntry } from "./types.js";
 
 const TRIALS_DIR = path.join(import.meta.dirname, "trials");
@@ -186,6 +186,14 @@ function trialPrompt(trialName: string): string {
   ].join("\n");
 }
 
+function persistAssistantFinal(workDir: string, rawLines: string[]): void {
+  const finalText = extractFinalAssistantText(rawLines);
+  if (!finalText) return;
+  const artifactDir = path.join(workDir, ".abp-eval");
+  fs.mkdirSync(artifactDir, { recursive: true });
+  fs.writeFileSync(path.join(artifactDir, "assistant-final.md"), finalText);
+}
+
 async function runTrial(trialName: string, opts: RunTrialOptions): Promise<{ report: EvalReport; runDir: string }> {
   const variant = opts.variant ?? "default";
   assertSupportedVariant(trialName, variant);
@@ -238,6 +246,7 @@ async function runTrial(trialName: string, opts: RunTrialOptions): Promise<{ rep
 
   if (result.stderr) fs.writeFileSync(path.join(runDir, "stderr.txt"), result.stderr);
   fs.writeFileSync(path.join(runDir, "session.jsonl"), result.session.rawLines.join("\n"));
+  persistAssistantFinal(workDir, result.session.rawLines);
 
   const verify = maturityPlugin.verify?.(workDir) ?? defaultVerify();
   console.log(`  Verify: ${verify.passed ? "PASS" : "FAIL"}`);

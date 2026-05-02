@@ -59,11 +59,13 @@ from `~/.codex/auth.json`. Each run gets a temporary isolated Codex home.
 npm run list                       # show trials, suites, experiments
 npm run experiment:smoke           # run baseline vs ABP on the smoke suite
 npm run experiment:core            # run baseline vs ABP on the core suite
+npm run experiment:routing         # compare read-only routing behavior
 npm run experiment:all             # run baseline vs ABP across every skill
 npm run experiment                 # alias for the codex-abp experiment
 npm run experiment -- --no-judge   # skip the judge for a faster dev run
 
 npm run bench:smoke                # bench mode for one suite
+npm run eval -- run routing --profile codexWithAbpSkills
 npm run eval -- run smoke --profile codexWithAbpSkills
 npm run eval -- run --trial proof-first-bugfix --profile codexBaseline
 

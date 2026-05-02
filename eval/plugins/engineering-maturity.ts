@@ -4,6 +4,108 @@ import * as path from "node:path";
 import type { EvalPlugin, EvalSession, VerifyResult } from "pi-do-eval";
 
 const TEXT_FILE_EXTENSIONS = new Set([".html", ".js", ".json", ".md", ".sql", ".txt"]);
+const KNOWN_SKILLS = [
+  "workflow",
+  "proof",
+  "whiteboarding",
+  "data-first",
+  "architecture",
+  "code-review",
+  "debugging",
+  "refactoring",
+  "error-handling",
+  "security",
+  "database",
+  "release",
+  "observability",
+  "async-systems",
+  "performance",
+  "api",
+  "documentation",
+  "ui-design",
+  "accessibility",
+  "git-workflow",
+  "scaffolding",
+] as const;
+
+interface RoutingCriteria {
+  caseId: number;
+  title: RegExp;
+  expected: Array<[label: string, pattern: RegExp]>;
+  excluded: Array<[label: string, pattern: RegExp]>;
+  maxNamedSkills: number;
+}
+
+type PluginScoreResult = ReturnType<EvalPlugin["scoreSession"]>;
+
+const ROUTING_CRITERIA: RoutingCriteria[] = [
+  {
+    caseId: 1,
+    title: /checkout payment change triage/i,
+    expected: [
+      ["data modeling", /\b(data[- ]first|data[ /-]invariants?|data model(?:ing)?|domain model|invariant)\b/i],
+      ["trust boundary", /\b(security|trust boundary|auth|sensitive|payment)\b/i],
+      ["persistence", /\b(database|migration|persist|stored data)\b/i],
+      ["public contract", /\b(api|contract|wire|http)\b/i],
+      ["release safety", /\b(release|rollout|rollback|deploy)\b/i],
+      ["proof", /(?:\bproof\b(?!\s*->)|\bevidence plan\b|\bverification (?:plan|step)\b|\btest plan\b|\bacceptance check\b|\bvalidation plan\b)/i],
+      ["self-review", /\b(code[- ]review|self[- ]review|review the diff|diff review)\b/i],
+    ],
+    excluded: [
+      ["product expansion excluded", /\b(wallet|management UX|broad .*redesign|unrelated checkout|unrelated account)\b/i],
+      ["speculative platform work excluded", /\b(provider abstraction|generalized|multi-provider|new external dependencies|speculative resilience|retry orchestration)\b/i],
+    ],
+    maxNamedSkills: 11,
+  },
+  {
+    caseId: 2,
+    title: /worker retry change triage/i,
+    expected: [
+      ["async behavior", /\b(async[- ]systems|worker|queue|concurrency|retry)\b/i],
+      ["error handling", /\b(error[- ]handling|failure|timeout|retry)\b/i],
+      ["observability", /\b(observability|log|metric|trace|lifecycle)\b/i],
+      ["proof", /(?:\bproof\b(?!\s*->)|\bevidence plan\b|\bverification (?:plan|step)\b|\btest plan\b|\bacceptance check\b|\bvalidation plan\b)/i],
+      ["self-review", /\b(code[- ]review|self[- ]review|review the diff|diff review)\b/i],
+    ],
+    excluded: [
+      ["database excluded", /\b(database|migration|schema|transaction)\b/i],
+      ["ui excluded", /\b(ui[- ]design|accessibility|screen reader|keyboard|wcag)\b/i],
+    ],
+    maxNamedSkills: 7,
+  },
+  {
+    caseId: 3,
+    title: /settings copy change triage/i,
+    expected: [
+      ["user surface", /\b(ui[- ]design|user-facing|interface|copy|content)\b/i],
+      ["accessibility", /\b(accessibility|screen reader|keyboard|wcag|focus)\b/i],
+      ["documentation", /\b(documentation|docs|content|copy)\b/i],
+      ["verification", /(?:\bproof\b(?!\s*->)|\bverification (?:plan|step)\b|\binspection pass\b|\bacceptance check\b|\bcopy review\b|\bscreen reader check\b)/i],
+    ],
+    excluded: [
+      ["security excluded", /\b(security|auth|secret|trust boundary)\b/i],
+      ["database excluded", /\b(database|migration|schema|transaction)\b/i],
+      ["async excluded", /\b(async[- ]systems|queue|worker|stream|concurrency)\b/i],
+    ],
+    maxNamedSkills: 8,
+  },
+  {
+    caseId: 4,
+    title: /customer email migration triage/i,
+    expected: [
+      ["database", /\b(database|migration|schema|index|constraint)\b/i],
+      ["release", /\b(release|rollout|rollback|deploy)\b/i],
+      ["data invariant", /\b(data[- ]first|invariant|unique|email)\b/i],
+      ["proof", /(?:\bproof\b(?!\s*->)|\bevidence plan\b|\bverification (?:plan|step)\b|\btest plan\b|\bacceptance check\b|\bexplain plan\b|\bdry[- ]run\b)/i],
+      ["self-review", /\b(code[- ]review|self[- ]review|review the diff|diff review)\b/i],
+    ],
+    excluded: [
+      ["ui excluded", /\b(ui[- ]design|accessibility|screen reader|keyboard|wcag)\b/i],
+      ["async excluded", /\b(async[- ]systems|queue|worker|stream|concurrency)\b/i],
+    ],
+    maxNamedSkills: 7,
+  },
+];
 
 function runNodeCheck(workDir: string, script: string): VerifyResult {
   const result = spawnSync(process.execPath, ["--input-type=module", "-e", script], {
@@ -46,6 +148,210 @@ function runTextCheck(name: string, checks: Array<[label: string, passed: boolea
 
 function readIfExists(filePath: string): string {
   return fs.existsSync(filePath) ? fs.readFileSync(filePath, "utf-8") : "";
+}
+
+function routingMarkerPath(workDir: string): string {
+  return path.join(workDir, ".abp-eval-kind.json");
+}
+
+function readRoutingMarker(workDir: string): { kind?: unknown; case?: unknown } | undefined {
+  try {
+    return JSON.parse(readIfExists(routingMarkerPath(workDir))) as { kind?: unknown; case?: unknown };
+  } catch {
+    return undefined;
+  }
+}
+
+function isRoutingTrial(workDir: string): boolean {
+  return readRoutingMarker(workDir)?.kind === "routing";
+}
+
+function extractTextBlocks(content: unknown): string[] {
+  if (!Array.isArray(content)) return [];
+  const textBlocks: string[] = [];
+  for (const block of content) {
+    if (typeof block !== "object" || block === null) continue;
+    const candidate = block as { type?: unknown; text?: unknown };
+    if ((candidate.type === "text" || candidate.type === "output_text") && typeof candidate.text === "string") {
+      textBlocks.push(candidate.text);
+    }
+  }
+  return textBlocks;
+}
+
+function asRecord(value: unknown): Record<string, unknown> | undefined {
+  return typeof value === "object" && value !== null && !Array.isArray(value) ? (value as Record<string, unknown>) : undefined;
+}
+
+function collectRoleMessages(value: unknown, role: "user" | "assistant", messages: string[]): void {
+  const record = asRecord(value);
+  if (!record) return;
+
+  const message = asRecord(record["message"]);
+  if (message?.["role"] === role) {
+    const text = extractTextBlocks(message["content"]).join("\n").trim();
+    if (text) messages.push(text);
+    return;
+  }
+
+  const item = asRecord(record["item"]);
+  if (
+    role === "assistant" &&
+    item?.["type"] === "agent_message" &&
+    typeof item["text"] === "string" &&
+    item["text"].trim()
+  ) {
+    messages.push(item["text"].trim());
+    return;
+  }
+  if (item?.["role"] === role) {
+    const text = extractTextBlocks(item["content"]).join("\n").trim();
+    if (text) messages.push(text);
+    return;
+  }
+
+  for (const child of Object.values(record)) collectRoleMessages(child, role, messages);
+}
+
+function extractMessages(rawLines: string[], role: "user" | "assistant"): string[] {
+  const messages: string[] = [];
+  for (const line of rawLines) {
+    if (!line.trim()) continue;
+    try {
+      collectRoleMessages(JSON.parse(line), role, messages);
+    } catch {
+      continue;
+    }
+  }
+  return messages;
+}
+
+export function extractInitialUserPrompt(rawLines: string[]): string {
+  return extractMessages(rawLines, "user")[0] ?? "";
+}
+
+export function extractFinalAssistantText(rawLines: string[]): string {
+  const messages = extractMessages(rawLines, "assistant");
+  return messages[messages.length - 1] ?? "";
+}
+
+function matchingRoutingCriteria(prompt: string): RoutingCriteria | undefined {
+  return ROUTING_CRITERIA.find((criteria) => criteria.title.test(prompt));
+}
+
+function hasExplicitExclusion(text: string, pattern: RegExp): boolean {
+  const exclusionSection = text.match(
+    /(?:engineering lenses to (?:explicitly )?exclude|excluded? (?:lenses|areas|scope)|exclusions?)[\s\S]*?(?=\n\s*(?:#{1,6}\s|\*\*[^*\n]+:\*\*|[A-Z][A-Za-z /-]{2,}:)|$)/i,
+  )?.[0];
+  if (exclusionSection && pattern.test(exclusionSection)) return true;
+
+  const sentences = text.split(/(?<=[.!?])\s+|\n+/);
+  return sentences.some(
+    (sentence) => pattern.test(sentence) && /\b(exclude|skip|defer|not needed|not relevant|out of scope|unneeded|avoid)\b/i.test(sentence),
+  );
+}
+
+function countNamedSkills(text: string): number {
+  return KNOWN_SKILLS.filter((skill) => new RegExp(`\\b${skill.replaceAll("-", "[- ]")}\\b`, "i").test(text)).length;
+}
+
+function scoreRoutingSession(session: EvalSession, verify: VerifyResult): PluginScoreResult {
+  const prompt = extractInitialUserPrompt(session.rawLines);
+  const finalAnswer = extractFinalAssistantText(session.rawLines);
+  const routingCase = verify.metrics["routingCase"];
+  const criteria =
+    routingCase !== undefined
+      ? ROUTING_CRITERIA.find((candidate) => candidate.caseId === routingCase)
+      : matchingRoutingCriteria(prompt);
+  if (!criteria) {
+    return {
+      scores: { routing: 0, exclusions: 0, proof_plan: 0, proportionality: 0 },
+      weights: { routing: 0.4, exclusions: 0.2, proof_plan: 0.25, proportionality: 0.15 },
+      findings: ["Routing trial criteria could not be matched from the prompt."],
+      judge: {
+        includeInOverall: true,
+        defaultWeight: 0.2,
+        weights: {
+          engineering_maturity: 0.35,
+          proof_quality: 0.25,
+          simplicity: 0.2,
+          risk_handling: 0.2,
+        },
+      },
+    };
+  }
+
+  const expectedHits = criteria.expected.filter(([, pattern]) => pattern.test(finalAnswer));
+  const excludedHits = criteria.excluded.filter(([, pattern]) => hasExplicitExclusion(finalAnswer, pattern));
+  const writesScore = session.fileWrites.length === 0 ? 100 : 0;
+  const proofSignals = [
+    /\b(proof|evidence|validation|verification|test|check|inspect)\b/i.test(finalAnswer),
+    /\b(command|scenario|negative|regression|acceptance|boundary)\b/i.test(finalAnswer),
+    /\b(self[- ]review|review the diff|code[- ]review|before claiming done|final scoped claim)\b/i.test(finalAnswer),
+  ].filter(Boolean).length;
+  const namedSkills = countNamedSkills(finalAnswer);
+  const proportionality =
+    namedSkills <= criteria.maxNamedSkills && namedSkills >= Math.min(3, criteria.expected.length) ? 100 : namedSkills === 0 ? 35 : 60;
+
+  const scores = {
+    routing: Math.round((expectedHits.length / criteria.expected.length) * 100),
+    exclusions: Math.round((excludedHits.length / criteria.excluded.length) * 100),
+    proof_plan: Math.round((proofSignals / 3) * 100),
+    no_file_writes: writesScore,
+    proportionality,
+  };
+  const weights = {
+    routing: 0.35,
+    exclusions: 0.15,
+    proof_plan: 0.25,
+    no_file_writes: 0.1,
+    proportionality: 0.15,
+  };
+  const findings: string[] = [];
+  for (const [label] of criteria.expected.filter(([label]) => !expectedHits.some(([hit]) => hit === label))) {
+    findings.push(`Missing expected routing lens: ${label}.`);
+  }
+  for (const [label] of criteria.excluded.filter(([label]) => !excludedHits.some(([hit]) => hit === label))) {
+    findings.push(`Missing explicit exclusion: ${label}.`);
+  }
+  if (session.fileWrites.length > 0) findings.push("Routing trial wrote files despite being read-only.");
+  if (proofSignals < 3) findings.push("Evidence plan or self-review loop was incomplete.");
+  if (scores.proportionality < 100) findings.push("Routing was not proportional to the task risks.");
+
+  return {
+    scores,
+    weights,
+    findings,
+    judge: {
+      includeInOverall: true,
+      defaultWeight: 0.2,
+      weights: {
+        engineering_maturity: 0.35,
+        proof_quality: 0.25,
+        simplicity: 0.2,
+        risk_handling: 0.2,
+      },
+    },
+  };
+}
+
+function isCommandTool(call: EvalSession["toolCalls"][number]): boolean {
+  return /\b(exec_command|bash|shell|terminal|run_command|write_stdin)\b/i.test(call.name);
+}
+
+function commandText(call: EvalSession["toolCalls"][number]): string {
+  const args = call.arguments as Record<string, unknown>;
+  const fields = ["cmd", "command", "script", "input", "chars"];
+  return fields.map((field) => args[field]).filter((value): value is string => typeof value === "string").join(" ");
+}
+
+function hasPostWriteCommand(session: EvalSession, pattern: RegExp): boolean {
+  const writeTimes = session.fileWrites.map((write) => write.timestamp);
+  if (writeTimes.length === 0) return false;
+  const lastWrite = Math.max(...writeTimes);
+  return session.toolCalls.some(
+    (call) => call.timestamp > lastWrite && isCommandTool(call) && pattern.test(`${call.name} ${commandText(call)}`),
+  );
 }
 
 function runHiddenChecks(workDir: string): VerifyResult {
@@ -337,6 +643,16 @@ const plugin: EvalPlugin = {
   },
 
   verify(workDir) {
+    if (isRoutingTrial(workDir)) {
+      const marker = readRoutingMarker(workDir);
+      const routingCase = typeof marker?.case === "number" ? marker.case : 0;
+      return {
+        passed: true,
+        output: "Routing trial: transcript-scored; no workdir verification required.",
+        metrics: { routingTrial: 1, routingCase },
+      };
+    }
+
     const visible = runVisibleTests(workDir);
     const hidden = runHiddenChecks(workDir);
     return {
@@ -350,22 +666,38 @@ const plugin: EvalPlugin = {
   },
 
   scoreSession(session: EvalSession, verify: VerifyResult) {
+    if (verify.metrics["routingTrial"] === 1) {
+      return scoreRoutingSession(session, verify);
+    }
+
     const wroteTests = session.fileWrites.some((file) => file.labels.includes("test"));
     const wroteSource = session.fileWrites.some((file) => file.labels.includes("source"));
     const touchedManyFiles = session.fileWrites.length > 8;
+    const postWriteSelfReview = hasPostWriteCommand(
+      session,
+      /\b(git\s+(?:diff|status|show)|rg\b)\b/i,
+    );
+    const postWriteProof = hasPostWriteCommand(
+      session,
+      /\b(npm\s+test|npm\s+run\s+(test|typecheck|lint|check)|vitest|pytest|go\s+test|cargo\s+test|mvn\s+test|uv\s+run\s+(pytest|ruff|pyright|python)|refcheck|validate_skill_anatomy)\b/i,
+    );
 
     const scores = {
       verification: verify.passed ? 100 : 0,
-      proof: wroteTests ? 100 : verify.passed ? 45 : 15,
+      proof: wroteTests && postWriteProof ? 100 : wroteTests ? 85 : postWriteProof ? 75 : verify.passed ? 45 : 15,
+      self_review: !wroteSource ? 80 : postWriteSelfReview ? 100 : 35,
       change_quality: wroteSource && !touchedManyFiles ? 85 : wroteSource ? 65 : 25,
     };
     const weights = {
-      verification: 0.55,
-      proof: 0.3,
+      verification: 0.45,
+      proof: 0.25,
+      self_review: 0.15,
       change_quality: 0.15,
     };
     const findings: string[] = [];
     if (!wroteTests) findings.push("No test file writes were detected.");
+    if (wroteSource && !postWriteSelfReview) findings.push("No post-change self-review inspection was detected.");
+    if (wroteSource && !postWriteProof) findings.push("No post-change proof command was detected.");
     if (touchedManyFiles) findings.push("The solution touched many files for a small trial.");
     if (!verify.passed) findings.push("Visible tests or hidden checks failed.");
 
@@ -415,6 +747,9 @@ const plugin: EvalPlugin = {
       "",
       "## Task",
       taskDescription,
+      "",
+      "## Final Assistant Answer",
+      readIfExists(path.join(workDir, ".abp-eval", "assistant-final.md")) || "(not captured)",
       "",
       "## Final Workdir Snapshot",
       readProjectSnapshot(workDir),

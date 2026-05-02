@@ -84,7 +84,36 @@ const scaffoldRepoWorkflow = {
   skills: ["scaffolding", "git-workflow", "documentation", "proof"],
 } satisfies EvalConfig["suites"][string][number];
 
+const routingCheckoutPayment = {
+  trial: "routing-checkout-payment",
+  variant: "default",
+  skills: ["workflow", "data-first", "security", "database", "api", "release", "proof", "code-review"],
+  priority: "core",
+} satisfies EvalConfig["suites"][string][number];
+
+const routingWorkerRetry = {
+  trial: "routing-worker-retry",
+  variant: "default",
+  skills: ["workflow", "async-systems", "error-handling", "observability", "proof", "code-review"],
+  priority: "core",
+} satisfies EvalConfig["suites"][string][number];
+
+const routingSettingsCopy = {
+  trial: "routing-settings-copy",
+  variant: "default",
+  skills: ["workflow", "ui-design", "accessibility", "documentation", "proof"],
+  priority: "core",
+} satisfies EvalConfig["suites"][string][number];
+
+const routingCustomerEmailMigration = {
+  trial: "routing-customer-email-migration",
+  variant: "default",
+  skills: ["workflow", "database", "release", "data-first", "proof", "code-review"],
+  priority: "core",
+} satisfies EvalConfig["suites"][string][number];
+
 const core = [proofFirstBugfix, securityBoundaryFix, designDecisionRecord, debuggingRegression];
+const routing = [routingCheckoutPayment, routingWorkerRetry, routingSettingsCopy, routingCustomerEmailMigration];
 const allSkills = [
   ...core,
   apiErrorContract,
@@ -130,6 +159,7 @@ const config: EvalConfig = {
   suites: {
     smoke: [proofFirstBugfix],
     core,
+    routing,
     allSkills,
     engineeringMaturity: allSkills,
   },
@@ -147,6 +177,12 @@ const config: EvalConfig = {
     },
     allSkills: {
       suite: "allSkills",
+      profiles: ["codexBaseline", "codexWithAbpSkills"],
+      baseline: "codexBaseline",
+      epochs: 3,
+    },
+    routing: {
+      suite: "routing",
       profiles: ["codexBaseline", "codexWithAbpSkills"],
       baseline: "codexBaseline",
       epochs: 3,
@@ -170,6 +206,12 @@ const config: EvalConfig = {
     },
     "codex-abp-all": {
       suite: "allSkills",
+      profiles: ["codexBaseline", "codexWithAbpSkills"],
+      baseline: "codexBaseline",
+      epochs: 3,
+    },
+    "codex-abp-routing": {
+      suite: "routing",
       profiles: ["codexBaseline", "codexWithAbpSkills"],
       baseline: "codexBaseline",
       epochs: 3,
