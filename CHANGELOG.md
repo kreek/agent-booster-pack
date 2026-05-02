@@ -38,6 +38,9 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   in `git-workflow`.
 - Skill frontmatter descriptions may now be up to 120 characters each, with a
   2,000-character pack-wide description budget enforced by the validator.
+- `api` now treats continuation tokens such as cursors, page tokens, sync
+  tokens, and resume tokens as caller input and requires explicit
+  invalid-token behavior instead of silent position fallback.
 
 ### Fixed
 

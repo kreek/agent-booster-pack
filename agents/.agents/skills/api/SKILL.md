@@ -36,7 +36,12 @@ description: Use for HTTP APIs, OpenAPI, request/response shape, status codes, a
 4. Mutations are safe to retry only when the public contract defines an
    idempotency strategy: key scope, replay window, duplicate response
    behavior, and conflict semantics.
-5. List endpoints have bounded pagination and stable ordering.
+5. List and stream endpoints have bounded pagination, stable ordering,
+   and explicit continuation-token semantics. Opaque cursors, page
+   tokens, sync tokens, and resume tokens are caller input: malformed,
+   tampered, expired, or out-of-range tokens fail with a client error
+   or a documented empty-result behavior, never a silent fallback to an
+   earlier position.
 6. Compatibility is a feature: optional additive changes can evolve an
    API without a new contract version; removals, renames, required
    additions, status-code changes, and semantic changes need a
@@ -114,8 +119,10 @@ server-origin failures into a client error.
       documented as unsafe to retry.
 - [ ] Public idempotency keys define scope, replay window, duplicate
       response behavior, and conflict semantics.
-- [ ] Lists have cursor or equivalent bounded pagination with a
-      server-side cap.
+- [ ] Lists and streams have cursor/page-token or equivalent bounded
+      pagination with a server-side cap, stable ordering, and explicit
+      invalid-token behavior; bad continuation tokens do not silently
+      restart, rewind, or skip position.
 - [ ] Additive changes are optional; old calls and consumers that
       ignore new fields, parameters, headers, or endpoints still work.
 - [ ] Request and response bodies use extensible object shapes and
