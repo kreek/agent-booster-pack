@@ -143,16 +143,19 @@ const config: EvalConfig = {
       suite: "core",
       profiles: ["codexBaseline", "codexWithAbpSkills"],
       baseline: "codexBaseline",
+      epochs: 3,
     },
     allSkills: {
       suite: "allSkills",
       profiles: ["codexBaseline", "codexWithAbpSkills"],
       baseline: "codexBaseline",
+      epochs: 3,
     },
     engineeringMaturity: {
       suite: "engineeringMaturity",
       profiles: ["codexBaseline", "codexWithAbpSkills"],
       baseline: "codexBaseline",
+      epochs: 3,
     },
     "codex-abp-smoke": {
       suite: "smoke",
@@ -163,16 +166,19 @@ const config: EvalConfig = {
       suite: "core",
       profiles: ["codexBaseline", "codexWithAbpSkills"],
       baseline: "codexBaseline",
+      epochs: 3,
     },
     "codex-abp-all": {
       suite: "allSkills",
       profiles: ["codexBaseline", "codexWithAbpSkills"],
       baseline: "codexBaseline",
+      epochs: 3,
     },
     "codex-abp": {
       suite: "allSkills",
       profiles: ["codexBaseline", "codexWithAbpSkills"],
       baseline: "codexBaseline",
+      epochs: 3,
     },
   },
   judge: {

@@ -258,8 +258,12 @@ async function runTrial(trialName: string, opts: RunTrialOptions): Promise<{ rep
       judgeResult = judgeOutcome.result;
     } else {
       judgeFailure = judgeOutcome.reason;
-      if (judgeOutcome.stdout) fs.writeFileSync(path.join(runDir, "judge.stdout.txt"), judgeOutcome.stdout);
       console.log(`  Judge: failed (${judgeFailure}), using deterministic scores only`);
+    }
+    // Always persist the raw judge output so that empty-findings or
+    // unexpected-score outcomes can be diagnosed without re-running the judge.
+    if (judgeOutcome.stdout) {
+      fs.writeFileSync(path.join(runDir, "judge.stdout.txt"), judgeOutcome.stdout);
     }
   }
 

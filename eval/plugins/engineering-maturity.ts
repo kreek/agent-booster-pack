@@ -115,6 +115,43 @@ function runHiddenChecks(workDir: string): VerifyResult {
         assert.deepEqual(existing.tags, ["admin"]);
         assert.notEqual(merged.preferences, existing.preferences);
         assert.notEqual(merged.tags, existing.tags);
+
+        // Negative test: prototype-pollution guard must actually block the
+        // attack. JSON.parse is used so the attack surface is realistic
+        // (network/JSON-borne patches), and we capture/restore the canary
+        // on Object.prototype to keep this trial isolated from the runner.
+        const canaryBefore = Object.prototype.polluted;
+        try {
+          const malicious = JSON.parse(
+            '{"__proto__":{"polluted":"yes"}}'
+          );
+          mergeProfile({ id: "u_2" }, malicious);
+          assert.equal(
+            ({}).polluted,
+            canaryBefore,
+            "mergeProfile leaked __proto__ patch into Object.prototype",
+          );
+        } finally {
+          if (canaryBefore === undefined) delete Object.prototype.polluted;
+          else Object.prototype.polluted = canaryBefore;
+        }
+
+        // Negative test: a constructor-key attack must also not escalate.
+        const ctorBefore = Object.prototype.ctorPolluted;
+        try {
+          const constructorAttack = JSON.parse(
+            '{"constructor":{"prototype":{"ctorPolluted":"yes"}}}'
+          );
+          mergeProfile({ id: "u_3" }, constructorAttack);
+          assert.equal(
+            ({}).ctorPolluted,
+            ctorBefore,
+            "mergeProfile leaked constructor.prototype patch",
+          );
+        } finally {
+          if (ctorBefore === undefined) delete Object.prototype.ctorPolluted;
+          else Object.prototype.ctorPolluted = ctorBefore;
+        }
       `,
     );
   }
@@ -143,21 +180,49 @@ function runHiddenChecks(workDir: string): VerifyResult {
     );
   }
 
-  if (fs.existsSync(path.join(workDir, "migrations", "001_customer_email.sql"))) {
-    const migration = readIfExists(path.join(workDir, "migrations", "001_customer_email.sql"));
-    const rollback = readIfExists(path.join(workDir, "migrations", "001_customer_email.rollback.sql"));
+  if (
+    fs.existsSync(path.join(workDir, "migrations", "001_customer_email.sql")) ||
+    fs.existsSync(path.join(workDir, "migrations", "001_customer_email_add_column.sql"))
+  ) {
+    const migrationFiles = fs
+      .readdirSync(path.join(workDir, "migrations"))
+      .filter((name) => name.endsWith(".sql") && !name.includes("rollback"));
+    const allMigrationSql = migrationFiles
+      .map((name) => readIfExists(path.join(workDir, "migrations", name)))
+      .join("\n\n");
+    const rollback = migrationFiles
+      .map((name) => readIfExists(path.join(workDir, "migrations", name.replace(/\.sql$/, ".rollback.sql"))))
+      .join("\n");
     const operations = [
       readIfExists(path.join(workDir, "OPERATIONS.md")),
       readIfExists(path.join(workDir, "operations.md")),
       readIfExists(path.join(workDir, "ROLLBACK.md")),
       readIfExists(path.join(workDir, "README.md")),
     ].join("\n");
+    // Detect the broken-elaboration shape: a partial index (CREATE [UNIQUE]
+    // INDEX … WHERE …) followed by an attempt to back a unique constraint
+    // with that index (ADD CONSTRAINT … UNIQUE USING INDEX <same name>).
+    // Postgres rejects this combination, so the elaboration looks
+    // sophisticated but ships a migration that cannot apply.
+    const partialIndexNames = Array.from(
+      allMigrationSql.matchAll(/create\s+(?:unique\s+)?index\s+(?:concurrently\s+)?(?:if\s+not\s+exists\s+)?([a-z0-9_]+)\b[^;]*\bwhere\b[^;]*;/gi),
+    ).map((m) => m[1]?.toLowerCase()).filter((name): name is string => Boolean(name));
+    const constraintAttachments = Array.from(
+      allMigrationSql.matchAll(/add\s+constraint\s+[a-z0-9_]+\s+unique\s+using\s+index\s+([a-z0-9_]+)/gi),
+    ).map((m) => m[1]?.toLowerCase()).filter((name): name is string => Boolean(name));
+    const brokenAttachment = constraintAttachments.find((name) => partialIndexNames.includes(name));
     return runTextCheck("customer email migration", [
-      ["uses a concurrent index build", /create\s+(unique\s+)?index\s+concurrently\b/i.test(migration)],
-      ["separates uniqueness validation", /\b(not\s+valid|validate\s+constraint)\b/i.test(migration)],
+      ["uses a concurrent index build", /create\s+(unique\s+)?index\s+concurrently\b/i.test(allMigrationSql)],
+      ["separates uniqueness validation", /\b(not\s+valid|validate\s+constraint)\b/i.test(allMigrationSql)],
       ["adds a rollback file", rollback.length > 0],
       ["documents rollout", /\b(rollout|deploy|apply)\b/i.test(operations)],
       ["documents rollback", /\brollback\b/i.test(operations)],
+      [
+        // Elaboration that cannot actually attach as a unique constraint in
+        // Postgres: partial index backing ADD CONSTRAINT … UNIQUE USING INDEX.
+        `does not back a unique constraint with a partial index${brokenAttachment ? ` (${brokenAttachment})` : ""}`,
+        brokenAttachment === undefined,
+      ],
     ]);
   }
 
@@ -324,7 +389,7 @@ const plugin: EvalPlugin = {
   buildJudgePrompt(taskDescription, workDir) {
     return [
       "Evaluate this coding-agent result for engineering maturity.",
-      "Respond with ONLY a JSON object. Scores must be numbers from 0 to 100.",
+      "Respond with ONLY a single JSON object containing all required keys below. Scores must be numbers from 0 to 100.",
       "",
       "Required keys:",
       '- "engineering_maturity"',
@@ -335,9 +400,18 @@ const plugin: EvalPlugin = {
       '- "simplicity_reason"',
       '- "risk_handling"',
       '- "risk_handling_reason"',
-      '- "findings"',
+      '- "findings" (JSON array of short strings)',
       "",
-      "Prefer evidence-backed, low-complexity, maintainable changes. Penalize superficial test edits, broad rewrites, missing edge cases, and changes that only satisfy the visible tests.",
+      "Findings rules:",
+      '- "findings" MUST be a non-empty array whenever ANY score is below 90.',
+      "- Each finding is one short sentence: a positive (\"good: …\") or a concrete concern (\"concern: …\"). Reference the specific file or function the finding applies to.",
+      "- A score below 90 with no matching finding is invalid output; if you can't name a concern, the score should be ≥ 90.",
+      "",
+      "Scoring guidance:",
+      "- Prefer evidence-backed, low-complexity, maintainable changes.",
+      "- Penalize superficial test edits, broad rewrites, missing edge cases, and changes that only satisfy the visible tests.",
+      "- Penalize elaborations that look sophisticated but do not deliver the invariant they imply (e.g. partial unique indexes that cannot enforce uniqueness, prototype-pollution guards that still permit `__proto__` writes, custom scripts that introduce undeclared dependencies).",
+      "- A solution that fails verification but is otherwise simple SHOULD score lower on engineering_maturity and risk_handling than a solution that passes verification with the same simplicity.",
       "",
       "## Task",
       taskDescription,

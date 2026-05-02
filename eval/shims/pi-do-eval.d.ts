@@ -209,7 +209,7 @@ declare module "pi-do-eval" {
     workDir: string;
   }>;
   export function runJudge(opts: Record<string, unknown>): Promise<
-    | { ok: true; result: JudgeResult }
+    | { ok: true; result: JudgeResult; stdout: string }
     | { ok: false; reason: "timeout" | "crash" | "parse_error" | "empty_response"; stdout?: string }
   >;
   export function scoreSession(opts: Record<string, unknown>): EvalScores;
