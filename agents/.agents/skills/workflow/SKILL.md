@@ -96,11 +96,23 @@ outcome.
 5. Load those skills and follow their workflows. If two skills conflict,
    prefer safety, data integrity, correctness, proof, and user trust over
    convenience or style.
-6. Finish by naming what was proven, what remains unproven, and what a
+6. After any non-trivial implementation, run a `code-review` pass on your
+   own diff before invoking `proof` or claiming done. Treat
+   agent-generated code as untrusted: a second pass by the same agent
+   reliably surfaces bugs, dead code, coupling, and missed edge cases the
+   implementation pass overlooks. Trivial edits that exited at step 1 may
+   skip this.
+7. Finish by naming what was proven, what remains unproven, and what a
    human should review or decide. Explain what was built or changed, why
    it is better than what it replaced, and/or what it enables next. If
    that explanation is weak, pause and consider whether the change is too
-   broad, too clever, or not yet justified.
+   broad, too clever, or not yet justified. If the diff contains a
+   behavior-bearing elaboration the literal requirement did not name (a
+   partial index added beyond a plain index, a prototype guard added
+   beyond a plain merge, a retry/fallback added beyond a single call,
+   a custom validator added beyond a maintained library), the completion
+   message names it and states the proof — or marks it explicitly
+   unproven.
 
 ## Verification
 
@@ -112,6 +124,12 @@ outcome.
       claims are routed to the relevant skill.
 - [ ] Completion claims are backed by `proof` evidence or reported as
       unproven.
+- [ ] User-not-named elaborations (extra checks, extra indexes, extra
+      wrappers, extra abstractions the requirement did not call for)
+      each have a named proof obligation that has been discharged or are
+      reported as unproven. Refactors and reorganisations counted by the
+      diff do not require enumeration; only behavior-bearing
+      elaborations do.
 - [ ] Human decisions and tradeoffs are surfaced instead of buried in
       implementation details.
 - [ ] The final response explains the change's value or future
@@ -132,7 +150,9 @@ outcome.
 | "The agent will decide acceptance" | Ask or infer caller-visible acceptance criteria and prove them with `proof`. | User explicitly says they will verify acceptance themselves. |
 | "This is only docs" | Check whether the docs change behavior, install path, commands, or user expectations. | Pure typo with no procedural meaning. |
 | "Production hardening later" | Route deploy, observability, security, data, and rollback risks now if real users are in scope. | Prototype clearly marked as disposable. |
+| "This hardening / extra check / extra layer makes it safer" | Either prove it (named negative test, EXPLAIN, fuzz seed, or load `proof` / `security` / `database` to do so), or drop it. Don't ship an elaboration whose claim you can't substantiate. | The user explicitly requested the hardening **and** the proof is already in the diff. |
 | "I'll just list files changed" | Explain why the change improves the system or what it enables next, tied to the user's goal. | Mechanical typo or formatting-only edit. |
+| "I just wrote it, I know it's fine" | Run a `code-review` pass on the diff before invoking `proof` or claiming done; self-review on agent-generated code reliably catches issues the implementation pass missed. | Trivial edits (typos, formatting, mechanical metadata) that exited at workflow step 1. |
 
 ## Handoffs
 

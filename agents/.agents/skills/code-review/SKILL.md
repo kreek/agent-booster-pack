@@ -11,6 +11,10 @@ description: Use to review diffs and PRs for bugs, regressions, edge cases, proo
 
 ## When to Use
 
+- Self-review of your own implementation diff before invoking `proof` or
+  claiming done. Default for any non-trivial agent-generated change; a
+  second pass by the same agent reliably surfaces bugs, dead code, and
+  missed edge cases the implementation pass overlooks.
 - Diff review (local, branch, or GitHub PR via `gh`).
 - Review-comment follow-up on the user's own PRs.
 - Agent-generated code review before merge or handoff.

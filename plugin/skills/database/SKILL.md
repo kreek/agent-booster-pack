@@ -65,6 +65,14 @@ description: Use for databases, schemas, migrations, indexes, transactions, quer
       briefly.
 - [ ] Index/constraint creation uses the online mechanism for the
       target database.
+- [ ] Engine-specific elaborations (partial unique constraints,
+      expression indexes, deferrable constraints, exclusion constraints,
+      GIN/GIST/BRIN indexes, `CONCURRENTLY`, `USING INDEX`-style
+      constraint attachments) are verified against the target engine —
+      the migration ran locally against Postgres (or whichever target
+      engine the project ships against) before claiming done. SQLite
+      passing is not proof of Postgres behavior. Plain index, column,
+      and FK migrations do not require this.
 - [ ] Important query changes include representative EXPLAIN/ANALYZE
       evidence.
 - [ ] Isolation level and retry behavior are explicit for transactional
@@ -82,6 +90,7 @@ description: Use for databases, schemas, migrations, indexes, transactions, quer
 | "We'll backfill async later" | Ship the backfill plan now or leave the schema expand-only. | Follow-up migration already exists in the same rollout plan. |
 | "Soft delete is good enough" | Decide the lifecycle rule once and enforce reads/indexes/schema around it. | Explicit audit-retention requirement with tested filters. |
 | "No one's using that index" | Observe across a full traffic cycle before dropping it. | Brand-new unused index in an unshipped migration. |
+| "Partial unique index gives me uniqueness" | A partial index does not satisfy a unique *constraint* on its own and cannot back an `ALTER TABLE … ADD CONSTRAINT … UNIQUE USING INDEX` in Postgres. Pick one: a full unique constraint, a partial unique *index* (and accept it does not enforce constraint semantics), or an `EXCLUDE` constraint. Verify your choice runs against the target engine. | The requirement explicitly asks for a partial unique *index* (not a constraint) and the migration was tested against that engine. |
 | "Adding a `password` column" | Load `security`. Store only an `argon2id`/`scrypt`/`bcrypt` hash in `password_hash`, never plaintext. The same applies to API keys, OAuth tokens, MFA secrets, and recovery codes. | Read-only mirror of an external auth source the app never writes to. |
 
 ## Handoffs

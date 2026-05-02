@@ -102,6 +102,14 @@ platform-specific guidance, since the threat model differs.
       signature verification use maintained libraries or framework
       primitives. Any custom implementation has a documented need,
       threat model, and negative tests.
+- [ ] Custom security logic (input sanitisers, prototype guards,
+      validators, redaction helpers, bespoke crypto wrappers) follows
+      the `proof` skill's Proof Contract with one specialisation: the
+      named check is a **negative test** that fails on the unguarded
+      code and passes with the guard. If the negative test cannot be
+      written, the guard is illusory — use a maintained library or
+      remove the guard rather than ship a check that doesn't actually
+      block the threat.
 - [ ] Tokens validated with pinned `alg` from configuration / JWKS, not
       from the token header. JWT or PASETO is fine; alg-pinning is what
       matters. See `secrets.md` and `api-and-auth.md`.
@@ -123,6 +131,7 @@ platform-specific guidance, since the threat model differs.
 | "It's a GET, no need for CSRF" | The state-changing GET is the bug. Convert to POST/PUT/DELETE, then add the CSRF check. | True read-only GET with no side effects. |
 | "We strip dangerous tags from the HTML" | Use a vetted sanitiser (DOMPurify, Bleach, sanitize-html). | Output is rendered as text, not HTML, and the framework auto-escapes. |
 | "This token / crypto / auth helper is small" | Use the platform's maintained security library or provider SDK; custom code needs a threat model and negative tests first. | Thin adapter around a vetted library with no security decision of its own. |
+| "I'll add a `__proto__` / prototype-pollution guard" | Many guards (e.g. a `getPrototypeOf` check before `clone[key] = …`) still walk the prototype chain. Write the negative test that mutates `__proto__` and asserts `Object.prototype` is unchanged **first**; if it can't fail without your guard, the guard is doing nothing. Prefer `Object.create(null)` maps, `Map`, or a vetted merge library. | The negative test is in the diff and demonstrably fails without the guard. |
 | "Low severity, ship and patch later" | Fix now or document explicit risk acceptance before merge. | Triage-only task that is not shipping code. |
 | "The input source is trusted" | Trace the trust chain and validate before dangerous sinks. | Cryptographically verified internal protocol with tested schema enforcement. |
 | "Just this one secret" | Stop and remove the secret from the diff/history path before continuing. Rotate the credential. | Placeholder value that cannot authenticate anywhere. |
