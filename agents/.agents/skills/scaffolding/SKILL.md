@@ -77,12 +77,19 @@ them — that is the point of this skill). ABP adds:
    (Cargo for Rust, Go modules for Go).
 2. Standardize task names: `test`, `lint`, `format`, `typecheck`, `coverage`
    where applicable. CI runs the same commands developers run locally.
-3. If the language, runtime, app shape, or current ecosystem state isn't
+3. Satisfy named artifacts literally before applying ecosystem preferences.
+   If the request names `tsconfig.json`, `package.json`, `pyproject.toml`,
+   CI, README, or another concrete file, create or update that artifact
+   unless you explicitly ask to substitute it.
+4. A `typecheck` script must run a type checker or the repo's established
+   equivalent and must consume the config file added for it. Syntax-only
+   checks such as `node --check` are lint/smoke checks, not typechecks.
+5. If the language, runtime, app shape, or current ecosystem state isn't
    covered by `references/`, search current official/project sources before
    choosing; explain the chosen default in one sentence.
-4. Add one smoke test that proves the runner, import path, and build system
+6. Add one smoke test that proves the runner, import path, and build system
    work together. The first real feature should not need tooling decisions.
-5. README says what it is, how to run it, and how to test it.
+7. README says what it is, how to run it, and how to test it.
 
 ## Workflow
 
@@ -98,8 +105,10 @@ them — that is the point of this skill). ABP adds:
    before creating runtime/deploy files.
 3. Choose minimal standard tooling for install, format, lint,
    typecheck, test, and coverage. Add scripts/commands with consistent
-   names. Add one smoke test and ensure it can fail and pass.
-4. Add CI that runs the same checks. Document local setup and test
+   names. For each requested script or config file, map requirement ->
+   artifact -> command before calling the scaffold done.
+4. Add one smoke test and ensure it can fail and pass.
+5. Add CI that runs the same checks. Document local setup and test
    commands in README. For large projects, add or propose Material
    for MkDocs.
 
@@ -111,6 +120,10 @@ them — that is the point of this skill). ABP adds:
       requested.
 - [ ] Standard commands exist and pass: `test`, `lint`,
       `format --check`, `typecheck`, `coverage` where applicable.
+- [ ] Requested concrete artifacts exist by their requested names, or a
+      substitution was explicitly approved.
+- [ ] Each command that depends on config consumes the config file added
+      for it; typecheck is not only a syntax check.
 - [ ] Web work was classified as prototype, scaffold, or
       production-bound app before files were created. Prototype mode
       was named explicitly and included an upgrade path.
@@ -136,6 +149,14 @@ them — that is the point of this skill). ABP adds:
 For prototypes, use the same command names even if some checks are
 lightweight. Before production or collaboration, promote the scaffold
 to the full checklist.
+
+## Tripwires
+
+| Trigger | Do this instead | False alarm |
+|---|---|---|
+| "A nearby config file is equivalent" | Use the requested file name, or ask before substituting. | The repo already uses the nearby config as its source of truth. |
+| "`node --check` proves typecheck" | Treat it as syntax/lint smoke; wire `typecheck` to the real type checker or established equivalent. | The ecosystem has no type checker and the limitation is stated. |
+| "The commands passed, so setup is done" | Verify requirement -> artifact -> command mapping for every named setup requirement. | Pure script rename with no requested artifact. |
 
 ## Handoffs
 

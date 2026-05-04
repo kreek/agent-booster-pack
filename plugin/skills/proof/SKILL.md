@@ -75,12 +75,16 @@ For every non-trivial engineering claim, record:
    maintainability.
 2. For each remaining claim, fill the Proof Contract before declaring
    the work complete.
-3. Load `references/recipes.md` when the proof shape is unclear or
+3. When the request names files, scripts, config, endpoints, commands,
+   or documents, make an acceptance map: requirement -> artifact ->
+   check. A passing command is incomplete proof if it does not exercise
+   the artifact the requirement asked for.
+4. Load `references/recipes.md` when the proof shape is unclear or
    domain-specific.
-4. When a claim needs a test, name the behavior in caller language.
+5. When a claim needs a test, name the behavior in caller language.
    Arrange only the state a real caller needs; act once; assert on
    externally visible state, output, response, event, or error.
-5. Run the check fresh after the final edit when the environment
+6. Run the check fresh after the final edit when the environment
    permits it. If it can't run, state the missing dependency and mark
    the claim unproven.
 
@@ -90,12 +94,15 @@ For every non-trivial engineering claim, record:
    claim in caller language.
 2. Inspect the final diff or touched surface. Confirm the change stayed within
    scope and did not leave dead paths, stale docs, or unrelated edits behind.
-3. Pick the command or inspection that would catch the failure: focused test,
+3. For setup, documentation, API, migration, or config work, check that
+   every named artifact exists by the requested name and that the proof
+   command reads or executes it.
+4. Pick the command or inspection that would catch the failure: focused test,
    full suite, build, lint/type check, migration check, CLI run, API contract,
    UI flow, or code review of the diff.
-4. Run the relevant command now, after the last edit. Read the exit code and
+5. Run the relevant command now, after the last edit. Read the exit code and
    the output that proves or disproves the claim.
-5. Report the actual state: proven, partially proven, blocked, or unproven.
+6. Report the actual state: proven, partially proven, blocked, or unproven.
    Do not convert a partial check into a complete claim.
 
 ## Verification
@@ -116,6 +123,8 @@ For every non-trivial engineering claim, record:
       blocker.
 - [ ] Completion claims are based on checks or inspections run after the final
       edit and matched to the latest request.
+- [ ] Named files, scripts, configs, commands, or documents from the request
+      are mapped to artifacts and checks; adjacent substitutes are called out.
 - [ ] Missing evidence is reported as unproven, not complete.
 
 ## Tripwires
@@ -133,6 +142,7 @@ For every non-trivial engineering claim, record:
 | "Already covered by another test" | Name the existing behavior test or add the missing assertion. | The named test enters through the same caller boundary and would fail for this bug. |
 | "Mock is faster than a fixture" | Use the real collaborator unless it crosses a true system boundary. | Clock, network, third-party service, process, filesystem, or expensive infrastructure. |
 | "I'll add tests after the feature lands" | Add the behavior assertion before claiming the feature is done. | Exploratory spike explicitly marked as not complete. |
+| "This equivalent artifact should count" | Prove the requested artifact or explicitly report the substitution and risk. | The user or repo convention already named the substitute. |
 
 ## Runtime Extensions
 

@@ -594,11 +594,13 @@ function runHiddenChecks(workDir: string): VerifyResult {
     };
     const readme = readIfExists(path.join(workDir, "README.md"));
     const commitPlan = readIfExists(path.join(workDir, "COMMIT_PLAN.md"));
+    const typecheckScript = packageJson.scripts?.["typecheck"] ?? "";
     return runTextCheck("package baseline", [
       ["defines npm test", typeof packageJson.scripts?.["test"] === "string"],
       ["defines npm run typecheck", typeof packageJson.scripts?.["typecheck"] === "string"],
       ["defines npm run lint", typeof packageJson.scripts?.["lint"] === "string"],
-      ["adds typecheck config", fs.existsSync(path.join(workDir, "tsconfig.json"))],
+      ["adds tsconfig typecheck config", fs.existsSync(path.join(workDir, "tsconfig.json"))],
+      ["typecheck uses tsconfig", /\btsc\b/.test(typecheckScript) && /\btsconfig\.json\b/.test(typecheckScript)],
       ["documents local commands", /\bnpm\s+run\s+(test|typecheck|lint)\b|\bnpm\s+test\b/i.test(readme)],
       ["adds review grouping note", /\b(commit|review|change)\b/i.test(commitPlan)],
     ]);
