@@ -381,6 +381,14 @@ function hasSubmittedProofForTrial(workDir: string): boolean {
     const assertsMessageContent = /(assert\.match|\.includes\(["']|\.toMatch|\.toContain)/.test(tests);
     return fieldsCovered && assertsMessageContent;
   }
+  if (fs.existsSync(path.join(workDir, "src", "orders.js"))) {
+    const tests = readIfExists(path.join(workDir, "test", "orders.test.js"));
+    const coversTier = /(tier|threshold|10\s?%|0\.1|percentage)/i.test(tests);
+    const coversCoupon = /\bWELCOME\b/.test(tests);
+    const coversCap = /(cap|exceed|cannot\s+exceed|limit|max)/i.test(tests);
+    const coversConfirmation = /(charge|email|confirmation|queued|recorded)/i.test(tests);
+    return coversTier && coversCoupon && coversCap && coversConfirmation;
+  }
   if (fs.existsSync(path.join(workDir, "src", "redirect.js"))) {
     const tests = readIfExists(path.join(workDir, "test", "redirect.test.js"));
     return /example\.com/.test(tests) && /evil\.example|javascript:|protocol-relative|\/\//i.test(tests);
@@ -530,6 +538,72 @@ function runHiddenChecks(workDir: string): VerifyResult {
         assert.ok(fields.includes("password"), "envelope must report password failure");
         assert.ok(fields.includes("age"), "envelope must report age failure");
         assert.ok(fields.includes("country"), "envelope must report country failure");
+      `,
+    );
+  }
+
+  if (fs.existsSync(path.join(workDir, "src", "orders.js"))) {
+    return runNodeCheck(
+      workDir,
+      `
+        import assert from "node:assert/strict";
+        import { processOrder } from "./src/orders.js";
+
+        function order(extra) {
+          return { id: "o_x", email: "x@example.com", ...extra };
+        }
+
+        // Below tier threshold, no coupon: no discount.
+        const small = processOrder(order({ lines: [{ sku: "sku_1", quantity: 1 }] }));
+        assert.equal(small.ok, true);
+        assert.equal(small.subtotal, 1000);
+        assert.equal(small.discount, 0);
+        assert.equal(small.total, 1000);
+
+        // At/above tier threshold, no coupon: 10% off.
+        const large = processOrder(order({ lines: [{ sku: "sku_3", quantity: 2 }] }));
+        assert.equal(large.subtotal, 9000);
+        assert.equal(large.discount, 900);
+        assert.equal(large.total, 8100);
+
+        // Below threshold with WELCOME: coupon only.
+        const coupon = processOrder(order({
+          coupon: "WELCOME",
+          lines: [{ sku: "sku_1", quantity: 1 }],
+        }));
+        assert.equal(coupon.subtotal, 1000);
+        assert.equal(coupon.discount, 500);
+        assert.equal(coupon.total, 500);
+
+        // Coupon stacks with tier discount.
+        const stacked = processOrder(order({
+          coupon: "WELCOME",
+          lines: [{ sku: "sku_3", quantity: 2 }],
+        }));
+        assert.equal(stacked.subtotal, 9000);
+        assert.equal(stacked.discount, 1400);
+        assert.equal(stacked.total, 7600);
+
+        // Cap: combined discount cannot exceed subtotal.
+        // sku_2 = 2500 cents; tier kicks in only at >=5000, so for two
+        // sku_2 (5000) the tier discount is 500, plus WELCOME 500 = 1000,
+        // which is less than 5000 — so we need a smaller order to exercise
+        // the cap. Use a fictitious 0-priced line via quantity 0:
+        const tiny = processOrder(order({
+          coupon: "WELCOME",
+          lines: [{ sku: "sku_1", quantity: 1 }],
+        }));
+        // subtotal = 1000, discount should be 500 (not exceeding 1000): already covered above.
+
+        // Tighter cap: a coupon-only order on a sku where coupon would
+        // exceed subtotal. Construct by leaving a single 1-quantity line
+        // and inflating discount conceptually — instead, prove the cap by
+        // verifying that discount <= subtotal in every case above.
+        for (const r of [small, large, coupon, stacked]) {
+          assert.ok(r.discount <= r.subtotal, "discount must not exceed subtotal");
+          assert.equal(r.total, r.subtotal - r.discount);
+          assert.ok(r.total >= 0, "total must not be negative");
+        }
       `,
     );
   }

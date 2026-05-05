@@ -12,3 +12,4 @@ trials:
   - scaffold-repo-workflow
   - proof-pipeline-shape
   - proof-validator-error-content
+  - proof-organize-tangled-seam
