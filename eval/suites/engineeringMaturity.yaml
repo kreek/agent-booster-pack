@@ -11,3 +11,4 @@ trials:
   - accessible-ui-state
   - scaffold-repo-workflow
   - proof-pipeline-shape
+  - proof-validator-error-content

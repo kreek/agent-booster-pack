@@ -1,0 +1,9 @@
+description: Build a validator whose error envelope and per-field messages must be proven.
+taskFile: task.md
+plugin: engineering-maturity
+features:
+  - proof
+  - error-handling
+  - data-first
+variants:
+  default: {}
