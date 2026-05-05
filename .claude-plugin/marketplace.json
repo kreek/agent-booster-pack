@@ -6,14 +6,14 @@
   },
   "metadata": {
     "description": "Agent Booster Pack: engineering-discipline skills for Claude Code.",
-    "version": "4.11.0",
+    "version": "4.12.0",
     "license": "MIT"
   },
   "plugins": [
     {
       "name": "abp",
       "description": "Portable, engineering-discipline skill pack: data, proof, security, debugging, refactoring, and more.",
-      "version": "4.11.0",
+      "version": "4.12.0",
       "author": {
         "name": "Alastair Dawson"
       },
