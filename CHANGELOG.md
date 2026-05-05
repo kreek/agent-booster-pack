@@ -53,6 +53,9 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - ABP doctrine now explicitly says skills ride on host harnesses rather than
   replacing browser control, delegation, tool use, memory, planning, or
   system-prompt orchestration.
+- `workflow` now separates internal ABP skill routing from user-facing
+  readiness notes, so agents translate skills into domain lenses and exclude
+  product scope instead of listing irrelevant tools.
 - `documentation` now supports refining vague product ideas into problem,
   audience, smallest useful outcome, non-goals, assumptions, and proof before
   whiteboarding or implementation.
