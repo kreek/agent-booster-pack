@@ -114,7 +114,13 @@ describe("ABP eval config", () => {
     expect(baseline.agent.codex?.isolateHome).toBe(true);
     expect(baseline.agent.codex?.ignoreUserConfig).toBe(true);
     expect(baseline.agent.codex?.pluginMarketplaces ?? []).toEqual([]);
-    expect(baseline.agent.codex?.extraArgs).toEqual(["--disable", "plugins"]);
+    expect(baseline.agent.codex?.extraArgs).toEqual([
+      "--disable",
+      "plugins",
+      "-c",
+      'model_reasoning_effort="medium"',
+    ]);
+    expect(baseline.factors["reasoningEffort"]).toBe("medium");
 
     expect(withAbp.agent.harness).toBe("codex");
     expect(withAbp.agent.codex?.isolateHome).toBe(true);
@@ -142,6 +148,11 @@ describe("ABP eval config", () => {
     expect(withAbp.agent.codex?.extraArgs).toEqual(
       expect.arrayContaining(["-c", expect.stringContaining('plugins."abp@abp".enabled=true')]),
     );
+    expect(withAbp.agent.codex?.extraArgs).toEqual(
+      expect.arrayContaining(["-c", 'model_reasoning_effort="medium"']),
+    );
+    expect(withAbp.factors["reasoningEffort"]).toBe("medium");
+    expect(config.judge?.thinking).toBe("medium");
   });
 
   it("makes the all-skills bench compare against an explicit baseline", () => {
@@ -158,6 +169,11 @@ describe("ABP eval config", () => {
     if (!bench) throw new Error("Expected smoke bench");
     expect(bench.baseline).toBe("codexBaseline");
     expect(bench.profiles).toEqual(["codexBaseline", "codexWithAbpSkills"]);
+    expect(bench.requireJudge).toBe(true);
+    expect(bench.requiredDeterministicScores).toEqual({
+      baseline_isolation: 100,
+      abp_activation: 100,
+    });
     expect(getSuite("smoke").map((entry) => entry.trial)).toEqual(["routing-checkout-payment"]);
   });
 
@@ -174,15 +190,32 @@ describe("ABP eval config", () => {
     ]);
   });
 
+  it("adds a one-trial large project bench", () => {
+    const bench = benches["largeProject"];
+    if (!bench) throw new Error("Expected largeProject bench");
+    expect(bench.baseline).toBe("codexBaseline");
+    expect(bench.profiles).toEqual(["codexBaseline", "codexWithAbpSkills"]);
+    expect(bench.epochs).toBe(1);
+    expect(getSuite("largeProject").map((entry) => entry.trial)).toEqual(["large-checkout-workflow"]);
+  });
+
   it("defines lightweight, core, and all-skills suites", () => {
     expect(suites.map((suite) => suite.name).sort()).toEqual([
       "allSkills",
       "core",
       "engineeringMaturity",
+      "largeProject",
       "routing",
       "smoke",
     ]);
-    expect(Object.keys(benches).sort()).toEqual(["allSkills", "core", "engineeringMaturity", "routing", "smoke"]);
+    expect(Object.keys(benches).sort()).toEqual([
+      "allSkills",
+      "core",
+      "engineeringMaturity",
+      "largeProject",
+      "routing",
+      "smoke",
+    ]);
 
     const smoke = getSuite("smoke");
     const core = getSuite("core");
@@ -201,6 +234,7 @@ describe("ABP eval config", () => {
       "routing-settings-copy",
       "routing-customer-email-migration",
     ]);
+    expect(getSuite("largeProject")).toEqual([{ trial: "large-checkout-workflow", variant: "default" }]);
     for (const entry of allSkills) {
       expect(entry.variant).toBe("default");
     }
@@ -294,7 +328,8 @@ describe("ABP eval config", () => {
   });
 
   it("ships trial scaffolds that start with passing visible tests and failing hidden checks", () => {
-    for (const { trial } of getSuite("allSkills")) {
+    const executableTrials = [...getSuite("allSkills"), ...getSuite("largeProject")];
+    for (const { trial } of executableTrials) {
       const scaffold = path.join(evalDir, "trials", trial, "scaffold");
       expect(fs.existsSync(path.join(evalDir, "trials", trial, "task.md"))).toBe(true);
       expect(fs.existsSync(path.join(scaffold, "package.json"))).toBe(true);
@@ -345,17 +380,8 @@ describe("ABP eval config", () => {
     expect(extractFinalAssistantText(rawLines)).toBe("Final Codex note");
   });
 
-  it("rewards routing answers that include expected lenses, exclusions, evidence, and loop", () => {
-    const finalAnswer = [
-      "Goal: add saved payment methods to checkout without weakening account or payment behavior.",
-      "Risk profile: sensitive payment data, stored token references, a public account contract, and gradual rollout.",
-      "Apply workflow, data-first, security, database, api, release, proof, and code-review around the account endpoint contract.",
-      "Exclusions:",
-      "1. Broad wallet management UX beyond what checkout needs now.",
-      "2. Provider abstraction, multi-provider generalization, and new external dependencies.",
-      "Evidence plan: contract tests, unauthorized cross-account negative trust-boundary cases, migration validation, and flag rollout/rollback checks.",
-      "Completion loop: implement -> self-review diff -> fix findings -> proof -> final scoped claim.",
-    ].join("\n");
+  it("limits routing deterministic scoring to objective harness facts", () => {
+    const finalAnswer = "A human judge should evaluate this readiness note's content.";
     const session = stubSession([
       messageLine("user", "# Checkout Payment Change Triage\n\nDo not edit files."),
       messageLine("assistant", finalAnswer),
@@ -363,35 +389,32 @@ describe("ABP eval config", () => {
 
     const result = maturityPlugin.scoreSession(session, routingVerify());
 
-    expect(result.scores["routing"]).toBeGreaterThanOrEqual(90);
-    expect(result.scores["exclusions"]).toBe(100);
-    expect(result.scores["proof_plan"]).toBe(100);
     expect(result.scores["no_file_writes"]).toBe(100);
-    expect(result.scores["actionability"]).toBe(100);
+    expect(result.scores["baseline_isolation"]).toBe(100);
+    expect(result.scores["abp_activation"]).toBe(100);
+    expect(result.scores).not.toHaveProperty("routing");
+    expect(result.scores).not.toHaveProperty("exclusions");
+    expect(result.scores).not.toHaveProperty("proof_plan");
+    expect(result.scores).not.toHaveProperty("actionability");
     expect(result.findings).toEqual([]);
   });
 
-  it("does not reward generic routing words as domain lenses", () => {
-    const finalAnswer = [
-      "Goal: keep checkout safe.",
-      "Risk profile: payment, database, API, release, and code-review all matter.",
-      "State, evidence, and tests are mentioned here as generic words, not as selected lenses.",
-      "Exclude broad wallet management UX.",
-      "Exclude provider abstraction.",
-      "Completion loop: implement -> self-review diff -> fix findings -> proof -> final scoped claim.",
-    ].join("\n");
+  it("keeps read-only routing file-write checks deterministic", () => {
+    const finalAnswer = "A readiness note.";
     const session = stubSession([
       messageLine("user", "# Checkout Payment Change Triage\n\nDo not edit files."),
       messageLine("assistant", finalAnswer),
-    ]);
+    ], {
+      fileWrites: [{ timestamp: 1, path: "README.md", tool: "edit", labels: ["documentation"] }],
+    });
 
     const result = maturityPlugin.scoreSession(session, routingVerify());
 
-    expect(result.findings).toContain("Missing expected routing lens: data modeling.");
-    expect(result.findings).toContain("Missing expected routing lens: proof.");
+    expect(result.scores["no_file_writes"]).toBe(0);
+    expect(result.findings).toContain("Routing trial wrote files despite being read-only.");
   });
 
-  it("penalizes routing answers that name too many skills", () => {
+  it("does not use skill-name counting or content regexes as routing proxies", () => {
     const finalAnswer = [
       "Goal: saved payment methods at checkout.",
       "Risk profile: payment token storage and rollout.",
@@ -408,15 +431,17 @@ describe("ABP eval config", () => {
 
     const result = maturityPlugin.scoreSession(session, routingVerify());
 
-    expect(result.scores["proportionality"]).toBe(25);
-    expect(result.findings).toContain("Routing named too many skills (21; max 11).");
+    expect(result.scores).not.toHaveProperty("proportionality");
+    expect(result.scores).not.toHaveProperty("routing");
+    expect(result.scores).not.toHaveProperty("exclusions");
+    expect(result.scores).not.toHaveProperty("actionability");
+    expect(result.findings.some((finding) => /too many skills|proportional/i.test(finding))).toBe(false);
   });
 
-  it("scores post-write self-review and meaningful proof for implementation trials", () => {
+  it("scores meaningful proof for implementation trials", () => {
     const session = stubSession([], {
       fileWrites: [{ timestamp: 10, path: "src/cart.js", tool: "edit", labels: ["source"] }],
       toolCalls: [
-        { timestamp: 11, name: "exec_command", arguments: { cmd: "git diff -- src/cart.js" }, resultText: "", wasBlocked: false },
         { timestamp: 12, name: "exec_command", arguments: { cmd: "npm test" }, resultText: "", wasBlocked: false },
       ],
     });
@@ -427,9 +452,8 @@ describe("ABP eval config", () => {
       metrics: { submittedProofPassed: 1 },
     });
 
-    expect(result.scores["self_review"]).toBe(100);
     expect(result.scores["proof"]).toBe(100);
-    expect(result.findings).not.toContain("No post-change self-review inspection was detected.");
+    expect(result.scores).not.toHaveProperty("self_review");
     expect(result.findings).not.toContain("No post-change proof command was detected.");
     expect(result.findings).not.toContain("No behavior-relevant submitted proof was detected.");
   });
@@ -540,8 +564,8 @@ describe("ABP eval config", () => {
     expect(result.findings).not.toContain("ABP profile did not read any ABP skill files; plugin activation is not proven.");
   });
 
-  it("penalizes implementation trials that load too many ABP skills", () => {
-    const skillNames = ["workflow", "proof", "scaffolding", "documentation", "release"];
+  it("does not count skill loads as a deterministic score dimension", () => {
+    const skillNames = ["workflow", "proof", "scaffolding", "documentation", "release", "security", "database"];
     const session = stubSession([], {
       toolCalls: skillNames.map((skill, index) => ({
         timestamp: index + 1,
@@ -560,31 +584,57 @@ describe("ABP eval config", () => {
       metrics: { submittedProofPassed: 1 },
     });
 
-    expect(result.scores["skill_focus"]).toBe(70);
-    expect(result.findings).toContain(
-      "Loaded too many ABP skills for this focused trial: documentation, proof, release, scaffolding, workflow.",
-    );
+    expect(result.scores).not.toHaveProperty("skill_focus");
+    expect(result.findings.some((finding) => finding.startsWith("Loaded too many ABP skills"))).toBe(false);
   });
 
-  it("does not count edited file content as post-write review or proof commands", () => {
-    const session = stubSession([], {
-      fileWrites: [{ timestamp: 10, path: "src/cart.js", tool: "edit", labels: ["source"] }],
-      toolCalls: [
-        {
-          timestamp: 11,
-          name: "Edit",
-          arguments: { filePath: "src/cart.js", newString: 'const note = "git diff && npm test";' },
-          resultText: "",
-          wasBlocked: false,
-        },
-      ],
+  it("does not cap change_quality on file count; rewards source+tests together", () => {
+    const fileWrites = Array.from({ length: 12 }, (_, index) => ({
+      timestamp: index + 1,
+      path: index < 6 ? `src/module${index}.js` : `test/module${index - 6}.test.js`,
+      tool: "edit" as const,
+      labels: index < 6 ? ["source" as const] : ["test" as const],
+    }));
+    const session = stubSession([], { fileWrites });
+
+    const result = maturityPlugin.scoreSession(session, {
+      passed: true,
+      output: "ok",
+      metrics: { submittedProofPassed: 1 },
     });
 
-    const result = maturityPlugin.scoreSession(session, { passed: true, output: "ok", metrics: {} });
+    expect(result.scores["change_quality"]).toBe(100);
+    expect(result.findings).not.toContain("The solution touched many files for a small trial.");
+  });
 
-    expect(result.scores["self_review"]).toBe(35);
-    expect(result.scores["proof"]).toBe(35);
-    expect(result.findings).toContain("No post-change self-review inspection was detected.");
-    expect(result.findings).toContain("No post-change proof command was detected.");
+  it("scores change_quality lower when source is written without tests", () => {
+    const session = stubSession([], {
+      fileWrites: [{ timestamp: 10, path: "src/cart.js", tool: "edit", labels: ["source"] }],
+    });
+
+    const result = maturityPlugin.scoreSession(session, {
+      passed: true,
+      output: "ok",
+      metrics: { submittedProofPassed: 1 },
+    });
+
+    expect(result.scores["change_quality"]).toBe(70);
+  });
+
+  it("keeps deterministic weights summing to 1 and dominated by outcome metrics", () => {
+    const session = stubSession([], {
+      fileWrites: [{ timestamp: 10, path: "src/cart.js", tool: "edit", labels: ["source"] }],
+    });
+
+    const result = maturityPlugin.scoreSession(session, {
+      passed: true,
+      output: "ok",
+      metrics: { submittedProofPassed: 1 },
+    });
+
+    const weightSum = Object.values(result.weights).reduce((sum, weight) => sum + weight, 0);
+    expect(Math.abs(weightSum - 1)).toBeLessThan(1e-9);
+    const outcomeWeight = (result.weights["verification"] ?? 0) + (result.weights["proof"] ?? 0);
+    expect(outcomeWeight).toBeGreaterThanOrEqual(0.7);
   });
 });

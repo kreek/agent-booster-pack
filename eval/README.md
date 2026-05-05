@@ -12,19 +12,23 @@ Bench runs compare:
 
 Suites:
 
-- `smoke`: one cheap proof-first task for wiring checks.
+- `smoke`: one cheap read-only routing task for wiring checks.
 - `core`: tasks for ABP's always-on and core design/correctness skills.
 - `allSkills`: a larger suite intended to exercise every ABP skill listed in
   the README at least once.
+- `largeProject`: one larger project-style task for cross-file reasoning and
+  end-to-end proof.
 
 Suite membership is defined in `eval/suites/*.yaml`. `eval.config.ts` owns
 profile, Bench, judge, timeout, and budget policy only.
 
-The suite uses deterministic hidden checks plus an LLM judge that scores
-engineering maturity, proof quality, simplicity, and risk handling. Hidden
-checks make sure the task still works even if the agent edits visible tests.
-The judge runs by default; pass `--no-judge` for a fast, deterministic-only
-run during local development.
+The suite uses an LLM judge for qualitative output: engineering maturity,
+proof quality, simplicity, and risk handling. Deterministic scoring is limited
+to objective evidence such as forbidden file writes, profile isolation,
+plugin activation, and executable tests/checks when the trial prompt asks for
+code. Hidden implementation checks make sure the task still works even if the
+agent edits visible tests. The judge runs by default; pass `--no-judge` only
+when you want to inspect objective harness checks without qualitative scoring.
 
 Trial prompts and starter files are intentionally neutral: they describe the
 product or maintenance task without naming ABP, skills, or the quality lens
@@ -45,8 +49,15 @@ npm install
 Set a model if the default is not what you want:
 
 ```sh
-export ABP_EVAL_MODEL=gpt-5.4
+export ABP_EVAL_MODEL=gpt-5.3-codex
+export ABP_EVAL_JUDGE_MODEL=gpt-5.3-codex
+export ABP_EVAL_REASONING_EFFORT=low
 ```
+
+By default, both eval workers and the judge use `gpt-5.5` with medium
+reasoning effort. Codex worker effort is passed through
+`model_reasoning_effort`; the judge receives the same value as its thinking
+setting.
 
 Codex authentication is read from `CODEX_HOME/auth.json` when set, otherwise
 from `~/.codex/auth.json`. Each run gets a temporary isolated Codex home.
@@ -60,6 +71,7 @@ npm run view              # start the do-eval web UI on http://localhost:4242
 npm run bench:smoke       # compare Codex baseline vs Codex + ABP
 npm run bench:core        # compare the core suite
 npm run bench:routing     # compare read-only routing behavior
+npm run bench:large       # compare one larger project task
 npm run bench:all         # compare every skill
 npm run bench:smoke -- --no-judge
 

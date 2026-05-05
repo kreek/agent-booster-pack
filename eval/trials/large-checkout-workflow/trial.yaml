@@ -1,0 +1,18 @@
+description: Harden a multi-module checkout workflow without changing the public shape.
+taskFile: task.md
+plugin: engineering-maturity
+features:
+  - workflow
+  - data-first
+  - architecture
+  - api
+  - security
+  - database
+  - error-handling
+  - observability
+  - release
+  - proof
+  - code-review
+  - documentation
+variants:
+  default: {}

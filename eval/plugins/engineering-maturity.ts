@@ -28,109 +28,7 @@ const KNOWN_SKILLS = [
   "scaffolding",
 ] as const;
 
-interface RoutingCriteria {
-  caseId: number;
-  title: RegExp;
-  expected: Array<[label: string, pattern: RegExp]>;
-  excluded: Array<[label: string, pattern: RegExp]>;
-  actionable: Array<[label: string, pattern: RegExp]>;
-  maxNamedSkills: number;
-}
-
 type PluginScoreResult = ReturnType<EvalPlugin["scoreSession"]>;
-
-const ROUTING_CRITERIA: RoutingCriteria[] = [
-  {
-    caseId: 1,
-    title: /checkout payment change triage/i,
-    expected: [
-      ["data modeling", /\b(data[- ]first|data[ /-]invariants?|data model(?:ing)?|domain model|invariant)\b/i],
-      ["trust boundary", /\b(security|trust boundary|auth|sensitive|payment)\b/i],
-      ["persistence", /\b(database|migration|persist|stored data)\b/i],
-      ["public contract", /\b(api|contract|wire|http)\b/i],
-      ["release safety", /\b(release|rollout|rollback|deploy)\b/i],
-      ["proof", /(?:\bproof\b(?!\s*->)|\bevidence plan\b|\bverification (?:plan|step)\b|\btest plan\b|\bacceptance check\b|\bvalidation plan\b)/i],
-      ["self-review", /\b(code[- ]review|self[- ]review|review the diff|diff review)\b/i],
-    ],
-    excluded: [
-      ["product expansion excluded", /\b(wallet|management UX|broad .*redesign|unrelated checkout|unrelated account)\b/i],
-      ["speculative platform work excluded", /\b(provider abstraction|generalized|multi-provider|new external dependencies|speculative resilience|retry orchestration)\b/i],
-    ],
-    actionable: [
-      ["token boundary", /\b(tokenized payment reference|token references?|payment token)\b/i],
-      ["account endpoint contract", /\b(account endpoint|endpoint contract|response contract|wire contract)\b/i],
-      ["flagged rollout", /\b(flag|gradual rollout|rollout\/rollback|rollback)\b/i],
-      ["negative trust case", /\b(unauthorized|forbidden|negative|cross-account|trust-boundary)\b/i],
-    ],
-    maxNamedSkills: 11,
-  },
-  {
-    caseId: 2,
-    title: /worker retry change triage/i,
-    expected: [
-      ["async behavior", /\b(async[- ]systems|worker|queue|concurrency|retry)\b/i],
-      ["error handling", /\b(error[- ]handling|failure|timeout|retry)\b/i],
-      ["observability", /\b(observability|log|metric|trace|lifecycle)\b/i],
-      ["proof", /(?:\bproof\b(?!\s*->)|\bevidence plan\b|\bverification (?:plan|step)\b|\btest plan\b|\bacceptance check\b|\bvalidation plan\b)/i],
-      ["self-review", /\b(code[- ]review|self[- ]review|review the diff|diff review)\b/i],
-    ],
-    excluded: [
-      ["database excluded", /\b(database|migration|schema|transaction)\b/i],
-      ["ui excluded", /\b(ui[- ]design|accessibility|screen reader|keyboard|wcag)\b/i],
-    ],
-    actionable: [
-      ["retry-once behavior", /\bretry[- ]once|retry one failed send once|second attempt\b/i],
-      ["duplicate-send guard", /\bduplicate sends?|idempotenc|at[- ]most[- ]once|dedupe\b/i],
-      ["concurrency bound", /\bconcurrency limit|bounded concurrency|throughput predictable|max active\b/i],
-      ["lifecycle logs", /\b(lifecycle log|start.*finish|attempt log|retry log|metrics?)\b/i],
-    ],
-    maxNamedSkills: 7,
-  },
-  {
-    caseId: 3,
-    title: /settings copy change triage/i,
-    expected: [
-      ["user surface", /\b(ui[- ]design|user-facing|interface|copy|content)\b/i],
-      ["accessibility", /\b(accessibility|screen reader|keyboard|wcag|focus)\b/i],
-      ["documentation", /\b(documentation|docs|content|copy)\b/i],
-      ["verification", /(?:\bproof\b(?!\s*->)|\bverification (?:plan|step)\b|\binspection pass\b|\bacceptance check\b|\bcopy review\b|\bscreen reader check\b)/i],
-    ],
-    excluded: [
-      ["security excluded", /\b(security|auth|secret|trust boundary)\b/i],
-      ["database excluded", /\b(database|migration|schema|transaction)\b/i],
-      ["async excluded", /\b(async[- ]systems|queue|worker|stream|concurrency)\b/i],
-    ],
-    actionable: [
-      ["copy-only scope", /\b(copy-only|text-only|no behavior change|no data model)\b/i],
-      ["screen-reader check", /\b(screen reader|accessible name|announcement)\b/i],
-      ["keyboard/focus check", /\b(keyboard|focus)\b/i],
-      ["visual/content review", /\b(content review|copy review|visual inspection)\b/i],
-    ],
-    maxNamedSkills: 8,
-  },
-  {
-    caseId: 4,
-    title: /customer email migration triage/i,
-    expected: [
-      ["database", /\b(database|migration|schema|index|constraint)\b/i],
-      ["release", /\b(release|rollout|rollback|deploy)\b/i],
-      ["data invariant", /\b(data[- ]first|invariant|unique|email)\b/i],
-      ["proof", /(?:\bproof\b(?!\s*->)|\bevidence plan\b|\bverification (?:plan|step)\b|\btest plan\b|\bacceptance check\b|\bexplain plan\b|\bdry[- ]run\b)/i],
-      ["self-review", /\b(code[- ]review|self[- ]review|review the diff|diff review)\b/i],
-    ],
-    excluded: [
-      ["ui excluded", /\b(ui[- ]design|accessibility|screen reader|keyboard|wcag)\b/i],
-      ["async excluded", /\b(async[- ]systems|queue|worker|stream|concurrency)\b/i],
-    ],
-    actionable: [
-      ["concurrent index", /\bcreate unique index concurrently|concurrent index\b/i],
-      ["validation failure path", /\bvalidation fails?|duplicate email|dry[- ]run|preflight\b/i],
-      ["rollback path", /\brollback|drop index|revert\b/i],
-      ["large-table writes", /\bnormal writes|write traffic|lock|large table\b/i],
-    ],
-    maxNamedSkills: 7,
-  },
-];
 
 function runNodeCheck(workDir: string, script: string): VerifyResult {
   const result = spawnSync(process.execPath, ["--input-type=module", "-e", script], {
@@ -269,26 +167,6 @@ export function extractFinalAssistantText(rawLines: string[]): string {
   return messages[messages.length - 1] ?? "";
 }
 
-function matchingRoutingCriteria(prompt: string): RoutingCriteria | undefined {
-  return ROUTING_CRITERIA.find((criteria) => criteria.title.test(prompt));
-}
-
-function hasExplicitExclusion(text: string, pattern: RegExp): boolean {
-  const exclusionSection = text.match(
-    /(?:engineering lenses to (?:explicitly )?exclude|excluded? (?:lenses|areas|scope)|exclusions?)[\s\S]*?(?=\n\s*(?:#{1,6}\s|\*\*[^*\n]+:\*\*|[A-Z][A-Za-z /-]{2,}:)|$)/i,
-  )?.[0];
-  if (exclusionSection && pattern.test(exclusionSection)) return true;
-
-  const sentences = text.split(/(?<=[.!?])\s+|\n+/);
-  return sentences.some(
-    (sentence) => pattern.test(sentence) && /\b(exclude|skip|defer|not needed|not relevant|out of scope|unneeded|avoid)\b/i.test(sentence),
-  );
-}
-
-function countNamedSkills(text: string): number {
-  return KNOWN_SKILLS.filter((skill) => new RegExp(`\\b${skill.replaceAll("-", "[- ]")}\\b`, "i").test(text)).length;
-}
-
 function commandAndResultText(session: EvalSession): string {
   return session.toolCalls
     .map((call) => `${call.name} ${commandText(call)}\n${call.resultText}`)
@@ -320,88 +198,28 @@ function readAbpSkillNames(session: EvalSession): string[] {
   return [...skills].sort();
 }
 
-function scoreRoutingSession(session: EvalSession, verify: VerifyResult): PluginScoreResult {
-  const prompt = extractInitialUserPrompt(session.rawLines);
-  const finalAnswer = extractFinalAssistantText(session.rawLines);
+function scoreRoutingSession(session: EvalSession, _verify: VerifyResult): PluginScoreResult {
   const skillReads = readAbpSkillNames(session);
   const baselineSkillReads = isBaselineSession(session) ? skillReads : [];
   const abpSkillReads = isAbpSession(session) ? skillReads : [];
-  const routingCase = verify.metrics["routingCase"];
-  const criteria =
-    routingCase !== undefined
-      ? ROUTING_CRITERIA.find((candidate) => candidate.caseId === routingCase)
-      : matchingRoutingCriteria(prompt);
-  if (!criteria) {
-    return {
-      scores: { routing: 0, exclusions: 0, proof_plan: 0, proportionality: 0, baseline_isolation: 100, abp_activation: 100 },
-      weights: { routing: 0.36, exclusions: 0.18, proof_plan: 0.23, proportionality: 0.13, baseline_isolation: 0.05, abp_activation: 0.05 },
-      findings: ["Routing trial criteria could not be matched from the prompt."],
-      judge: {
-        includeInOverall: true,
-        defaultWeight: 0.2,
-        weights: {
-          engineering_maturity: 0.35,
-          proof_quality: 0.25,
-          simplicity: 0.2,
-          risk_handling: 0.2,
-        },
-      },
-    };
-  }
-
-  const expectedHits = criteria.expected.filter(([, pattern]) => pattern.test(finalAnswer));
-  const excludedHits = criteria.excluded.filter(([, pattern]) => hasExplicitExclusion(finalAnswer, pattern));
-  const actionableHits = criteria.actionable.filter(([, pattern]) => pattern.test(finalAnswer));
   const writesScore = session.fileWrites.length === 0 ? 100 : 0;
-  const proofSignals = [
-    /\b(proof|evidence|validation|verification|test|check|inspect)\b/i.test(finalAnswer),
-    /\b(command|scenario|negative|regression|acceptance|boundary)\b/i.test(finalAnswer),
-    /\b(self[- ]review|review the diff|code[- ]review|before claiming done|final scoped claim)\b/i.test(finalAnswer),
-  ].filter(Boolean).length;
-  const namedSkills = countNamedSkills(finalAnswer);
-  const tooManySkills = namedSkills > criteria.maxNamedSkills;
-  const proportionality =
-    !tooManySkills && namedSkills >= Math.min(3, criteria.expected.length) ? 100 : namedSkills === 0 ? 35 : tooManySkills ? 25 : 60;
-
   const scores = {
-    routing: Math.round((expectedHits.length / criteria.expected.length) * 100),
-    exclusions: Math.round((excludedHits.length / criteria.excluded.length) * 100),
-    proof_plan: Math.round((proofSignals / 3) * 100),
     no_file_writes: writesScore,
-    proportionality,
-    actionability: Math.round((actionableHits.length / criteria.actionable.length) * 100),
     baseline_isolation: baselineSkillReads.length > 0 ? 0 : 100,
     abp_activation: isAbpSession(session) && abpSkillReads.length === 0 ? 0 : 100,
   };
   const weights = {
-    routing: 0.22,
-    exclusions: 0.14,
-    proof_plan: 0.18,
-    no_file_writes: 0.1,
-    proportionality: 0.08,
-    actionability: 0.18,
-    baseline_isolation: 0.05,
-    abp_activation: 0.05,
+    no_file_writes: 0.7,
+    baseline_isolation: 0.15,
+    abp_activation: 0.15,
   };
   const findings: string[] = [];
-  for (const [label] of criteria.expected.filter(([label]) => !expectedHits.some(([hit]) => hit === label))) {
-    findings.push(`Missing expected routing lens: ${label}.`);
-  }
-  for (const [label] of criteria.excluded.filter(([label]) => !excludedHits.some(([hit]) => hit === label))) {
-    findings.push(`Missing explicit exclusion: ${label}.`);
-  }
   if (session.fileWrites.length > 0) findings.push("Routing trial wrote files despite being read-only.");
-  if (proofSignals < 3) findings.push("Evidence plan or self-review loop was incomplete.");
-  if (tooManySkills) findings.push(`Routing named too many skills (${namedSkills}; max ${criteria.maxNamedSkills}).`);
-  else if (scores.proportionality < 100) findings.push("Routing was not proportional to the task risks.");
   if (baselineSkillReads.length > 0) {
     findings.push(`Baseline session read ABP skill files: ${baselineSkillReads.join(", ")}.`);
   }
   if (isAbpSession(session) && abpSkillReads.length === 0) {
     findings.push("ABP profile did not read any ABP skill files; plugin activation is not proven.");
-  }
-  for (const [label] of criteria.actionable.filter(([label]) => !actionableHits.some(([hit]) => hit === label))) {
-    findings.push(`Missing actionable routing detail: ${label}.`);
   }
 
   return {
@@ -410,7 +228,7 @@ function scoreRoutingSession(session: EvalSession, verify: VerifyResult): Plugin
     findings,
     judge: {
       includeInOverall: true,
-      defaultWeight: 0.2,
+      defaultWeight: 0.45,
       weights: {
         engineering_maturity: 0.35,
         proof_quality: 0.25,
@@ -422,7 +240,7 @@ function scoreRoutingSession(session: EvalSession, verify: VerifyResult): Plugin
 }
 
 function isCommandTool(call: EvalSession["toolCalls"][number]): boolean {
-  return /\b(exec_command|bash|shell|terminal|run_command|write_stdin)\b/i.test(call.name);
+  return /\b(command_execution|exec_command|bash|shell|terminal|run_command|write_stdin)\b/i.test(call.name);
 }
 
 function commandText(call: EvalSession["toolCalls"][number]): string {
@@ -561,6 +379,10 @@ function hasSubmittedProofForTrial(workDir: string): boolean {
   if (fs.existsSync(path.join(workDir, "src", "worker.js"))) {
     const tests = readIfExists(path.join(workDir, "test", "worker.test.js"));
     return /\bconcurrency\b|\bmaxActive\b/i.test(tests) && /\bretry|attempt/i.test(tests) && /\blog|events/i.test(tests);
+  }
+  if (fs.existsSync(path.join(workDir, "src", "checkout.js")) && fs.existsSync(path.join(workDir, "src", "services.js"))) {
+    const tests = readIfExists(path.join(workDir, "test", "checkout.test.js"));
+    return Array.from(tests.matchAll(/(?:^|\n)\s*test\s*\(/g)).length >= 4;
   }
   if (fs.existsSync(path.join(workDir, "docs", "checkout-notes.md"))) {
     const content = readIfExists(path.join(workDir, "docs", "checkout-validation.md"));
@@ -790,6 +612,99 @@ function runHiddenChecks(workDir: string): VerifyResult {
     );
   }
 
+  if (fs.existsSync(path.join(workDir, "src", "checkout.js")) && fs.existsSync(path.join(workDir, "src", "services.js"))) {
+    return runNodeCheck(
+      workDir,
+      `
+          import assert from "node:assert/strict";
+          import { submitCheckout } from "./src/checkout.js";
+
+          const request = {
+            customerId: "cus_123",
+            idempotencyKey: "idem_123",
+            paymentSource: "tok_visa",
+            items: [{ sku: "sku_book", quantity: 1, priceCents: 1000 }],
+          };
+
+          function makeServices(options = {}) {
+            const events = [];
+            const existing = options.existing;
+            return {
+              events,
+              orders: {
+                async findByIdempotencyKey(key) {
+                  events.push(["find-order", key]);
+                  return existing;
+                },
+                async create(order) {
+                  events.push(["create-order", order]);
+                  return { ...order, id: "ord_new" };
+                },
+              },
+              inventory: {
+                async reserve(items) {
+                  events.push(["reserve", items]);
+                  if (options.reserveFails) throw new Error("out of stock");
+                  return { reservationId: "res_1" };
+                },
+                async release(reservationId) {
+                  events.push(["release", reservationId]);
+                },
+              },
+              payments: {
+                async charge(payment) {
+                  events.push(["charge", payment]);
+                  if (options.chargeFails) throw new Error("card declined");
+                  return { id: "pay_1" };
+                },
+                async refund(paymentId) {
+                  events.push(["refund", paymentId]);
+                },
+              },
+              email: {
+                async sendReceipt(orderId, customerId) {
+                  events.push(["email", { orderId, customerId }]);
+                },
+              },
+              logger: {
+                info(event, data) { events.push(["info", event, data]); },
+                warn(event, data) { events.push(["warn", event, data]); },
+                error(event, data) { events.push(["error", event, data]); },
+              },
+            };
+          }
+
+          const existingOrder = {
+            id: "ord_existing",
+            customerId: request.customerId,
+            totalCents: 1083,
+            status: "paid",
+          };
+          const duplicateServices = makeServices({ existing: existingOrder });
+          const duplicate = await submitCheckout(request, duplicateServices);
+          assert.equal(duplicate.status, "confirmed");
+          assert.equal(duplicate.orderId, "ord_existing");
+          assert.equal(duplicate.totalCents, 1083);
+          assert.equal(duplicateServices.events.some(([event]) => event === "charge"), false);
+          assert.equal(duplicateServices.events.some(([event]) => event === "reserve"), false);
+          assert.equal(duplicateServices.events.some(([event]) => event === "create-order"), false);
+
+          const stockServices = makeServices({ reserveFails: true });
+          await assert.rejects(() => submitCheckout(request, stockServices), /stock|inventory|reserve|unavailable|failed|checkout/i);
+          assert.equal(stockServices.events.some(([event]) => event === "charge"), false);
+          assert.equal(stockServices.events.some(([event]) => event === "create-order"), false);
+
+          const paymentServices = makeServices({ chargeFails: true });
+          await assert.rejects(() => submitCheckout(request, paymentServices), /payment|charge|declined|failed|checkout/i);
+          const paymentEvents = paymentServices.events.map(([event]) => event);
+          assert.ok(paymentEvents.indexOf("reserve") >= 0);
+          assert.ok(paymentEvents.indexOf("charge") > paymentEvents.indexOf("reserve"));
+          assert.ok(paymentEvents.indexOf("release") > paymentEvents.indexOf("charge"));
+          assert.equal(paymentServices.events.some(([event]) => event === "create-order"), false);
+        `,
+    );
+  }
+
   if (fs.existsSync(path.join(workDir, "public", "index.html"))) {
     return validateSubscriptionForm(workDir);
   }
@@ -883,16 +798,10 @@ const plugin: EvalPlugin = {
 
     const wroteTests = session.fileWrites.some((file) => file.labels.includes("test"));
     const wroteSource = session.fileWrites.some((file) => file.labels.includes("source"));
-    const touchedManyFiles = session.fileWrites.length > 8;
     const submittedProofPassed = verify.metrics["submittedProofPassed"] === 1;
     const skillReads = readAbpSkillNames(session);
     const baselineSkillReads = isBaselineSession(session) ? skillReads : [];
     const abpSkillReads = isAbpSession(session) ? skillReads : [];
-    const skillFocus = skillReads.length <= 4 ? 100 : skillReads.length <= 6 ? 70 : 40;
-    const postWriteSelfReview = hasPostWriteCommand(
-      session,
-      /\b(git\s+(?:diff|status|show)|rg\b)\b/i,
-    );
     const postWriteProof = hasPostWriteCommand(
       session,
       /\b(npm\s+test|npm\s+run\s+(test|typecheck|lint|check)|vitest|pytest|go\s+test|cargo\s+test|mvn\s+test|uv\s+run\s+(pytest|ruff|pyright|python)|refcheck|validate_skill_anatomy)\b/i,
@@ -901,29 +810,22 @@ const plugin: EvalPlugin = {
     const scores = {
       verification: verify.passed ? 100 : 0,
       proof: submittedProofPassed && postWriteProof ? 100 : submittedProofPassed ? 85 : postWriteProof ? 60 : verify.passed ? 35 : 15,
-      self_review: !wroteSource ? 80 : postWriteSelfReview ? 100 : 35,
-      change_quality: wroteSource && !touchedManyFiles ? 85 : wroteSource ? 65 : 25,
+      change_quality: wroteSource && wroteTests ? 100 : wroteSource ? 70 : 25,
       baseline_isolation: baselineSkillReads.length > 0 ? 0 : 100,
       abp_activation: isAbpSession(session) && abpSkillReads.length === 0 ? 0 : 100,
-      skill_focus: skillFocus,
     };
     const weights = {
-      verification: 0.36,
-      proof: 0.22,
-      self_review: 0.13,
-      change_quality: 0.13,
+      verification: 0.45,
+      proof: 0.30,
+      change_quality: 0.14,
       baseline_isolation: 0.05,
       abp_activation: 0.06,
-      skill_focus: 0.05,
     };
     const findings: string[] = [];
     if (!submittedProofPassed) findings.push("No behavior-relevant submitted proof was detected.");
     else if (!wroteTests) findings.push("No test file writes were detected; proof came from the submitted artifact.");
-    if (wroteSource && !postWriteSelfReview) findings.push("No post-change self-review inspection was detected.");
     if (wroteSource && !postWriteProof) findings.push("No post-change proof command was detected.");
-    if (touchedManyFiles) findings.push("The solution touched many files for a small trial.");
     if (!verify.passed) findings.push("Visible tests or hidden checks failed.");
-    if (skillReads.length > 4) findings.push(`Loaded too many ABP skills for this focused trial: ${skillReads.join(", ")}.`);
     if (baselineSkillReads.length > 0) {
       findings.push(`Baseline session read ABP skill files: ${baselineSkillReads.join(", ")}.`);
     }
@@ -937,7 +839,7 @@ const plugin: EvalPlugin = {
       findings,
       judge: {
         includeInOverall: true,
-        defaultWeight: 0.2,
+        defaultWeight: 0.45,
         weights: {
           engineering_maturity: 0.35,
           proof_quality: 0.25,
@@ -986,9 +888,10 @@ const plugin: EvalPlugin = {
       "- A score below 90 with no matching finding is invalid output; if you can't name a concern, the score should be ≥ 90.",
       "",
       "Scoring guidance:",
-      "- Prefer evidence-backed, low-complexity, maintainable changes.",
-      "- Penalize superficial test edits, broad rewrites, missing edge cases, and changes that only satisfy the visible tests.",
-      "- Penalize elaborations that look sophisticated but do not deliver the invariant they imply (e.g. partial unique indexes that cannot enforce uniqueness, prototype-pollution guards that still permit `__proto__` writes, custom scripts that introduce undeclared dependencies).",
+      "- Prefer evidence-backed, maintainable changes that match the problem's scope.",
+      "- Penalize superficial test edits, missing edge cases, and changes that only satisfy the visible tests.",
+      "- Penalize sophisticated-looking constructs that fail to deliver the invariant they imply (e.g. partial unique indexes that cannot enforce uniqueness, prototype-pollution guards that still permit `__proto__` writes, custom scripts that introduce undeclared dependencies).",
+      "- Do not penalize a solution merely for adding tests, ADRs, migrations, or documentation when those artifacts are warranted by the task; reward thoroughness when it serves correctness, safety, or maintainability.",
       "- A solution that fails verification but is otherwise simple SHOULD score lower on engineering_maturity and risk_handling than a solution that passes verification with the same simplicity.",
       "",
       "## Task",

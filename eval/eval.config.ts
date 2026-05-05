@@ -3,7 +3,10 @@ import * as path from "node:path";
 import type { ExecutionProfile, ProjectEvalConfig } from "do-eval";
 
 const provider = process.env["ABP_EVAL_PROVIDER"] ?? "openai";
-const model = process.env["ABP_EVAL_MODEL"] ?? "gpt-5.4";
+const model = process.env["ABP_EVAL_MODEL"] ?? "gpt-5.5";
+const judgeModel = process.env["ABP_EVAL_JUDGE_MODEL"] ?? "gpt-5.5";
+const reasoningEffort = process.env["ABP_EVAL_REASONING_EFFORT"] ?? "medium";
+const codexReasoningArgs = ["-c", `model_reasoning_effort="${reasoningEffort}"`];
 
 const ABP_REPO_ROOT = path.resolve(import.meta.dirname, "..");
 
@@ -14,7 +17,7 @@ const baselineCodexAgent: ExecutionProfile["agent"] = {
   codex: {
     isolateHome: true,
     ignoreUserConfig: true,
-    extraArgs: ["--disable", "plugins"],
+    extraArgs: ["--disable", "plugins", ...codexReasoningArgs],
   },
 };
 
@@ -25,7 +28,7 @@ const abpCodexAgent: ExecutionProfile["agent"] = {
   codex: {
     isolateHome: true,
     pluginMarketplaces: [ABP_REPO_ROOT],
-    extraArgs: ["-c", 'plugins."abp@abp".enabled=true'],
+    extraArgs: ["-c", 'plugins."abp@abp".enabled=true', ...codexReasoningArgs],
   },
 };
 
@@ -63,6 +66,7 @@ const config: ProjectEvalConfig = {
         harness: "codex",
         provider,
         model,
+        reasoningEffort,
         layers: [],
       },
     },
@@ -85,6 +89,7 @@ const config: ProjectEvalConfig = {
         harness: "codex",
         provider,
         model,
+        reasoningEffort,
         layers: [
           {
             id: "abp",
@@ -101,6 +106,11 @@ const config: ProjectEvalConfig = {
       profiles: ["codexBaseline", "codexWithAbpSkills"],
       baseline: "codexBaseline",
       reuseBaseline: true,
+      requireJudge: true,
+      requiredDeterministicScores: {
+        baseline_isolation: 100,
+        abp_activation: 100,
+      },
     },
     core: {
       profiles: ["codexBaseline", "codexWithAbpSkills"],
@@ -126,13 +136,20 @@ const config: ProjectEvalConfig = {
       epochs: 1,
       reuseBaseline: true,
     },
+    largeProject: {
+      profiles: ["codexBaseline", "codexWithAbpSkills"],
+      baseline: "codexBaseline",
+      epochs: 1,
+      reuseBaseline: true,
+    },
   },
   defaultProfile: "codexWithAbpSkills",
   defaultPlugin: "engineering-maturity",
   runsDir: process.env["ABP_EVAL_RUNS_DIR"] ?? path.join(os.homedir(), ".cache", "agent-booster-pack", "eval", "runs"),
   judge: {
     provider: "openai-codex",
-    model: "gpt-5.4",
+    model: judgeModel,
+    thinking: reasoningEffort,
   },
   timeouts: {
     workerMs: 15 * 60 * 1000,

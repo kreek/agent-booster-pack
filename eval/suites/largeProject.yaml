@@ -1,0 +1,4 @@
+name: largeProject
+description: One larger project-style task that forces cross-file reasoning and end-to-end proof.
+trials:
+  - large-checkout-workflow
