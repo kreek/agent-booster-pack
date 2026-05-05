@@ -45,15 +45,47 @@ description: Use for proof and tests, claims, invariants, behavior specs, edge c
    Use workflow's `references/simple-not-easy.md` when a "safer" hardening
    step lacks a named failure mode and evidence.
 6. Test behavior, not implementation: assertions describe what a
-   caller observes. Enter at the outermost practical boundary: HTTP,
-   CLI, UI, public API, or module facade.
-7. One test covers one behavior; if the name needs "and", split it.
-8. Prefer real collaborators until they cross a true system boundary.
-   Mock only at edges: clock, network, third-party service, process,
-   filesystem, or expensive infrastructure not under test.
-9. A good test would survive a full implementation swap that preserves
-   the contract.
-10. Flaky tests are bugs in the test, code, or environment; do not
+   caller, downstream stage, or consumer observes. Enter at the
+   outermost practical boundary — anywhere data shape or values change
+   observably. Common cases: HTTP, CLI, UI, public API, module facade,
+   pipeline or stage seam, parser or serializer edge, validator output,
+   middleware boundary, or any function from raw input to a typed or
+   normalized representation.
+7. In transformation chains and pipelines, the function call graph is
+   not the test surface. Tests belong at the seams where data shape
+   changes — extract -> transform -> load; raw -> parsed -> validated;
+   request -> middleware-N output -> handler input. Assert shape
+   (schema, types, key invariants) plus representative values at each
+   seam, plus one end-to-end happy path. A per-function unit test
+   inside the chain is a duplicate of the seam assertion above it
+   unless the function has non-trivial branching, accumulation, or
+   edge-case handling that the seam tests do not exercise. See
+   `references/data-shape-boundaries.md` for worked examples.
+8. Errors are shape changes too. An error envelope (`Result.Err`, HTTP
+   4xx, `ParseError`, `ValidationError`) is a different shape from the
+   success envelope at the same seam, and both deserve assertions. The
+   content of the user-facing error message is a value claim at the
+   outermost seam where the error becomes observable to the consumer:
+   assert the message, code, and structured fields the consumer relies
+   on, not just that an error happened. Per-error-class coverage lives
+   at the seam where the error becomes user-observable, not at every
+   internal function that could raise.
+9. Test placement is a code-organization signal. If a clean seam test
+   is hard to write, the seam is wrong: data and effects are tangled,
+   the boundary is leaking implementation, or the responsibility is
+   split awkwardly across functions. Simplify the code so the seam
+   becomes testable — extract the pure transform, push effects to the
+   edge, name the data shape — rather than adding test ceremony around
+   tangled code. A test that needs many mocks, deep setup, or
+   assertions on private call patterns is reporting that the design
+   needs refactoring, not that the test framework is inadequate.
+10. One test covers one behavior; if the name needs "and", split it.
+11. Prefer real collaborators until they cross a true system boundary.
+    Mock only at edges: clock, network, third-party service, process,
+    filesystem, or expensive infrastructure not under test.
+12. A good test would survive a full implementation swap that preserves
+    the contract.
+13. Flaky tests are bugs in the test, code, or environment; do not
     hide them with sleeps or retries.
 
 ## Proof Contract
@@ -63,8 +95,11 @@ For every non-trivial engineering claim, record:
 - Claim: the behavior, invariant, contract, or root cause asserted.
 - Data invariant: the data shape, state rule, or type boundary that
   makes bad states impossible or visible.
-- Boundary: where the proof enters: public API, CLI, HTTP endpoint,
-  UI flow, migration preflight, module facade, or reproducible command.
+- Boundary: where the proof enters — the point at which data shape
+  or values change in a way the claim is about. Common cases: public
+  API, CLI, HTTP endpoint, UI flow, migration preflight, module
+  facade, pipeline or stage seam, parser output, validator output, or
+  reproducible command.
 - Check: the executable validation that would fail if the claim were
   false.
 - Evidence: command/result, test name, diff reference, observed
@@ -145,6 +180,9 @@ For every non-trivial engineering claim, record:
 | "Mock is faster than a fixture" | Use the real collaborator unless it crosses a true system boundary. | Clock, network, third-party service, process, filesystem, or expensive infrastructure. |
 | "I'll add tests after the feature lands" | Add the behavior assertion before claiming the feature is done. | Exploratory spike explicitly marked as not complete. |
 | "This equivalent artifact should count" | Prove the requested artifact or explicitly report the substitution and risk. | The user or repo convention already named the substitute. |
+| "Wrote a unit test for every function in a transformation chain" | The seam tests above and below already cover them. Keep an internal-stage test only when the stage has non-trivial branching or stateful behavior the seam assertions cannot exercise. | The internal stage has multiple branches or accumulates state that the seam tests cannot drive. |
+| "Asserted an error happens, but not what the consumer sees" | The user-facing error message and envelope are the value claim at the outermost seam. Assert the message, code, and structured fields the consumer relies on. | The error path is purely internal and the consumer never observes it. |
+| "Test needs many mocks and deep setup to run" | The design is signaling tangle, not test framework limits. Simplify the seam — extract pure transforms, push effects to the edge — before piling on mocks. | The test crosses a true system boundary (clock, network, infra) that genuinely requires substitution. |
 
 ## Runtime Extensions
 
@@ -163,6 +201,13 @@ counts toward whichever claims it actually covers.
   unrepresentable.
 - Use `debugging` when the proof depends on root-cause evidence.
 - Use `api` when the claim is a public contract.
+- Use `refactoring` or `architecture` when test placement reveals a
+  tangled seam that needs simplification before it can be cleanly
+  proven; the inability to write a clean seam test is a code-
+  organization signal, not a test-framework limit.
+- Use `error-handling` when the error envelope, message content, or
+  recovery contract that proof must assert at the seam is itself
+  unsettled; that skill owns the contract, this skill owns the proof.
 - Use `refactoring` when the proof is behavior preservation through
   structural change.
 - Use `security` when proof requires abuse cases or trust-boundary
@@ -171,4 +216,7 @@ counts toward whichever claims it actually covers.
 ## References
 
 - Proof recipes: `references/recipes.md`.
+- Data-shape boundaries (worked examples for pipelines, parsers,
+  validators, middleware, sans-IO, and functional core):
+  `references/data-shape-boundaries.md`.
 - `pi-proof` extension: https://github.com/kreek/pi-proof
