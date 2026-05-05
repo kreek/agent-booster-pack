@@ -314,6 +314,9 @@ function readAbpSkillNames(session: EvalSession): string[] {
   for (const match of text.matchAll(/plugin\/skills\/([^/\s"']+)\/SKILL\.md/g)) {
     if (match[1]) skills.add(match[1]);
   }
+  for (const match of text.matchAll(/\.codex\/skills\/([^/\s"']+)\/SKILL\.md/g)) {
+    if (match[1]) skills.add(match[1]);
+  }
   return [...skills].sort();
 }
 

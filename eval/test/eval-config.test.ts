@@ -126,6 +126,15 @@ describe("ABP eval config", () => {
         runtime: "codex",
       }),
     ]);
+    expect(withAbp.setup?.layers).toEqual([
+      expect.objectContaining({
+        id: "abp-skills",
+        kind: "skill-library",
+        runtime: "codex",
+        source: "../agents/.agents/skills",
+      }),
+    ]);
+    expect(fs.existsSync(path.resolve(evalDir, withAbp.setup?.layers?.[0]?.source ?? ""))).toBe(true);
     const marketplaceSource = withAbp.agent.codex?.pluginMarketplaces?.[0];
     expect(marketplaceSource, "ABP profile must register the local repo as a codex plugin marketplace").toBeDefined();
     expect(fs.existsSync(path.resolve(marketplaceSource ?? ""))).toBe(true);
@@ -513,7 +522,7 @@ describe("ABP eval config", () => {
           name: "command_execution",
           arguments: {
             command:
-              "/bin/zsh -lc \"sed -n '1,120p' /repo/plugin/skills/proof/SKILL.md\"",
+              "/bin/zsh -lc \"sed -n '1,120p' .codex/skills/proof/SKILL.md\"",
           },
           resultText: "# Proof\n",
           wasBlocked: false,

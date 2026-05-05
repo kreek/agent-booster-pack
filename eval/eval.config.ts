@@ -70,6 +70,17 @@ const config: ProjectEvalConfig = {
       id: "codexWithAbpSkills",
       label: "Codex + ABP skills",
       agent: abpCodexAgent,
+      setup: {
+        layers: [
+          {
+            id: "abp-skills",
+            kind: "skill-library",
+            runtime: "codex",
+            source: "../agents/.agents/skills",
+            capabilities: skillLayerCapabilities,
+          },
+        ],
+      },
       factors: {
         harness: "codex",
         provider,
