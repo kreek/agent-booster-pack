@@ -1,14 +1,23 @@
 # Agent Booster Pack Evals
 
-This eval suite benchmarks whether Codex behaves better when the Agent Booster
-Pack is installed as a Codex plugin.
+This eval suite gates ABP changes against regressions and, when a new
+comparison run is wanted, benchmarks whether Codex behaves better when the
+Agent Booster Pack is installed as a Codex plugin.
 
-Bench runs compare:
+**Default workflow: regression.** ABP-vs-baseline behaviour is established;
+routine change-validation runs `regression` against `codexWithAbpSkills`
+only and compares scores against history. Bench (cross-profile comparison)
+is reserved for periodic re-baselining or when claiming a directional win
+against unaided Codex.
 
-- `codexBaseline`: Codex with an isolated, freshly-authed home and no plugins.
+Profiles:
+
+- `codexBaseline`: Codex with an isolated, freshly-authed home and no
+  plugins. Used by bench only.
 - `codexWithAbpSkills`: the same Codex model with the local repo registered
   as a codex plugin marketplace and the `abp@abp` plugin enabled — the same
-  flow a real user gets after `codex plugin marketplace add`.
+  flow a real user gets after `codex plugin marketplace add`. The default
+  profile for regression.
 
 Suites:
 
@@ -18,6 +27,8 @@ Suites:
   the README at least once.
 - `largeProject`: one larger project-style task for cross-file reasoning and
   end-to-end proof.
+- `regressionCheck`: trials known to have regressed under ABP; rerun after
+  fixes to confirm they landed.
 
 Suite membership is defined in `eval/suites/*.yaml`. `eval.config.ts` owns
 profile, Bench, judge, timeout, and budget policy only.
@@ -68,25 +79,30 @@ from `~/.codex/auth.json`. Each run gets a temporary isolated Codex home.
 npm run list              # show profiles, suites, and bench configs
 npm run view              # start the do-eval web UI on http://localhost:4242
 
-npm run bench:smoke       # compare Codex baseline vs Codex + ABP
-npm run bench:core        # compare the core suite
-npm run bench:routing     # compare read-only routing behavior
-npm run bench:large       # compare one larger project task
-npm run bench:all         # compare every skill
-npm run bench:smoke -- --no-judge
+# Regression — the default workflow. Runs codexWithAbpSkills only.
+npm run regression:check  # the two trials known to have regressed
+npm run regression:core   # always-on and core design/correctness skills
+npm run regression:smoke  # cheap routing wiring check
+npm run regression:all    # full ABP-only sweep
 
-npm run regression:smoke -- --profile codexWithAbpSkills
-npm run trial -- proof-first-bugfix --profile codexBaseline
+npm run trial -- proof-first-bugfix --profile codexWithAbpSkills
+
+# Bench — cross-profile comparison. Reserved for re-baselining.
+npm run bench:smoke       # compare Codex baseline vs Codex + ABP
+npm run bench:core
+npm run bench:routing
+npm run bench:large
+npm run bench:all
 
 npm test                  # run eval harness tests
 npm run typecheck         # type-check the eval harness
 ```
 
-Use **Bench** for cross-profile comparisons: one suite, baseline Codex, and
-Codex with ABP installed. Use **Regression** to inspect one profile's runs
-over time. Use **Trial** to debug one task under one profile. The launcher card
-in the do-eval UI defaults to **Bench** for this project via
-`defaultLaunchType: "bench"` in `eval.config.ts`.
+Use **Regression** for routine ABP change-validation: one profile (ABP),
+one suite, score against history. Use **Bench** when a fresh
+ABP-vs-baseline comparison is needed (every release, or when claiming
+a directional win against unaided Codex). Use **Trial** to debug one
+task under one profile.
 
 Results are written under `~/.cache/agent-booster-pack/eval/runs/` by default
 (override with `ABP_EVAL_RUNS_DIR`). Trial workdirs live outside the repo to
