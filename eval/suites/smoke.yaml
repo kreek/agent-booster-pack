@@ -1,0 +1,4 @@
+name: smoke
+description: Cheap read-only harness wiring check before expensive benchmark suites.
+trials:
+  - routing-checkout-payment

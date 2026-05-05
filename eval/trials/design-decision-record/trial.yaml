@@ -1,0 +1,10 @@
+description: Capture a design choice for a small service change.
+taskFile: task.md
+plugin: engineering-maturity
+features:
+  - workflow
+  - whiteboarding
+  - architecture
+  - documentation
+variants:
+  default: {}

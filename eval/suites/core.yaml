@@ -1,0 +1,7 @@
+name: core
+description: ABP's always-on and core design/correctness skills.
+trials:
+  - proof-first-bugfix
+  - security-boundary-fix
+  - design-decision-record
+  - debugging-regression

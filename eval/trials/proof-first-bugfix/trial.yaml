@@ -1,0 +1,10 @@
+description: Improve a small maintenance change and leave executable evidence.
+taskFile: task.md
+plugin: engineering-maturity
+features:
+  - workflow
+  - proof
+  - data-first
+  - refactoring
+variants:
+  default: {}

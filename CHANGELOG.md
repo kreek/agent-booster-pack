@@ -56,6 +56,15 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   whiteboarding or implementation.
 - `security`, `workflow`, `code-review`, and `refactoring` now make context
   trust and simplification guidance more concrete.
+- Eval commands now use the Pi Do Eval **Bench**, **Regression**, and
+  **Trial** vocabulary; the duplicate experiment command/scripts and config
+  surface were removed.
+- ABP eval suites now use Pi Do Eval's file-backed `eval/suites/*.yaml`
+  workflow; `eval.config.ts` is limited to profile, Bench, judge, timeout,
+  and budget policy.
+- ABP eval trial metadata now lives in `eval/trials/*/trial.yaml`; generic
+  Trial, Regression, and Bench runner code is provided by Pi Do Eval instead
+  of project-local TypeScript.
 
 ### Fixed
 

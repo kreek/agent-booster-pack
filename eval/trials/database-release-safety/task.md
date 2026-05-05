@@ -6,11 +6,11 @@ Target engine: PostgreSQL.
 
 Requirements:
 
-- Add an index for customer email lookups without blocking normal writes.
-- Add the uniqueness rule in a way that can be validated separately from the
-  initial table change. The migration must actually run against PostgreSQL —
-  any constraint or index choice you ship has to be one Postgres accepts.
-- Include a rollback file.
-- Leave a short operations note with rollout and rollback steps.
+- Add customer email lookup support in a way suitable for a large live
+  PostgreSQL table.
+- Normal writes must continue during rollout.
+- The uniqueness rule needs a separately validated path and must be valid
+  PostgreSQL.
+- Include rollback and operator notes for rollout, validation, and failure.
 
 Do not add external dependencies.

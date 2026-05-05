@@ -1,0 +1,14 @@
+description: Plan the engineering lenses for a checkout payment change.
+taskFile: task.md
+plugin: engineering-maturity
+features:
+  - workflow
+  - data-first
+  - security
+  - database
+  - api
+  - release
+  - proof
+  - code-review
+variants:
+  default: {}

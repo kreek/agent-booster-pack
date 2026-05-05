@@ -1,7 +1,7 @@
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import type { EvalSession, VerifyResult } from "pi-do-eval";
+import { loadFileSuites, readTrialManifest, type EvalSession, type VerifyResult } from "do-eval";
 import { describe, expect, it } from "vitest";
 import config from "../eval.config.js";
 import maturityPlugin, {
@@ -34,9 +34,18 @@ const expectedReadmeSkills = [
   "scaffolding",
 ] as const;
 const checkedFixtureExtensions = new Set([".html", ".js", ".json", ".md", ".sql", ".txt", ".ts"]);
+const suites = loadFileSuites(evalDir);
+const profiles = config.profiles ?? {};
+const benches = config.benches ?? {};
+const coreTrials = new Set([
+  "proof-first-bugfix",
+  "security-boundary-fix",
+  "design-decision-record",
+  "debugging-regression",
+]);
 
 function getSuite(name: string) {
-  const suite = config.suites[name];
+  const suite = suites.find((entry) => entry.name === name)?.trials;
   if (!suite) throw new Error(`Expected suite ${name}`);
   return suite;
 }
@@ -96,15 +105,20 @@ function routingVerify(): VerifyResult {
 
 describe("ABP eval config", () => {
   it("defines a baseline Codex profile and a Codex profile with the ABP plugin", () => {
-    const baseline = config.profiles["codexBaseline"];
-    const withAbp = config.profiles["codexWithAbpSkills"];
+    const baseline = profiles["codexBaseline"];
+    const withAbp = profiles["codexWithAbpSkills"];
     if (!baseline || !withAbp) throw new Error("Expected Codex profiles");
 
     expect(baseline.agent.harness).toBe("codex");
     expect(baseline.factors.layers).toEqual([]);
+    expect(baseline.agent.codex?.isolateHome).toBe(true);
+    expect(baseline.agent.codex?.ignoreUserConfig).toBe(true);
     expect(baseline.agent.codex?.pluginMarketplaces ?? []).toEqual([]);
+    expect(baseline.agent.codex?.extraArgs).toEqual(["--disable", "plugins"]);
 
     expect(withAbp.agent.harness).toBe("codex");
+    expect(withAbp.agent.codex?.isolateHome).toBe(true);
+    expect(withAbp.agent.codex?.ignoreUserConfig).not.toBe(true);
     expect(withAbp.factors.layers).toEqual([
       expect.objectContaining({
         id: "abp",
@@ -121,40 +135,45 @@ describe("ABP eval config", () => {
     );
   });
 
-  it("makes the Codex ABP experiment compare against an explicit baseline", () => {
-    const experiment = config.experiments["codex-abp"];
-    if (!experiment) throw new Error("Expected codex-abp experiment");
-    expect(experiment.baseline).toBe("codexBaseline");
-    expect(experiment.profiles).toEqual(["codexBaseline", "codexWithAbpSkills"]);
-    expect(config.suites[experiment.suite]?.map((entry) => entry.trial)).toEqual(
-      getSuite("allSkills").map((entry) => entry.trial),
-    );
+  it("makes the all-skills bench compare against an explicit baseline", () => {
+    const bench = benches["allSkills"];
+    if (!bench) throw new Error("Expected allSkills bench");
+    expect(bench.baseline).toBe("codexBaseline");
+    expect(bench.profiles).toEqual(["codexBaseline", "codexWithAbpSkills"]);
+    expect(getSuite("allSkills").length).toBeGreaterThan(0);
+    expect(bench.epochs).toBe(1);
   });
 
-  it("adds a routing experiment that compares ABP against the same baseline", () => {
-    const experiment = config.experiments["codex-abp-routing"];
-    if (!experiment) throw new Error("Expected codex-abp-routing experiment");
-    expect(experiment.baseline).toBe("codexBaseline");
-    expect(experiment.profiles).toEqual(["codexBaseline", "codexWithAbpSkills"]);
-    expect(config.suites[experiment.suite]?.map((entry) => entry.trial)).toEqual(
-      getSuite("routing").map((entry) => entry.trial),
-    );
+  it("keeps smoke cheap and focused on harness wiring", () => {
+    const bench = benches["smoke"];
+    if (!bench) throw new Error("Expected smoke bench");
+    expect(bench.baseline).toBe("codexBaseline");
+    expect(bench.profiles).toEqual(["codexBaseline", "codexWithAbpSkills"]);
+    expect(getSuite("smoke").map((entry) => entry.trial)).toEqual(["routing-checkout-payment"]);
+  });
+
+  it("adds a routing bench that compares ABP against the same baseline", () => {
+    const bench = benches["routing"];
+    if (!bench) throw new Error("Expected routing bench");
+    expect(bench.baseline).toBe("codexBaseline");
+    expect(bench.profiles).toEqual(["codexBaseline", "codexWithAbpSkills"]);
+    expect(getSuite("routing").map((entry) => entry.trial)).toEqual([
+      "routing-checkout-payment",
+      "routing-worker-retry",
+      "routing-settings-copy",
+      "routing-customer-email-migration",
+    ]);
   });
 
   it("defines lightweight, core, and all-skills suites", () => {
-    expect(Object.keys(config.suites).sort()).toEqual(["allSkills", "core", "engineeringMaturity", "routing", "smoke"]);
-    expect(Object.keys(config.experiments).sort()).toEqual([
+    expect(suites.map((suite) => suite.name).sort()).toEqual([
       "allSkills",
-      "codex-abp",
-      "codex-abp-all",
-      "codex-abp-core",
-      "codex-abp-routing",
-      "codex-abp-smoke",
       "core",
       "engineeringMaturity",
       "routing",
       "smoke",
     ]);
+    expect(Object.keys(benches).sort()).toEqual(["allSkills", "core", "engineeringMaturity", "routing", "smoke"]);
 
     const smoke = getSuite("smoke");
     const core = getSuite("core");
@@ -162,7 +181,7 @@ describe("ABP eval config", () => {
 
     expect(smoke.length).toBeLessThan(core.length);
     expect(core.length).toBeLessThan(allSkills.length);
-    expect(core.every((entry) => entry.priority === "core")).toBe(true);
+    expect(core.every((entry) => coreTrials.has(entry.trial))).toBe(true);
     expect(new Set(core.map((entry) => entry.trial))).toEqual(
       new Set(["proof-first-bugfix", "security-boundary-fix", "design-decision-record", "debugging-regression"]),
     );
@@ -178,39 +197,48 @@ describe("ABP eval config", () => {
     }
   });
 
-  it("uses the standard pi-do-eval launcher contract for suite entries and trial discovery", () => {
-    for (const [suiteName, entries] of Object.entries(config.suites)) {
-      expect(entries.length, suiteName).toBeGreaterThan(0);
-      for (const entry of entries) {
+  it("uses YAML manifests and the standard do-eval launcher contract", () => {
+    for (const suite of suites) {
+      expect(suite.trials.length, suite.name).toBeGreaterThan(0);
+      for (const entry of suite.trials) {
         expect(entry).toEqual(
           expect.objectContaining({
             trial: expect.any(String),
             variant: "default",
           }),
         );
-        expect(fs.existsSync(path.join(evalDir, "trials", entry.trial, "config.ts"))).toBe(true);
+        expect(fs.existsSync(path.join(evalDir, "trials", entry.trial, "trial.yaml"))).toBe(true);
+        expect(fs.existsSync(path.join(evalDir, "trials", entry.trial, "config.ts"))).toBe(false);
       }
     }
 
-    const evalSource = fs.readFileSync(path.join(evalDir, "eval.ts"), "utf-8");
-    expect(evalSource).toContain('command === "bench"');
-    expect(evalSource).toContain("resolveBenchmarkExperimentName");
-    expect(evalSource).toContain("persistAssistantFinal");
+    expect(fs.existsSync(path.join(evalDir, "eval.ts"))).toBe(false);
+    expect(fs.existsSync(path.join(evalDir, "framework.ts"))).toBe(false);
+    expect(fs.existsSync(path.join(evalDir, "types.ts"))).toBe(false);
   });
 
   it("covers every README skill without putting skill names in trial prompts or starter files", () => {
     const allSkills = getSuite("allSkills");
-    const coveredSkills = new Set(allSkills.flatMap((entry) => entry.skills));
+    const trialSkills = allSkills.map((entry) => ({
+      trial: entry.trial,
+      skills: readTrialManifest(evalDir, entry.trial).features ?? [],
+    }));
+    const coveredSkills = new Set(trialSkills.flatMap((entry) => entry.skills));
     for (const skill of expectedReadmeSkills) {
       expect(coveredSkills.has(skill), `missing suite coverage for ${skill}`).toBe(true);
     }
-    expect(allSkills.filter((entry) => entry.skills.includes("workflow")).length).toBeGreaterThanOrEqual(4);
-    expect(allSkills.filter((entry) => entry.skills.includes("proof")).length).toBeGreaterThanOrEqual(4);
+    expect(trialSkills.filter((entry) => entry.skills.includes("workflow")).length).toBeGreaterThanOrEqual(4);
+    expect(trialSkills.filter((entry) => entry.skills.includes("proof")).length).toBeGreaterThanOrEqual(4);
+    for (const { trial, skills } of trialSkills) {
+      expect(skills.length, `${trial} must declare intended skill coverage`).toBeGreaterThan(0);
+      for (const skill of skills) {
+        expect(expectedReadmeSkills, `${trial} declares unknown skill ${skill}`).toContain(skill);
+      }
+    }
 
     for (const entry of allSkills) {
       const taskPath = path.join(evalDir, "trials", entry.trial, "task.md");
       expectNeutralFixtureContent(taskPath);
-      expectNeutralFixtureContent(path.join(evalDir, "trials", entry.trial, "config.ts"));
       for (const fixturePath of collectCheckedFiles(path.join(evalDir, "trials", entry.trial, "scaffold"))) {
         expectNeutralFixtureContent(fixturePath);
       }
@@ -221,7 +249,6 @@ describe("ABP eval config", () => {
     for (const entry of getSuite("routing")) {
       const trialDir = path.join(evalDir, "trials", entry.trial);
       expectNeutralFixtureContent(path.join(trialDir, "task.md"));
-      expectNeutralFixtureContent(path.join(trialDir, "config.ts"));
       for (const fixturePath of collectCheckedFiles(path.join(trialDir, "scaffold"))) {
         expectNeutralFixtureContent(fixturePath);
       }
@@ -231,6 +258,29 @@ describe("ABP eval config", () => {
       };
       expect(marker).toEqual({ kind: "routing", case: expect.any(Number) });
       expect(fs.existsSync(path.join(trialDir, "scaffold", "package.json"))).toBe(false);
+    }
+  });
+
+  it("keeps implementation prompts from naming hidden-check literals", () => {
+    const hiddenCheckSpoilers = [
+      /aria-live/i,
+      /role=["']status["']/i,
+      /protocol-relative/i,
+      /javascript:/i,
+      /__proto__/i,
+      /constructor\.prototype/i,
+      /create\s+unique\s+index\s+concurrently/i,
+      /Object\.prototype/i,
+      /maxActive/i,
+      /missing_id/i,
+      /not_found/i,
+    ];
+
+    for (const entry of getSuite("allSkills").filter((trial) => !trial.trial.startsWith("routing-"))) {
+      const task = fs.readFileSync(path.join(evalDir, "trials", entry.trial, "task.md"), "utf-8");
+      for (const spoiler of hiddenCheckSpoilers) {
+        expect(task, `${entry.trial} leaked ${spoiler}`).not.toMatch(spoiler);
+      }
     }
   });
 
@@ -254,13 +304,10 @@ describe("ABP eval config", () => {
     }
   });
 
-  it("keeps per-trial work directory names opaque to the agent", () => {
-    const evalSource = fs.readFileSync(path.join(evalDir, "eval.ts"), "utf-8");
-    const runNameExpression = evalSource.match(/const runName = (?<expression>.+);/)?.groups?.["expression"];
-    expect(runNameExpression).toBeDefined();
-    expect(runNameExpression).not.toContain("trialName");
-    expect(runNameExpression).not.toContain("profile");
-    expect(runNameExpression).not.toContain("suite");
+  it("keeps generic runner code out of the ABP eval project", () => {
+    expect(fs.existsSync(path.join(evalDir, "eval.ts"))).toBe(false);
+    expect(fs.existsSync(path.join(evalDir, "framework.ts"))).toBe(false);
+    expect(fs.existsSync(path.join(evalDir, "types.ts"))).toBe(false);
   });
 
   it("classifies test and source writes for deterministic proof scoring", () => {
@@ -293,11 +340,11 @@ describe("ABP eval config", () => {
     const finalAnswer = [
       "Goal: add saved payment methods to checkout without weakening account or payment behavior.",
       "Risk profile: sensitive payment data, stored token references, a public account contract, and gradual rollout.",
-      "Apply workflow, data-first, security, database, api, release, proof, and code-review.",
+      "Apply workflow, data-first, security, database, api, release, proof, and code-review around the account endpoint contract.",
       "Exclusions:",
       "1. Broad wallet management UX beyond what checkout needs now.",
       "2. Provider abstraction, multi-provider generalization, and new external dependencies.",
-      "Evidence plan: contract tests, negative trust-boundary cases, migration validation, and rollout/rollback checks.",
+      "Evidence plan: contract tests, unauthorized cross-account negative trust-boundary cases, migration validation, and flag rollout/rollback checks.",
       "Completion loop: implement -> self-review diff -> fix findings -> proof -> final scoped claim.",
     ].join("\n");
     const session = stubSession([
@@ -311,6 +358,7 @@ describe("ABP eval config", () => {
     expect(result.scores["exclusions"]).toBe(100);
     expect(result.scores["proof_plan"]).toBe(100);
     expect(result.scores["no_file_writes"]).toBe(100);
+    expect(result.scores["actionability"]).toBe(100);
     expect(result.findings).toEqual([]);
   });
 
@@ -334,7 +382,28 @@ describe("ABP eval config", () => {
     expect(result.findings).toContain("Missing expected routing lens: proof.");
   });
 
-  it("scores post-write self-review and proof commands for implementation trials", () => {
+  it("penalizes routing answers that name too many skills", () => {
+    const finalAnswer = [
+      "Goal: saved payment methods at checkout.",
+      "Risk profile: payment token storage and rollout.",
+      "Use workflow, proof, whiteboarding, data-first, architecture, code-review, debugging, refactoring, error-handling, security, database, release, observability, async-systems, performance, api, documentation, ui-design, accessibility, git-workflow, and scaffolding.",
+      "Exclude broad wallet management UX.",
+      "Exclude provider abstraction.",
+      "Evidence plan: tokenized payment reference contract tests, account endpoint contract checks, unauthorized cross-account negative trust-boundary cases, and flagged rollout/rollback checks.",
+      "Completion loop: implement -> self-review diff -> fix findings -> proof -> final scoped claim.",
+    ].join("\n");
+    const session = stubSession([
+      messageLine("user", "# Checkout Payment Change Triage\n\nDo not edit files."),
+      messageLine("assistant", finalAnswer),
+    ]);
+
+    const result = maturityPlugin.scoreSession(session, routingVerify());
+
+    expect(result.scores["proportionality"]).toBe(25);
+    expect(result.findings).toContain("Routing named too many skills (21; max 11).");
+  });
+
+  it("scores post-write self-review and meaningful proof for implementation trials", () => {
     const session = stubSession([], {
       fileWrites: [{ timestamp: 10, path: "src/cart.js", tool: "edit", labels: ["source"] }],
       toolCalls: [
@@ -343,12 +412,149 @@ describe("ABP eval config", () => {
       ],
     });
 
-    const result = maturityPlugin.scoreSession(session, { passed: true, output: "ok", metrics: {} });
+    const result = maturityPlugin.scoreSession(session, {
+      passed: true,
+      output: "ok",
+      metrics: { submittedProofPassed: 1 },
+    });
 
     expect(result.scores["self_review"]).toBe(100);
-    expect(result.scores["proof"]).toBe(75);
+    expect(result.scores["proof"]).toBe(100);
     expect(result.findings).not.toContain("No post-change self-review inspection was detected.");
     expect(result.findings).not.toContain("No post-change proof command was detected.");
+    expect(result.findings).not.toContain("No behavior-relevant submitted proof was detected.");
+  });
+
+  it("does not give full proof credit for superficial test writes", () => {
+    const session = stubSession([], {
+      fileWrites: [
+        { timestamp: 10, path: "src/cart.js", tool: "edit", labels: ["source"] },
+        { timestamp: 11, path: "test/cart.test.js", tool: "edit", labels: ["test"] },
+      ],
+      toolCalls: [
+        { timestamp: 12, name: "exec_command", arguments: { cmd: "npm test" }, resultText: "", wasBlocked: false },
+      ],
+    });
+
+    const result = maturityPlugin.scoreSession(session, { passed: true, output: "ok", metrics: {} });
+
+    expect(result.scores["proof"]).toBe(60);
+    expect(result.findings).toContain("No behavior-relevant submitted proof was detected.");
+  });
+
+  it("flags baseline sessions that read ABP skill files", () => {
+    const session = stubSession([], {
+      toolCalls: [
+        {
+          timestamp: 1,
+          name: "command_execution",
+          arguments: { command: "/bin/zsh -lc pwd" },
+          resultText: "/tmp/run-proof-first-bugfix-default-codexBaseline-123/workdir\n",
+          wasBlocked: false,
+        },
+        {
+          timestamp: 2,
+          name: "command_execution",
+          arguments: {
+            command:
+              "/bin/zsh -lc \"sed -n '1,120p' /repo/agents/.agents/skills/scaffolding/SKILL.md\"",
+          },
+          resultText: "# Scaffolding\n",
+          wasBlocked: false,
+        },
+      ],
+    });
+
+    const result = maturityPlugin.scoreSession(session, {
+      passed: true,
+      output: "ok",
+      metrics: { submittedProofPassed: 1 },
+    });
+
+    expect(result.scores["baseline_isolation"]).toBe(0);
+    expect(result.findings).toContain("Baseline session read ABP skill files: scaffolding.");
+  });
+
+  it("flags ABP sessions that never read an ABP skill file", () => {
+    const session = stubSession([], {
+      toolCalls: [
+        {
+          timestamp: 1,
+          name: "command_execution",
+          arguments: { command: "/bin/zsh -lc pwd" },
+          resultText: "/tmp/run-proof-first-bugfix-default-codexWithAbpSkills-123/workdir\n",
+          wasBlocked: false,
+        },
+      ],
+    });
+
+    const result = maturityPlugin.scoreSession(session, {
+      passed: true,
+      output: "ok",
+      metrics: { submittedProofPassed: 1 },
+    });
+
+    expect(result.scores["abp_activation"]).toBe(0);
+    expect(result.findings).toContain("ABP profile did not read any ABP skill files; plugin activation is not proven.");
+  });
+
+  it("accepts ABP sessions that read a focused ABP skill file", () => {
+    const session = stubSession([], {
+      toolCalls: [
+        {
+          timestamp: 1,
+          name: "command_execution",
+          arguments: { command: "/bin/zsh -lc pwd" },
+          resultText: "/tmp/run-proof-first-bugfix-default-codexWithAbpSkills-123/workdir\n",
+          wasBlocked: false,
+        },
+        {
+          timestamp: 2,
+          name: "command_execution",
+          arguments: {
+            command:
+              "/bin/zsh -lc \"sed -n '1,120p' /repo/plugin/skills/proof/SKILL.md\"",
+          },
+          resultText: "# Proof\n",
+          wasBlocked: false,
+        },
+      ],
+    });
+
+    const result = maturityPlugin.scoreSession(session, {
+      passed: true,
+      output: "ok",
+      metrics: { submittedProofPassed: 1 },
+    });
+
+    expect(result.scores["abp_activation"]).toBe(100);
+    expect(result.findings).not.toContain("ABP profile did not read any ABP skill files; plugin activation is not proven.");
+  });
+
+  it("penalizes implementation trials that load too many ABP skills", () => {
+    const skillNames = ["workflow", "proof", "scaffolding", "documentation", "release"];
+    const session = stubSession([], {
+      toolCalls: skillNames.map((skill, index) => ({
+        timestamp: index + 1,
+        name: "command_execution",
+        arguments: {
+          command: `/bin/zsh -lc "sed -n '1,80p' /repo/agents/.agents/skills/${skill}/SKILL.md"`,
+        },
+        resultText: `# ${skill}`,
+        wasBlocked: false,
+      })),
+    });
+
+    const result = maturityPlugin.scoreSession(session, {
+      passed: true,
+      output: "ok",
+      metrics: { submittedProofPassed: 1 },
+    });
+
+    expect(result.scores["skill_focus"]).toBe(70);
+    expect(result.findings).toContain(
+      "Loaded too many ABP skills for this focused trial: documentation, proof, release, scaffolding, workflow.",
+    );
   });
 
   it("does not count edited file content as post-write review or proof commands", () => {
@@ -368,7 +574,7 @@ describe("ABP eval config", () => {
     const result = maturityPlugin.scoreSession(session, { passed: true, output: "ok", metrics: {} });
 
     expect(result.scores["self_review"]).toBe(35);
-    expect(result.scores["proof"]).toBe(45);
+    expect(result.scores["proof"]).toBe(35);
     expect(result.findings).toContain("No post-change self-review inspection was detected.");
     expect(result.findings).toContain("No post-change proof command was detected.");
   });

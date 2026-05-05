@@ -1,0 +1,8 @@
+description: Finish a small interactive state change for keyboard users.
+taskFile: task.md
+plugin: engineering-maturity
+features:
+  - ui-design
+  - accessibility
+variants:
+  default: {}

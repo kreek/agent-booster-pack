@@ -1,0 +1,12 @@
+name: engineeringMaturity
+description: Alias of allSkills for the engineering maturity scorecard.
+trials:
+  - proof-first-bugfix
+  - security-boundary-fix
+  - design-decision-record
+  - debugging-regression
+  - api-error-contract
+  - database-release-safety
+  - observable-async-worker
+  - accessible-ui-state
+  - scaffold-repo-workflow

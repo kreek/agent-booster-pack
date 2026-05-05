@@ -1,7 +1,7 @@
 import { spawnSync } from "node:child_process";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import type { EvalPlugin, EvalSession, VerifyResult } from "pi-do-eval";
+import type { EvalPlugin, EvalSession, VerifyResult } from "do-eval";
 
 const TEXT_FILE_EXTENSIONS = new Set([".html", ".js", ".json", ".md", ".sql", ".txt"]);
 const KNOWN_SKILLS = [
@@ -33,6 +33,7 @@ interface RoutingCriteria {
   title: RegExp;
   expected: Array<[label: string, pattern: RegExp]>;
   excluded: Array<[label: string, pattern: RegExp]>;
+  actionable: Array<[label: string, pattern: RegExp]>;
   maxNamedSkills: number;
 }
 
@@ -55,6 +56,12 @@ const ROUTING_CRITERIA: RoutingCriteria[] = [
       ["product expansion excluded", /\b(wallet|management UX|broad .*redesign|unrelated checkout|unrelated account)\b/i],
       ["speculative platform work excluded", /\b(provider abstraction|generalized|multi-provider|new external dependencies|speculative resilience|retry orchestration)\b/i],
     ],
+    actionable: [
+      ["token boundary", /\b(tokenized payment reference|token references?|payment token)\b/i],
+      ["account endpoint contract", /\b(account endpoint|endpoint contract|response contract|wire contract)\b/i],
+      ["flagged rollout", /\b(flag|gradual rollout|rollout\/rollback|rollback)\b/i],
+      ["negative trust case", /\b(unauthorized|forbidden|negative|cross-account|trust-boundary)\b/i],
+    ],
     maxNamedSkills: 11,
   },
   {
@@ -70,6 +77,12 @@ const ROUTING_CRITERIA: RoutingCriteria[] = [
     excluded: [
       ["database excluded", /\b(database|migration|schema|transaction)\b/i],
       ["ui excluded", /\b(ui[- ]design|accessibility|screen reader|keyboard|wcag)\b/i],
+    ],
+    actionable: [
+      ["retry-once behavior", /\bretry[- ]once|retry one failed send once|second attempt\b/i],
+      ["duplicate-send guard", /\bduplicate sends?|idempotenc|at[- ]most[- ]once|dedupe\b/i],
+      ["concurrency bound", /\bconcurrency limit|bounded concurrency|throughput predictable|max active\b/i],
+      ["lifecycle logs", /\b(lifecycle log|start.*finish|attempt log|retry log|metrics?)\b/i],
     ],
     maxNamedSkills: 7,
   },
@@ -87,6 +100,12 @@ const ROUTING_CRITERIA: RoutingCriteria[] = [
       ["database excluded", /\b(database|migration|schema|transaction)\b/i],
       ["async excluded", /\b(async[- ]systems|queue|worker|stream|concurrency)\b/i],
     ],
+    actionable: [
+      ["copy-only scope", /\b(copy-only|text-only|no behavior change|no data model)\b/i],
+      ["screen-reader check", /\b(screen reader|accessible name|announcement)\b/i],
+      ["keyboard/focus check", /\b(keyboard|focus)\b/i],
+      ["visual/content review", /\b(content review|copy review|visual inspection)\b/i],
+    ],
     maxNamedSkills: 8,
   },
   {
@@ -102,6 +121,12 @@ const ROUTING_CRITERIA: RoutingCriteria[] = [
     excluded: [
       ["ui excluded", /\b(ui[- ]design|accessibility|screen reader|keyboard|wcag)\b/i],
       ["async excluded", /\b(async[- ]systems|queue|worker|stream|concurrency)\b/i],
+    ],
+    actionable: [
+      ["concurrent index", /\bcreate unique index concurrently|concurrent index\b/i],
+      ["validation failure path", /\bvalidation fails?|duplicate email|dry[- ]run|preflight\b/i],
+      ["rollback path", /\brollback|drop index|revert\b/i],
+      ["large-table writes", /\bnormal writes|write traffic|lock|large table\b/i],
     ],
     maxNamedSkills: 7,
   },
@@ -143,6 +168,15 @@ function runTextCheck(name: string, checks: Array<[label: string, passed: boolea
     passed: failed.length === 0,
     output: failed.length === 0 ? `${name}: OK` : `${name}: failed checks: ${failed.join(", ")}`,
     metrics: {},
+  };
+}
+
+function combineChecks(name: string, results: VerifyResult[]): VerifyResult {
+  const failed = results.flatMap((result) => (result.passed ? [] : [result.output]));
+  return {
+    passed: failed.length === 0,
+    output: failed.length === 0 ? `${name}: OK` : failed.join("\n\n"),
+    metrics: Object.assign({}, ...results.map((result) => result.metrics)),
   };
 }
 
@@ -255,9 +289,40 @@ function countNamedSkills(text: string): number {
   return KNOWN_SKILLS.filter((skill) => new RegExp(`\\b${skill.replaceAll("-", "[- ]")}\\b`, "i").test(text)).length;
 }
 
+function commandAndResultText(session: EvalSession): string {
+  return session.toolCalls
+    .map((call) => `${call.name} ${commandText(call)}\n${call.resultText}`)
+    .join("\n");
+}
+
+function isBaselineSession(session: EvalSession): boolean {
+  return /-codexBaseline[-/]|"profile"\s*:\s*"codexBaseline"|\bcodexBaseline\b/i.test(commandAndResultText(session));
+}
+
+function isAbpSession(session: EvalSession): boolean {
+  return /-codexWithAbpSkills[-/]|"profile"\s*:\s*"codexWithAbpSkills"|\bcodexWithAbpSkills\b/i.test(
+    commandAndResultText(session),
+  );
+}
+
+function readAbpSkillNames(session: EvalSession): string[] {
+  const text = commandAndResultText(session);
+  const skills = new Set<string>();
+  for (const match of text.matchAll(/agents\/\.agents\/skills\/([^/\s"']+)\/SKILL\.md/g)) {
+    if (match[1]) skills.add(match[1]);
+  }
+  for (const match of text.matchAll(/plugin\/skills\/([^/\s"']+)\/SKILL\.md/g)) {
+    if (match[1]) skills.add(match[1]);
+  }
+  return [...skills].sort();
+}
+
 function scoreRoutingSession(session: EvalSession, verify: VerifyResult): PluginScoreResult {
   const prompt = extractInitialUserPrompt(session.rawLines);
   const finalAnswer = extractFinalAssistantText(session.rawLines);
+  const skillReads = readAbpSkillNames(session);
+  const baselineSkillReads = isBaselineSession(session) ? skillReads : [];
+  const abpSkillReads = isAbpSession(session) ? skillReads : [];
   const routingCase = verify.metrics["routingCase"];
   const criteria =
     routingCase !== undefined
@@ -265,8 +330,8 @@ function scoreRoutingSession(session: EvalSession, verify: VerifyResult): Plugin
       : matchingRoutingCriteria(prompt);
   if (!criteria) {
     return {
-      scores: { routing: 0, exclusions: 0, proof_plan: 0, proportionality: 0 },
-      weights: { routing: 0.4, exclusions: 0.2, proof_plan: 0.25, proportionality: 0.15 },
+      scores: { routing: 0, exclusions: 0, proof_plan: 0, proportionality: 0, baseline_isolation: 100, abp_activation: 100 },
+      weights: { routing: 0.36, exclusions: 0.18, proof_plan: 0.23, proportionality: 0.13, baseline_isolation: 0.05, abp_activation: 0.05 },
       findings: ["Routing trial criteria could not be matched from the prompt."],
       judge: {
         includeInOverall: true,
@@ -283,6 +348,7 @@ function scoreRoutingSession(session: EvalSession, verify: VerifyResult): Plugin
 
   const expectedHits = criteria.expected.filter(([, pattern]) => pattern.test(finalAnswer));
   const excludedHits = criteria.excluded.filter(([, pattern]) => hasExplicitExclusion(finalAnswer, pattern));
+  const actionableHits = criteria.actionable.filter(([, pattern]) => pattern.test(finalAnswer));
   const writesScore = session.fileWrites.length === 0 ? 100 : 0;
   const proofSignals = [
     /\b(proof|evidence|validation|verification|test|check|inspect)\b/i.test(finalAnswer),
@@ -290,8 +356,9 @@ function scoreRoutingSession(session: EvalSession, verify: VerifyResult): Plugin
     /\b(self[- ]review|review the diff|code[- ]review|before claiming done|final scoped claim)\b/i.test(finalAnswer),
   ].filter(Boolean).length;
   const namedSkills = countNamedSkills(finalAnswer);
+  const tooManySkills = namedSkills > criteria.maxNamedSkills;
   const proportionality =
-    namedSkills <= criteria.maxNamedSkills && namedSkills >= Math.min(3, criteria.expected.length) ? 100 : namedSkills === 0 ? 35 : 60;
+    !tooManySkills && namedSkills >= Math.min(3, criteria.expected.length) ? 100 : namedSkills === 0 ? 35 : tooManySkills ? 25 : 60;
 
   const scores = {
     routing: Math.round((expectedHits.length / criteria.expected.length) * 100),
@@ -299,13 +366,19 @@ function scoreRoutingSession(session: EvalSession, verify: VerifyResult): Plugin
     proof_plan: Math.round((proofSignals / 3) * 100),
     no_file_writes: writesScore,
     proportionality,
+    actionability: Math.round((actionableHits.length / criteria.actionable.length) * 100),
+    baseline_isolation: baselineSkillReads.length > 0 ? 0 : 100,
+    abp_activation: isAbpSession(session) && abpSkillReads.length === 0 ? 0 : 100,
   };
   const weights = {
-    routing: 0.35,
-    exclusions: 0.15,
-    proof_plan: 0.25,
+    routing: 0.22,
+    exclusions: 0.14,
+    proof_plan: 0.18,
     no_file_writes: 0.1,
-    proportionality: 0.15,
+    proportionality: 0.08,
+    actionability: 0.18,
+    baseline_isolation: 0.05,
+    abp_activation: 0.05,
   };
   const findings: string[] = [];
   for (const [label] of criteria.expected.filter(([label]) => !expectedHits.some(([hit]) => hit === label))) {
@@ -316,7 +389,17 @@ function scoreRoutingSession(session: EvalSession, verify: VerifyResult): Plugin
   }
   if (session.fileWrites.length > 0) findings.push("Routing trial wrote files despite being read-only.");
   if (proofSignals < 3) findings.push("Evidence plan or self-review loop was incomplete.");
-  if (scores.proportionality < 100) findings.push("Routing was not proportional to the task risks.");
+  if (tooManySkills) findings.push(`Routing named too many skills (${namedSkills}; max ${criteria.maxNamedSkills}).`);
+  else if (scores.proportionality < 100) findings.push("Routing was not proportional to the task risks.");
+  if (baselineSkillReads.length > 0) {
+    findings.push(`Baseline session read ABP skill files: ${baselineSkillReads.join(", ")}.`);
+  }
+  if (isAbpSession(session) && abpSkillReads.length === 0) {
+    findings.push("ABP profile did not read any ABP skill files; plugin activation is not proven.");
+  }
+  for (const [label] of criteria.actionable.filter(([label]) => !actionableHits.some(([hit]) => hit === label))) {
+    findings.push(`Missing actionable routing detail: ${label}.`);
+  }
 
   return {
     scores,
@@ -352,6 +435,168 @@ function hasPostWriteCommand(session: EvalSession, pattern: RegExp): boolean {
   return session.toolCalls.some(
     (call) => call.timestamp > lastWrite && isCommandTool(call) && pattern.test(`${call.name} ${commandText(call)}`),
   );
+}
+
+function stripSqlComments(sql: string): string {
+  return sql
+    .replace(/--.*$/gm, "")
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .trim();
+}
+
+function splitSqlStatements(sql: string): string[] {
+  return stripSqlComments(sql)
+    .split(";")
+    .map((statement) => statement.trim())
+    .filter(Boolean);
+}
+
+function validateCustomerEmailSql(workDir: string): VerifyResult {
+  const migrationFiles = fs
+    .readdirSync(path.join(workDir, "migrations"))
+    .filter((name) => name.endsWith(".sql") && !name.includes("rollback"));
+  const allMigrationSql = migrationFiles
+    .map((name) => readIfExists(path.join(workDir, "migrations", name)))
+    .join("\n\n");
+  const statements = splitSqlStatements(allMigrationSql);
+  const rollback = migrationFiles
+    .map((name) => readIfExists(path.join(workDir, "migrations", name.replace(/\.sql$/, ".rollback.sql"))))
+    .join("\n");
+  const operations = [
+    readIfExists(path.join(workDir, "OPERATIONS.md")),
+    readIfExists(path.join(workDir, "operations.md")),
+    readIfExists(path.join(workDir, "ROLLBACK.md")),
+    readIfExists(path.join(workDir, "README.md")),
+  ].join("\n");
+  const partialIndexNames = Array.from(
+    allMigrationSql.matchAll(/create\s+(?:unique\s+)?index\s+(?:concurrently\s+)?(?:if\s+not\s+exists\s+)?([a-z0-9_]+)\b[^;]*\bwhere\b[^;]*;/gi),
+  ).map((m) => m[1]?.toLowerCase()).filter((name): name is string => Boolean(name));
+  const constraintAttachments = Array.from(
+    allMigrationSql.matchAll(/add\s+constraint\s+[a-z0-9_]+\s+unique\s+using\s+index\s+([a-z0-9_]+)/gi),
+  ).map((m) => m[1]?.toLowerCase()).filter((name): name is string => Boolean(name));
+  const brokenAttachment = constraintAttachments.find((name) => partialIndexNames.includes(name));
+  const allowedPostgresStatements = statements.every((statement) =>
+    [
+      /^alter\s+table\s+customers\s+add\s+column\s+(?:if\s+not\s+exists\s+)?email\s+text(?:\s+null)?$/i,
+      /^create\s+unique\s+index\s+concurrently\s+(?:if\s+not\s+exists\s+)?[a-z0-9_]+\s+on\s+customers\s*\(\s*(?:lower\s*\(\s*)?email\s*\)?\s*\)(?:\s+where\s+email\s+is\s+not\s+null)?$/i,
+      /^alter\s+table\s+customers\s+add\s+constraint\s+[a-z0-9_]+\s+unique\s+using\s+index\s+[a-z0-9_]+$/i,
+    ].some((pattern) => pattern.test(statement.replace(/\s+/g, " "))),
+  );
+
+  return runTextCheck("customer email migration", [
+    ["contains only recognized Postgres online-migration statements", statements.length > 0 && allowedPostgresStatements],
+    ["uses a concurrent unique index build", /create\s+unique\s+index\s+concurrently\b/i.test(allMigrationSql)],
+    ["does not create a blocking unique index", !/create\s+unique\s+index\s+(?!concurrently\b)/i.test(allMigrationSql)],
+    ["separates uniqueness from the initial table change", statements.length >= 2],
+    ["adds a rollback file", rollback.length > 0],
+    ["rollback reverses schema or index changes", /\b(drop\s+index|drop\s+constraint|drop\s+column)\b/i.test(rollback)],
+    ["documents rollout", /\b(rollout|deploy|apply)\b/i.test(operations)],
+    ["documents validation", /\b(validate|verification|check)\b/i.test(operations)],
+    ["documents rollback", /\brollback\b/i.test(operations)],
+    [
+      `does not back a unique constraint with a partial index${brokenAttachment ? ` (${brokenAttachment})` : ""}`,
+      brokenAttachment === undefined,
+    ],
+  ]);
+}
+
+function runOptionalPostgresMigrationCheck(workDir: string): VerifyResult {
+  const databaseUrl = process.env["ABP_EVAL_POSTGRES_URL"];
+  if (!databaseUrl) return { passed: true, output: "Postgres execution skipped; ABP_EVAL_POSTGRES_URL is not set.", metrics: {} };
+
+  const migrationFiles = fs
+    .readdirSync(path.join(workDir, "migrations"))
+    .filter((name) => name.endsWith(".sql") && !name.includes("rollback"))
+    .sort();
+  const allMigrationSql = migrationFiles
+    .map((name) => readIfExists(path.join(workDir, "migrations", name)))
+    .join("\n\n");
+  const schema = `abp_eval_${process.pid}_${Date.now()}`;
+  const artifactDir = path.join(workDir, ".abp-eval");
+  fs.mkdirSync(artifactDir, { recursive: true });
+  const scriptPath = path.join(artifactDir, "postgres-migration-check.sql");
+  fs.writeFileSync(
+    scriptPath,
+    [
+      `DROP SCHEMA IF EXISTS ${schema} CASCADE;`,
+      `CREATE SCHEMA ${schema};`,
+      `SET search_path TO ${schema};`,
+      "CREATE TABLE customers (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY);",
+      ...splitSqlStatements(allMigrationSql).map((statement) => `${statement};`),
+      `DROP SCHEMA ${schema} CASCADE;`,
+    ].join("\n"),
+  );
+  const result = spawnSync("psql", [databaseUrl, "-v", "ON_ERROR_STOP=1", "-f", scriptPath], {
+    cwd: workDir,
+    encoding: "utf-8",
+    timeout: 30_000,
+  });
+  return {
+    passed: result.status === 0,
+    output: [result.stdout, result.stderr].filter(Boolean).join("\n"),
+    metrics: { postgresExecuted: result.status === 0 ? 1 : 0 },
+  };
+}
+
+function hasSubmittedProofForTrial(workDir: string): boolean {
+  if (fs.existsSync(path.join(workDir, "src", "cart.js"))) {
+    const tests = readIfExists(path.join(workDir, "test", "cart.test.js"));
+    return /\bSAVE10\b/.test(tests) && /assert\.throws/.test(tests) && /\b(integer|invalid|negative|quantity|priceCents)\b/i.test(tests);
+  }
+  if (fs.existsSync(path.join(workDir, "src", "redirect.js"))) {
+    const tests = readIfExists(path.join(workDir, "test", "redirect.test.js"));
+    return /example\.com/.test(tests) && /evil\.example|javascript:|protocol-relative|\/\//i.test(tests);
+  }
+  if (fs.existsSync(path.join(workDir, "src", "profile.js"))) {
+    const tests = readIfExists(path.join(workDir, "test", "profile.test.js"));
+    return /preferences/.test(tests) && /notEqual|notStrictEqual/.test(tests) && /__proto__|constructor|prototype/.test(tests);
+  }
+  if (fs.existsSync(path.join(workDir, "src", "users.js"))) {
+    const tests = readIfExists(path.join(workDir, "test", "users.test.js"));
+    return /\b400\b/.test(tests) && /\b404\b/.test(tests) && /\berror\b/.test(tests) && /\bmessage\b/.test(tests);
+  }
+  if (fs.existsSync(path.join(workDir, "src", "worker.js"))) {
+    const tests = readIfExists(path.join(workDir, "test", "worker.test.js"));
+    return /\bconcurrency\b|\bmaxActive\b/i.test(tests) && /\bretry|attempt/i.test(tests) && /\blog|events/i.test(tests);
+  }
+  if (fs.existsSync(path.join(workDir, "docs", "checkout-notes.md"))) {
+    const content = readIfExists(path.join(workDir, "docs", "checkout-validation.md"));
+    return /\bcontext\b/i.test(content) && /\bdecision\b/i.test(content) && /\balternatives?\b/i.test(content);
+  }
+  if (
+    fs.existsSync(path.join(workDir, "migrations", "001_customer_email.sql")) ||
+    fs.existsSync(path.join(workDir, "migrations", "001_customer_email_add_column.sql"))
+  ) {
+    const check = validateCustomerEmailSql(workDir);
+    return check.passed;
+  }
+  if (fs.existsSync(path.join(workDir, "public", "index.html"))) {
+    const check = validateSubscriptionForm(workDir);
+    return check.passed;
+  }
+  if (fs.existsSync(path.join(workDir, "src", "index.js")) && fs.existsSync(path.join(workDir, "test", "index.test.js"))) {
+    const packageJson = JSON.parse(readIfExists(path.join(workDir, "package.json")) || "{}") as {
+      scripts?: Record<string, string>;
+    };
+    return Boolean(packageJson.scripts?.["test"] && packageJson.scripts?.["typecheck"] && packageJson.scripts?.["lint"]);
+  }
+  return false;
+}
+
+function validateSubscriptionForm(workDir: string): VerifyResult {
+  const html = readIfExists(path.join(workDir, "public", "index.html"));
+  const emailInput = html.match(/<input\b[^>]*\bid=["']email["'][^>]*>/i)?.[0] ?? "";
+  const submitButton = html.match(/<button\b[^>]*>[\s\S]*?<\/button>/i)?.[0] ?? "";
+  const statusElement = html.match(/<(?:p|div|span)\b[^>]*\bid=["']status["'][^>]*>/i)?.[0] ?? "";
+  const labelText = html.match(/<label[^>]+for=["']email["'][^>]*>([\s\S]*?)<\/label>/i)?.[1]?.replace(/<[^>]+>/g, "").trim() ?? "";
+
+  return runTextCheck("subscription form", [
+    ["email input has an explicit text label", labelText.length > 0],
+    ["email input is not placeholder-only", /\bplaceholder=/i.test(emailInput) ? labelText.length > 0 : true],
+    ["submit control is a native submit button", /<button\b/i.test(submitButton) && !/\btype=["']button["']/i.test(submitButton)],
+    ["status region is announced politely", /\b(aria-live=["']polite["']|role=["']status["'])\b/i.test(statusElement)],
+    ["does not use a clickable div submit", !/<div\b[^>]*(onclick|role=["']button["'])[^>]*>[\s\S]*subscribe/i.test(html)],
+  ]);
 }
 
 function runHiddenChecks(workDir: string): VerifyResult {
@@ -472,12 +717,16 @@ function runHiddenChecks(workDir: string): VerifyResult {
         const missing = handleUserLookup({ query: {} });
         assert.equal(missing.status, 400);
         assert.equal(typeof missing.body.error, "string");
+        assert.equal(missing.body.error, "missing_id");
         assert.equal(typeof missing.body.message, "string");
+        assert.ok(missing.body.message.length > 0);
 
         const absent = handleUserLookup({ query: { id: "missing" } });
         assert.equal(absent.status, 404);
         assert.equal(typeof absent.body.error, "string");
+        assert.equal(absent.body.error, "not_found");
         assert.equal(typeof absent.body.message, "string");
+        assert.ok(absent.body.message.length > 0);
 
         const found = handleUserLookup({ query: { id: "u_1" } });
         assert.equal(found.status, 200);
@@ -490,45 +739,9 @@ function runHiddenChecks(workDir: string): VerifyResult {
     fs.existsSync(path.join(workDir, "migrations", "001_customer_email.sql")) ||
     fs.existsSync(path.join(workDir, "migrations", "001_customer_email_add_column.sql"))
   ) {
-    const migrationFiles = fs
-      .readdirSync(path.join(workDir, "migrations"))
-      .filter((name) => name.endsWith(".sql") && !name.includes("rollback"));
-    const allMigrationSql = migrationFiles
-      .map((name) => readIfExists(path.join(workDir, "migrations", name)))
-      .join("\n\n");
-    const rollback = migrationFiles
-      .map((name) => readIfExists(path.join(workDir, "migrations", name.replace(/\.sql$/, ".rollback.sql"))))
-      .join("\n");
-    const operations = [
-      readIfExists(path.join(workDir, "OPERATIONS.md")),
-      readIfExists(path.join(workDir, "operations.md")),
-      readIfExists(path.join(workDir, "ROLLBACK.md")),
-      readIfExists(path.join(workDir, "README.md")),
-    ].join("\n");
-    // Detect the broken-elaboration shape: a partial index (CREATE [UNIQUE]
-    // INDEX … WHERE …) followed by an attempt to back a unique constraint
-    // with that index (ADD CONSTRAINT … UNIQUE USING INDEX <same name>).
-    // Postgres rejects this combination, so the elaboration looks
-    // sophisticated but ships a migration that cannot apply.
-    const partialIndexNames = Array.from(
-      allMigrationSql.matchAll(/create\s+(?:unique\s+)?index\s+(?:concurrently\s+)?(?:if\s+not\s+exists\s+)?([a-z0-9_]+)\b[^;]*\bwhere\b[^;]*;/gi),
-    ).map((m) => m[1]?.toLowerCase()).filter((name): name is string => Boolean(name));
-    const constraintAttachments = Array.from(
-      allMigrationSql.matchAll(/add\s+constraint\s+[a-z0-9_]+\s+unique\s+using\s+index\s+([a-z0-9_]+)/gi),
-    ).map((m) => m[1]?.toLowerCase()).filter((name): name is string => Boolean(name));
-    const brokenAttachment = constraintAttachments.find((name) => partialIndexNames.includes(name));
-    return runTextCheck("customer email migration", [
-      ["uses a concurrent index build", /create\s+(unique\s+)?index\s+concurrently\b/i.test(allMigrationSql)],
-      ["separates uniqueness validation", /\b(not\s+valid|validate\s+constraint)\b/i.test(allMigrationSql)],
-      ["adds a rollback file", rollback.length > 0],
-      ["documents rollout", /\b(rollout|deploy|apply)\b/i.test(operations)],
-      ["documents rollback", /\brollback\b/i.test(operations)],
-      [
-        // Elaboration that cannot actually attach as a unique constraint in
-        // Postgres: partial index backing ADD CONSTRAINT … UNIQUE USING INDEX.
-        `does not back a unique constraint with a partial index${brokenAttachment ? ` (${brokenAttachment})` : ""}`,
-        brokenAttachment === undefined,
-      ],
+    return combineChecks("customer email migration", [
+      validateCustomerEmailSql(workDir),
+      runOptionalPostgresMigrationCheck(workDir),
     ]);
   }
 
@@ -575,17 +788,7 @@ function runHiddenChecks(workDir: string): VerifyResult {
   }
 
   if (fs.existsSync(path.join(workDir, "public", "index.html"))) {
-    const html = readIfExists(path.join(workDir, "public", "index.html"));
-    return runTextCheck("subscription form", [
-      [
-        "email input has an associated label",
-        /<label[^>]+for=["']email["'][^>]*>/i.test(html) ||
-          /<label\b[^>]*>[\s\S]*<input[^>]+id=["']email["']/i.test(html),
-      ],
-      ["uses a button for submit", /<button\b/i.test(html)],
-      ["announces status changes", /\b(aria-live|role=["']status["'])\b/i.test(html)],
-      ["does not use a clickable div submit", !/<div\b[^>]*(onclick|role=["']button["'])[^>]*>[\s\S]*subscribe/i.test(html)],
-    ]);
+    return validateSubscriptionForm(workDir);
   }
 
   if (fs.existsSync(path.join(workDir, "src", "index.js")) && fs.existsSync(path.join(workDir, "test", "index.test.js"))) {
@@ -657,12 +860,15 @@ const plugin: EvalPlugin = {
 
     const visible = runVisibleTests(workDir);
     const hidden = runHiddenChecks(workDir);
+    const submittedProofPassed = hasSubmittedProofForTrial(workDir);
     return {
       passed: visible.passed && hidden.passed,
       output: [`# npm test\n${visible.output}`, `# hidden checks\n${hidden.output}`].join("\n\n"),
       metrics: {
         visiblePassed: visible.passed ? 1 : 0,
         hiddenPassed: hidden.passed ? 1 : 0,
+        submittedProofPassed: submittedProofPassed ? 1 : 0,
+        ...hidden.metrics,
       },
     };
   },
@@ -675,6 +881,11 @@ const plugin: EvalPlugin = {
     const wroteTests = session.fileWrites.some((file) => file.labels.includes("test"));
     const wroteSource = session.fileWrites.some((file) => file.labels.includes("source"));
     const touchedManyFiles = session.fileWrites.length > 8;
+    const submittedProofPassed = verify.metrics["submittedProofPassed"] === 1;
+    const skillReads = readAbpSkillNames(session);
+    const baselineSkillReads = isBaselineSession(session) ? skillReads : [];
+    const abpSkillReads = isAbpSession(session) ? skillReads : [];
+    const skillFocus = skillReads.length <= 4 ? 100 : skillReads.length <= 6 ? 70 : 40;
     const postWriteSelfReview = hasPostWriteCommand(
       session,
       /\b(git\s+(?:diff|status|show)|rg\b)\b/i,
@@ -686,22 +897,36 @@ const plugin: EvalPlugin = {
 
     const scores = {
       verification: verify.passed ? 100 : 0,
-      proof: wroteTests && postWriteProof ? 100 : wroteTests ? 85 : postWriteProof ? 75 : verify.passed ? 45 : 15,
+      proof: submittedProofPassed && postWriteProof ? 100 : submittedProofPassed ? 85 : postWriteProof ? 60 : verify.passed ? 35 : 15,
       self_review: !wroteSource ? 80 : postWriteSelfReview ? 100 : 35,
       change_quality: wroteSource && !touchedManyFiles ? 85 : wroteSource ? 65 : 25,
+      baseline_isolation: baselineSkillReads.length > 0 ? 0 : 100,
+      abp_activation: isAbpSession(session) && abpSkillReads.length === 0 ? 0 : 100,
+      skill_focus: skillFocus,
     };
     const weights = {
-      verification: 0.45,
-      proof: 0.25,
-      self_review: 0.15,
-      change_quality: 0.15,
+      verification: 0.36,
+      proof: 0.22,
+      self_review: 0.13,
+      change_quality: 0.13,
+      baseline_isolation: 0.05,
+      abp_activation: 0.06,
+      skill_focus: 0.05,
     };
     const findings: string[] = [];
-    if (!wroteTests) findings.push("No test file writes were detected.");
+    if (!submittedProofPassed) findings.push("No behavior-relevant submitted proof was detected.");
+    else if (!wroteTests) findings.push("No test file writes were detected; proof came from the submitted artifact.");
     if (wroteSource && !postWriteSelfReview) findings.push("No post-change self-review inspection was detected.");
     if (wroteSource && !postWriteProof) findings.push("No post-change proof command was detected.");
     if (touchedManyFiles) findings.push("The solution touched many files for a small trial.");
     if (!verify.passed) findings.push("Visible tests or hidden checks failed.");
+    if (skillReads.length > 4) findings.push(`Loaded too many ABP skills for this focused trial: ${skillReads.join(", ")}.`);
+    if (baselineSkillReads.length > 0) {
+      findings.push(`Baseline session read ABP skill files: ${baselineSkillReads.join(", ")}.`);
+    }
+    if (isAbpSession(session) && abpSkillReads.length === 0) {
+      findings.push("ABP profile did not read any ABP skill files; plugin activation is not proven.");
+    }
 
     return {
       scores,
@@ -718,6 +943,22 @@ const plugin: EvalPlugin = {
         },
       },
     };
+  },
+
+  buildPrompt({ taskDescription }) {
+    return [
+      taskDescription.trim(),
+      "",
+      "Work in the provided repository. Do not add external dependencies.",
+    ].join("\n");
+  },
+
+  afterRun({ workDir, session }) {
+    const finalText = extractFinalAssistantText(session.rawLines);
+    if (!finalText) return;
+    const artifactDir = path.join(workDir, ".abp-eval");
+    fs.mkdirSync(artifactDir, { recursive: true });
+    fs.writeFileSync(path.join(artifactDir, "assistant-final.md"), finalText);
   },
 
   buildJudgePrompt(taskDescription, workDir) {

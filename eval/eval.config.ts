@@ -1,21 +1,24 @@
+import * as os from "node:os";
 import * as path from "node:path";
-import type { EvalConfig } from "./types.js";
+import type { ExecutionProfile, ProjectEvalConfig } from "do-eval";
 
 const provider = process.env["ABP_EVAL_PROVIDER"] ?? "openai";
 const model = process.env["ABP_EVAL_MODEL"] ?? "gpt-5.4";
 
 const ABP_REPO_ROOT = path.resolve(import.meta.dirname, "..");
 
-const baselineCodexAgent: EvalConfig["profiles"][string]["agent"] = {
+const baselineCodexAgent: ExecutionProfile["agent"] = {
   harness: "codex",
   provider,
   model,
   codex: {
     isolateHome: true,
+    ignoreUserConfig: true,
+    extraArgs: ["--disable", "plugins"],
   },
 };
 
-const abpCodexAgent: EvalConfig["profiles"][string]["agent"] = {
+const abpCodexAgent: ExecutionProfile["agent"] = {
   harness: "codex",
   provider,
   model,
@@ -26,105 +29,31 @@ const abpCodexAgent: EvalConfig["profiles"][string]["agent"] = {
   },
 };
 
-const proofFirstBugfix = {
-  trial: "proof-first-bugfix",
-  variant: "default",
-  priority: "core",
-  skills: ["workflow", "proof", "data-first", "refactoring"],
-} satisfies EvalConfig["suites"][string][number];
-
-const securityBoundaryFix = {
-  trial: "security-boundary-fix",
-  variant: "default",
-  priority: "core",
-  skills: ["workflow", "proof", "security"],
-} satisfies EvalConfig["suites"][string][number];
-
-const designDecisionRecord = {
-  trial: "design-decision-record",
-  variant: "default",
-  priority: "core",
-  skills: ["workflow", "whiteboarding", "architecture", "documentation"],
-} satisfies EvalConfig["suites"][string][number];
-
-const debuggingRegression = {
-  trial: "debugging-regression",
-  variant: "default",
-  priority: "core",
-  skills: ["workflow", "debugging", "code-review", "proof"],
-} satisfies EvalConfig["suites"][string][number];
-
-const apiErrorContract = {
-  trial: "api-error-contract",
-  variant: "default",
-  skills: ["api", "error-handling", "security", "documentation"],
-} satisfies EvalConfig["suites"][string][number];
-
-const databaseReleaseSafety = {
-  trial: "database-release-safety",
-  variant: "default",
-  skills: ["database", "release", "data-first"],
-} satisfies EvalConfig["suites"][string][number];
-
-const observableAsyncWorker = {
-  trial: "observable-async-worker",
-  variant: "default",
-  skills: ["observability", "async-systems", "performance"],
-} satisfies EvalConfig["suites"][string][number];
-
-const accessibleUiState = {
-  trial: "accessible-ui-state",
-  variant: "default",
-  skills: ["ui-design", "accessibility"],
-} satisfies EvalConfig["suites"][string][number];
-
-const scaffoldRepoWorkflow = {
-  trial: "scaffold-repo-workflow",
-  variant: "default",
-  skills: ["scaffolding", "git-workflow", "documentation", "proof"],
-} satisfies EvalConfig["suites"][string][number];
-
-const routingCheckoutPayment = {
-  trial: "routing-checkout-payment",
-  variant: "default",
-  skills: ["workflow", "data-first", "security", "database", "api", "release", "proof", "code-review"],
-  priority: "core",
-} satisfies EvalConfig["suites"][string][number];
-
-const routingWorkerRetry = {
-  trial: "routing-worker-retry",
-  variant: "default",
-  skills: ["workflow", "async-systems", "error-handling", "observability", "proof", "code-review"],
-  priority: "core",
-} satisfies EvalConfig["suites"][string][number];
-
-const routingSettingsCopy = {
-  trial: "routing-settings-copy",
-  variant: "default",
-  skills: ["workflow", "ui-design", "accessibility", "documentation", "proof"],
-  priority: "core",
-} satisfies EvalConfig["suites"][string][number];
-
-const routingCustomerEmailMigration = {
-  trial: "routing-customer-email-migration",
-  variant: "default",
-  skills: ["workflow", "database", "release", "data-first", "proof", "code-review"],
-  priority: "core",
-} satisfies EvalConfig["suites"][string][number];
-
-const core = [proofFirstBugfix, securityBoundaryFix, designDecisionRecord, debuggingRegression];
-const routing = [routingCheckoutPayment, routingWorkerRetry, routingSettingsCopy, routingCustomerEmailMigration];
-const allSkills = [
-  ...core,
-  apiErrorContract,
-  databaseReleaseSafety,
-  observableAsyncWorker,
-  accessibleUiState,
-  scaffoldRepoWorkflow,
+const skillLayerCapabilities = [
+  "accessibility",
+  "api",
+  "architecture",
+  "async-systems",
+  "code-review",
+  "data-first",
+  "database",
+  "debugging",
+  "documentation",
+  "error-handling",
+  "git-workflow",
+  "observability",
+  "performance",
+  "proof",
+  "refactoring",
+  "release",
+  "scaffolding",
+  "security",
+  "ui-design",
+  "whiteboarding",
+  "workflow",
 ];
-const skillLayerCapabilities = Array.from(new Set(allSkills.flatMap((entry) => entry.skills))).sort();
 
-const config: EvalConfig = {
+const config: ProjectEvalConfig = {
   profiles: {
     codexBaseline: {
       id: "codexBaseline",
@@ -156,73 +85,40 @@ const config: EvalConfig = {
       },
     },
   },
-  suites: {
-    smoke: [proofFirstBugfix],
-    core,
-    routing,
-    allSkills,
-    engineeringMaturity: allSkills,
-  },
-  experiments: {
+  benches: {
     smoke: {
-      suite: "smoke",
       profiles: ["codexBaseline", "codexWithAbpSkills"],
       baseline: "codexBaseline",
+      reuseBaseline: true,
     },
     core: {
-      suite: "core",
       profiles: ["codexBaseline", "codexWithAbpSkills"],
       baseline: "codexBaseline",
       epochs: 3,
+      reuseBaseline: true,
     },
     allSkills: {
-      suite: "allSkills",
       profiles: ["codexBaseline", "codexWithAbpSkills"],
       baseline: "codexBaseline",
-      epochs: 3,
+      epochs: 1,
+      reuseBaseline: true,
     },
     routing: {
-      suite: "routing",
       profiles: ["codexBaseline", "codexWithAbpSkills"],
       baseline: "codexBaseline",
       epochs: 3,
+      reuseBaseline: true,
     },
     engineeringMaturity: {
-      suite: "engineeringMaturity",
       profiles: ["codexBaseline", "codexWithAbpSkills"],
       baseline: "codexBaseline",
-      epochs: 3,
-    },
-    "codex-abp-smoke": {
-      suite: "smoke",
-      profiles: ["codexBaseline", "codexWithAbpSkills"],
-      baseline: "codexBaseline",
-    },
-    "codex-abp-core": {
-      suite: "core",
-      profiles: ["codexBaseline", "codexWithAbpSkills"],
-      baseline: "codexBaseline",
-      epochs: 3,
-    },
-    "codex-abp-all": {
-      suite: "allSkills",
-      profiles: ["codexBaseline", "codexWithAbpSkills"],
-      baseline: "codexBaseline",
-      epochs: 3,
-    },
-    "codex-abp-routing": {
-      suite: "routing",
-      profiles: ["codexBaseline", "codexWithAbpSkills"],
-      baseline: "codexBaseline",
-      epochs: 3,
-    },
-    "codex-abp": {
-      suite: "allSkills",
-      profiles: ["codexBaseline", "codexWithAbpSkills"],
-      baseline: "codexBaseline",
-      epochs: 3,
+      epochs: 1,
+      reuseBaseline: true,
     },
   },
+  defaultProfile: "codexWithAbpSkills",
+  defaultPlugin: "engineering-maturity",
+  runsDir: process.env["ABP_EVAL_RUNS_DIR"] ?? path.join(os.homedir(), ".cache", "agent-booster-pack", "eval", "runs"),
   judge: {
     provider: "openai-codex",
     model: "gpt-5.4",

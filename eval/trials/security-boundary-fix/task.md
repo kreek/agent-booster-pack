@@ -4,9 +4,10 @@ Fix `resolveRedirect` in `src/redirect.js`.
 
 Requirements:
 
-- Allow same-site relative paths such as `/account/settings`.
-- Allow absolute HTTPS URLs only for `example.com`.
-- Reject protocol-relative URLs, JavaScript URLs, malformed URLs, and other hosts by returning `/`.
+- Keep normal same-site redirects working.
+- Allow only the trusted HTTPS app host for absolute redirects.
+- Treat malformed or suspicious redirect targets as unsafe and fall back to
+  `/`.
 - Keep the boundary explicit and easy to audit.
 
 Do not add external dependencies.

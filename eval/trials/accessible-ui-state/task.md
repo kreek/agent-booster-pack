@@ -4,10 +4,9 @@ Fix the subscription form in `public/index.html`.
 
 Requirements:
 
-- The email field must have an associated label.
-- The submit control must be keyboard-operable and use the correct semantic
-  element.
-- The success message region should be announced when it changes.
-- Keep the page simple and readable.
+- Keep the form simple and readable.
+- Make the email field, submit control, and success feedback work for
+  keyboard users and assistive technology.
+- Use native HTML semantics where they fit.
 
 Do not add external dependencies.

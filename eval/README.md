@@ -3,7 +3,7 @@
 This eval suite benchmarks whether Codex behaves better when the Agent Booster
 Pack is installed as a Codex plugin.
 
-The experiments compare:
+Bench runs compare:
 
 - `codexBaseline`: Codex with an isolated, freshly-authed home and no plugins.
 - `codexWithAbpSkills`: the same Codex model with the local repo registered
@@ -17,32 +17,30 @@ Suites:
 - `allSkills`: a larger suite intended to exercise every ABP skill listed in
   the README at least once.
 
+Suite membership is defined in `eval/suites/*.yaml`. `eval.config.ts` owns
+profile, Bench, judge, timeout, and budget policy only.
+
 The suite uses deterministic hidden checks plus an LLM judge that scores
 engineering maturity, proof quality, simplicity, and risk handling. Hidden
 checks make sure the task still works even if the agent edits visible tests.
 The judge runs by default; pass `--no-judge` for a fast, deterministic-only
 run during local development.
 
-Trial prompts are intentionally neutral: they describe the product or
-maintenance task without naming ABP, skills, or the quality lens being scored.
-Skill coverage lives in `eval.config.ts` and the scorer.
+Trial prompts and starter files are intentionally neutral: they describe the
+product or maintenance task without naming ABP, skills, or the quality lens
+being scored. Intended skill coverage lives in each trial manifest's
+`features:` list so suite coverage has one source of truth without leaking
+skill names into the agent-visible task.
 
 ## Setup
 
-This package currently depends on the local `pi-do-eval` checkout:
+This package depends on the local `do-eval` checkout through
+`package.json`:
 
 ```sh
 cd eval
 npm install
 ```
-
-By default the runner loads:
-
-```text
-../../pi-extensions/pi-do-eval/src/lib/eval/index.ts
-```
-
-Override that with `PI_DO_EVAL_SOURCE` if your checkout lives elsewhere.
 
 Set a model if the default is not what you want:
 
@@ -56,31 +54,29 @@ from `~/.codex/auth.json`. Each run gets a temporary isolated Codex home.
 ## Commands
 
 ```sh
-npm run list                       # show trials, suites, experiments
-npm run experiment:smoke           # run baseline vs ABP on the smoke suite
-npm run experiment:core            # run baseline vs ABP on the core suite
-npm run experiment:routing         # compare read-only routing behavior
-npm run experiment:all             # run baseline vs ABP across every skill
-npm run experiment                 # alias for the codex-abp experiment
-npm run experiment -- --no-judge   # skip the judge for a faster dev run
+npm run list              # show profiles, suites, and bench configs
+npm run view              # start the do-eval web UI on http://localhost:4242
 
-npm run bench:smoke                # bench mode for one suite
-npm run eval -- run routing --profile codexWithAbpSkills
-npm run eval -- run smoke --profile codexWithAbpSkills
-npm run eval -- run --trial proof-first-bugfix --profile codexBaseline
+npm run bench:smoke       # compare Codex baseline vs Codex + ABP
+npm run bench:core        # compare the core suite
+npm run bench:routing     # compare read-only routing behavior
+npm run bench:all         # compare every skill
+npm run bench:smoke -- --no-judge
 
-npm test
-npm run typecheck
+npm run regression:smoke -- --profile codexWithAbpSkills
+npm run trial -- proof-first-bugfix --profile codexBaseline
+
+npm test                  # run eval harness tests
+npm run typecheck         # type-check the eval harness
 ```
 
-The launcher card in the pi-do-eval UI defaults to the **Bench** tab for this
-project (set via `defaultLaunchType: "bench"` in `eval.config.ts`) — that's
-where the cross-profile comparison view lives. The **Regression** sidebar tab
-shows each profile's runs over time as a separate timeline, since two
-profiles with different layers can't share a single drift line.
+Use **Bench** for cross-profile comparisons: one suite, baseline Codex, and
+Codex with ABP installed. Use **Regression** to inspect one profile's runs
+over time. Use **Trial** to debug one task under one profile. The launcher card
+in the do-eval UI defaults to **Bench** for this project via
+`defaultLaunchType: "bench"` in `eval.config.ts`.
 
-Results are written under `~/.cache/agent-booster-pack/eval/runs/` (override
-with `ABP_EVAL_RUNS_DIR`). The in-repo `eval/runs/` is a symlink into that
-cache so the pi-do-eval UI can serve them. Trial workdirs live outside the
-repo to keep codex's ancestor walk from auto-discovering ABP skills into the
-baseline profile.
+Results are written under `~/.cache/agent-booster-pack/eval/runs/` by default
+(override with `ABP_EVAL_RUNS_DIR`). Trial workdirs live outside the repo to
+keep codex's ancestor walk from auto-discovering ABP skills into the baseline
+profile.

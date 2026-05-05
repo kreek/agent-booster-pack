@@ -1,0 +1,7 @@
+name: routing
+description: Read-only routing behavior for quality-lens selection.
+trials:
+  - routing-checkout-payment
+  - routing-worker-retry
+  - routing-settings-copy
+  - routing-customer-email-migration

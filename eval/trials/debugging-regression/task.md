@@ -4,14 +4,11 @@ Fix `mergeProfile` in `src/profile.js`.
 
 Requirements:
 
-- Preserve existing nested preference values when a patch updates only one
-  preference.
-- Replace arrays from the patch instead of concatenating them.
-- Do not mutate either input object.
-- Keep the function usable for plain JSON-compatible values.
-- Patches may arrive from untrusted JSON. Merging must not let a patch
-  modify `Object.prototype` or any global prototype (treat `__proto__`,
-  `constructor.prototype`, and `prototype` keys defensively, or pick a
-  shape that makes the attack impossible).
+- Preserve existing nested settings when a patch changes only one nested
+  value.
+- Keep array updates, input immutability, and plain JSON-compatible values
+  predictable.
+- Treat patches as untrusted JSON; the merge must not let untrusted keys
+  affect global prototypes.
 
 Do not add external dependencies.

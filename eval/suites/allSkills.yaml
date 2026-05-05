@@ -1,0 +1,12 @@
+name: allSkills
+description: A larger suite intended to exercise every ABP skill listed in the README at least once.
+trials:
+  - proof-first-bugfix
+  - security-boundary-fix
+  - design-decision-record
+  - debugging-regression
+  - api-error-contract
+  - database-release-safety
+  - observable-async-worker
+  - accessible-ui-state
+  - scaffold-repo-workflow
