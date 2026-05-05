@@ -51,6 +51,10 @@ outranks style; do not invent issues. ABP adds:
 7. Simpler-looking code is not automatically simpler. Fewer files, shared
    helpers, or a new layer are findings when they couple concerns that change
    independently or hide state/effects from callers.
+8. Complexity findings should name the concrete cost: hidden state,
+   tangled effect, broad abstraction, dead compatibility shim, stale flag,
+   duplicated rule with divergent meaning, or behavior split across
+   unrelated lifecycles.
 
 ## Workflow
 
@@ -75,7 +79,7 @@ outranks style; do not invent issues. ABP adds:
 5. Sweep for harmful duplication, orphaned code, unreachable branches, dead
    feature flags, unused public surface, and stale tests/docs/config. For
    maintainability, ask what independent concerns the diff couples or
-   separates.
+   separates, and whether simplification preserves behavior with evidence.
 6. Don't review generated, vendored, or lockfile churn as if it were
    hand-written; sample only enough to detect obvious risk. If the diff
    is too large, review by risk area and state the partial scope.
@@ -119,6 +123,8 @@ only for ambiguity that blocks a finding or fix.
 - [ ] Coupling risks were checked: business logic mixed with I/O,
       transport, persistence, time, shared state, framework lifecycle,
       or unrelated feature behavior.
+- [ ] Simplification claims were checked for preserved behavior, not only
+      fewer files or fewer lines.
 - [ ] Triggered domain skills and language reference(s) were loaded and
       named.
 - [ ] Findings are ordered by severity and grounded in file/line or PR
@@ -136,6 +142,7 @@ only for ambiguity that blocks a finding or fix.
 | "Tests pass, ship it" | Check what the tests prove and still review safety/data lenses. | The task is only to report current CI status. |
 | "Style nits are blocking" | Separate style notes from correctness, security, and maintainability findings. | Style issue hides a real ambiguity or risky control flow. |
 | "This is simpler because it has fewer files" | Check whether the diff couples independent behavior, data, effects, or lifecycles. | Generated or framework-required layout with no hand-written behavior. |
+| "This compatibility shim is harmless" | Require owner, removal condition, and proof that callers still need it, or remove it in a proven refactor. | Public contract or migration policy explicitly requires it. |
 | "I trust this author" | Review the diff with the same lenses; trust changes tone, not coverage. | Pair review where the same evidence was already inspected in this turn. |
 | "Skip the security pass this once" | Run the security lens and name why it is or is not relevant. | Files are provably outside executable, config, dependency, and data surfaces. |
 

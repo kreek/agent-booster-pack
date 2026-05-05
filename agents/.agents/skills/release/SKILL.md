@@ -70,7 +70,8 @@ back, change production flags, or mutate shared environments.
    Default to the higher plausible bump when compatibility is unclear.
 2. Update all version manifests together. Add the CHANGELOG entry,
    deprecation warning/removal version, and migration note when
-   applicable.
+   applicable. For deprecation, migration, removal, or sunset work, read
+   `references/deprecation-and-migration.md`.
 3. Define artifact, environments, human operator, promotion path, and
    merge gates. Put lint/type/test/security checks before merge where
    possible.
@@ -128,6 +129,7 @@ back, change production flags, or mutate shared environments.
 
 ## References
 
+- Deprecation and migration: `references/deprecation-and-migration.md`.
 - Semantic Versioning 2.0.0: <https://semver.org>
 - Keep a Changelog: <https://keepachangelog.com>
 - Conventional Commits: <https://www.conventionalcommits.org>

@@ -1,6 +1,6 @@
 {
   "name": "pi-agent-booster-pack",
-  "version": "4.9.0",
+  "version": "4.10.0",
   "description": "Agent Booster Pack helps Pi produce code that is well-organized, low in complexity and side effects, and is secure and high-performing.",
   "type": "module",
   "engines": {

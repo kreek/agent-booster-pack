@@ -23,6 +23,26 @@ done. Prefer concrete behavior over product theater.
 - Proof: tests, inspections, logs, screenshots, contract checks, or
   rollout evidence that will demonstrate acceptance.
 
+## Vague Idea Refinement
+
+Use this before `whiteboarding` when the user has a rough idea but no
+proposal worth designing yet. The goal is not a full PRD; it is a small,
+reviewable brief that prevents the agent from inventing product behavior.
+
+Capture:
+
+- Problem: the current pain, opportunity, or user-visible gap.
+- Audience: who benefits or operates the behavior.
+- Outcome: the smallest useful result that would make the idea real.
+- Non-goals: tempting adjacent work that is explicitly out of scope.
+- Assumptions: business, technical, data, safety, or UX guesses that need
+  validation before implementation.
+- Proof: what would demonstrate that the idea is worth building or that the
+  first slice works.
+
+If the idea changes public contracts, data shape, workflow ownership, or
+module boundaries, hand off to `whiteboarding` after this brief is clear.
+
 ## User Stories
 
 Use the classic format only when it clarifies the reader's goal:
@@ -88,6 +108,7 @@ Open question: should ...
 | Trigger | Do this instead | False alarm |
 |---|---|---|
 | "As a user..." is enough | Add concrete acceptance criteria and proof. | User explicitly asks only for a backlog title. |
+| "The idea is obvious" | Write the problem, audience, smallest useful outcome, non-goals, assumptions, and proof before design. | User already provided a concrete PRD or accepted brief. |
 | "The agent can infer the rest" | Draft likely criteria and ask for confirmation on the risky parts. | Mechanical implementation task with no behavior choice. |
 | "Acceptance is implementation tasks" | Rewrite criteria as caller-visible behavior. | Internal-only refactor where the acceptance is unchanged public behavior plus tests. |
 | "We'll know it when we see it" | Name the observable evidence before implementation starts. | Exploratory prototype clearly marked as disposable. |

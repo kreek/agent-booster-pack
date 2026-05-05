@@ -12,6 +12,10 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   for native-ready JVM services with Quarkus REST, CDI, Gradle, JUnit 5,
   RestAssured, Panache, observability, auth, scheduler, and native-image
   choices.
+- `workflow` now includes a version-verified implementation reference for
+  version-sensitive framework, library, runtime, and platform work.
+- `release` now includes a deprecation and migration reference covering
+  advisory deprecation, compulsory migration, removal, and recovery proof.
 
 ### Changed
 
@@ -44,6 +48,14 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `workflow` now includes a documentation check in the completion loop, and
   `documentation` clarifies when explanatory comments should capture
   non-obvious why/how context without encouraging comment-count targets.
+- ABP doctrine now explicitly says skills ride on host harnesses rather than
+  replacing browser control, delegation, tool use, memory, planning, or
+  system-prompt orchestration.
+- `documentation` now supports refining vague product ideas into problem,
+  audience, smallest useful outcome, non-goals, assumptions, and proof before
+  whiteboarding or implementation.
+- `security`, `workflow`, `code-review`, and `refactoring` now make context
+  trust and simplification guidance more concrete.
 
 ### Fixed
 
