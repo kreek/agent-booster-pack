@@ -364,6 +364,14 @@ function hasSubmittedProofForTrial(workDir: string): boolean {
     const tests = readIfExists(path.join(workDir, "test", "cart.test.js"));
     return /\bSAVE10\b/.test(tests) && /assert\.throws/.test(tests) && /\b(integer|invalid|negative|quantity|priceCents)\b/i.test(tests);
   }
+  if (fs.existsSync(path.join(workDir, "src", "pipeline.js"))) {
+    const tests = readIfExists(path.join(workDir, "test", "pipeline.test.js"));
+    return /\bvalid\b/.test(tests) &&
+      /\berrors\b/.test(tests) &&
+      /(deepEqual|deepStrictEqual|toEqual)/.test(tests) &&
+      /(duplicate|dedupe|same\s+email|second\s+occurrence)/i.test(tests) &&
+      /(reason|invalid|malformed|unable|cannot)/i.test(tests);
+  }
   if (fs.existsSync(path.join(workDir, "src", "redirect.js"))) {
     const tests = readIfExists(path.join(workDir, "test", "redirect.test.js"));
     return /example\.com/.test(tests) && /evil\.example|javascript:|protocol-relative|\/\//i.test(tests);
@@ -435,6 +443,42 @@ function runHiddenChecks(workDir: string): VerifyResult {
         assert.equal(totalCents([{ priceCents: 333, quantity: 3 }]), 999);
         assert.throws(() => totalCents([{ priceCents: -1, quantity: 1 }]));
         assert.throws(() => totalCents([{ priceCents: 100, quantity: 1.5 }]));
+      `,
+    );
+  }
+
+  if (fs.existsSync(path.join(workDir, "src", "pipeline.js"))) {
+    return runNodeCheck(
+      workDir,
+      `
+        import assert from "node:assert/strict";
+        import { processCustomers } from "./src/pipeline.js";
+
+        const result = processCustomers([
+          { name: "Ada", email: "Ada@Example.COM", phone: "5551234567" },
+          { name: "Ada Dup", email: "ada@example.com", phone: "(555) 123-4567" },
+          { name: "Bob", email: "bob@example.com", phone: "555-987-6543" },
+          { name: "Bad", email: "bad@example.com", phone: "abc" },
+        ]);
+
+        assert.equal(result.valid.length, 2, "expected two unique valid records");
+        assert.equal(result.errors.length, 1, "expected one record in errors");
+
+        const ada = result.valid.find((r) => r.email === "ada@example.com");
+        assert.ok(ada, "expected first Ada record to survive dedupe");
+        assert.equal(ada.email, "ada@example.com");
+        assert.equal(ada.phone, "+15551234567");
+
+        const bob = result.valid.find((r) => r.email === "bob@example.com");
+        assert.ok(bob, "expected Bob record");
+        assert.equal(bob.phone, "+15559876543");
+
+        const bad = result.errors[0];
+        assert.equal(typeof bad.reason, "string");
+        assert.ok(bad.reason.length > 0, "error reason must describe the failure");
+
+        const empty = processCustomers([]);
+        assert.deepEqual(empty, { valid: [], errors: [] });
       `,
     );
   }

@@ -1,0 +1,9 @@
+description: Build a multi-stage transformation that surfaces seam-shape coverage.
+taskFile: task.md
+plugin: engineering-maturity
+features:
+  - proof
+  - data-first
+  - error-handling
+variants:
+  default: {}

@@ -10,3 +10,4 @@ trials:
   - observable-async-worker
   - accessible-ui-state
   - scaffold-repo-workflow
+  - proof-pipeline-shape
