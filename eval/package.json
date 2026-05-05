@@ -30,7 +30,7 @@
     "tui": "npm run eval"
   },
   "dependencies": {
-    "do-eval": "file:../../pi-extensions/pi-do-eval"
+    "do-eval": "file:../../pi-do-eval"
   },
   "devDependencies": {
     "@types/node": "^25.6.0",
