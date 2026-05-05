@@ -22,6 +22,7 @@
     "regression:routing": "do-eval regression routing --project .",
     "regression:large": "do-eval regression largeProject --project .",
     "regression:all": "do-eval regression allSkills --project .",
+    "regression:check": "do-eval regression regressionCheck --project .",
     "trial": "npm run eval:trial --",
     "list": "npm run eval:list",
     "view": "npm run eval:web",

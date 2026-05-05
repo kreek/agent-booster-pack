@@ -1,0 +1,5 @@
+name: regressionCheck
+description: Trials known to have regressed under ABP; rerun to confirm fixes landed.
+trials:
+  - security-boundary-fix
+  - accessible-ui-state
