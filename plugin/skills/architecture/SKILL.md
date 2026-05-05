@@ -66,7 +66,9 @@ it changes, the structure is fighting the work.
 9. Add a layer only when it represents a real boundary (process, deploy,
    trust, persistence, transport) or removes proven duplication.
    Request middleware is a transport boundary; it should carry
-   pipeline-wide concerns, not feature-specific business behavior.
+   pipeline-wide concerns, not feature-specific business behavior. Use
+   workflow's `references/simple-not-easy.md` when a proposed boundary feels
+   convenient but its change axis is unclear.
 
 ## Workflow
 
@@ -113,6 +115,9 @@ it changes, the structure is fighting the work.
   without changing behavior.
 - Use `api` when the boundary in question is a public HTTP contract.
 - Use `documentation` for ADRs that capture the rationale.
+- Use workflow's `references/simple-not-easy.md` when deciding whether a
+  boundary, layer, or tactical pattern is simplifying the system or only
+  making the next edit easier.
 
 ## References
 

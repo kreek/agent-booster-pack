@@ -40,7 +40,9 @@ description: Use for refactoring, behavior-preserving change, legacy seams, test
    dual paths, or migration complexity.
 8. Simplification is refactoring when behavior must stay the same. Remove
    accidental complexity only after naming the behavior being preserved and
-   the coupling being reduced.
+   the coupling being reduced. Use workflow's
+   `references/simple-not-easy.md` when shorter code, new helpers, or removed
+   paths might hide state, compatibility, ownership, or proof risk.
 
 ## Workflow
 
@@ -102,6 +104,8 @@ description: Use for refactoring, behavior-preserving change, legacy seams, test
 - Use `architecture` when the refactor is about module boundaries,
   domain/feature locality versus horizontal layers, or DDD tactical
   patterns.
+- Use workflow's `references/simple-not-easy.md` when the refactor's value
+  depends on reducing real coupling rather than making a local edit easier.
 
 ## References
 

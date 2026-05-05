@@ -45,7 +45,9 @@ load them only when they change the outcome.
    change safety.
 2. Prefer simple over easy: name what is being tangled together (data,
    effects, time, ownership, transport, persistence, UI state, release,
-   or compatibility) before choosing the implementation path.
+   or compatibility) before choosing the implementation path. Use
+   `references/simple-not-easy.md` when the task risks ceremony, helper
+   layers, broad skill loading, or hidden coupling disguised as safety.
 3. Before claiming done, use `proof` to connect the completion claim to
    fresh evidence.
 4. Use the coding agent's own judgment and built-in tools for delegation,
@@ -215,9 +217,12 @@ load them only when they change the outcome.
   requirements and acceptance criteria.
 - Use `references/version-verified.md` when current official framework,
   library, runtime, or platform guidance matters to the implementation.
+- Use `references/simple-not-easy.md` when ceremony, helper layers, broad
+  skill loading, or hidden coupling might be mistaken for engineering rigor.
 
 ## References
 
+- Simple, not easy doctrine: `references/simple-not-easy.md`.
 - Version-verified implementation: `references/version-verified.md`.
 - "Simple Made Easy": <https://www.youtube.com/watch?v=SxdOUGdseq4>
 - "Out of the Tar Pit":

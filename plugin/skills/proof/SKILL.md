@@ -42,6 +42,8 @@ description: Use for proof and tests, claims, invariants, behavior specs, edge c
    helper-level checks.
 5. A completion claim is still an engineering claim. Passing checks are
    only relevant when they prove the latest request was actually satisfied.
+   Use workflow's `references/simple-not-easy.md` when a "safer" hardening
+   step lacks a named failure mode and evidence.
 6. Test behavior, not implementation: assertions describe what a
    caller observes. Enter at the outermost practical boundary: HTTP,
    CLI, UI, public API, or module facade.

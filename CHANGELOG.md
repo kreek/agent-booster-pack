@@ -14,6 +14,8 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   choices.
 - `workflow` now includes a version-verified implementation reference for
   version-sensitive framework, library, runtime, and platform work.
+- `workflow` now includes a simple-not-easy doctrine reference for avoiding
+  ceremony, over-broad skill loading, and hidden coupling disguised as safety.
 - `release` now includes a deprecation and migration reference covering
   advisory deprecation, compulsory migration, removal, and recovery proof.
 

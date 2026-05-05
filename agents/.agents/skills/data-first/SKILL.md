@@ -48,7 +48,9 @@ will construct it.
    pure and composable.
 8. Discover model abstractions from repeated domain meaning. Do not invent
    generic wrappers, base classes, or helper layers before the data says they
-   pay for themselves.
+   pay for themselves. Use workflow's `references/simple-not-easy.md` when
+   the choice is between a direct data shape and ceremony that only makes the
+   next step feel easier.
 
 ## Workflow
 
@@ -104,6 +106,9 @@ the type forces care. Load the right reference when either appears in the diff.
   context.
 - Use `async-systems` when mutable places or ownership cross task/thread
   boundaries.
+- Use workflow's `references/simple-not-easy.md` when a generic helper,
+  wrapper, or layer is being proposed as "simpler" before the data or effects
+  justify it.
 
 ## References
 
