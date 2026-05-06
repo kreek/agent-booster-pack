@@ -196,7 +196,10 @@ describe("ABP eval config", () => {
     expect(bench.baseline).toBe("codexBaseline");
     expect(bench.profiles).toEqual(["codexBaseline", "codexWithAbpSkills"]);
     expect(bench.epochs).toBe(1);
-    expect(getSuite("largeProject").map((entry) => entry.trial)).toEqual(["large-checkout-workflow"]);
+    expect(getSuite("largeProject").map((entry) => entry.trial)).toEqual([
+      "large-checkout-workflow",
+      "large-link-shortener",
+    ]);
   });
 
   it("defines lightweight, core, and all-skills suites", () => {
@@ -205,6 +208,7 @@ describe("ABP eval config", () => {
       "core",
       "engineeringMaturity",
       "largeProject",
+      "regressionCheck",
       "routing",
       "smoke",
     ]);
@@ -234,7 +238,10 @@ describe("ABP eval config", () => {
       "routing-settings-copy",
       "routing-customer-email-migration",
     ]);
-    expect(getSuite("largeProject")).toEqual([{ trial: "large-checkout-workflow", variant: "default" }]);
+    expect(getSuite("largeProject")).toEqual([
+      { trial: "large-checkout-workflow", variant: "default" },
+      { trial: "large-link-shortener", variant: "default" },
+    ]);
     for (const entry of allSkills) {
       expect(entry.variant).toBe("default");
     }
@@ -327,7 +334,7 @@ describe("ABP eval config", () => {
     }
   });
 
-  it("ships trial scaffolds that start with passing visible tests and failing hidden checks", () => {
+  it("ships trial scaffolds that start with passing visible tests and failing hidden checks", { timeout: 30_000 }, () => {
     const executableTrials = [...getSuite("allSkills"), ...getSuite("largeProject")];
     for (const { trial } of executableTrials) {
       const scaffold = path.join(evalDir, "trials", trial, "scaffold");

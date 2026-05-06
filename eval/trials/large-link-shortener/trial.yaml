@@ -1,0 +1,13 @@
+description: Build a small link-shortener app from an empty scaffold; SQLite + HTMX + Alpine.
+taskFile: task.md
+plugin: engineering-maturity
+features:
+  - scaffolding
+  - architecture
+  - data-first
+  - api
+  - security
+  - proof
+  - ui-design
+variants:
+  default: {}

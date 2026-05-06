@@ -78,6 +78,15 @@ function combineChecks(name: string, results: VerifyResult[]): VerifyResult {
   };
 }
 
+function readPackageName(workDir: string): string {
+  try {
+    const pkg = JSON.parse(readIfExists(path.join(workDir, "package.json"))) as { name?: string };
+    return pkg?.name ?? "";
+  } catch {
+    return "";
+  }
+}
+
 function readIfExists(filePath: string): string {
   return fs.existsSync(filePath) ? fs.readFileSync(filePath, "utf-8") : "";
 }
@@ -389,6 +398,22 @@ function hasSubmittedProofForTrial(workDir: string): boolean {
     const coversConfirmation = /(charge|email|confirmation|queued|recorded)/i.test(tests);
     return coversTier && coversCoupon && coversCap && coversConfirmation;
   }
+  if (readPackageName(workDir) === "link-shortener-trial") {
+    const testDir = path.join(workDir, "test");
+    let combined = "";
+    if (fs.existsSync(testDir)) {
+      for (const entry of fs.readdirSync(testDir)) {
+        if (entry.endsWith(".js") || entry.endsWith(".mjs")) {
+          combined += "\n" + readIfExists(path.join(testDir, entry));
+        }
+      }
+    }
+    const coversShorten = /\b(shorten|\/shorten)\b/i.test(combined);
+    const coversRedirect = /(redirect|location|302|301)/i.test(combined);
+    const coversReject = /(invalid|reject|4\d\d|javascript:|https:|\/\/evil)/i.test(combined);
+    const coversAdmin = /\b(admin|list)\b/i.test(combined);
+    return coversShorten && coversRedirect && coversReject && coversAdmin;
+  }
   if (fs.existsSync(path.join(workDir, "src", "redirect.js"))) {
     const tests = readIfExists(path.join(workDir, "test", "redirect.test.js"));
     return /example\.com/.test(tests) && /evil\.example|javascript:|protocol-relative|\/\//i.test(tests);
@@ -603,6 +628,135 @@ function runHiddenChecks(workDir: string): VerifyResult {
           assert.ok(r.discount <= r.subtotal, "discount must not exceed subtotal");
           assert.equal(r.total, r.subtotal - r.discount);
           assert.ok(r.total >= 0, "total must not be negative");
+        }
+      `,
+    );
+  }
+
+  if (readPackageName(workDir) === "link-shortener-trial") {
+    if (!fs.existsSync(path.join(workDir, "src", "server.js"))) {
+      return {
+        passed: false,
+        output: "src/server.js missing; cannot exercise link-shortener endpoints.",
+        metrics: {},
+      };
+    }
+    return runNodeCheck(
+      workDir,
+      `
+        import { spawn } from "node:child_process";
+        import assert from "node:assert/strict";
+
+        const PORT = String(20000 + Math.floor(Math.random() * 10000));
+        const server = spawn(process.execPath, ["--experimental-sqlite", "src/server.js"], {
+          cwd: process.cwd(),
+          env: { ...process.env, PORT },
+          stdio: ["ignore", "ignore", "pipe"],
+        });
+        let stderr = "";
+        server.stderr.on("data", (d) => { stderr += d.toString(); });
+        server.on("error", () => {});
+
+        const base = "http://localhost:" + PORT;
+        const fail = (msg) => {
+          server.kill("SIGKILL");
+          throw new Error(msg + (stderr ? "\\n--- server stderr ---\\n" + stderr.slice(-1500) : ""));
+        };
+
+        // Wait up to 10s for the server to accept connections.
+        let ready = false;
+        for (let i = 0; i < 50; i++) {
+          if (server.exitCode !== null) fail("server exited before becoming ready (exit " + server.exitCode + ")");
+          try {
+            const r = await fetch(base + "/", { signal: AbortSignal.timeout(500) });
+            if (r.status < 500) { ready = true; break; }
+          } catch (_) {}
+          await new Promise((r) => setTimeout(r, 200));
+        }
+        if (!ready) fail("server did not become ready within 10s");
+
+        try {
+          // GET / — HTML referencing htmx and alpine.
+          const home = await fetch(base + "/");
+          assert.equal(home.status, 200, "GET / should be 200, got " + home.status);
+          const homeBody = await home.text();
+          assert.ok(/htmx/i.test(homeBody), "home page must reference htmx");
+          assert.ok(/alpine/i.test(homeBody), "home page must reference alpine");
+
+          // POST /shorten with valid URL — extract slug from JSON or any URL-safe token in body.
+          const target = "https://example.com/foo";
+          const post = await fetch(base + "/shorten", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ url: target }),
+          });
+          assert.ok(post.status >= 200 && post.status < 300, "POST /shorten should be 2xx, got " + post.status);
+          const postBody = await post.text();
+
+          let slug = null;
+          try {
+            const parsed = JSON.parse(postBody);
+            slug = parsed?.slug ?? parsed?.short ?? parsed?.shortSlug ?? null;
+            if (!slug && typeof parsed?.shortUrl === "string") {
+              const tail = parsed.shortUrl.split("/").pop();
+              if (tail) slug = tail;
+            }
+          } catch (_) {
+            // not JSON — extract a URL-safe token candidate.
+          }
+          if (!slug) {
+            const tokens = postBody.split(/[^A-Za-z0-9_-]+/).filter((t) => t.length >= 3 && t.length <= 32);
+            for (const candidate of tokens) {
+              if (/^(html|head|body|div|span|class|id|http|https|json|true|false|null|slug|shortUrl|copy|button|form|input|btoa|alpine|htmx|admin|index)$/i.test(candidate)) continue;
+              const r = await fetch(base + "/" + candidate, { redirect: "manual", signal: AbortSignal.timeout(2000) });
+              if (r.status === 301 || r.status === 302 || r.status === 303 || r.status === 307 || r.status === 308) {
+                slug = candidate;
+                break;
+              }
+            }
+          }
+          if (!slug) fail("response to POST /shorten did not yield a slug — body: " + postBody.slice(0, 300));
+
+          // GET /:slug — redirect to original.
+          const redir = await fetch(base + "/" + slug, { redirect: "manual" });
+          assert.ok(redir.status >= 300 && redir.status < 400, "GET /:slug should redirect, got " + redir.status);
+          assert.equal(redir.headers.get("location"), target, "redirect location must match the original URL");
+
+          // GET /:nonexistent — 404.
+          const missing = await fetch(base + "/no-such-slug-xyz-9q9q9q", { redirect: "manual" });
+          assert.equal(missing.status, 404, "unknown slug should be 404, got " + missing.status);
+
+          // Reject javascript:.
+          const js = await fetch(base + "/shorten", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ url: "javascript:alert(1)" }),
+          });
+          assert.ok(js.status >= 400 && js.status < 500, "javascript: target must be rejected, got " + js.status);
+
+          // Reject https:host (URL parser leniency).
+          const lenient = await fetch(base + "/shorten", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ url: "https:evil.example.com" }),
+          });
+          assert.ok(lenient.status >= 400 && lenient.status < 500, "lenient https:host must be rejected, got " + lenient.status);
+
+          // Reject scheme-relative //host.
+          const schemeRel = await fetch(base + "/shorten", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ url: "//evil.example.com" }),
+          });
+          assert.ok(schemeRel.status >= 400 && schemeRel.status < 500, "//host must be rejected, got " + schemeRel.status);
+
+          // GET /admin — listing must include the slug.
+          const admin = await fetch(base + "/admin");
+          assert.equal(admin.status, 200, "GET /admin should be 200, got " + admin.status);
+          const adminBody = await admin.text();
+          assert.ok(adminBody.includes(slug), "admin page must list the slug created earlier");
+        } finally {
+          server.kill("SIGKILL");
         }
       `,
     );
@@ -896,7 +1050,11 @@ function runHiddenChecks(workDir: string): VerifyResult {
     ]);
   }
 
-  return { passed: true, output: "No hidden check for this trial", metrics: {} };
+  return {
+    passed: false,
+    output: "No hidden check matched this workdir; treat as unproven rather than silently passing.",
+    metrics: {},
+  };
 }
 
 function collectFiles(root: string, current = root, files: string[] = []): string[] {
