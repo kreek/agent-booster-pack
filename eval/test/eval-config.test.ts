@@ -208,6 +208,7 @@ describe("ABP eval config", () => {
       "core",
       "engineeringMaturity",
       "largeProject",
+      "linkShortener",
       "regressionCheck",
       "routing",
       "smoke",
@@ -217,6 +218,7 @@ describe("ABP eval config", () => {
       "core",
       "engineeringMaturity",
       "largeProject",
+      "linkShortener",
       "routing",
       "smoke",
     ]);

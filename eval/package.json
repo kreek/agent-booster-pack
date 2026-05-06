@@ -16,6 +16,7 @@
     "bench:routing": "do-eval bench routing --project .",
     "bench:large": "do-eval bench largeProject --project .",
     "bench:all": "do-eval bench allSkills --project .",
+    "bench:link": "do-eval bench linkShortener --project .",
     "regression": "npm run eval:regression",
     "regression:smoke": "do-eval regression smoke --project .",
     "regression:core": "do-eval regression core --project .",

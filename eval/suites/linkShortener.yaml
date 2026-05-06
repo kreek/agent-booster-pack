@@ -1,0 +1,4 @@
+name: linkShortener
+description: Greenfield link-shortener trial; isolates the largeProject app build from the checkout workflow trial.
+trials:
+  - large-link-shortener

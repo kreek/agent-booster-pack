@@ -142,6 +142,12 @@ const config: ProjectEvalConfig = {
       epochs: 1,
       reuseBaseline: true,
     },
+    linkShortener: {
+      profiles: ["codexBaseline", "codexWithAbpSkills"],
+      baseline: "codexBaseline",
+      epochs: 1,
+      reuseBaseline: true,
+    },
   },
   defaultProfile: "codexWithAbpSkills",
   defaultPlugin: "engineering-maturity",
