@@ -7,7 +7,7 @@ description: Use for design discussions that map contracts, resolve questions, a
 
 ## Iron Law
 
-`READ THE CODE. DISCUSS THE SHAPE. ALIGN BEFORE CODE LANDS.`
+`READ THE CODE. DISCUSS THE SHAPE. GET SIGN-OFF BEFORE CODE LANDS.`
 
 ## When to Use
 
@@ -16,6 +16,8 @@ description: Use for design discussions that map contracts, resolve questions, a
 - Adding a new public surface: function signature, exported type, endpoint,
   event/queue payload, CLI flag, environment variable, config key, file format,
   or database schema/migration step.
+- Defining or changing a durable interface/contract (defined in `workflow`):
+  the Interface Design Gate must fire before implementation lands.
 - Changing an existing public surface in a way callers will see.
 - Crossing a module boundary or touching more than one service or component.
 - Any work where data shape, state machine, or domain invariant changes.
@@ -49,26 +51,30 @@ description: Use for design discussions that map contracts, resolve questions, a
    database schema and migration step, queue or event payload, file format,
    config key, or any shape that crosses a boundary. "API" does not mean only
    HTTP.
-4. `data-first` is the always-on lens. Name new and changed states,
+4. When a durable interface appears, route to the `workflow` Interface Design
+   Gate. Stop at design and do not implement until the human has approved,
+   revised, or ruled out the shape. The agent should propose the concrete
+   interface; the human does not have to design it from scratch.
+5. `data-first` is the always-on lens. Name new and changed states,
    transitions, and invariants. Make illegal states unrepresentable in the
    proposed shape. Apply `api`, `database`, `async-systems`, and other
    surface-specific lenses in addition when those surfaces are touched.
-5. When the change touches more than one service or component, draw a
+6. When the change touches more than one service or component, draw a
    lightweight diagram in the conversation. Boxes and arrows force you to see
    the whole shape; prose hides what the diagram exposes. Mermaid is fine when
    it helps, but a diagram is a discussion aid, not a required file.
-6. Do not create a file called `whiteboard` or `docs/whiteboard/...`. Do not
+7. Do not create a file called `whiteboard` or `docs/whiteboard/...`. Do not
    create any design artifact before the discussion has converged. Once the
    human agrees on the direction, write the result as an RFC or ADR using the
    repo's existing convention, or ask where RFCs/ADRs should live if no
    convention exists.
-7. The whiteboard is iterative. Offer an initial read of the code and design
+8. The whiteboard is iterative. Offer an initial read of the code and design
    shape, then ask the next meaningful question. Revise the shape as the human
    answers. Do not collapse the session into a one-shot plan.
-8. Keep the conversation high-level enough to preserve design options. If you
+9. Keep the conversation high-level enough to preserve design options. If you
    are writing step-by-step implementation tasks, pseudocode, or file-by-file
    edits, you have left whiteboarding and entered planning.
-9. Architecture is downstream of whiteboarding. The whiteboard maps the
+10. Architecture is downstream of whiteboarding. The whiteboard maps the
    terrain; `architecture` decides module boundaries on top of the map. Bring
    `architecture` in only when boundary changes are part of the work.
 
@@ -83,10 +89,11 @@ description: Use for design discussions that map contracts, resolve questions, a
    constraints that matter to the user's goal. Keep citations close to each
    claim.
 4. Offer one or more feasible target shapes at the contract level. Name
-   tradeoffs, compatibility concerns, migration pressure, and what each option
-   makes easier or harder.
+   durable interfaces, tradeoffs, compatibility concerns, migration pressure,
+   and what each option makes easier or harder.
 5. Ask the human the smallest set of decision questions that changes the
-   design. Avoid asking for information the code can answer.
+   design. For a durable interface, route through the `workflow` Interface
+   Design Gate. Avoid asking for information the code can answer.
 6. Iterate. After each user answer, update the shared shape: resolved
    decisions, open questions, out-of-scope boundaries, and proof obligations.
 7. When the human agrees on the design direction, create or update the RFC or
@@ -105,7 +112,8 @@ Use this structure in chat before writing the RFC or ADR:
    invariants, concrete enough to compare but not a task list.
 4. **Tradeoffs** — compatibility, migration, ergonomics, operational risk,
    and what becomes easier or harder.
-5. **Questions** — decisions only the human can make.
+5. **Questions** — decisions only the human can make, including approval,
+   revision, or rejection of each durable interface.
 6. **Current agreement** — resolved decisions, out-of-scope boundaries, and
    proof obligations to carry into planning or implementation.
 
@@ -136,6 +144,8 @@ completed discussion; it is not the starting point for the discussion.
       decision questions and revised the design with the user's answers.
 - [ ] Every contract that will change is named: signature, schema, endpoint,
       event, CLI flag, config key, or file format.
+- [ ] Every durable interface has an approved interface/contract before
+      implementation starts.
 - [ ] Each contract has its current shape with `file:line` evidence (or
       "doesn't exist yet" with adjacent conventions cited).
 - [ ] Each contract has its proposed shape shown concretely, not in prose.
@@ -154,12 +164,15 @@ completed discussion; it is not the starting point for the discussion.
       Proof Contracts.
 - [ ] The human has agreed to move from design discussion into RFC/ADR capture,
       planning, or implementation before any code lands.
+- [ ] No implementation code for a durable interface was written before user
+      sign-off.
 
 ## Tripwires
 
 | Trigger | Do this instead | False alarm |
 |---|---|---|
 | "I'll just code it, no design needed" | Check the When to Use criteria. If more than one contract changes, whiteboard first. | Trivial typo, formatting, or dep-bump per the When NOT to Use list. |
+| "This interface is obvious" | Show the current interface, proposed interface, and why this boundary belongs here, then ask the human to approve or revise it before implementation. | Private helper or one-file refactor with no durable caller dependency. |
 | "I'll create a whiteboard file so the session is formal" | Keep the design in chat until it converges, then capture the result as an RFC or ADR. | The user explicitly asks to draft an RFC/ADR first as the discussion medium. |
 | "We agreed, so no doc is needed" | Capture the agreed decision as an RFC or ADR before handing off to planning or implementation. | Trivial change covered by When NOT to Use. |
 | "I'll produce the plan now" | Stay at the contract and tradeoff level. Ask the next design question before task sequencing. | The human has agreed on the design and asked to plan or implement. |

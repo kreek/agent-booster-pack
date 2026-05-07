@@ -60,7 +60,7 @@ after editing skills.
 
 ## What's included
 
-20 skills, grouped by the kind of engineering pressure they apply.
+21 skills, grouped by the kind of engineering pressure they apply.
 
 ### Entry point
 
@@ -69,6 +69,7 @@ after editing skills.
 
 ### Foundational design
 
+- `whiteboarding` — collaborative interface and contract design before code.
 - `data-first` — domain data, fields, states, transitions, effects.
 - `architecture` — module boundaries, domain locality, DDD tactical patterns.
 - `proof` — proof obligations and behavior-focused tests.

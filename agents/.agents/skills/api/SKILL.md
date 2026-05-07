@@ -7,7 +7,7 @@ description: Use for HTTP APIs, OpenAPI, request/response shape, status codes, a
 
 ## Iron Law
 
-`DESIGN THE CONTRACT BEFORE THE IMPLEMENTATION. DO NOT BREAK A PUBLISHED CONTRACT IN PLACE.`
+`DESIGN THE CONTRACT BEFORE THE IMPLEMENTATION. GET SIGN-OFF FOR DURABLE API INTERFACES. NEVER BREAK A PUBLISHED CONTRACT IN PLACE.`
 
 ## When to Use
 
@@ -29,25 +29,29 @@ description: Use for HTTP APIs, OpenAPI, request/response shape, status codes, a
 1. Contract first: sketch or update OpenAPI/equivalent before
    controller code. Implement from the contract, not the other way
    around.
-2. Resource names are nouns; verbs belong in HTTP methods unless the
+2. When a public API surface is a durable interface, the `workflow` sign-off gate
+   applies. The api-specific addition is error shape: present it alongside
+   the standard gate artifacts so callers know which `4xx`/`5xx` they must
+   handle.
+3. Resource names are nouns; verbs belong in HTTP methods unless the
    operation is truly non-resource.
-3. Every response shape is explicit, including errors, empty states,
+4. Every response shape is explicit, including errors, empty states,
    pagination, and auth failures.
-4. Mutations are safe to retry only when the public contract defines an
+5. Mutations are safe to retry only when the public contract defines an
    idempotency strategy: key scope, replay window, duplicate response
    behavior, and conflict semantics.
-5. List and stream endpoints have bounded pagination, stable ordering,
+6. List and stream endpoints have bounded pagination, stable ordering,
    and explicit continuation-token semantics. Opaque cursors, page
    tokens, sync tokens, and resume tokens are caller input: malformed,
    tampered, expired, or out-of-range tokens fail with a client error
    or a documented empty-result behavior, never a silent fallback to an
    earlier position.
-6. Compatibility is a feature: optional additive changes can evolve an
+7. Compatibility is a feature: optional additive changes can evolve an
    API without a new contract version; removals, renames, required
    additions, status-code changes, and semantic changes need a
    successor contract or deprecation path. Hand off the bump,
    CHANGELOG, and deprecation primitives to `release`.
-7. Webhooks are APIs too: sign payloads, version events, and make
+8. Webhooks are APIs too: sign payloads, version events, and make
    receivers idempotent.
 
 ## Request Pipeline and Middleware
@@ -92,18 +96,22 @@ server-origin failures into a client error.
 1. Identify the caller and the contract surface they will bind to.
    Define paths, methods, request/response bodies, status codes, auth,
    pagination, idempotency, and error shape.
-2. For each error response, pick status by origin (request, upstream,
+2. When the surface is a durable API interface, route through the
+   `workflow` sign-off gate before controller, client, SDK, webhook, or
+   integration implementation continues. Add error shape to the gate
+   artifacts.
+3. For each error response, pick status by origin (request, upstream,
    your service). Check compatibility: new optional fields, query
    parameters, headers, methods, and endpoints are usually safe;
    renames, removals, required additions, status-code changes, and
    semantic changes require a successor contract or deprecation path.
-3. For retryable public mutations, document the idempotency-key
+4. For retryable public mutations, document the idempotency-key
    contract and prove duplicate submissions cannot create duplicate
    side effects.
-4. For request-pipeline concerns, decide whether the behavior belongs in
+5. For request-pipeline concerns, decide whether the behavior belongs in
    middleware, an edge/gateway, or the endpoint handler. Keep
    route-specific business rules out of global middleware.
-5. For each public contract change, record a Proof Contract: contract
+6. For each public contract change, record a Proof Contract: contract
    claim, data invariant, public boundary, check, evidence. Add
    contract or behavior tests at the outermost boundary; update
    generated/source-of-truth docs only.
@@ -111,6 +119,8 @@ server-origin failures into a client error.
 ## Verification
 
 - [ ] Contract exists or is updated before implementation lands.
+- [ ] Durable API interfaces have explicit user approval before
+      implementation continues.
 - [ ] Every endpoint documents request, responses by status, auth, and
       errors.
 - [ ] Errors use a consistent Problem Details-style shape; status codes

@@ -54,6 +54,11 @@
 - For non-trivial, ambiguous, or risky changes, state the short plan,
   assumptions, and tradeoffs before editing. Ask only when the answer changes
   the implementation or risk.
+- When a task creates or changes a durable interface — a durable caller-facing
+  boundary callers outside the module will bind to — design the contract/API
+  and high-level plan first, then get the user's approval before
+  implementation continues. The full enumeration and the gate's required
+  artifacts live in the `workflow` skill.
 - Start with the happy path. Add edge cases when the requirement names them,
   they are security- or data-loss-relevant, or they are needed for a real
   boundary such as network, filesystem, database, or concurrency.
@@ -99,8 +104,9 @@ They shape the problem, not just the implementation.
   events/queues, CLI flags, config keys, file formats), constraints, tradeoffs,
   and open questions before any non-trivial code lands, then capture the agreed
   result as an RFC or ADR. Mandatory when more than one contract changes, when
-  a new public surface is added, or when a module boundary is crossed. Upstream
-  of `data-first` and `architecture`, not a substitute for built-in plan mode.
+  a new public surface is added, when a module boundary is crossed, or when any
+  durable interface is identified. Upstream of `data-first` and `architecture`, not a
+  substitute for built-in plan mode.
 - `data-first`: use for any data modeling work: domain data, fields, states,
   inputs, invariants, allowed combinations, transitions, or effects. Use it
   first after scaffolding when specs are clear and the next step is shaping
