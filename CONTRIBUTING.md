@@ -42,7 +42,7 @@ uv run refcheck . --no-color
 uv run python scripts/validate_skill_anatomy.py
 ```
 
-The validator checks all 26 skills, the `plugin/skills/` symlinks, and
+The validator checks all 21 skills, the `plugin/skills/` symlinks, and
 the Codex plugin manifest in one pass.
 
 To enable the pre-commit hook locally:
