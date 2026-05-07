@@ -1,0 +1,39 @@
+{
+  "name": "agent-booster-pack",
+  "version": "5.0.0",
+  "description": "Agent Booster Pack for Pi: skills + Interface Design Gate runtime + proof-first runtime, in one install. Meta-package; depends on the three siblings.",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "agent-booster-pack-skills": "^5.0.0",
+    "agent-booster-pack-contract-first": "^1.0.0",
+    "agent-booster-pack-proof": "^2.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kreek/agent-booster-pack.git",
+    "directory": "agent-booster-pack"
+  },
+  "author": "Alastair Dawson",
+  "license": "MIT",
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "pi",
+    "abp",
+    "agent-booster-pack",
+    "agent-skills",
+    "skills",
+    "engineering",
+    "code-review",
+    "proof",
+    "contract-first",
+    "interface-design"
+  ]
+}

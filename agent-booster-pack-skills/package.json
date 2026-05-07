@@ -1,0 +1,48 @@
+{
+  "name": "agent-booster-pack-skills",
+  "version": "5.0.0",
+  "description": "Agent Booster Pack skills for Pi: data, proof, security, debugging, refactoring, and more. Skills only — runtime gates ship as sibling packages (agent-booster-pack-contract-first, agent-booster-pack-proof). Renamed from pi-agent-booster-pack; old name deprecated.",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "pi": {
+    "skills": [
+      "./skills"
+    ]
+  },
+  "files": [
+    "skills",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "node scripts/build-skills.mjs",
+    "prepack": "npm run build",
+    "install-ext": "npm run build && mkdir -p ~/.pi/agent/extensions && ln -sfn \"$(pwd)\" ~/.pi/agent/extensions/agent-booster-pack-skills && echo 'Installed to ~/.pi/agent/extensions/agent-booster-pack-skills -- run /reload in Pi to activate'",
+    "uninstall-ext": "rm -f ~/.pi/agent/extensions/agent-booster-pack-skills && echo 'Uninstalled'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kreek/agent-booster-pack.git",
+    "directory": "agent-booster-pack-skills"
+  },
+  "author": "Alastair Dawson",
+  "license": "MIT",
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "pi",
+    "agent-skills",
+    "skills",
+    "abp",
+    "agent-booster-pack",
+    "engineering",
+    "code-review",
+    "proof",
+    "testing",
+    "security",
+    "debugging",
+    "refactoring"
+  ]
+}

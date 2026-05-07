@@ -219,4 +219,7 @@ counts toward whichever claims it actually covers.
 - Data-shape boundaries (worked examples for pipelines, parsers,
   validators, middleware, sans-IO, and functional core):
   `references/data-shape-boundaries.md`.
-- `pi-proof` extension: https://github.com/kreek/pi-proof
+- `agent-booster-pack-proof` Pi runtime companion: ships from this repo
+  at `agent-booster-pack-proof/` and enforces the red-green-refactor
+  loop at tool-call time. (Renamed from `pi-proof`; old npm name
+  deprecated.)
