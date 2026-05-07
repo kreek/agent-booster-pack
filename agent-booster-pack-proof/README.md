@@ -1,10 +1,15 @@
-# pi-proof
+# agent-booster-pack-proof
 
 A proof-first extension for [Pi](https://pi.dev), the terminal coding agent.
 
 It nudges the agent into a red-green-refactor loop when the next change needs a test. It stays out of the way for docs, config, and exploration.
 
-[![pi-proof demo](https://github.com/kreek/pi-proof/raw/refs/heads/main/assets/release/demo.gif)](https://github.com/kreek/pi-proof/raw/refs/heads/main/assets/release/demo.mp4)
+[![agent-booster-pack-proof demo](https://github.com/kreek/agent-booster-pack/raw/refs/heads/main/agent-booster-pack-proof/assets/release/demo.gif)](https://github.com/kreek/agent-booster-pack/raw/refs/heads/main/agent-booster-pack-proof/assets/release/demo.mp4)
+
+> **Renamed from `pi-proof`.** The old npm name is deprecated;
+> migrate to `agent-booster-pack-proof` for ongoing updates. This package is
+> one of four sibling packages in [Agent Booster Pack](https://github.com/kreek/agent-booster-pack);
+> install the meta-package `agent-booster-pack` for the full bundle.
 
 ## Install
 
@@ -15,14 +20,10 @@ npm install -g @mariozechner/pi-coding-agent
 pi
 ```
 
-Install pi-proof:
+Install agent-booster-pack-proof:
 
 ```bash
-# Global
-pi install git:git@github.com:kreek/pi-proof.git
-
-# Project-local
-pi install -l git:git@github.com:kreek/pi-proof.git
+pi install npm:agent-booster-pack-proof
 ```
 
 If Pi is already running, run `/reload`.
@@ -169,8 +170,8 @@ This extension enforces the loop, not the quality of the tests.
 ## Development
 
 ```bash
-git clone git@github.com:kreek/pi-proof.git
-cd pi-proof
+git clone git@github.com:kreek/agent-booster-pack.git
+cd agent-booster-pack/agent-booster-pack-proof
 npm install
 npm run install-hooks
 npm test
@@ -186,11 +187,11 @@ test/
   parsers.test.ts Parser tests
 ```
 
-To add a parser, append a `TestLineParser` to `defaultParsers` in `src/parsers.ts`. For development installs from a local checkout, `npm run install-ext` symlinks the repo into `~/.pi/agent/extensions/pi-proof`.
+To add a parser, append a `TestLineParser` to `defaultParsers` in `src/parsers.ts`. For development installs from a local checkout, `npm run install-ext` symlinks the repo into `~/.pi/agent/extensions/agent-booster-pack-proof`.
 
 ## Eval
 
-The extension ships with an eval harness built on [pi-do-eval](https://github.com/kreek/pi-do-eval). It runs Pi with pi-proof loaded against small coding projects and scores proof-first compliance, test quality, and correctness.
+The extension ships with an eval harness built on [pi-do-eval](https://github.com/kreek/pi-do-eval). It runs Pi with agent-booster-pack-proof loaded against small coding projects and scores proof-first compliance, test quality, and correctness.
 
 ```bash
 cd eval

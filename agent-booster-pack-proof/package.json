@@ -7,8 +7,8 @@
     "extensions": [
       "./src/index.ts"
     ],
-    "video": "https://github.com/kreek/pi-proof/raw/refs/heads/main/assets/release/demo.mp4",
-    "image": "https://github.com/kreek/pi-proof/raw/refs/heads/main/assets/release/demo.gif"
+    "video": "https://github.com/kreek/agent-booster-pack/raw/refs/heads/main/agent-booster-pack-proof/assets/release/demo.mp4",
+    "image": "https://github.com/kreek/agent-booster-pack/raw/refs/heads/main/agent-booster-pack-proof/assets/release/demo.gif"
   },
   "files": [
     "src",
