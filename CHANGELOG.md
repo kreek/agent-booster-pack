@@ -18,9 +18,28 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   ceremony, over-broad skill loading, and hidden coupling disguised as safety.
 - `release` now includes a deprecation and migration reference covering
   advisory deprecation, compulsory migration, removal, and recovery proof.
+- New Pi runtime package `agent-booster-pack-contract-first@1.0.0` hosts
+  the Interface Design Gate as a soft runtime check that pauses
+  mutating tool calls when interface/contract intent appears without
+  an approved gate packet. Pairs with the `whiteboarding` and
+  `workflow` skills.
+- New meta-package `agent-booster-pack` (Pi-installable) depends on
+  `agent-booster-pack-skills`, `agent-booster-pack-contract-first`, and
+  `agent-booster-pack-proof`. One-command install for the full ABP-on-Pi
+  experience.
 
 ### Changed
 
+- BREAKING (Pi): `pi-agent-booster-pack` is renamed to
+  `agent-booster-pack-skills`@5.0.0 and is skills-only — Pi runtime
+  extensions live in sibling packages now. The old
+  `pi-agent-booster-pack` npm name is deprecated pointing at the new
+  name; existing installs keep working until upgrade.
+- BREAKING (Pi): `pi-proof` is renamed to `agent-booster-pack-proof`@2.0.0
+  and is now built/published from this monorepo at
+  `agent-booster-pack-proof/` instead of the standalone `kreek/pi-proof`
+  repo. The old `pi-proof` npm name is deprecated pointing at the new
+  name; package contents are functionally unchanged.
 - BREAKING: Skills are consolidated to reduce Codex skill-list context
   pressure: `git` + `commit` -> `git-workflow`, `deployment` +
   `versioning` -> `release`, `concurrency` + `realtime` +

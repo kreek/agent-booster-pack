@@ -194,3 +194,7 @@ completed discussion; it is not the starting point for the discussion.
 - ADR template: status, date, context, decision, consequences.
 - "Design It!" (Keeling) for architectural conversation patterns:
   <https://pragprog.com/titles/mkdsa/design-it/>
+- `agent-booster-pack-contract-first` Pi runtime companion: ships from
+  this repo at `agent-booster-pack-contract-first/` and soft-blocks
+  mutating tool calls when interface intent appears without an approved
+  Interface Design Gate packet.

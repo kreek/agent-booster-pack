@@ -7,5 +7,5 @@ node_modules/
 .claude/
 .idea/
 reference/
-pi/skills/
+agent-booster-pack-skills/skills/
 eval/runs

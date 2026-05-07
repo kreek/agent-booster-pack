@@ -1,0 +1,43 @@
+{
+  "name": "agent-booster-pack-contract-first",
+  "version": "1.0.0",
+  "description": "Interface Design Gate for Pi: pause and require human approval of contract/API shape before implementation lands. Companion runtime for Agent Booster Pack's whiteboarding/workflow doctrine.",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "pi": {
+    "extensions": [
+      "./extensions"
+    ]
+  },
+  "files": [
+    "extensions",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "install-ext": "mkdir -p ~/.pi/agent/extensions && ln -sfn \"$(pwd)\" ~/.pi/agent/extensions/agent-booster-pack-contract-first && echo 'Installed to ~/.pi/agent/extensions/agent-booster-pack-contract-first -- run /reload in Pi to activate'",
+    "uninstall-ext": "rm -f ~/.pi/agent/extensions/agent-booster-pack-contract-first && echo 'Uninstalled'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kreek/agent-booster-pack.git",
+    "directory": "agent-booster-pack-contract-first"
+  },
+  "author": "Alastair Dawson",
+  "license": "MIT",
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "pi",
+    "abp",
+    "agent-booster-pack",
+    "contract-first",
+    "interface-design",
+    "design-review",
+    "agent-workflow",
+    "coding-agent"
+  ]
+}

@@ -67,10 +67,36 @@ if Codex shows an available update.
 
 ### Pi Package Install
 
-Install as a Pi plugin via NPM.
+ABP for Pi ships as four packages built from this monorepo. Each one is
+independently installable; the meta-package installs all of them at
+once.
+
+- [`agent-booster-pack`](agent-booster-pack/) — meta. Depends on the
+  three below. The "I want it all" install.
+- [`agent-booster-pack-skills`](agent-booster-pack-skills/) — the 21
+  ABP skills, no runtime extension. (Renamed from
+  `pi-agent-booster-pack`; old name deprecated.)
+- [`agent-booster-pack-contract-first`](agent-booster-pack-contract-first/)
+  — Interface Design Gate runtime. Soft-blocks mutating tool calls
+  when interface/contract intent appears without an approved gate
+  packet.
+- [`agent-booster-pack-proof`](agent-booster-pack-proof/) —
+  proof-first red-green-refactor runtime. Enforces a failing test
+  before production code lands. (Renamed from `pi-proof`; old name
+  deprecated.)
+
+Install everything at once:
 
 ```sh
-pi install npm:pi-agent-booster-pack
+pi install npm:agent-booster-pack
+```
+
+Or install à la carte:
+
+```sh
+pi install npm:agent-booster-pack-skills           # skills only
+pi install npm:agent-booster-pack-contract-first   # interface gate
+pi install npm:agent-booster-pack-proof            # proof gate
 ```
 
 Then in Pi:
@@ -79,8 +105,7 @@ Then in Pi:
 /reload
 ```
 
-See [`pi/README.md`](pi/README.md) for local-checkout installs and the build
-pipeline.
+See each package's `README.md` for local-checkout installs.
 
 ### Manual Skills Installation
 

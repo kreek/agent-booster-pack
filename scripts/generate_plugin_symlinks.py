@@ -2,8 +2,9 @@
 """Sync plugin skill copies from canonical agent skills.
 
 Writes the Claude Code / Codex plugin mirror at `plugin/skills/` from the
-canonical source at `agents/.agents/skills/`. The Pi package builds its own
-mirror at npm-pack time via `pi/scripts/build-skills.mjs`, so it is not
+canonical source at `agents/.agents/skills/`. The Pi skills package builds
+its own mirror at npm-pack time via
+`agent-booster-pack-skills/scripts/build-skills.mjs`, so it is not
 generated here.
 """
 
