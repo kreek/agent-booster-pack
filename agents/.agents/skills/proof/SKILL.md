@@ -183,6 +183,7 @@ For every non-trivial engineering claim, record:
 | "Wrote a unit test for every function in a transformation chain" | The seam tests above and below already cover them. Keep an internal-stage test only when the stage has non-trivial branching or stateful behavior the seam assertions cannot exercise. | The internal stage has multiple branches or accumulates state that the seam tests cannot drive. |
 | "Asserted an error happens, but not what the consumer sees" | The user-facing error message and envelope are the value claim at the outermost seam. Assert the message, code, and structured fields the consumer relies on. | The error path is purely internal and the consumer never observes it. |
 | "Test needs many mocks and deep setup to run" | The design is signaling tangle, not test framework limits. Simplify the seam — extract pure transforms, push effects to the edge — before piling on mocks. | The test crosses a true system boundary (clock, network, infra) that genuinely requires substitution. |
+| "I'll parameterize this across every input I can think of" | Tests cover behaviors named by the requirement and real boundary cases (security, data-loss, parsing edges that exist in production data). Speculative inputs are noise that locks in implementation detail. | The function is a parser, validator, or security gate where input-space coverage *is* the contract. |
 
 ## Runtime Extensions
 
