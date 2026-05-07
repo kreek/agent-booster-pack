@@ -28,6 +28,45 @@ In practice, ABP guides agents to:
 Prefer packaged installs for Claude Code, Codex, and Pi. Use the manual install
 for agents that can read `~/.agents/skills/` or do not support plugins.
 
+### Pi Package Install
+
+ABP for Pi ships as four packages built from this monorepo. Each one is
+independently installable; the meta-package installs all of them at
+once.
+
+- [`agent-booster-pack`](agent-booster-pack/): The meta package, 
+  installs all the things below.
+- [`agent-booster-pack-skills`](agent-booster-pack-skills/): the 21
+  ABP skills, no runtime extension.
+- [`agent-booster-pack-contract-first`](agent-booster-pack-contract-first/): 
+  Interface Design Gate runtime. Requires human approval of contracts and interfaces
+  to ensure code at the boundaries of components will play well with other components
+  and systems.
+- [`agent-booster-pack-proof`](agent-booster-pack-proof/):
+  Make agents prove their work! Not strictly TDD in that tests/specs/proof can
+  land any time during the dev cycle. But it does require proof that the agent
+  has implemented what was asked for.
+
+Install everything at once:
+
+```sh
+pi install npm:agent-booster-pack
+```
+
+Or install à la carte:
+
+```sh
+pi install npm:agent-booster-pack-skills           # skills only
+pi install npm:agent-booster-pack-contract-first   # interface gate
+pi install npm:agent-booster-pack-proof            # proof gate
+```
+
+Then in Pi:
+
+```text
+/reload
+```
+
 ### Claude Code Plugin Install
 
 Run `claude` from your terminal to open it, then add the marketplace and install. 
@@ -64,48 +103,6 @@ codex plugin marketplace upgrade abp
 
 Then open `/plugins`, select **Agent Booster Pack**, and update or reinstall it
 if Codex shows an available update.
-
-### Pi Package Install
-
-ABP for Pi ships as four packages built from this monorepo. Each one is
-independently installable; the meta-package installs all of them at
-once.
-
-- [`agent-booster-pack`](agent-booster-pack/) — meta. Depends on the
-  three below. The "I want it all" install.
-- [`agent-booster-pack-skills`](agent-booster-pack-skills/) — the 21
-  ABP skills, no runtime extension. (Renamed from
-  `pi-agent-booster-pack`; old name deprecated.)
-- [`agent-booster-pack-contract-first`](agent-booster-pack-contract-first/)
-  — Interface Design Gate runtime. Soft-blocks mutating tool calls
-  when interface/contract intent appears without an approved gate
-  packet.
-- [`agent-booster-pack-proof`](agent-booster-pack-proof/) —
-  proof-first red-green-refactor runtime. Enforces a failing test
-  before production code lands. (Renamed from `pi-proof`; old name
-  deprecated.)
-
-Install everything at once:
-
-```sh
-pi install npm:agent-booster-pack
-```
-
-Or install à la carte:
-
-```sh
-pi install npm:agent-booster-pack-skills           # skills only
-pi install npm:agent-booster-pack-contract-first   # interface gate
-pi install npm:agent-booster-pack-proof            # proof gate
-```
-
-Then in Pi:
-
-```text
-/reload
-```
-
-See each package's `README.md` for local-checkout installs.
 
 ### Manual Skills Installation
 
