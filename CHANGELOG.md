@@ -48,6 +48,12 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - ABP routing doctrine is now described as quality-driven and risk-triggered:
   `workflow` is the entry point, `proof` is both the completion gate and a
   proof-work skill, and other skills are peers selected by quality concern.
+- ABP now treats durable interfaces as contract/API sign-off gates: agents
+  must design the boundary, propose the contract, and get user approval
+  before implementation continues. In practice this means more pause/approve
+  loops than 4.12.0 — expect agents to stop on any new exported type, prop,
+  schema, endpoint, or migration that crosses a module boundary. Internal-only
+  exports and one-module refactors do not trip the gate.
 - Adds `whiteboarding` skill: a mandatory pre-code artifact that maps current
   and proposed contracts (function signatures, schemas, events, CLI, config,
   types) and surfaces resolved decisions and open questions before any

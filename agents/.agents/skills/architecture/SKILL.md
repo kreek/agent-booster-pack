@@ -53,17 +53,19 @@ it changes, the structure is fighting the work.
    should say what shape crosses it, what assumptions are guaranteed, and
    what internal details must not leak. Public HTTP contracts belong to
    `api`; exact parsed shapes and invariants belong to `data-first`.
-6. Bounded contexts beat shared models. When two parts of the system mean
+6. If a proposed boundary is a durable interface, route to the `workflow` sign-off
+   gate via `whiteboarding` before shaping code around it.
+7. Bounded contexts beat shared models. When two parts of the system mean
    subtly different things by the same word, give each context its own type.
-7. Separate things that change for different reasons. A simple boundary
+8. Separate things that change for different reasons. A simple boundary
    reduces coordination between independent changes; an easy layer that every
    feature must cross usually increases it.
-8. Make component data flow explicit when a feature consumes external data.
+9. Make component data flow explicit when a feature consumes external data.
    Name where data enters, where it is parsed or normalized, which internal
    shape owns domain meaning, and which output/view shape feeds presentation.
    These are roles in the flow, not mandatory folders. Raw service payloads
    should not leak past the trust boundary by accident.
-9. Add a layer only when it represents a real boundary (process, deploy,
+10. Add a layer only when it represents a real boundary (process, deploy,
    trust, persistence, transport) or removes proven duplication.
    Request middleware is a transport boundary; it should carry
    pipeline-wide concerns, not feature-specific business behavior. Use
@@ -75,14 +77,16 @@ it changes, the structure is fighting the work.
 1. Name the business capability and its transitions before drawing modules.
 2. Sketch the module surface from the caller's view: what it accepts, what
    it returns, what it must never expose.
-3. Sketch the internal data path: where external data enters, where it is
+3. If the surface is a durable interface, route to the `workflow` sign-off gate
+   before implementation.
+4. Sketch the internal data path: where external data enters, where it is
    parsed into a trusted shape, where domain work happens, where output data
    is shaped, and what the renderer/presenter receives.
-4. Group code by capability first; introduce horizontal layers only where a
+5. Group code by capability first; introduce horizontal layers only where a
    real technical boundary justifies them.
-5. For each cross-module call, ask whether the caller depends on a stable
+6. For each cross-module call, ask whether the caller depends on a stable
    contract or on internal shape. Stabilise the contract; hide the shape.
-6. Record the decisions that future readers can't recover from the code:
+7. Record the decisions that future readers can't recover from the code:
    why this boundary, why this shape, what alternative was rejected.
 
 ## Verification
@@ -98,6 +102,8 @@ it changes, the structure is fighting the work.
       the parse boundary.
 - [ ] Module surfaces hide volatile decisions; callers depend on the
       contract, not the internal shape.
+- [ ] Durable interfaces were routed through user-approved contract/API
+      design before implementation.
 - [ ] Boundaries separate concerns that change independently; they are
       not merely steps in a flowchart.
 - [ ] Bounded contexts are explicit where the same word means different
