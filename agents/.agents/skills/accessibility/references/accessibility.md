@@ -85,6 +85,36 @@ Ref: https://www.w3.org/TR/wcag-3.0/
 
 ---
 
+## Native-first decision table
+
+Point-of-decision lookup. Reach for the right column only when the middle column
+genuinely cannot express the interaction.
+
+| Need | Use this | Avoid |
+| --- | --- | --- |
+| Click action | `<button type="button">` | `<div onClick>`, `role="button"` on a span |
+| Navigation to a URL | `<a href>` | `<button>` that calls `router.push`, `<div onClick>` |
+| Toggle on/off (immediate effect) | `<button aria-pressed>` | `role="switch"` on a div |
+| Toggle inside a form (submitted with the form) | `<input type="checkbox" role="switch">` | Custom div toggle |
+| Disclosure | `<details><summary>` | div + custom JS toggling display |
+| Modal | `<dialog>` + `.showModal()`; close button + Esc; do not manually trap focus | div with `role="dialog"` + custom focus trap |
+| Non-modal popover | `popover` attribute, or `<dialog>` + `.show()` | div + click-outside listener |
+| Native dropdown | `<select>` | Custom div listbox unless design genuinely requires it |
+| Custom combobox | ARIA 1.2 pattern: `role="combobox"` on the `<input>` itself; `aria-controls` to the popup | ARIA 1.0/1.1 wrapper pattern, `aria-owns` instead of `aria-controls` |
+| Tabs | APG tabs pattern when content is genuinely tab-switching | `role="tab"` on site nav |
+| Site nav | `<nav>` + `<ul>` of `<a>`; flyouts as link + disclosure | `role="menu"` / `role="menubar"` on site nav |
+| Application menu (toolbar, contextual command surface) | APG menu/menubar with full keyboard model | Light-touch `role="menu"` without arrow-key handling |
+| Tooltip | Hover/focus reveal, `aria-describedby` to the tooltip; `<button>` + popover for toggletip | `title` attribute as primary tooltip |
+| Field label | `<label for>` (or wrapping label) | `aria-label` overriding visible text; placeholder as label |
+| Required indicator | `required` HTML attribute + visible "(required)" text | `aria-required="true"` only |
+| Field error | Visible message linked via `aria-describedby`; set `aria-invalid="true"` only after validation runs | `aria-invalid="true"` on initial render; error text not associated with the input |
+| Image (informative) | `<img alt="meaningful description">` | Empty/missing alt; "Image of..." prefix |
+| Image (decorative) | `<img alt="">` | Missing `alt` attribute (screen readers will read the file path) |
+| SVG icon (informative) | `<svg role="img" aria-label="...">` or `<svg aria-hidden="true">` adjacent to visible text | SVG with no role and no label |
+| Status update | Pre-rendered `<output>` or live region (`aria-live="polite"`) | Late-injected DOM with `aria-live`; live regions for state already exposed by `aria-pressed/expanded/selected/current/busy` |
+
+---
+
 ## ARIA
 
 ### The First Rule of ARIA
@@ -108,6 +138,30 @@ https://webaim.org/projects/million/
    element.
 5. Every interactive element needs an accessible name.
 
+### ARIA 1.2 corrections
+
+Older blog posts and library defaults still ship outdated patterns. Treat the
+following as the current shape:
+
+- **Combobox.** ARIA 1.2 places `role="combobox"` on the `<input>` itself, with
+  `aria-controls` pointing to the popup, `aria-expanded` on the input, and
+  `aria-autocomplete` matching the behavior. The ARIA 1.0/1.1 wrapper pattern
+  (a wrapper div with `role="combobox"` and `aria-owns` on the popup) is
+  deprecated; treat any agent-generated combobox using `aria-owns` on a wrapper
+  as a regression.
+- **Dialog.** Native `<dialog>` + `.showModal()` does not require a manual
+  focus trap. The user agent prevents tab from leaving the modal into the
+  document and intentionally allows escape to browser chrome. Pre-2022 articles
+  that advise building a custom focus trap are out of date. Set
+  `aria-labelledby` to the dialog heading and restore focus to the invoking
+  element on close. For non-modal popovers prefer the `popover` attribute or
+  `<dialog>` + `.show()`.
+- **`aria-activedescendant`.** Has documented VoiceOver gaps on grid and
+  treegrid popups. Default to roving `tabindex` for composite widgets;
+  `aria-activedescendant` is appropriate only for combobox + listbox popup
+  (DOM focus stays on the input). When you do use AD, the container must have
+  `tabindex` and a visual focus indicator that follows the active descendant.
+
 ### APG patterns to implement faithfully
 
 Dialog, Combobox, Listbox, Menu / Menubar, Tabs, Accordion, Disclosure, Tooltip,
@@ -130,6 +184,30 @@ Ref: https://www.w3.org/WAI/ARIA/apg/patterns/
   groups).
 - Restore focus on modal close.
 
+### Focus indicator (WCAG 2.4.13)
+
+A focused control needs a visible indicator whose contrasting area is at least
+equivalent to a 2 CSS px solid perimeter, with at least 3:1 contrast against
+both the unfocused state and the adjacent surface. Concretely:
+
+```css
+:focus-visible {
+  /* Visible ring; pick a token with 3:1 against both element bg and adjacent surface. */
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@media (forced-colors: active) {
+  :focus-visible {
+    /* Forced Colors strips author colors; a transparent outline becomes the UA's forced ring. */
+    outline: 2px solid transparent;
+  }
+}
+```
+
+Do not use `outline: none` without a compliant replacement. Skip links must meet
+the same contrast on their visible (focused) state.
+
 ---
 
 ## User-preference media queries
@@ -143,6 +221,26 @@ Honour these; do not override:
 | `prefers-contrast: more`         | Raise contrast.                                                                                                                                                                    |
 | `prefers-reduced-transparency`   | Turn off backdrop blur.                                                                                                                                                            |
 | `forced-colors: active`          | Windows High Contrast. Use CSS system colours: `Canvas`, `CanvasText`, `LinkText`, `ButtonFace`, `ButtonText`, `Highlight`. Never `forced-color-adjust: none` unless unavoidable. |
+
+---
+
+## Live regions
+
+- **Pre-render the empty live region container in initial HTML.** Injecting the
+  live region itself at runtime suppresses the first announcement on most
+  screen readers; the container must already exist when the content lands.
+- **Do not use a live region for state ARIA already exposes.** Screen readers
+  announce `aria-pressed`, `aria-expanded`, `aria-selected`, `aria-current`,
+  and `aria-busy` natively, plus button-label changes and page-title changes
+  after navigation. A live announcement on top of those double-fires.
+- **Politeness levels:** `aria-live="polite"` for status, success messages,
+  search-result counts. `aria-live="assertive"` only for errors that block the
+  user's task. `role="status"` is implicit polite; `role="alert"` is implicit
+  assertive plus announce-on-insertion (interrupting — use sparingly).
+- **High-frequency updates** (typing in a search box) need a manually-triggered
+  "X results found" status, not a per-keystroke live region.
+- **Do not** wrap auto-advancing carousels, marketing banners, or page-title
+  updates in a live region.
 
 ---
 
@@ -162,8 +260,13 @@ Honour these; do not override:
 | VoiceOver     | Safari            |
 | TalkBack      | Chrome on Android |
 
-Automated tools (axe DevTools, WAVE, Lighthouse, Accessibility Insights) catch
-~30–40% of issues. Always follow with manual keyboard and screen-reader passes.
+Automated tools catch a bounded share of issues. Deque's 2024 published
+analysis of 13,000+ first-audit page states puts axe-core at ~57%; the
+conservative industry range is 30–50%; vendor-marketing claims of ~80% include
+semi-automated guided tests. Always follow with manual keyboard and
+screen-reader passes; the remaining gap is what automation cannot see
+(meaningful labels, focus order intent, screen-reader output, keyboard model
+correctness on custom widgets).
 
 Refs:
 
