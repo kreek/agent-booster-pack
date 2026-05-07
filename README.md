@@ -25,43 +25,38 @@ In practice, ABP guides agents to:
 
 ## Installation
 
-Prefer packaged installs for Claude Code, Codex, and Pi. Use the manual install
+Prefer packaged installs for Pi, Codex, and Claude Code. Use the manual install
 for agents that can read `~/.agents/skills/` or do not support plugins.
 
 ### Pi Package Install
 
-ABP for Pi ships as four packages built from this monorepo. Each one is
-independently installable; the meta-package installs all of them at
-once.
+Pi is meant to be modular, so ABP for Pi is broken up into two extensions and a skill library. 
+If you want everything, a meta package will install _all the things_.
 
-- [`agent-booster-pack`](agent-booster-pack/): The meta package, 
-  installs all the things below.
-- [`agent-booster-pack-skills`](agent-booster-pack-skills/): the 21
-  ABP skills, no runtime extension.
-- [`agent-booster-pack-contract-first`](agent-booster-pack-contract-first/): 
-  Interface Design Gate runtime. Requires human approval of contracts and interfaces
-  to ensure code at the boundaries of components will play well with other components
-  and systems.
-- [`agent-booster-pack-proof`](agent-booster-pack-proof/):
-  Make agents prove their work! Not strictly TDD in that tests/specs/proof can
-  land any time during the dev cycle. But it does require proof that the agent
-  has implemented what was asked for.
-
-Install everything at once:
-
+#### Meta Package
+[`agent-booster-pack`](agent-booster-pack/) Installs all the packages below.
 ```sh
 pi install npm:agent-booster-pack
 ```
-
-Or install à la carte:
-
+#### Skills
+[`agent-booster-pack-skills`](agent-booster-pack-skills/) All the engineering quality-focused skills, no runtime extension.
 ```sh
-pi install npm:agent-booster-pack-skills           # skills only
-pi install npm:agent-booster-pack-contract-first   # interface gate
-pi install npm:agent-booster-pack-proof            # proof gate
+pi install npm:agent-booster-pack-skills
 ```
 
-Then in Pi:
+#### Contract-First Extension
+[`agent-booster-pack-contract-first`](agent-booster-pack-contract-first/) Interface Design Gate runtime. Requires human approval of contracts and interfaces to ensure code at the boundaries of components will play well with other components and systems.
+```sh
+pi install npm:agent-booster-pack-contract-first
+```
+
+#### Proof Extension
+[`agent-booster-pack-proof`](agent-booster-pack-proof/) Make agents prove their work! Not strictly TDD in that tests/specs/proof can land any time during the dev cycle. But it does require proof that the agent has implemented what was asked for.
+```sh
+pi install npm:agent-booster-pack-proof
+```
+
+Once you've run one of the install commands, you may need to reload things, from within Pi run reload:
 
 ```text
 /reload
