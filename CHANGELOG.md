@@ -117,7 +117,8 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - `agent-booster-pack` now exposes its dependency skills and runtime extensions
   through its Pi manifest, so `pi install npm:agent-booster-pack` activates the
-  skills, Interface Design Gate, and proof-first runtime in one install.
+  skills, Interface Design Gate, proof-first runtime, and whiteboarding guard in
+  one install.
 - `./setup.sh` now prunes legacy ABP-owned `~/.codex/skills/` links when the
   ABP Codex plugin is installed and warns that Codex can still duplicate ABP
   via direct `~/.agents/skills/` discovery if both install paths stay enabled.
