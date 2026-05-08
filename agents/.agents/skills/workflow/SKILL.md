@@ -34,11 +34,10 @@ description: Use first to route ABP work, choose skills, sequence handoffs, and 
 
 ## Core Ideas
 
-Use `workflow` to decide whether ABP changes the next action, proof
-obligation, or user-facing tradeoff. Load downstream skills only when a
-quality or risk trigger makes their guidance material. Use the host agent's
-native planning, tools, browser/runtime inspection, context management, and
-delegation behavior for execution mechanics.
+Run a routing pass before implementation: identify the user-visible goal,
+acceptance risk, durable interfaces, relevant quality concerns, and proof
+obligations. Then load only the downstream skills whose guidance changes the
+next action.
 
 1. Start from the quality and risk profile: correctness, data integrity,
    security, operability, performance, accessibility, compatibility, or
