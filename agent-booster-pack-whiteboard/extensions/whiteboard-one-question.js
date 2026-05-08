@@ -5,13 +5,6 @@ export const WHITEBOARD_STATE_ENTRY = "abp-whiteboard-state";
 const ACTIVATION_PATTERN = /^\s*(\/abp:whiteboard(?:\s|$)|\/skill:whiteboarding(?:\s|$))/i;
 const DEACTIVATION_PATTERN = /^\s*\/abp:whiteboard-off\s*$/i;
 const QUESTION_PATTERN = /[^?]+\?/g;
-const IMPLEMENTATION_TOOL_NAMES = new Set(["edit", "write"]);
-const FINAL_VALUE_GUARD_MARKER = "ABP Final Value Guard";
-
-const CHANGE_PATTERN = /\b(changed|updated|added|implemented|fixed|removed|created|bumped|committed|now)\b/i;
-const BETTER_PATTERN = /\b(better|improv\w*|because|prevents?|reduces?|avoids?|simpler|safer|clearer|reliable|replaces|compared|previous|before)\b/i;
-const ENABLES_PATTERN = /\b(enables?|going forward|future|next|allows?|unblocks?|sets up|makes it possible|can now)\b/i;
-const ALTERNATIVE_PATTERN = /\b(not an improvement|cannot justify|can't justify|alternative strateg\w*|revise|revert|reduce|different strategy|instead)\b/i;
 
 function messageText(value) {
   if (typeof value === "string") return value;
@@ -62,54 +55,6 @@ Regenerate the response with exactly one decision question. Keep any other uncer
 
 Blocked response:
 ${blockedText}`;
-}
-
-function hasImplementationToolCall(message) {
-  if (message?.role !== "assistant" || !Array.isArray(message.content)) return false;
-  return message.content.some((item) => item?.type === "toolCall" && IMPLEMENTATION_TOOL_NAMES.has(item.name));
-}
-
-function lastAssistantText(messages) {
-  for (let index = messages.length - 1; index >= 0; index -= 1) {
-    const message = messages[index];
-    if (message?.role !== "assistant") continue;
-
-    const text = messageText(message.content).trim();
-    if (text) return text;
-  }
-  return "";
-}
-
-function hasFinalValueReflection(text) {
-  if (!CHANGE_PATTERN.test(text)) return false;
-  return (BETTER_PATTERN.test(text) && ENABLES_PATTERN.test(text)) || ALTERNATIVE_PATTERN.test(text);
-}
-
-function isFinalValueCorrectionTurn(messages) {
-  return messages.some((message) => message?.role === "user" && messageText(message.content).includes(FINAL_VALUE_GUARD_MARKER));
-}
-
-export function shouldRequestFinalValueReflection(messages) {
-  if (!Array.isArray(messages) || messages.length === 0) return false;
-  if (isFinalValueCorrectionTurn(messages)) return false;
-  if (!messages.some(hasImplementationToolCall)) return false;
-
-  return !hasFinalValueReflection(lastAssistantText(messages));
-}
-
-export function makeFinalValuePrompt(finalText) {
-  return `${FINAL_VALUE_GUARD_MARKER} requested a stronger final step.
-
-Your previous final response did not explain the value of the implementation clearly enough. Respond with a concise final summary that states:
-
-1. what changed,
-2. why the change or new feature is better than what came before, and
-3. what it enables going forward.
-
-If you cannot justify the change as an improvement, say so directly and explain why it may not be an improvement. Then name alternative strategies such as revising, reducing, reverting, or choosing a different approach.
-
-Previous final response:
-${finalText}`;
 }
 
 function activeReminder() {
@@ -189,11 +134,5 @@ export default function whiteboardOneQuestion(pi) {
         "ABP Whiteboarding Guard blocked a response that asked multiple questions. Regenerating with one decision question."
       ),
     };
-  });
-
-  pi.on("agent_end", async (event) => {
-    if (!shouldRequestFinalValueReflection(event.messages)) return;
-
-    pi.sendUserMessage(makeFinalValuePrompt(lastAssistantText(event.messages)), { deliverAs: "followUp" });
   });
 }

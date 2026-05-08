@@ -20,10 +20,9 @@ The agent may propose the interface shape, but the user must approve,
 revise, or rule it out before implementation code lands. The gate is a
 soft runtime check — false positives can be allowed through.
 
-This is the runtime companion to the doctrine in
-[Agent Booster Pack](https://github.com/kreek/agent-booster-pack)'s
-`whiteboarding` and `workflow` skills. The skills carry the doctrine; this
-package enforces it at tool-call time inside Pi.
+This package includes both the runtime gate and the matching full
+`contract-first` skill. The skill carries the doctrine; this package enforces
+it at tool-call time inside Pi.
 
 ## Install
 
@@ -46,7 +45,7 @@ Then in Pi:
 /reload
 ```
 
-If you want the full ABP experience (skills + this gate + the proof gate),
+If you want the full ABP experience (general skills + runtime-owned skills + gates),
 install the meta-package instead.
 
 ## What it does

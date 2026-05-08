@@ -1,0 +1,62 @@
+---
+name: contract-first
+description: Use when an Interface Design Gate must approve durable function, API, config, event, or schema contracts.
+---
+
+# Contract First
+
+## Iron Law
+
+`NO DURABLE INTERFACE LANDS BEFORE THE HUMAN APPROVES THE SHAPE.`
+
+## When to Use
+
+- A task defines or materially changes a durable interface: exported function,
+  public type, module boundary, HTTP endpoint, CLI command or flag, config key,
+  environment variable, event payload, file format, database schema, migration
+  step, or cross-component contract.
+- The Pi Interface Design Gate blocks a mutating tool call and asks for the
+  current interface, proposed interface, boundary reason, and user decision.
+- Reviewing whether implementation started before contract approval.
+
+## When NOT to Use
+
+- Purely internal helper changes with no caller-visible boundary.
+- Typos, formatting, comment-only edits, or docs-only changes with no contract
+  effect.
+- Broad routing and skill selection; use `workflow`.
+- Collaborative design exploration before a concrete interface proposal; use
+  `whiteboarding`.
+
+## Workflow
+
+1. Stop before implementation code lands. Do not write source, migration, or
+   config that commits the new boundary until approval is recorded.
+2. Name the current interface with file/line evidence, or state "new
+   interface" for greenfield work.
+3. Propose the concrete interface shape: function signature, type, endpoint,
+   CLI, config, event, schema, or file format.
+4. Explain why this boundary belongs here and what owns each side of it.
+5. Ask the user to approve, revise, or rule it out. Treat silence as not
+   approved.
+6. After approval, implement only the approved shape. If the implementation
+   discovers a materially different contract, return to the gate.
+
+## Verification
+
+- [ ] The current interface is named with evidence, or marked as new.
+- [ ] The proposed interface is concrete enough for callers to bind to.
+- [ ] Ownership and boundary placement are explained.
+- [ ] The user approved, revised, or rejected the interface before
+      implementation landed.
+- [ ] The implemented contract matches the approved shape, or the gate was
+      reopened for approval.
+
+## Handoffs
+
+- Use `workflow` to choose all relevant skills and keep the broad ABP routing
+  context.
+- Use `whiteboarding` when the contract shape is still being explored.
+- Use `api`, `database`, `async-systems`, or `security` when the interface
+  crosses those domain boundaries.
+- Use `proof` to turn the approved contract into executable acceptance checks.

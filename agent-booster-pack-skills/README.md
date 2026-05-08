@@ -4,18 +4,17 @@ ABP skills packaged for [Pi](https://pi.dev), the terminal coding agent.
 Helps Pi produce code that is well-organized, low in complexity and side
 effects, and is secure and performant.
 
-This package is **skills only**. The runtime gates that enforce ABP
-doctrine ship as separate sibling packages from the same monorepo:
+This package is **skills only** and carries the general ABP skills. Runtime-owned skills ship with their matching sibling packages:
 
-- `agent-booster-pack-contract-first` — Interface Design Gate runtime.
-  Pauses before mutating tool calls when interface/contract intent
-  appears without approval. Pairs with the `whiteboarding` and
-  `workflow` skills.
-- `agent-booster-pack-proof` — proof-first red-green-refactor runtime.
-  Pairs with the `proof` skill.
+- `agent-booster-pack-contract-first` — Interface Design Gate runtime plus the
+  `contract-first` skill.
+- `agent-booster-pack-proof` — proof-first red-green-refactor runtime plus the
+  `proof` skill.
+- `agent-booster-pack-whiteboard` — one-question whiteboarding runtime plus the
+  `whiteboarding` skill.
 
-The pack covers data modeling, proof obligations, code review, security,
-debugging, refactoring, and more. The canonical skill source lives at
+The pack covers data modeling, code review, security, debugging, refactoring,
+and more. The canonical skill source lives at
 `agents/.agents/skills/` in the parent repository; `skills/` here is
 built from that source at npm-pack time and is not committed.
 
@@ -38,7 +37,7 @@ Then in Pi:
 /reload
 ```
 
-For the full ABP experience (skills + the two runtime gates), install
+For the full ABP experience (general skills + runtime-owned skills + gates), install
 the meta-package instead:
 
 ```sh
@@ -83,7 +82,7 @@ This builds `skills/` and symlinks the working tree into
 
 ## What's included
 
-21 skills, grouped by the kind of engineering pressure they apply.
+The general ABP skills, grouped by the kind of engineering pressure they apply.
 
 ### Entry point
 
@@ -93,12 +92,9 @@ This builds `skills/` and symlinks the working tree into
 
 ### Foundational design
 
-- `whiteboarding` — collaborative interface and contract design before
-  code.
 - `data-first` — domain data, fields, states, transitions, effects.
 - `architecture` — module boundaries, domain locality, DDD tactical
   patterns.
-- `proof` — proof obligations and behavior-focused tests.
 
 ### Correctness and change
 

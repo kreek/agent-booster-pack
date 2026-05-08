@@ -93,12 +93,17 @@ the higher-priority concerns.
   ready to commit, ready for a PR, or passing. Also use it as the main skill
   when the requested work is tests, proof contracts, behavior evidence, or
   coverage decisions.
+- `contract-first`: use when a durable interface or boundary must be approved
+  before implementation lands.
 
 ### Foundational Design
 
 Use these before choosing abstractions or control flow for non-trivial code.
 They shape the problem, not just the implementation.
 
+- `contract-first`: use when an Interface Design Gate must approve a durable
+  function, API, CLI, config, event, schema, file format, or module boundary
+  before implementation lands.
 - `whiteboarding`: use for collaborative design discussions that map current
   and proposed contracts (function signatures, exported types, schemas,
   events/queues, CLI flags, config keys, file formats), constraints, tradeoffs,
