@@ -69,8 +69,8 @@ require_publish_ready() {
     exit 1
   fi
 
-  if ! git tag --points-at HEAD | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
-    echo "error: HEAD is not tagged with a vX.Y.Z release tag" >&2
+  if ! git describe --tags --match 'v[0-9]*.[0-9]*.[0-9]*' --abbrev=0 >/dev/null 2>&1; then
+    echo "error: no reachable vX.Y.Z release tag found" >&2
     exit 1
   fi
 

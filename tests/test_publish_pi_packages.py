@@ -34,7 +34,7 @@ def write_stub(path: Path, content: str) -> None:
     path.chmod(0o755)
 
 
-def make_repo(tmp_path: Path, *, dirty: bool = False) -> Path:
+def make_repo(tmp_path: Path, *, dirty: bool = False, exact_tag: bool = True) -> Path:
     root = tmp_path / "repo"
     root.mkdir()
     versions = {
@@ -53,6 +53,7 @@ def make_repo(tmp_path: Path, *, dirty: bool = False) -> Path:
     log_path = shlex.quote(str(log))
     root_path = shlex.quote(str(root))
     dirty_command = "printf 'dirty\\n'" if dirty else ":"
+    points_at_command = "printf 'v5.1.0\\n'" if exact_tag else ":"
 
     write_stub(
         bin_dir / "git",
@@ -62,7 +63,8 @@ printf 'git %s\\n' "$*" >> {log_path}
 case "$*" in
   'rev-parse --show-toplevel') printf '%s\\n' {root_path} ;;
   'status --porcelain') {dirty_command} ;;
-  'tag --points-at HEAD') printf 'v5.1.0\\n' ;;
+  'tag --points-at HEAD') {points_at_command} ;;
+  'describe --tags --match v[0-9]*.[0-9]*.[0-9]* --abbrev=0') printf 'v5.1.0\\n' ;;
   *) exit 0 ;;
 esac
 """,
@@ -136,6 +138,17 @@ def test_dry_run_reports_missing_packages_without_publishing(tmp_path: Path):
     assert "would publish agent-booster-pack-whiteboard@1.0.0" in result.stdout
     assert "would publish agent-booster-pack@5.1.0" in result.stdout
     assert "npm publish" not in command_log(tmp_path)
+
+
+def test_publish_allows_clean_commits_after_the_release_tag(tmp_path: Path):
+    root = make_repo(tmp_path, exact_tag=False)
+
+    result = run_script(tmp_path, root)
+
+    assert result.returncode == 0, result.stderr
+    assert "npm publish ./agent-booster-pack-skills --access public" in command_log(
+        tmp_path
+    )
 
 
 def test_publish_refuses_dirty_working_tree_before_npm_publish(tmp_path: Path):
