@@ -16,6 +16,23 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   version-sensitive framework, library, runtime, and platform work.
 - `workflow` now includes a simple-not-easy doctrine reference for avoiding
   ceremony, over-broad skill loading, and hidden coupling disguised as safety.
+- `data-first` now ships a `complecting.md` reference: a smell catalog with
+  AST-level signals (mutable field + reader + writer = state/identity/value
+  braid; switch-on-tag braids who/what; ORM lazy associations braid object
+  and relational semantics; setter/getter pairs; mutating builders;
+  singletons; pass-through parameters; etc.) and the smallest disentangling
+  move per smell. Cross-cited by `code-review` for diff sweeps.
+- `refactoring` now ships a `connascence.md` reference: the Page-Jones /
+  Weirich axes (Name → Type → Meaning → Position → Algorithm → Execution →
+  Timing → Identity) with strength, locality, and degree dimensions, used
+  to score whether a refactor weakens coupling, reduces degree, or
+  tightens locality. Cross-cited by `architecture` and `code-review`.
+- `workflow` now ships a `vocabulary-map.md` reference: a crosswalk from
+  SOLID, Clean Architecture, Hexagonal / Ports & Adapters, and DDD
+  vocabulary into the ABP simplicity-shaped implementation, so the agent
+  meets the user's dialect at design time rather than asserting a
+  competing one at PR review. Cross-cited by `architecture`, `data-first`,
+  `refactoring`, and `code-review`.
 - `release` now includes a deprecation and migration reference covering
   advisory deprecation, compulsory migration, removal, and recovery proof.
 - New Pi runtime package `agent-booster-pack-contract-first@1.0.0` hosts
