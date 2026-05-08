@@ -3,7 +3,7 @@
 The full ABP experience for [Pi](https://pi.dev), in one install.
 
 This is a **meta-package**: it has no code of its own. Installing it
-pulls in three independently-developed packages:
+pulls in four independently-developed packages:
 
 - [`agent-booster-pack-skills`](../agent-booster-pack-skills/) — the 21
   ABP skills (data, proof, security, debugging, refactoring, code
@@ -17,8 +17,12 @@ pulls in three independently-developed packages:
 - [`agent-booster-pack-proof`](../agent-booster-pack-proof/) —
   proof-first red-green-refactor runtime. Enforces a failing test
   before production code lands. Pairs with the `proof` skill.
+- [`agent-booster-pack-whiteboard`](../agent-booster-pack-whiteboard/) —
+  whiteboarding conversation guard. Enforces one user-facing question
+  at a time while ABP whiteboarding mode is active. Pairs with the
+  `whiteboarding` skill.
 
-If you want only some of the three, install them individually instead
+If you want only some of the four, install them individually instead
 of this meta-package. See each package's README for details.
 
 ## Install
@@ -33,7 +37,7 @@ Then in Pi:
 /reload
 ```
 
-That's it — all three siblings are now active. To disable a runtime
+That's it — all four siblings are now active. To disable a runtime
 gate without uninstalling, see the relevant package's README.
 
 ## Migration from `pi-agent-booster-pack`

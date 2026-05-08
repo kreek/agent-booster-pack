@@ -1,0 +1,41 @@
+{
+  "name": "agent-booster-pack-whiteboard",
+  "version": "1.0.0",
+  "description": "Whiteboarding conversation guard for Pi: enforce one user-facing question at a time during ABP whiteboarding sessions.",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "pi": {
+    "extensions": [
+      "./extensions"
+    ]
+  },
+  "files": [
+    "extensions",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "install-ext": "mkdir -p ~/.pi/agent/extensions && ln -sfn \"$(pwd)\" ~/.pi/agent/extensions/agent-booster-pack-whiteboard && echo 'Installed to ~/.pi/agent/extensions/agent-booster-pack-whiteboard -- run /reload in Pi to activate'",
+    "uninstall-ext": "rm -f ~/.pi/agent/extensions/agent-booster-pack-whiteboard && echo 'Uninstalled'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kreek/agent-booster-pack.git",
+    "directory": "agent-booster-pack-whiteboard"
+  },
+  "author": "Alastair Dawson",
+  "license": "MIT",
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "pi",
+    "abp",
+    "agent-booster-pack",
+    "whiteboarding",
+    "conversation-guard",
+    "coding-agent"
+  ]
+}

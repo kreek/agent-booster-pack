@@ -1,7 +1,7 @@
 {
   "name": "agent-booster-pack",
   "version": "5.0.1",
-  "description": "Agent Booster Pack for Pi: skills + Interface Design Gate runtime + proof-first runtime, in one install. Meta-package; depends on the three siblings.",
+  "description": "Agent Booster Pack for Pi: skills + Interface Design Gate runtime + proof-first runtime + whiteboarding guard, in one install. Meta-package; depends on the four siblings.",
   "type": "module",
   "engines": {
     "node": ">=18"
@@ -9,7 +9,8 @@
   "pi": {
     "extensions": [
       "./node_modules/agent-booster-pack-contract-first/extensions",
-      "./node_modules/agent-booster-pack-proof/src/index.ts"
+      "./node_modules/agent-booster-pack-proof/src/index.ts",
+      "./node_modules/agent-booster-pack-whiteboard/extensions"
     ],
     "skills": [
       "./node_modules/agent-booster-pack-skills/skills"
@@ -25,12 +26,14 @@
   "dependencies": {
     "agent-booster-pack-skills": "^5.0.0",
     "agent-booster-pack-contract-first": "^1.0.0",
-    "agent-booster-pack-proof": "^2.0.0"
+    "agent-booster-pack-proof": "^2.0.0",
+    "agent-booster-pack-whiteboard": "^1.0.0"
   },
   "bundledDependencies": [
     "agent-booster-pack-skills",
     "agent-booster-pack-contract-first",
-    "agent-booster-pack-proof"
+    "agent-booster-pack-proof",
+    "agent-booster-pack-whiteboard"
   ],
   "repository": {
     "type": "git",

@@ -30,7 +30,7 @@ for agents that can read `~/.agents/skills/` or do not support plugins.
 
 ### Pi Package Install
 
-Pi is meant to be modular, so ABP for Pi is broken up into two extensions and a skill library. 
+Pi is meant to be modular, so ABP for Pi is broken up into three extensions and a skill library.
 If you want everything, a meta package will install _all the things_.
 
 #### Meta Package
@@ -54,6 +54,12 @@ pi install npm:agent-booster-pack-contract-first
 [`agent-booster-pack-proof`](agent-booster-pack-proof/) Make agents prove their work! Not strictly TDD in that tests/specs/proof can land any time during the dev cycle. But it does require proof that the agent has implemented what was asked for.
 ```sh
 pi install npm:agent-booster-pack-proof
+```
+
+#### Whiteboard Extension
+[`agent-booster-pack-whiteboard`](agent-booster-pack-whiteboard/) Enforces one user-facing question at a time during ABP whiteboarding sessions, activated by `/abp:whiteboard` or `/skill:whiteboarding`.
+```sh
+pi install npm:agent-booster-pack-whiteboard
 ```
 
 Once you've run one of the install commands, you may need to reload things, from within Pi run reload:
