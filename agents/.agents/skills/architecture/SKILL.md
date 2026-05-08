@@ -29,7 +29,7 @@ it changes, the structure is fighting the work.
 
 ## When NOT to Use
 
-- Data shape, invariant, and effect discipline; use `data-first`.
+- Data shape, invariant, and effect discipline; use `domain-modeling`.
 - Public HTTP contract details; use `api`.
 - Database physical schema, indexes, or migrations; use `database`.
 - Reshaping existing code while preserving behavior; use `refactoring`.
@@ -52,7 +52,7 @@ it changes, the structure is fighting the work.
 5. Define contracts at internal boundaries. Each module/component boundary
    should say what shape crosses it, what assumptions are guaranteed, and
    what internal details must not leak. Public HTTP contracts belong to
-   `api`; exact parsed shapes and invariants belong to `data-first`.
+   `api`; exact parsed shapes and invariants belong to `domain-modeling`.
 6. If a proposed boundary is a durable interface, route to the `workflow` sign-off
    gate via `whiteboarding` before shaping code around it.
 7. Bounded contexts beat shared models. When two parts of the system mean
@@ -115,7 +115,7 @@ it changes, the structure is fighting the work.
 
 - Use `whiteboarding` upstream to map the terrain — current and proposed
   contracts — before deciding module boundaries.
-- Use `data-first` to design data shapes, invariants, and effect isolation
+- Use `domain-modeling` to design data shapes, invariants, and effect isolation
   inside a module, including the exact parsed and output shapes.
 - Use `refactoring` to move existing code toward the chosen structure
   without changing behavior.

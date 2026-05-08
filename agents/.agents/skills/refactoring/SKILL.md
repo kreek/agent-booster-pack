@@ -99,7 +99,7 @@ description: Use for refactoring, behavior-preserving change, legacy seams, test
   evidence.
 - Use `proof` for characterization and boundary tests.
 - Use `git-workflow` to group resulting changes cleanly.
-- Use `data-first` when the refactor is mainly about untangling
+- Use `domain-modeling` when the refactor is mainly about untangling
   effects or domain shape.
 - Use `architecture` when the refactor is about module boundaries,
   domain/feature locality versus horizontal layers, or DDD tactical

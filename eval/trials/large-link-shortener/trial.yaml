@@ -4,7 +4,7 @@ plugin: engineering-maturity
 features:
   - scaffolding
   - architecture
-  - data-first
+  - domain-modeling
   - api
   - security
   - proof

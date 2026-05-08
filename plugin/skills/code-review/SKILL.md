@@ -73,7 +73,7 @@ outranks style; do not invent issues. ABP adds:
 4. Load triggered domain skills as mandatory lenses. Always include a
    `security` pass for any auth, trust-boundary, input, dependency, secret,
    crypto, logging-redaction, or user-controlled-sink concern. Add others
-   as triggered: `database`, `api`, `proof`, `data-first`, `architecture`,
+   as triggered: `database`, `api`, `proof`, `domain-modeling`, `architecture`,
    `error-handling`, `async-systems`, `release`, `observability`,
    `ui-design`, `accessibility`, `documentation`, `performance`.
 5. Sweep for harmful duplication, orphaned code, unreachable branches, dead

@@ -110,9 +110,9 @@ They shape the problem, not just the implementation.
   and open questions before any non-trivial code lands, then capture the agreed
   result as an RFC or ADR. Mandatory when more than one contract changes, when
   a new public surface is added, when a module boundary is crossed, or when any
-  durable interface is identified. Upstream of `data-first` and `architecture`, not a
+  durable interface is identified. Upstream of `domain-modeling` and `architecture`, not a
   substitute for built-in plan mode.
-- `data-first`: use for any data modeling work: domain data, fields, states,
+- `domain-modeling`: use for any data modeling work: domain data, fields, states,
   inputs, invariants, allowed combinations, transitions, or effects. Use it
   first after scaffolding when specs are clear and the next step is shaping
   feature data.
@@ -232,7 +232,7 @@ effects at the boundary.
 - Make illegal states unrepresentable: prefer sum types over stringly-typed
   flags.
 - Default to immutability; mutate only where the performance case is clear.
-- Use `data-first` for data modeling, values, states, effects, and invariants;
+- Use `domain-modeling` for data modeling, values, states, effects, and invariants;
   use `architecture`, `refactoring`, and `code-review` for broader simplicity
   questions about boundaries, tangled concerns, and review risk.
 

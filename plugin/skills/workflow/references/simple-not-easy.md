@@ -37,7 +37,7 @@ easy when it hides data, effects, ownership, time, trust, or rollout risk.
 
 ## Handoffs
 
-- `data-first`: when the tangle is shape, state, invariant, parsing, or
+- `domain-modeling`: when the tangle is shape, state, invariant, parsing, or
   effect order.
 - `architecture`: when the tangle is boundary, ownership, layering, or
   change cadence.

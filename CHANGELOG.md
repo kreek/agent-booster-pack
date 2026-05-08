@@ -6,6 +6,17 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- Renamed the `data-first` skill to `domain-modeling`. The new
+  `contract-first` skill (Pi Interface Design Gate) owns the temporal
+  "first" position in the workflow; `data-first` was always a doctrine
+  about data shapes, invariants, parsing, and effect isolation rather
+  than ordering, so the name now matches what the skill teaches.
+  Cross-references in canonical skills, AGENTS, README, the npm package
+  README, and the eval harness have been updated. The plugin mirror at
+  `plugin/skills/` is regenerated from canonical.
+
 ## [5.1.0] (2026-05-08)
 
 ### Added

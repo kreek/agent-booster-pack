@@ -120,7 +120,7 @@ consumer-group scaling, partitioned throughput, or durable recovery.
 
 ## Handoffs
 
-- Use `data-first` to remove shared mutable state from the core
+- Use `domain-modeling` to remove shared mutable state from the core
   design.
 - Use `api` for public subscription, webhook, SSE, or event-contract
   surface.

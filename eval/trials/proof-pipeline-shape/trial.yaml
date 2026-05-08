@@ -3,7 +3,7 @@ taskFile: task.md
 plugin: engineering-maturity
 features:
   - proof
-  - data-first
+  - domain-modeling
   - error-handling
 variants:
   default: {}

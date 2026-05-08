@@ -5,7 +5,7 @@ features:
   - workflow
   - database
   - release
-  - data-first
+  - domain-modeling
   - proof
   - code-review
 variants:

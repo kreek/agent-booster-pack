@@ -139,7 +139,7 @@ Java-shaped framework (Javalin, Quarkus, Spring Boot).
   Compojure is older.
 - Component lifecycle: Integrant is the most modern of the
   Component / mount / Integrant trio for new services.
-- Schema / validation: malli for new code (data-first); `clojure.spec`
+- Schema / validation: malli for new code (domain-modeling); `clojure.spec`
   is built-in but more verbose for everyday use.
 
 ## Frontend tooling (TypeScript-adjacent)

@@ -160,7 +160,7 @@ to the full checklist.
 
 ## Handoffs
 
-- Use `data-first` immediately after scaffolding when specs are clear
+- Use `domain-modeling` immediately after scaffolding when specs are clear
   and the next step is feature/domain data modeling.
 - Use `proof` for the first real feature test.
 - Use `release` when CI becomes release/deploy automation.

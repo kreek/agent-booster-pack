@@ -8,7 +8,7 @@ skill workflow. Targets TS ≥ 5.5 with `strict` plus
 ## Data-first bias (apply first)
 
 Classes are easy to reach for in TS and rarely the right tool. The
-`data-first` skill's doctrine is canonical:
+`domain-modeling` skill's doctrine is canonical:
 
 - Prefer `readonly` fields, `as const`, and **discriminated unions
   with literal-string tags** over classes with mutable state and
@@ -480,12 +480,12 @@ export const createOrder = (deps: Deps) => async (input: NewOrder) => {
   another condition in `package.json#exports`.
 - `Date`, `Map`, `Set`, `bigint`, `undefined` keys, or class
   instances crossing a JSON boundary unconverted. See
-  [`data-first/references/dates.md`](../../data-first/references/dates.md) for
+  [`domain-modeling/references/dates.md`](../../domain-modeling/references/dates.md) for
   the cross-language date discipline (UTC storage, RFC 3339 wire
   format).
 - Money as `number` in any API or domain type; the IEEE 754 trap
   hits TS the same way it hits Python. See
-  [`data-first/references/money.md`](../../data-first/references/money.md).
+  [`domain-modeling/references/money.md`](../../domain-modeling/references/money.md).
 - Long-running async function with no `signal: AbortSignal` parameter.
 - Runtime imports of type-only symbols under `verbatimModuleSyntax`.
 - New code on `fp-ts` (in maintenance): redirect to Effect or

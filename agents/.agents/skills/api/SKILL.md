@@ -19,7 +19,7 @@ description: Use for HTTP APIs, OpenAPI, request/response shape, status codes, a
 ## When NOT to Use
 
 - Internal function signatures with no caller contract; use
-  `data-first` or `refactoring`.
+  `domain-modeling` or `refactoring`.
 - Auth, secrets, or trust-boundary review beyond API shape; use
   `security`.
 - Database schema design; use `database`.

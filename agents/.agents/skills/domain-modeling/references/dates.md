@@ -2,7 +2,7 @@
 
 Use this when storing, comparing, formatting, serialising, or computing
 on dates or times: at the language, wire, database, or display layer.
-Triggered from the `data-first` skill's Crosscutting Hazards
+Triggered from the `domain-modeling` skill's Crosscutting Hazards
 section.
 
 ## Iron rules
