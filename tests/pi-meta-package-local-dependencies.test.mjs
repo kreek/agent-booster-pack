@@ -1,0 +1,54 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { describe, expect, it } from "vitest";
+
+import { readJson, ROOT } from "./helpers.mjs";
+
+const META_PACKAGE = join(ROOT, "agent-booster-pack");
+const SIBLING_PACKAGES = [
+  "agent-booster-pack-skills",
+  "agent-booster-pack-contract-first",
+  "agent-booster-pack-proof",
+  "agent-booster-pack-whiteboard",
+];
+
+function readPackage(packageDir) {
+  return readJson(join(packageDir, "package.json"));
+}
+
+describe("Pi meta-package local dependencies", () => {
+  it("depends on local sibling directories", () => {
+    const pkg = readPackage(META_PACKAGE);
+
+    expect(pkg.dependencies).toEqual(Object.fromEntries(SIBLING_PACKAGES.map((name) => [name, `file:../${name}`])));
+  });
+
+  it("bundles every local sibling dependency", () => {
+    const pkg = readPackage(META_PACKAGE);
+
+    expect([...pkg.bundledDependencies].sort()).toEqual([...SIBLING_PACKAGES].sort());
+  });
+
+  it("prepack builds and copies local siblings", () => {
+    const scripts = readPackage(META_PACKAGE).scripts;
+
+    for (const name of SIBLING_PACKAGES) {
+      expect(scripts["build:siblings"]).toContain(`npm --prefix ../${name} run build`);
+    }
+    expect(scripts.prepack).toContain("npm run build:siblings");
+    expect(scripts.prepack).toContain("npm install --install-links");
+    expect(scripts.prepack).toContain("npm run sync:bundled-packages");
+    expect(scripts["sync:bundled-packages"]).toBe("node scripts/sync-bundled-packages.mjs");
+  });
+
+  it("has a bundled package sync script", () => {
+    const text = readFileSync(join(META_PACKAGE, "scripts/sync-bundled-packages.mjs"), "utf8");
+
+    for (const name of SIBLING_PACKAGES) {
+      expect(text).toContain(name);
+    }
+    expect(text).toContain('"package.json"');
+    expect(text).toContain("packageJson.files");
+    expect(text).toContain("node_modules");
+  });
+});

@@ -4,11 +4,10 @@ SHELL := /bin/bash
 .PHONY: test publish-pi publish-pi-dry-run
 
 test:
-	uv run pytest
-	uv run ruff format --check .
-	uv run ruff check .
-	uv run python scripts/validate_skill_anatomy.py
+	npm test
+	node scripts/validate-skill-anatomy.mjs
 	uv run refcheck . --no-color
+	cd agent-booster-pack && npm test
 	cd agent-booster-pack-contract-first && npm test
 	cd agent-booster-pack-proof && npm test
 	cd agent-booster-pack-whiteboard && npm test

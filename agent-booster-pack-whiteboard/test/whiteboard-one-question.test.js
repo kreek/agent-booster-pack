@@ -1,5 +1,4 @@
-import test from "node:test";
-import assert from "node:assert/strict";
+import { describe, expect, it } from "vitest";
 
 import {
   countUserFacingQuestions,
@@ -22,24 +21,24 @@ const custom = (active) => ({
   data: { active },
 });
 
-
-test("detects manual whiteboarding activation commands", () => {
-  assert.equal(isWhiteboardingActivation("/abp:whiteboard design the import flow"), true);
-  assert.equal(isWhiteboardingActivation(" /abp:whiteboard"), true);
-  assert.equal(isWhiteboardingActivation("/abp:whiteboard-off"), false);
+describe("whiteboard one-question guard", () => {
+it("detects manual whiteboarding activation commands", () => {
+  expect(isWhiteboardingActivation("/abp:whiteboard design the import flow")).toBe(true);
+  expect(isWhiteboardingActivation(" /abp:whiteboard")).toBe(true);
+  expect(isWhiteboardingActivation("/abp:whiteboard-off")).toBe(false);
 });
 
-test("detects explicit skill invocation as automatic activation", () => {
-  assert.equal(isWhiteboardingActivation("/skill:whiteboarding design the API"), true);
-  assert.equal(isWhiteboardingActivation("/skill:proof add tests"), false);
+it("detects explicit skill invocation as automatic activation", () => {
+  expect(isWhiteboardingActivation("/skill:whiteboarding design the API")).toBe(true);
+  expect(isWhiteboardingActivation("/skill:proof add tests")).toBe(false);
 });
 
-test("detects manual whiteboarding deactivation", () => {
-  assert.equal(isWhiteboardingDeactivation("/abp:whiteboard-off"), true);
-  assert.equal(isWhiteboardingDeactivation("/abp:whiteboard off"), false);
+it("detects manual whiteboarding deactivation", () => {
+  expect(isWhiteboardingDeactivation("/abp:whiteboard-off")).toBe(true);
+  expect(isWhiteboardingDeactivation("/abp:whiteboard off")).toBe(false);
 });
 
-test("counts user-facing questions but ignores uncertainty notes", () => {
+it("counts user-facing questions but ignores uncertainty notes", () => {
   const text = `Possible shape: keep a queue.
 
 Open uncertainties:
@@ -48,45 +47,46 @@ Open uncertainties:
 
 Should the queue be durable?`;
 
-  assert.equal(countUserFacingQuestions(text), 1);
+  expect(countUserFacingQuestions(text)).toBe(1);
 });
 
-test("counts multiple question list items as multiple user-facing questions", () => {
+it("counts multiple question list items as multiple user-facing questions", () => {
   const text = `Questions:
 1. Should the queue be durable?
 2. What retention window do you want?`;
 
-  assert.equal(countUserFacingQuestions(text), 2);
+  expect(countUserFacingQuestions(text)).toBe(2);
 });
 
-test("does not enforce outside active whiteboarding mode", () => {
+it("does not enforce outside active whiteboarding mode", () => {
   const history = messages(["assistant", "Should we use Postgres? Should we add Redis?"]);
 
-  assert.equal(shouldEnforceAssistantMessage(history, "Should we use Postgres? Should we add Redis?"), false);
+  expect(shouldEnforceAssistantMessage(history, "Should we use Postgres? Should we add Redis?")).toBe(false);
 });
 
-test("enforces multi-question assistant messages while whiteboarding is active", () => {
+it("enforces multi-question assistant messages while whiteboarding is active", () => {
   const history = [custom(true), ...messages(["assistant", "Goal noted."])];
 
-  assert.equal(shouldEnforceAssistantMessage(history, "Should we use Postgres? Should we add Redis?"), true);
+  expect(shouldEnforceAssistantMessage(history, "Should we use Postgres? Should we add Redis?")).toBe(true);
 });
 
-test("allows a single question while whiteboarding is active", () => {
+it("allows a single question while whiteboarding is active", () => {
   const history = [custom(true), ...messages(["assistant", "Goal noted."])];
 
-  assert.equal(shouldEnforceAssistantMessage(history, "Should we use Postgres?"), false);
+  expect(shouldEnforceAssistantMessage(history, "Should we use Postgres?")).toBe(false);
 });
 
-test("latest persisted whiteboarding state wins", () => {
+it("latest persisted whiteboarding state wins", () => {
   const history = [custom(true), custom(false)];
 
-  assert.equal(shouldEnforceAssistantMessage(history, "Should we use Postgres? Should we add Redis?"), false);
+  expect(shouldEnforceAssistantMessage(history, "Should we use Postgres? Should we add Redis?")).toBe(false);
 });
 
-test("correction prompt asks the agent to regenerate with exactly one decision question", () => {
+it("correction prompt asks the agent to regenerate with exactly one decision question", () => {
   const prompt = makeCorrectionPrompt("Should we use Postgres? Should we add Redis?");
 
-  assert.match(prompt, /exactly one decision question/i);
-  assert.match(prompt, /notes, not questions/i);
-  assert.match(prompt, /Postgres/);
+  expect(prompt).toMatch(/exactly one decision question/i);
+  expect(prompt).toMatch(/notes, not questions/i);
+  expect(prompt).toMatch(/Postgres/);
+});
 });

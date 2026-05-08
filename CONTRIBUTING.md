@@ -12,7 +12,7 @@ need to know before opening a PR.
   `plugin/skills/` tree is symlinked from there; edit the canonical
   copy only.
 - Each skill must conform to the anatomy enforced by
-  `scripts/validate_skill_anatomy.py`: frontmatter (name + description),
+  `scripts/validate-skill-anatomy.mjs`: frontmatter (name + description),
   `# Title`, `## When to Use`, optional `## When NOT to Use`,
   `## Workflow`, `## Verification`, optional `## Tripwires`, `## Handoffs`,
   and a final `## References` if any names, books, or papers are cited.
@@ -35,11 +35,9 @@ need to know before opening a PR.
 Run before opening a PR:
 
 ```sh
-uv run pytest
-uv run ruff format --check .
-uv run ruff check .
+make test
 uv run refcheck . --no-color
-uv run python scripts/validate_skill_anatomy.py
+node scripts/validate-skill-anatomy.mjs
 ```
 
 The validator checks all 21 skills, the `plugin/skills/` symlinks, and

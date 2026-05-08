@@ -2,6 +2,9 @@
 
 const GATE_TITLE = "Interface Design Gate";
 
+export const INTERFACE_GATE_CYCLE_ENTRY = "abp-interface-gate-cycle";
+export const INTERFACE_GATE_UI_ALLOW_ENTRY = "abp-interface-gate-ui-allowed";
+
 const REQUIRED_GATE_FIELDS = [
   "current interface:",
   "proposed interface:",
@@ -51,11 +54,57 @@ export function hasInterfaceGatePrompt(entries) {
 }
 
 /**
- * Return true when the user approved the latest Interface Design Gate prompt.
- * Approval before a later gate prompt does not count as sign-off.
+ * Return the entry index of the most recent closed-cycle marker, or -1.
+ * A closed cycle scopes intent and approval lookups: anything before the
+ * marker belongs to a prior, settled design decision.
+ */
+export function lastClosedCycleIndex(entries) {
+  for (let index = entries.length - 1; index >= 0; index -= 1) {
+    const entry = entries[index];
+    if (
+      entry?.type === "custom" &&
+      entry?.customType === INTERFACE_GATE_CYCLE_ENTRY &&
+      entry?.data?.state === "closed"
+    ) {
+      return index;
+    }
+  }
+  return -1;
+}
+
+/** Return the entry index of the most recent user message, or -1. */
+export function lastUserMessageIndex(entries) {
+  for (let index = entries.length - 1; index >= 0; index -= 1) {
+    const message = entries[index]?.message ?? entries[index];
+    if (message?.role === "user") return index;
+  }
+  return -1;
+}
+
+/**
+ * Return true when the user clicked Allow on a prior gate prompt within the
+ * current turn. The allow persists until the next user message starts a new
+ * turn, mirroring `pre-work-guard`'s `hasAlreadyExplainedThisTurn` shape.
+ */
+export function hasInterfaceUiAllowThisTurn(entries) {
+  const cutoff = lastUserMessageIndex(entries);
+  for (let index = entries.length - 1; index > cutoff; index -= 1) {
+    const entry = entries[index];
+    if (entry?.type === "custom" && entry?.customType === INTERFACE_GATE_UI_ALLOW_ENTRY) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Return true when the user approved the latest Interface Design Gate prompt
+ * within the current cycle. Approval before a later gate prompt does not
+ * count, and approvals from prior closed cycles do not carry over.
  */
 export function hasInterfaceGateApproval(entries) {
-  const messages = chatMessages(entries);
+  const cycleStart = lastClosedCycleIndex(entries) + 1;
+  const messages = chatMessages(entries.slice(cycleStart));
   const latestGateIndex = messages.findLastIndex(
     (message) => message.role === "assistant" && message.text.includes(GATE_TITLE)
   );
@@ -69,6 +118,32 @@ export function hasInterfaceGateApproval(entries) {
   });
 }
 
+/**
+ * Return the entry index of the latest user message that approves the latest
+ * gate prompt, or -1. Used to lazily reconcile a closed-cycle marker.
+ */
+function latestApprovingUserMessageEntryIndex(entries) {
+  let latestGateEntryIndex = -1;
+  for (let index = entries.length - 1; index >= 0; index -= 1) {
+    const message = entries[index]?.message ?? entries[index];
+    if (message?.role !== "assistant") continue;
+    if (messageText(message.content).includes(GATE_TITLE)) {
+      latestGateEntryIndex = index;
+      break;
+    }
+  }
+  if (latestGateEntryIndex === -1) return -1;
+
+  for (let index = entries.length - 1; index > latestGateEntryIndex; index -= 1) {
+    const message = entries[index]?.message ?? entries[index];
+    if (message?.role !== "user") continue;
+    const text = messageText(message.content);
+    if (REJECTION_PATTERN.test(text)) continue;
+    if (APPROVAL_PATTERN.test(text)) return index;
+  }
+  return -1;
+}
+
 /** Classify whether a tool call can mutate files or project state. */
 export function classifyToolCall(toolName, input) {
   if (toolName === "edit" || toolName === "write") return "mutating";
@@ -78,18 +153,27 @@ export function classifyToolCall(toolName, input) {
   return MUTATING_BASH_PATTERN.test(command) ? "mutating" : "read_only";
 }
 
-/** Return true when recent chat suggests an interface design decision is in play. */
+/**
+ * Return true when recent chat suggests an interface design decision is in
+ * play. Scoped to entries since the last closed cycle so a stale mention
+ * from a prior, settled design decision does not keep firing the gate.
+ */
 export function hasInterfaceIntent(entries) {
-  return chatMessages(entries).some((message) => INTERFACE_INTENT_PATTERN.test(message.text));
+  const cycleStart = lastClosedCycleIndex(entries) + 1;
+  return chatMessages(entries.slice(cycleStart)).some((message) =>
+    INTERFACE_INTENT_PATTERN.test(message.text)
+  );
 }
 
 /**
  * Decide whether a mutating tool call should trigger Pi's soft interface gate.
- * The gate fires only when interface intent exists and no user approval follows
- * the latest lean gate packet.
+ * The gate fires only when interface intent exists in the current cycle, no
+ * user approval follows the latest gate prompt, and no UI allow has cleared
+ * the gate within this turn.
  */
 export function isPotentialInterfaceImplementation(toolName, input, entries) {
   if (classifyToolCall(toolName, input) !== "mutating") return false;
+  if (hasInterfaceUiAllowThisTurn(entries)) return false;
   if (hasInterfaceGateApproval(entries)) return false;
   return hasInterfaceIntent(entries);
 }
@@ -102,6 +186,21 @@ function blockReason() {
   return "Interface Design Gate: show the current interface, proposed interface, and why this boundary belongs here, then ask the user to approve or revise before implementation.";
 }
 
+/**
+ * Lazily append a closed-cycle marker when the user has approved the latest
+ * gate prompt but no marker exists for that approval yet. Idempotent: if the
+ * approval is already followed by a close marker, this is a no-op.
+ */
+function reconcileClosedCycle(pi, entries) {
+  const approvingIndex = latestApprovingUserMessageEntryIndex(entries);
+  if (approvingIndex === -1) return;
+
+  const lastCloseIndex = lastClosedCycleIndex(entries);
+  if (lastCloseIndex > approvingIndex) return;
+
+  pi.appendEntry(INTERFACE_GATE_CYCLE_ENTRY, { state: "closed", at: Date.now() });
+}
+
 /** Register the Interface Design Gate extension with Pi. */
 export default function interfaceDesignGate(pi) {
   pi.on("before_agent_start", async (event) => ({
@@ -110,11 +209,16 @@ export default function interfaceDesignGate(pi) {
 
   pi.on("tool_call", async (event, ctx) => {
     const entries = ctx.sessionManager.getBranch();
-    if (!isPotentialInterfaceImplementation(event.toolName, event.input, entries)) return;
+    reconcileClosedCycle(pi, entries);
+
+    const refreshed = ctx.sessionManager.getBranch();
+    if (!isPotentialInterfaceImplementation(event.toolName, event.input, refreshed)) return;
 
     if (!ctx.hasUI) return { block: true, reason: blockReason() };
 
     const allowed = await ctx.ui.confirm("Interface Design Gate", blockReason());
     if (!allowed) return { block: true, reason: blockReason() };
+
+    pi.appendEntry(INTERFACE_GATE_UI_ALLOW_ENTRY, { allowedAt: Date.now() });
   });
 }

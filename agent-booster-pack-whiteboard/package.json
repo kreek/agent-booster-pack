@@ -1,6 +1,6 @@
 {
   "name": "agent-booster-pack-whiteboard",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "ABP Pi whiteboarding guard plus whiteboarding skill: one user-facing question at a time.",
   "type": "module",
   "engines": {
@@ -23,9 +23,12 @@
   "scripts": {
     "build": "node scripts/build-skills.mjs",
     "prepack": "npm run build",
-    "test": "node --test test/*.test.js",
+    "test": "vitest run test",
     "install-ext": "npm run build && mkdir -p ~/.pi/agent/extensions && ln -sfn \"$(pwd)\" ~/.pi/agent/extensions/agent-booster-pack-whiteboard && echo 'Installed to ~/.pi/agent/extensions/agent-booster-pack-whiteboard -- run /reload in Pi to activate'",
     "uninstall-ext": "rm -f ~/.pi/agent/extensions/agent-booster-pack-whiteboard && echo 'Uninstalled'"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.1"
   },
   "repository": {
     "type": "git",

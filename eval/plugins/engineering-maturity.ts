@@ -1131,7 +1131,7 @@ const plugin: EvalPlugin = {
     const abpSkillReads = isAbpSession(session) ? skillReads : [];
     const postWriteProof = hasPostWriteCommand(
       session,
-      /\b(npm\s+test|npm\s+run\s+(test|typecheck|lint|check)|vitest|pytest|go\s+test|cargo\s+test|mvn\s+test|uv\s+run\s+(pytest|ruff|pyright|python)|refcheck|validate_skill_anatomy)\b/i,
+      /\b(npm\s+test|npm\s+run\s+(test|typecheck|lint|check)|vitest|pytest|go\s+test|cargo\s+test|mvn\s+test|uv\s+run\s+(pytest|ruff|pyright|python)|refcheck|validate[-_]skill[-_]anatomy)\b/i,
     );
 
     const scores = {

@@ -1,0 +1,12 @@
+{
+  "name": "agent-booster-pack-repo",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run tests"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.1"
+  }
+}

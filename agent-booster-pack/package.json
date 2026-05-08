@@ -1,6 +1,6 @@
 {
   "name": "agent-booster-pack",
-  "version": "5.1.0",
+  "version": "5.1.1",
   "description": "Agent Booster Pack for Pi: skills + Interface Design Gate runtime + proof-first runtime + whiteboarding guard + final value guard, in one install. Meta-package; depends on the four siblings.",
   "type": "module",
   "engines": {
@@ -26,10 +26,10 @@
     "LICENSE"
   ],
   "scripts": {
-    "test": "node --test test/*.test.js",
+    "test": "vitest run test",
     "build:siblings": "npm --prefix ../agent-booster-pack-skills run build && npm --prefix ../agent-booster-pack-contract-first run build && npm --prefix ../agent-booster-pack-proof run build && npm --prefix ../agent-booster-pack-whiteboard run build",
-    "sync:bundled-skills": "node scripts/sync-bundled-skills.mjs",
-    "prepack": "npm run build:siblings && npm install --install-links --ignore-scripts --no-audit --no-fund && npm run sync:bundled-skills"
+    "sync:bundled-packages": "node scripts/sync-bundled-packages.mjs",
+    "prepack": "npm run build:siblings && npm install --install-links --ignore-scripts --no-audit --no-fund && npm run sync:bundled-packages"
   },
   "dependencies": {
     "agent-booster-pack-skills": "file:../agent-booster-pack-skills",
@@ -43,6 +43,9 @@
     "agent-booster-pack-proof",
     "agent-booster-pack-whiteboard"
   ],
+  "devDependencies": {
+    "vitest": "^3.2.1"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/kreek/agent-booster-pack.git",

@@ -6,17 +6,8 @@ dependencies = []
 
 [dependency-groups]
 dev = [
-    "pytest>=8.3.0",
-    "pytest-describe>=2.2.0",
     "refcheck>=0.4.4",
-    "ruff>=0.11.0",
 ]
 
 [tool.uv]
 package = false
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-
-[tool.ruff]
-target-version = "py313"

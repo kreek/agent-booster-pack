@@ -168,7 +168,7 @@ ABP setup will:
   - link individual ABP skills into ~/.codeium/windsurf/skills when Windsurf is installed
   - prune stale ABP-owned skill links and legacy command links
   - ask before replacing conflicting symlinks or moving real directories
-  - sync plugin/ skill links when uv is available
+  - sync plugin/ skill links when node is available
 
 It will not overwrite real skill directories or third-party symlinks without
 showing the exact path and asking again.
@@ -353,16 +353,15 @@ prune_stale_command_links() {
 prune_stale_command_links "$HOME/.claude/commands"
 prune_stale_command_links "$HOME/.codex/prompts"
 
-# Sync the in-repo Claude Code plugin for maintainers when uv is available.
-# End-user installs use the committed plugin symlinks and should not need Python
-# tooling just to fan out already-published skills.
-GENERATE_PLUGIN="$REPO_ROOT/scripts/generate_plugin_symlinks.py"
-if [ -f "$GENERATE_PLUGIN" ] && command -v uv >/dev/null 2>&1; then
+# Sync the in-repo Claude Code / Codex plugin mirror for maintainers when Node
+# is available. End-user installs use the committed plugin mirror.
+GENERATE_PLUGIN="$REPO_ROOT/scripts/generate-plugin-symlinks.mjs"
+if [ -f "$GENERATE_PLUGIN" ] && command -v node >/dev/null 2>&1; then
 	echo ""
-	(cd "$REPO_ROOT" && uv run python "$GENERATE_PLUGIN" "$REPO_ROOT")
+	(cd "$REPO_ROOT" && node "$GENERATE_PLUGIN" "$REPO_ROOT")
 elif [ -f "$GENERATE_PLUGIN" ]; then
 	echo ""
-	echo "uv not found; skipping maintainer-only plugin sync"
+	echo "node not found; skipping maintainer-only plugin sync"
 fi
 
 echo "Done."

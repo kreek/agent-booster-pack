@@ -399,9 +399,8 @@ Run the full repo checks before publishing script updates:
 make test
 ```
 
-Use `uv run ruff format .` only when you intend to rewrite Python formatting in
-the repo. `refcheck` skips remote URLs unless `--check-remote` is passed, so the
-default command validates local Markdown links and anchors deterministically.
+`refcheck` skips remote URLs unless `--check-remote` is passed, so the default
+command validates local Markdown links and anchors deterministically.
 
 Maintainers can enable the repo-local pre-commit guard after setup:
 

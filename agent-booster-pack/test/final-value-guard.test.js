@@ -1,5 +1,4 @@
-import test from "node:test";
-import assert from "node:assert/strict";
+import { describe, expect, it } from "vitest";
 
 import {
   finalValuePromptFor,
@@ -17,26 +16,27 @@ const assistantText = (text) => ({
   content: [{ type: "text", text }],
 });
 
-test("does not request final value reflection for read-only turns", () => {
+describe("final value guard", () => {
+it("does not request final value reflection for read-only turns", () => {
   const turnMessages = [assistantToolCall("read"), assistantText("The workflow skill already has that language.")];
 
-  assert.equal(shouldRequestFinalValueReflection(turnMessages), false);
-  assert.equal(finalValuePromptFor(turnMessages), null);
+  expect(shouldRequestFinalValueReflection(turnMessages)).toBe(false);
+  expect(finalValuePromptFor(turnMessages)).toBeNull();
 });
 
-test("uses a short implementation prompt for one-file source edits", () => {
+it("uses a short implementation prompt for one-file source edits", () => {
   const turnMessages = [assistantToolCall("edit", { path: "src/cache.js" }), assistantText("Updated cache handling.")];
 
   const prompt = finalValuePromptFor(turnMessages);
 
-  assert.equal(shouldRequestFinalValueReflection(turnMessages), true);
-  assert.match(prompt, /one sentence/i);
-  assert.match(prompt, /what changed and why it matters/i);
-  assert.match(prompt, /implementation/i);
-  assert.doesNotMatch(prompt, /1\./);
+  expect(shouldRequestFinalValueReflection(turnMessages)).toBe(true);
+  expect(prompt).toMatch(/one sentence/i);
+  expect(prompt).toMatch(/what changed and why it matters/i);
+  expect(prompt).toMatch(/implementation/i);
+  expect(prompt).not.toMatch(/1\./);
 });
 
-test("uses a short documentation prompt for one-file markdown writes", () => {
+it("uses a short documentation prompt for one-file markdown writes", () => {
   const turnMessages = [
     assistantToolCall("write", { path: "docs/PRD.md" }),
     assistantText("Created the PRD at docs/PRD.md."),
@@ -44,14 +44,14 @@ test("uses a short documentation prompt for one-file markdown writes", () => {
 
   const prompt = finalValuePromptFor(turnMessages);
 
-  assert.equal(shouldRequestFinalValueReflection(turnMessages), true);
-  assert.match(prompt, /one sentence/i);
-  assert.match(prompt, /what document changed/i);
-  assert.doesNotMatch(prompt, /implementation/i);
-  assert.doesNotMatch(prompt, /1\./);
+  expect(shouldRequestFinalValueReflection(turnMessages)).toBe(true);
+  expect(prompt).toMatch(/one sentence/i);
+  expect(prompt).toMatch(/what document changed/i);
+  expect(prompt).not.toMatch(/implementation/i);
+  expect(prompt).not.toMatch(/1\./);
 });
 
-test("uses the full prompt for multi-file implementation changes", () => {
+it("uses the full prompt for multi-file implementation changes", () => {
   const turnMessages = [
     assistantToolCall("edit", { path: "src/cache.js" }),
     assistantToolCall("write", { path: "test/cache.test.js" }),
@@ -60,13 +60,13 @@ test("uses the full prompt for multi-file implementation changes", () => {
 
   const prompt = finalValuePromptFor(turnMessages);
 
-  assert.equal(shouldRequestFinalValueReflection(turnMessages), true);
-  assert.match(prompt, /1\. what changed/);
-  assert.match(prompt, /2\. why the change or new feature is better/);
-  assert.match(prompt, /3\. what it enables going forward/);
+  expect(shouldRequestFinalValueReflection(turnMessages)).toBe(true);
+  expect(prompt).toMatch(/1\. what changed/);
+  expect(prompt).toMatch(/2\. why the change or new feature is better/);
+  expect(prompt).toMatch(/3\. what it enables going forward/);
 });
 
-test("allows final implementation summary that explains value and future direction", () => {
+it("allows final implementation summary that explains value and future direction", () => {
   const turnMessages = [
     assistantToolCall("write", { path: "src/release.js" }),
     assistantText(
@@ -74,10 +74,10 @@ test("allows final implementation summary that explains value and future directi
     ),
   ];
 
-  assert.equal(shouldRequestFinalValueReflection(turnMessages), false);
+  expect(shouldRequestFinalValueReflection(turnMessages)).toBe(false);
 });
 
-test("allows final summary that reflects on weak improvement and alternatives", () => {
+it("allows final summary that reflects on weak improvement and alternatives", () => {
   const turnMessages = [
     assistantToolCall("edit", { path: "src/guard.js" }),
     assistantText(
@@ -85,13 +85,14 @@ test("allows final summary that reflects on weak improvement and alternatives", 
     ),
   ];
 
-  assert.equal(shouldRequestFinalValueReflection(turnMessages), false);
+  expect(shouldRequestFinalValueReflection(turnMessages)).toBe(false);
 });
 
-test("final value prompt keeps the full alternative strategy language for normal changes", () => {
+it("final value prompt keeps the full alternative strategy language for normal changes", () => {
   const prompt = makeFinalValuePrompt("Updated the release skill.", { subject: "implementation", size: "normal" });
 
-  assert.match(prompt, /why.+better/i);
-  assert.match(prompt, /enables.+going forward/i);
-  assert.match(prompt, /alternative strategies/i);
+  expect(prompt).toMatch(/why.+better/i);
+  expect(prompt).toMatch(/enables.+going forward/i);
+  expect(prompt).toMatch(/alternative strategies/i);
+});
 });
