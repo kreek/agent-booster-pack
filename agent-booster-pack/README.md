@@ -20,9 +20,17 @@ This is a **meta-package**: it installs the sibling ABP packages and adds the cr
   a time while ABP whiteboarding mode is active. Includes the
   `whiteboarding` skill.
 
-The meta-package also includes a Final Value Guard that prompts for a
-better final summary after durable file changes. One-file changes get a
-short one-sentence nudge; larger changes get a fuller reflection prompt.
+The meta-package also includes two cross-cutting reflection gates:
+
+- **Pre-Work Reflection Gate** soft-blocks the first mutating tool call of
+  a turn until the agent's latest message explains the plan and why it's
+  an improvement (single-file edits) or also names the alternatives
+  considered (multi-file or mutating-bash changes). Once satisfied, the
+  rest of the turn proceeds without re-prompting; the gate resets at the
+  next user message.
+- **Final Value Guard** prompts for a better final summary after durable
+  file changes. One-file changes get a short one-sentence nudge; larger
+  changes get a fuller reflection prompt.
 
 If you want only some of the four, install them individually instead
 of this meta-package. See each package's README for details.
