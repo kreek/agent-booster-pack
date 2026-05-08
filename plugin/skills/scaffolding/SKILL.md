@@ -25,124 +25,89 @@ and run the baseline without local knowledge.
 - Detailed UI design choices after the framework is chosen; use
   `ui-design`.
 
-## Preflight
-
-Before creating files or running generator commands:
-
-1. Identify the ecosystem and existing manifest/lockfile. If no
-   existing package-manager choice, select the `AGENTS.md` default
-   and state it before proceeding.
-2. Read `references/language-defaults.md` for the language's
-   cross-cutting stance (runtime, tooling posture, deprecated
-   conventions to avoid), then look up the relevant Backstage
-   Template under `references/stacks/<language>/` for framework,
-   axes, and `metadata.links` to authoritative docs.
-3. For web work, classify the request before choosing files:
-   local prototype/spike, new app scaffold, or production-bound app.
-   Static HTML/CSS/JS is acceptable for a local throwaway prototype or
-   isolated demo. Say when you are taking that path and name the
-   likely upgrade framework if work continues.
-4. For fresh web apps, don't scaffold a hand-rolled HTTP
-   server/router by default. Use a mature framework with routing,
-   request handling, testing, and deployment conventions baked in.
-   Hand-rolled servers are only for explicit user requests, tiny
-   scripts, libraries, teaching examples, or cases where avoiding a
-   framework is itself a stated requirement.
-
-## Project-Specific Defaults
-
-For greenfield app scaffolding, match the request to a stack preset
-in `references/stacks/index.yaml`. Each preset names required and optional
-axes (backend, frontend, database, background jobs) and the tooling
-that goes with the stack. Confirm the preset and the required
-choices with the user before creating files.
-
-For documentation tooling on a large project, default to Material
-for MkDocs unless the repo/user/publishing constraint chooses
-another, regardless of app language or framework.
-
-Package-manager defaults (pnpm, uv, bundler, cargo, etc.) come from
-`AGENTS.md` and apply even with zero dependencies.
-
 ## Core Ideas
-
-The harness baseline already covers: prefer established/boring tech, prefer
-framework defaults over hand-rolled, do not add a formatter or test runner
-to a repo that lacks one (the inverse here: when scaffolding, you _do_ add
-them — that is the point of this skill). ABP adds:
 
 1. Pick one package manager and commit its lockfile. Use the modern
    ecosystem default from `AGENTS.md` (pnpm/uv/etc.) even with zero
-   dependencies; only fall back to built-ins where they are still strongest
-   (Cargo for Rust, Go modules for Go).
-2. Standardize task names: `test`, `lint`, `format`, `typecheck`, `coverage`
-   where applicable. CI runs the same commands developers run locally.
-3. Satisfy named artifacts literally before applying ecosystem preferences.
-   If the request names `tsconfig.json`, `package.json`, `pyproject.toml`,
-   CI, README, or another concrete file, create or update that artifact
-   unless you explicitly ask to substitute it.
-4. A `typecheck` script must run a type checker or the repo's established
-   equivalent and must consume the config file added for it. Syntax-only
-   checks such as `node --check` are lint/smoke checks, not typechecks.
-5. If the language, runtime, app shape, or current ecosystem state isn't
-   covered by `references/`, search current official/project sources before
+   dependencies; only fall back to built-ins where they are still
+   strongest (Cargo for Rust, Go modules for Go).
+2. Standardize task names: `test`, `lint`, `format`, `typecheck`,
+   `coverage` where applicable. CI runs the same commands developers
+   run locally.
+3. Satisfy named artifacts literally before applying ecosystem
+   preferences. If the request names `tsconfig.json`, `package.json`,
+   `pyproject.toml`, CI, README, or another concrete file, create or
+   update that artifact unless you explicitly ask to substitute it.
+4. A `typecheck` script must run a type checker or the repo's
+   established equivalent and must consume the config file added for
+   it. Syntax-only checks such as `node --check` are lint/smoke
+   checks, not typechecks.
+5. For fresh web apps, use a mature framework with routing, request
+   handling, testing, and deployment conventions baked in. Hand-rolled
+   HTTP servers are only for explicit user requests, tiny scripts,
+   libraries, teaching examples, or cases where avoiding a framework
+   is itself a stated requirement.
+6. If the language, runtime, app shape, or ecosystem state isn't
+   covered by `references/`, search current official sources before
    choosing; explain the chosen default in one sentence.
-6. Add one smoke test that proves the runner, import path, and build system
-   work together. The first real feature should not need tooling decisions.
-7. README says what it is, how to run it, and how to test it.
+7. Add one smoke test that proves the runner, import path, and build
+   system work together. The first real feature should not need
+   tooling decisions.
+8. README says what it is, how to run it, and how to test it.
 
 ## Workflow
 
 1. Detect language, framework, and existing conventions. Select and
    state the package manager before running any scaffold or install
-   command. Read `references/language-defaults.md` for the
-   cross-cutting stance and the relevant template under
-   `references/stacks/<language>/` for stack picks.
-2. For web work, state whether this is a prototype, scaffold, or
-   production-bound app. Match the request to a stack preset in
-   `references/stacks/index.yaml`, name the preset and any required choices
-   (database, hosting adapter, etc.), and confirm with the user
-   before creating runtime/deploy files.
+   command (use the `AGENTS.md` default if no existing choice). Read
+   `references/language-defaults.md` for the cross-cutting stance and
+   the relevant template under `references/stacks/<language>/` for
+   stack picks.
+2. For web work, classify the request: local prototype/spike, new app
+   scaffold, or production-bound app. Static HTML/CSS/JS is acceptable
+   for a throwaway prototype — say so explicitly and name the likely
+   upgrade framework if work continues. For greenfield apps, match the
+   request to a stack preset in `references/stacks/index.yaml` and
+   confirm the preset and required choices (database, hosting adapter,
+   etc.) before creating runtime/deploy files.
 3. Choose minimal standard tooling for install, format, lint,
    typecheck, test, and coverage. Add scripts/commands with consistent
-   names. For each requested script or config file, map requirement ->
-   artifact -> command before calling the scaffold done.
+   names. For each requested script or config file, map requirement →
+   artifact → command before calling the scaffold done.
 4. Add one smoke test and ensure it can fail and pass.
 5. Add CI that runs the same checks. Document local setup and test
-   commands in README. For large projects, add or propose Material
-   for MkDocs.
+   commands in README. Hand off documentation system choice (Material
+   for MkDocs by default for large projects) to `documentation`.
 
 ## Verification
 
-- [ ] Lockfile exists and clean install works from a fresh clone.
-- [ ] Fresh Node projects use pnpm and `pnpm-lock.yaml`;
-      `package-lock.json` is absent unless inherited or explicitly
-      requested.
-- [ ] Standard commands exist and pass: `test`, `lint`,
-      `format --check`, `typecheck`, `coverage` where applicable.
-- [ ] Requested concrete artifacts exist by their requested names, or a
-      substitution was explicitly approved.
-- [ ] Each command that depends on config consumes the config file added
-      for it; typecheck is not only a syntax check.
-- [ ] Web work was classified as prototype, scaffold, or
-      production-bound app before files were created. Prototype mode
-      was named explicitly and included an upgrade path.
-- [ ] A stack preset from `references/stacks/index.yaml` was matched and
-      named, and its required choices were confirmed with the user
-      before runtime/deploy files were created. Where no preset
-      fit, the explicit fallback was named.
-- [ ] Fresh web app scaffolds use a mature framework with
-      conventions, not a hand-rolled HTTP server or inline JS in a
-      backend entrypoint.
-- [ ] Relevant ecosystem reference was read, or the ecosystem was not
-      covered and current official/project sources were searched.
-- [ ] One smoke test proves the test runner and build/import path.
-- [ ] CI runs the same checks on push/PR and gates merge.
-- [ ] `.gitignore` excludes dependencies, build output, env files,
-      IDE state, and secrets; no secrets are committed; `.env.example`
-      uses placeholders only.
-- [ ] README includes purpose, install/run, and test commands.
-- [ ] Large projects use or explicitly defer Material for MkDocs.
+- [ ] **Package management**: lockfile exists; clean install works
+      from a fresh clone; fresh Node projects use pnpm and
+      `pnpm-lock.yaml` (no `package-lock.json` unless inherited or
+      requested); relevant ecosystem reference was read, or current
+      official sources were searched when not covered.
+- [ ] **Command surface**: standard commands exist and pass (`test`,
+      `lint`, `format --check`, `typecheck`, `coverage` where
+      applicable); each command consumes the config file added for
+      it; typecheck is not only a syntax check.
+- [ ] **Requested artifacts**: named artifacts exist by their
+      requested names, or a substitution was explicitly approved.
+- [ ] **Web classification**: prototype/scaffold/production-bound was
+      named before files were created; prototypes name an upgrade
+      path; greenfield apps matched a stack preset (or named the
+      fallback) with required choices confirmed; fresh web app
+      scaffolds use a mature framework, not a hand-rolled HTTP server
+      or inline JS in a backend entrypoint.
+- [ ] **Smoke test + CI**: one smoke test proves the runner and
+      build/import path; CI runs the same checks on push/PR and gates
+      merge.
+- [ ] **Hygiene**: `.gitignore` excludes deps, build output, env
+      files, IDE state, and secrets; no secrets are committed;
+      `.env.example` uses placeholders only; README includes purpose,
+      install/run, and test commands.
+- [ ] **Docs system**: documentation tooling for large projects was
+      handed off to `documentation` (Material for MkDocs by default)
+      or explicitly deferred.
 
 ## Risk Tier
 
@@ -169,14 +134,10 @@ to the full checklist.
 
 ## References
 
-- `references/stacks/index.yaml`: Backstage Software Template
-  catalog of named stack presets (lightweight + larger backend per
-  language, plus TypeScript fullstack/static-site/frontend).
-  Each template carries its own `metadata.links` to authoritative
-  framework / runtime / tooling docs.
+- `references/stacks/index.yaml`: Backstage Software Template catalog
+  of stack presets (per-language backend + TypeScript fullstack/
+  static-site/frontend). Each template carries `metadata.links` to
+  authoritative docs.
 - `references/language-defaults.md`: cross-cutting language and
-  runtime stances that apply beyond any single template (uv
-  philosophy, modern `net/http` ServeMux, K2 Kotlin compiler,
-  Native AOT limits and F#-specific dynamic-code constraints,
-  Phoenix on Bandit, deps.edn for Clojure, etc.). Languages
-  mirror the catalog under `references/stacks/`.
+  runtime stances beyond any single template; languages mirror the
+  catalog under `references/stacks/`.

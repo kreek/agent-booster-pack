@@ -9,10 +9,6 @@ description: Use for releases, SemVer, changelogs, CI/CD, rollout, rollback, fla
 
 `BREAKING CHANGES BUMP MAJOR. HUMANS MUTATE SHARED ENVIRONMENTS.`
 
-Agents reduce release toil through classification, notes, checks,
-runbooks, and evidence. They do not approve, promote, deploy, roll
-back, change production flags, or mutate shared environments.
-
 ## When to Use
 
 - Bumping version manifests, editing `CHANGELOG.md`, preparing release
@@ -61,8 +57,10 @@ back, change production flags, or mutate shared environments.
    what `git log` already says.
 8. Manifest version, lockfile when committed, CHANGELOG release header,
    tag, and publish plan agree.
-9. Release preparation and release execution are separate. Humans make
-   shared-environment decisions.
+9. Release preparation and release execution are separate. Agents
+   prepare classification, notes, checks, runbooks, and evidence;
+   humans approve, promote, deploy, roll back, change flags, and
+   mutate shared environments.
 10. Rollback must be faster and more reliable than emergency
     fix-forward.
 11. Feature flags need owner, expiry, safe default, cleanup, and a
@@ -93,53 +91,49 @@ back, change production flags, or mutate shared environments.
    artifacts than the chosen release units, do not run or patch it inside
    the release unless the user explicitly approves that separate tooling
    change.
-5. Update the selected manifests, committed lockfiles, changelog entry,
-   and tag plan together. Add the deprecation warning/removal version
-   and migration note when applicable. For deprecation, migration,
-   removal, or sunset work, read `references/deprecation-and-migration.md`.
-6. Validate packaging before tagging: dry-run pack/build where available,
-   confirm dependency ranges resolve to published or intentionally
-   staged artifacts, and name the human publish order.
+5. Update selected manifests, committed lockfiles, changelog entry,
+   and tag plan together. Add deprecation warning, removal version,
+   and migration note where applicable; for deprecation/migration/
+   removal/sunset work, load `references/deprecation-and-migration.md`.
+6. Validate packaging before tagging: dry-run pack/build where
+   available, confirm dependency ranges resolve, name the human
+   publish order.
 7. Define artifact, environments, human operator, promotion path, and
-   merge gates. Put lint/type/test/security checks before merge where
+   merge gates. Lint/type/test/security run before merge where
    possible.
-8. Design rollback and rehearsal steps. Split migrations and feature
-   flags into safe deploy phases.
-9. Report human-run release steps separately from agent-run validation,
-   with risks, rollout gates, and rollback evidence named.
+8. Design rollback and rehearsal. Split migrations and feature flags
+   into safe deploy phases.
+9. Report human-run release steps separately from agent-run
+   validation, naming risks, rollout gates, and rollback evidence.
 
 ## Verification
 
-- [ ] Release unit(s) and versioning policy were identified before any
-      manifest edit, script edit, commit, or tag.
-- [ ] Registry/latest published versions, existing tags, dependency
-      metadata, and committed lockfiles were checked or explicitly marked
-      unavailable.
-- [ ] Bump matches the classification table for each release unit;
-      ambiguous cases erred higher.
-- [ ] Only artifacts in the chosen release unit(s) were bumped; any
-      lockstep bump is backed by repo policy or explicit user approval.
-- [ ] Dependency ranges resolve to published artifacts or to a named
-      human-owned publish order for staged artifacts.
-- [ ] Manifest versions, committed lockfiles, CHANGELOG release header,
-      tag plan, and publish plan agree.
-- [ ] CHANGELOG entry is user-observable and uses the right section.
-- [ ] Packaging dry-run/build/check ran where available before tagging,
-      or the blocker is named.
-- [ ] Every breaking change has a migration note callers can act on.
-- [ ] Every deprecation names a removal version using the
+- [ ] **Classification**: release unit(s) and versioning policy
+      identified before any manifest edit, script edit, commit, or
+      tag; bump matches the classification table; ambiguous cases
+      erred higher; only artifacts in the chosen release unit(s) were
+      bumped (lockstep bumps backed by repo policy or user approval).
+- [ ] **Artifact consistency**: registry/latest versions, existing
+      tags, dependency metadata, and committed lockfiles checked or
+      explicitly marked unavailable; manifest versions, lockfiles,
+      CHANGELOG release header, tag plan, and publish plan all agree;
+      CHANGELOG entry is user-observable and in the right section.
+- [ ] **Packaging proof**: packaging dry-run/build/check ran where
+      available before tagging, or the blocker is named; dependency
+      ranges resolve to published artifacts or to a named human-owned
+      publish order; every breaking change has a migration note;
+      every deprecation names a removal version using the
       language-native primitive where available.
-- [ ] No deploy, rollback, promotion, approval, production config,
-      feature flag, DNS, infrastructure apply, or shared-environment
-      mutation was executed by the agent.
-- [ ] Human-run release steps are clearly separated from agent-run
+- [ ] **Human execution boundary**: no deploy, rollback, promotion,
+      approval, production config, feature flag, DNS, infrastructure
+      apply, or shared-environment mutation was executed by the agent;
+      human-run release steps are clearly separated from agent-run
       checks.
-- [ ] Merge gates run the repo's canonical lint, typecheck, test, and
-      security checks.
-- [ ] Rollback path is documented; migration rollout is split into
-      expand/backfill/switch/contract where needed.
-- [ ] Feature flags have owner, expiry, cleanup issue, and safe
-      default-on-failure.
+- [ ] **Gates / rollback / flags**: merge gates run the repo's
+      canonical lint, typecheck, test, and security checks; rollback
+      path is documented and migration rollout is split into
+      expand/backfill/switch/contract where needed; feature flags have
+      owner, expiry, cleanup issue, and safe default-on-failure.
 
 ## Tripwires
 

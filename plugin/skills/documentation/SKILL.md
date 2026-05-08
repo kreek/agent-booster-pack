@@ -36,13 +36,11 @@ description: Use for documentation, READMEs, guides, ADRs, runbooks, API docs, c
 4. Write the why, context, and tradeoffs; let code/tests/schemas prove
    mechanics.
 5. Delete stale docs when you cannot fix them now.
-6. Comments explain why and how when that context is not obvious from
-   names, types, schemas, tests, or local structure. Comment
-   non-obvious business rules, domain constraints, safety invariants,
-   protocol or lifecycle assumptions, and workarounds. Prefer encoding
-   the rule in a name, type, function, schema, or test first; add a
-   comment when the reason still is not locally obvious. Avoid
-   comment-count targets and line-by-line narration.
+6. Comments explain why and how when names, types, schemas, tests, or
+   local structure cannot. Encode the rule in a name, type, function,
+   schema, or test first; add a comment only when the reason still
+   isn't locally obvious. Avoid comment-count targets and line-by-line
+   narration. (Verification names which subjects deserve a comment.)
 7. Runbooks are operational artifacts: symptom, diagnosis,
    remediation, verification, escalation.
 8. Large project documentation uses Material for MkDocs by default,

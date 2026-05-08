@@ -27,10 +27,6 @@ recoverable, scoped, and honest.
 
 ## Core Ideas
 
-The harness baseline already covers: never commit on `main`/`master`, atomic
-commits, never rewrite shared history, never `--no-verify` or bare
-force-push, no commit/branch creation without ask. ABP adds:
-
 1. Inspect before mutation: status, staged state, diff stats, branch,
    upstream, merge/rebase state, and recent log. Stop on unexpected state.
 2. Name files explicitly when staging; never `git add .` or `git add -A` in
@@ -62,10 +58,10 @@ force-push, no commit/branch creation without ask. ABP adds:
 
 ## Verification
 
-- [ ] `git status --short` is clean or only contains explicitly deferred work.
+- [ ] Final status is known and scoped: tree is clean or explicitly deferred,
+      no files staged outside the approved group, no unresolved merge/rebase
+      state or conflict markers.
 - [ ] Every commit subject completes "When applied, this commit will \_\_\_".
-- [ ] No file was staged outside the approved group.
-- [ ] Working tree has no unresolved merge/rebase state or conflict markers.
 - [ ] Rewritten history was local/solo or explicitly approved; force pushes
       used lease/inclusion protection.
 - [ ] `range-diff` or log inspection confirms intended commits remain; a

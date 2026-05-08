@@ -79,21 +79,20 @@ description: Use for accessible UI, WCAG, ARIA, keyboard, focus, contrast, and i
 - [ ] WCAG 2.2 AA-relevant criteria are satisfied or gaps are named.
 - [ ] Native controls/semantics are used where possible; ARIA is
       minimal and correct.
-- [ ] Keyboard-only use reaches every interactive control in logical
-      order.
-- [ ] Focus is visible, not obscured, and restored after
-      modal/overlay close.
-- [ ] Text contrast, non-text contrast, target size, and reflow are
-      checked.
-- [ ] Dragging has a single-pointer alternative; multi-step flows avoid
-      redundant entry; authentication does not require cognitive tests.
+- [ ] Keyboard/focus: every interactive control reachable in logical
+      order; focus visible, not obscured, restored after modal/overlay
+      close.
+- [ ] Visual perception: text contrast, non-text contrast, target
+      size, and reflow checked.
+- [ ] User preferences: reduced motion, forced colors, contrast, and
+      dark mode all work.
 - [ ] Forms have labels, grouped controls where needed, and
       field-linked errors.
-- [ ] Reduced motion, forced colors, contrast preferences, and dark
-      mode are not broken.
-- [ ] Automated tooling was run, and manual keyboard checks were
-      performed; screen-reader behavior was checked for custom
-      controls, dialogs, menus, tabs, forms, and live/status updates.
+- [ ] Dragging has a single-pointer alternative; multi-step flows avoid
+      redundant entry; authentication does not require cognitive tests.
+- [ ] Automated tooling was run, manual keyboard checks were performed,
+      and screen-reader behavior was checked on custom controls,
+      dialogs, menus, tabs, forms, and live/status updates.
 
 ## Handoffs
 

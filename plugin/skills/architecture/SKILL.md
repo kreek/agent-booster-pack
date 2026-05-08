@@ -9,9 +9,6 @@ description: Use for architecture decisions, module boundaries, coupling, layeri
 
 `ORGANIZE BY WHAT CHANGES TOGETHER. BOUNDARIES EXPOSE CONTRACTS, NOT INTERNAL STEPS.`
 
-If a single feature requires editing four files in four directories every time
-it changes, the structure is fighting the work.
-
 ## When to Use
 
 - Choosing between domain/feature-oriented organization and horizontal
@@ -42,10 +39,10 @@ it changes, the structure is fighting the work.
    controller/service/repository/DTO splits are useful at real technical
    boundaries; they are harmful when they scatter one behavior across many
    files by default.
-3. Use DDD tactically, not ceremonially. The language, states, invariants,
-   and workflow boundaries are the load-bearing part. Formal aggregates,
-   repositories, factories, and domain services are optional and must earn
-   their keep.
+3. Use DDD tactically, not ceremonially:
+   - Load-bearing: domain language, states, invariants, workflow boundaries.
+   - Optional (must earn their keep): aggregates, repositories, factories,
+     domain services.
 4. Hide volatile design decisions behind small surfaces, not flowchart steps.
    Module boundaries are about what callers don't need to know, not about
    sequencing.

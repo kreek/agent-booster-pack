@@ -55,9 +55,10 @@ platform-specific guidance, since the threat model differs.
 ## Workflow
 
 1. Map actors, assets, entry points, trust boundaries, and data flows.
-2. Review authentication, authorization, input validation, output
-   encoding, secrets, errors, logs, dependencies, SSRF / egress paths,
-   and (for agent systems) tool surface and prompt-injection vectors.
+2. Review across these domains: identity/access (authn/authz),
+   input/output (validation, encoding), secrets/logging (errors,
+   redaction), dependencies/CI, egress (SSRF), and — for agent
+   systems — tool surface and prompt-injection vectors.
 3. Before implementing security-sensitive behavior, identify the
    framework primitive, provider SDK, or maintained library that owns the
    problem. If custom logic is unavoidable, document the threat model,
@@ -106,13 +107,11 @@ platform-specific guidance, since the threat model differs.
       primitives. Any custom implementation has a documented need,
       threat model, and negative tests.
 - [ ] Custom security logic (input sanitisers, prototype guards,
-      validators, redaction helpers, bespoke crypto wrappers) follows
-      the `proof` skill's Proof Contract with one specialisation: the
-      named check is a **negative test** that fails on the unguarded
-      code and passes with the guard. If the negative test cannot be
-      written, the guard is illusory — use a maintained library or
-      remove the guard rather than ship a check that doesn't actually
-      block the threat.
+      validators, redaction helpers, bespoke crypto wrappers) ships
+      with a **negative test** that fails on the unguarded code and
+      passes with the guard. If the negative test can't be written,
+      the guard is illusory — use a maintained library instead. See
+      `proof` for the Proof Contract.
 - [ ] Tokens validated with pinned `alg` from configuration / JWKS, not
       from the token header. JWT or PASETO is fine; alg-pinning is what
       matters. See `secrets.md` and `api-and-auth.md`.
@@ -135,8 +134,8 @@ platform-specific guidance, since the threat model differs.
 | "It's a GET, no need for CSRF" | The state-changing GET is the bug. Convert to POST/PUT/DELETE, then add the CSRF check. | True read-only GET with no side effects. |
 | "We strip dangerous tags from the HTML" | Use a vetted sanitiser (DOMPurify, Bleach, sanitize-html). | Output is rendered as text, not HTML, and the framework auto-escapes. |
 | "This token / crypto / auth helper is small" | Use the platform's maintained security library or provider SDK; custom code needs a threat model and negative tests first. | Thin adapter around a vetted library with no security decision of its own. |
-| "I'll add a `__proto__` / prototype-pollution guard" | Many guards (e.g. a `getPrototypeOf` check before `clone[key] = …`) still walk the prototype chain. Write the negative test that mutates `__proto__` and asserts `Object.prototype` is unchanged **first**; if it can't fail without your guard, the guard is doing nothing. Prefer `Object.create(null)` maps, `Map`, or a vetted merge library. | The negative test is in the diff and demonstrably fails without the guard. |
-| "Just trust `new URL` — if `url.origin` matches we're fine" | The WHATWG URL parser leniently normalizes `https:host`, `https:/host`, `//host`, backslash-prefixed and percent-encoded variants to forms that pass origin comparison. Validate the **input string form** before parsing: explicit `https://` literal, no leading `//`, no `\` or encoded `%2f` `%5c`, no userinfo. Negative-test against `https:host`, `https:/host`, `//evil`, `\\evil`, `https://user:pass@host`, `javascript:alert(1)`, `/path/%2f%2fevil`. See `references/web-app.md` (Open redirect). | The framework's parser rejects these forms in strict mode and the negative tests prove it. |
+| "I'll add a `__proto__` / prototype-pollution guard" | Many guards still walk the prototype chain. Write the negative test that mutates `__proto__` and asserts `Object.prototype` is unchanged **first**; if it can't fail without your guard, the guard is doing nothing. Prefer `Object.create(null)` maps, `Map`, or a vetted merge library. See `references/file-and-input.md` for failure modes. | The negative test is in the diff and demonstrably fails without the guard. |
+| "Just trust `new URL` — if `url.origin` matches we're fine" | The WHATWG URL parser leniently normalizes `https:host`, `//host`, backslash-prefixed and percent-encoded variants to forms that pass origin comparison. Validate the **input string form** before parsing (explicit `https://`, no leading `//`, no `\`/`%2f`/`%5c`, no userinfo) and negative-test against the open-redirect inputs in `references/web-app.md`. | The framework's parser rejects these forms in strict mode and the negative tests prove it. |
 | "Low severity, ship and patch later" | Fix now or document explicit risk acceptance before merge. | Triage-only task that is not shipping code. |
 | "The input source is trusted" | Trace the trust chain and validate before dangerous sinks. | Cryptographically verified internal protocol with tested schema enforcement. |
 | "Just this one secret" | Stop and remove the secret from the diff/history path before continuing. Rotate the credential. | Placeholder value that cannot authenticate anywhere. |
@@ -160,24 +159,20 @@ platform-specific guidance, since the threat model differs.
 
 ## References
 
-- `references/owasp-top-10.md`: per-category mitigations, edition-stamped.
-- `references/secrets.md`: secrets, tokens, passwords, MFA, sessions,
-  service identity, CI identity.
-- `references/web-app.md`: CSRF, XSS / CSP, security headers, cookies,
-  clickjacking, open redirect, mixed content / SRI, CORS.
-- `references/api-and-auth.md`: OAuth / OIDC client and server, JWT /
-  JWKS validation, API keys, webhook HMAC, BOLA / BFLA, rate limiting.
-- `references/ssrf-and-egress.md`: SSRF mitigation patterns,
-  block / allowlist, DNS rebinding, cloud-metadata defence, egress
-  controls.
-- `references/file-and-input.md`: file upload, path traversal, ZIP slip,
-  XXE, deserialisation, mass assignment, ReDoS, parser differentials.
+- `references/owasp-top-10.md`: per-category mitigations.
+- `references/secrets.md`: secrets, tokens, MFA, sessions, identity.
+- `references/web-app.md`: CSRF, XSS/CSP, headers, cookies, redirects,
+  CORS.
+- `references/api-and-auth.md`: OAuth/OIDC, JWT/JWKS, API keys,
+  webhook HMAC, BOLA/BFLA, rate limiting.
+- `references/ssrf-and-egress.md`: SSRF, allowlist, DNS rebinding,
+  cloud-metadata defence, egress controls.
+- `references/file-and-input.md`: uploads, traversal, ZIP slip, XXE,
+  deserialization, mass assignment, ReDoS, parser differentials.
 - `references/ai-agent.md`: prompt injection, tool sandboxing, output
-  handling, RAG threats, agent supply chain.
-- `references/infra.md`: container hardening, Kubernetes baseline,
-  cloud baseline, IaC and image scanning, CI/CD identity, dependency
-  confusion, TLS.
-- `references/dep-audit.md`: per-ecosystem dependency-audit command
-  table.
-- `references/secrets-scan.md`: detecting credential leaks in source,
-  history, and the working tree.
+  handling, RAG, supply chain.
+- `references/infra.md`: containers, Kubernetes, cloud baseline, IaC,
+  CI/CD identity, dependency confusion, TLS.
+- `references/dep-audit.md`: per-ecosystem dependency-audit commands.
+- `references/secrets-scan.md`: credential leak detection in source,
+  history, and working tree.

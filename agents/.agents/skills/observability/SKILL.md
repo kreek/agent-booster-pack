@@ -43,10 +43,9 @@ description: Use for observability, logs, metrics, traces, health checks, dashbo
 
 1. Identify the user-facing path, dependency, queue, or resource being
    observed. Choose RED for request paths, USE for resources.
-2. Add structured logs, metrics, and spans using the project's
-   conventions. For logging changes, read `references/logging.md` and
-   define event names, required fields, level policy, and safe payload
-   rules.
+2. Add structured logs, metrics, and spans per project conventions;
+   for logging changes, load `references/logging.md` to set event
+   names, required fields, level policy, and payload rules.
 3. Bound labels and high-cardinality log fields; redact sensitive
    fields at the source. Add dashboards that answer "is it broken?"
    and "where?" quickly. Add alerts only when action is clear and a
@@ -70,11 +69,8 @@ description: Use for observability, logs, metrics, traces, health checks, dashbo
 - [ ] Alerts link to runbooks with immediate action and escalation.
 - [ ] Dashboards answer health, latency, errors, saturation, and
       dependency state.
-
-## Risk Tier
-
-For prototypes, record what production observability is intentionally
-deferred. Before real users, promote the path to the full checklist.
+- [ ] For prototypes, deferred observability is recorded and the path
+      is promoted to the full checklist before real users.
 
 ## Handoffs
 

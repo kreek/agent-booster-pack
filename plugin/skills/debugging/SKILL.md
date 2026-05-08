@@ -71,8 +71,7 @@ description: Use to debug failures, reproduce symptoms, isolate causes, inspect 
 
 ## Handoffs
 
-- Use `proof` when a fix claim needs explicit evidence.
-- Use `proof` for the regression test shape.
+- Use `proof` for fix-claim evidence and the regression test shape.
 - Use `git-workflow` for `git bisect`, reflog recovery, or conflict-heavy
   debugging.
 - Use `observability` when the right evidence must come from logs,

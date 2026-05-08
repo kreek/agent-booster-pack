@@ -148,17 +148,13 @@ next action.
    engineering lens without loading that skill body. If two skills conflict,
    prefer safety, data integrity, correctness, proof, and user trust over
    convenience or style.
-7. For non-trivial implementation, follow the named completion loop:
-   implement -> self-review diff -> fix findings -> documentation
-   check -> proof -> final scoped claim. The documentation check asks
-   whether changed behavior, setup, config, APIs, operations, domain
-   rules, or maintainer expectations need updated docs, examples, or
-   explanatory comments before proof. Treat agent-generated code as
-   untrusted: a second pass by the same agent reliably surfaces bugs,
-   dead code, coupling, and missed edge cases the implementation pass
-   overlooks. Trivial edits, one-liners, typo fixes, formatting, and
-   mechanical metadata changes that exited at step 1 skip this loop;
-   do not spend tokens manufacturing a documentation check for them.
+7. For non-trivial implementation, follow the completion loop:
+   implement → self-review diff (`code-review`) → fix findings →
+   documentation check → `proof` → final scoped claim. The
+   documentation check asks whether changed behavior, setup, config,
+   APIs, operations, domain rules, or maintainer expectations need
+   updated docs, examples, or explanatory comments before proof.
+   Trivial edits that exited at step 1 skip this loop.
 8. Finish by naming what was proven, what remains unproven, and what a
    human should review or decide. Explain what was built or changed, why
    it is better than what it replaced, and/or what it enables next. If
@@ -173,34 +169,28 @@ next action.
 
 ## Verification
 
-- [ ] The selected skills match the actual quality and risk profile, not a
-      generic checklist.
-- [ ] The work is scoped to the user's goal and local project
+- [ ] **Skill selection**: smallest useful set chosen by quality and
+      risk profile, not a generic checklist; correctness, safety,
+      accessibility, performance, and operability claims are routed to
+      the relevant skill.
+- [ ] **Scope**: work matches the user's goal and local project
       conventions.
-- [ ] Correctness, safety, accessibility, performance, or operability
-      claims are routed to the relevant skill.
-- [ ] Completion claims are backed by `proof` evidence or reported as
-      unproven.
-- [ ] User-not-named elaborations (extra checks, extra indexes, extra
-      wrappers, extra abstractions the requirement did not call for)
-      each have a named proof obligation that has been discharged or are
-      reported as unproven. Refactors and reorganisations counted by the
-      diff do not require enumeration; only behavior-bearing
-      elaborations do.
-- [ ] Non-trivial implementation followed the completion loop:
-      implement -> self-review diff -> fix findings -> documentation
-      check -> proof -> final scoped claim.
-- [ ] When the completion loop applied, documentation needs were
-      checked after review: changed behavior, setup, config, APIs,
-      operations, domain rules, and maintainer expectations either have
-      the right source of truth or were explicitly left unchanged.
-- [ ] Human decisions and tradeoffs are surfaced instead of buried in
-      implementation details.
-- [ ] Durable interfaces were identified before implementation; each proposed
-      interface/contract received user approval or was explicitly ruled out of
-      scope.
-- [ ] The final response explains the change's value or future
-      enablement, not only the files touched.
+- [ ] **Proof**: completion claims are backed by `proof` evidence or
+      reported as unproven; user-not-named behavior-bearing
+      elaborations (extra checks, indexes, wrappers, abstractions)
+      each have a named proof obligation discharged or reported
+      unproven (refactors/reorganisations counted by the diff don't
+      require enumeration).
+- [ ] **Human decisions**: tradeoffs are surfaced rather than buried
+      in implementation details.
+- [ ] **Durable interfaces**: identified before implementation; each
+      proposed contract received user approval or was explicitly ruled
+      out of scope.
+- [ ] **Completion loop** (when non-trivial): implement → self-review
+      → fix findings → documentation check → proof → final scoped
+      claim; documentation needs were checked after review.
+- [ ] **Final value claim**: the response explains the change's value
+      or future enablement, not only the files touched.
 
 ## Tripwires
 

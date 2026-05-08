@@ -14,10 +14,9 @@ description: Use for performance, profiling, latency, throughput, allocation, ca
 - Diagnosing slowness, optimizing latency/throughput/allocation,
   reading profiles, designing benchmarks, investigating p99/p99.9, or
   deciding whether a performance change is worth it.
-- Adding, reviewing, tuning, or debugging application, database,
-  Redis/Memcached, CDN, browser, or edge caches.
-- Investigating stale data, stampedes, hot keys, cache misses, or
-  cache-related latency.
+- Adding, reviewing, tuning, or debugging caches (application,
+  database, Redis/Memcached, CDN, browser, edge), including stale
+  data, stampedes, hot keys, and miss latency.
 
 ## When NOT to Use
 
@@ -37,9 +36,12 @@ description: Use for performance, profiling, latency, throughput, allocation, ca
    network wait are different problems.
 6. Micro-benchmarks prove local mechanics, not end-to-end wins.
 7. Keep complexity only when the measured gain justifies it.
+
+For caches:
+
 8. No invalidation story, no cache.
-9. Cache keys encode freshness, tenant, permissions, locale, and
-   version where those affect the value.
+9. Keys encode freshness, tenant, permissions, locale, and version
+   where those affect the value.
 10. Prefer event/key-based expiration for correctness; use TTL as a
     safety net, not the primary truth.
 11. Every hot key needs stampede protection.
@@ -70,18 +72,16 @@ description: Use for performance, profiling, latency, throughput, allocation, ca
 - [ ] Load generator avoids coordinated omission for latency work.
 - [ ] Adjacent metrics did not regress enough to erase the win.
 - [ ] Added complexity is justified by measured improvement.
-- [ ] Cache invalidation owner, trigger, and stale tolerance are
-      documented where caching is involved.
-- [ ] Cache keys include all inputs that change the value and avoid
-      secrets/raw PII.
-- [ ] TTL has jitter where many entries can expire together.
+- [ ] Cache invalidation is specified: owner/trigger/stale tolerance
+      documented; TTL has jitter where many entries can expire
+      together; negative caching is intentional and bounded.
+- [ ] Cache keys include all inputs that change the value and exclude
+      secrets/raw PII unless the cache is treated as sensitive storage.
 - [ ] Hot keys are protected by singleflight, locking, probabilistic
       early refresh, or equivalent.
-- [ ] Negative caching is intentional and bounded.
-- [ ] Cache metrics exist for hit rate, miss latency, eviction rate,
-      memory, and refresh errors.
-- [ ] Tests cover stale data and invalidation, not only the warm-cache
-      happy path.
+- [ ] Cache metrics cover hit rate, miss latency, eviction, memory,
+      and refresh errors; tests cover stale data and invalidation, not
+      only the warm-cache happy path.
 
 ## Handoffs
 

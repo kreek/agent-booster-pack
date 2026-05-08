@@ -101,71 +101,49 @@ description: Use for design discussions that map contracts, resolve questions, a
    proof obligations. Then hand off downstream skills with that artifact as
    their input.
 
-## Conversation Shape
-
-Use this structure in chat before writing the RFC or ADR:
-
-1. **Goal** — caller-language description in one or two sentences.
-2. **Surface today** — existing contracts and constraints, with `file:line`
-   evidence. For greenfield work, adjacent conventions and patterns.
-3. **Possible shape** — proposed contracts, data shapes, states, and
-   invariants, concrete enough to compare but not a task list.
-4. **Tradeoffs** — compatibility, migration, ergonomics, operational risk,
-   and what becomes easier or harder.
-5. **Questions** — decisions only the human can make, including approval,
-   revision, or rejection of each durable interface.
-6. **Current agreement** — resolved decisions, out-of-scope boundaries, and
-   proof obligations to carry into planning or implementation.
-
 ## Final Artifact
 
-After the discussion converges, create or update one persistent design artifact:
+After the discussion converges, capture the agreed design as the
+repo's standard ADR or RFC:
 
-1. **ADR** — use when one architectural or contract decision has been accepted.
-   Include status, date, context, decision, consequences, and links to the
-   code contracts that motivated it.
-2. **RFC** — use when the design is still a proposal, spans multiple decisions,
-   needs review, or carries meaningful rollout/migration questions. Include
-   problem, goals, non-goals, current surface, proposed surface, data shapes
-   and invariants, tradeoffs, open follow-ups, and proof obligations.
+- **ADR** for a single accepted architectural or contract decision.
+- **RFC** for proposals spanning multiple decisions or rollout/
+  migration questions.
 
-Use the repo's existing RFC/ADR location and naming convention. If none exists,
-ask the human before choosing a path. The artifact is the durable record of the
-completed discussion; it is not the starting point for the discussion.
+Use the repo's existing convention for location, naming, and required
+sections; if none exists, ask the human before choosing a path. The
+artifact records the completed discussion, not the start of one.
 
 ## Verification
 
-- [ ] No `whiteboard` or `docs/whiteboard/...` file was created.
-- [ ] No persistent design artifact was created before the design discussion
-      converged.
-- [ ] After convergence, the agreed design was captured as an RFC or ADR in
-      the repo's convention, or the human was asked where it should live.
-- [ ] The interaction stayed conversational: the agent asked meaningful
-      decision questions and revised the design with the user's answers.
-- [ ] Every contract that will change is named: signature, schema, endpoint,
-      event, CLI flag, config key, or file format.
-- [ ] Every durable interface has an approved interface/contract before
-      implementation starts.
-- [ ] Each contract has its current shape with `file:line` evidence (or
-      "doesn't exist yet" with adjacent conventions cited).
-- [ ] Each contract has its proposed shape shown concretely, not in prose.
-- [ ] `domain-modeling` lens applied: new and changed states, transitions, and
-      invariants named; illegal states unrepresentable in the proposed shape.
-- [ ] When more than one service or component is touched, a Mermaid diagram
-      or equivalent lightweight sketch shows the components and contracts
-      between them in the conversation.
-- [ ] Resolved decisions and open questions are listed separately.
-- [ ] Open questions that block design direction are answered before moving to
-      implementation.
-- [ ] Three readers (the human, the agent, a reviewer) can independently
-      summarize "what is different about the system after this lands?" in two
-      sentences and match each other.
-- [ ] The discussion names proof obligations that `proof` will turn into
-      Proof Contracts.
-- [ ] The human has agreed to move from design discussion into RFC/ADR capture,
-      planning, or implementation before any code lands.
-- [ ] No implementation code for a durable interface was written before user
-      sign-off.
+- [ ] **No premature artifact**: no `whiteboard` or
+      `docs/whiteboard/...` file; no persistent design artifact before
+      convergence; after convergence the agreed design was captured as
+      an RFC or ADR in the repo's convention, or the human was asked
+      where it should live.
+- [ ] **Conversational**: the agent asked meaningful decision
+      questions and revised the design with the user's answers.
+- [ ] **Contracts named**: every changing contract is named
+      (signature, schema, endpoint, event, CLI flag, config key, or
+      file format); each has current shape with `file:line` evidence
+      (or "doesn't exist yet" with adjacent conventions cited); each
+      has a proposed shape shown concretely, not in prose.
+- [ ] **Domain lens**: new and changed states, transitions, and
+      invariants named; illegal states unrepresentable in the proposed
+      shape.
+- [ ] **Diagram**: when more than one service or component is touched,
+      a Mermaid diagram or equivalent lightweight sketch shows
+      components and contracts between them in the conversation.
+- [ ] **Decisions and questions**: resolved decisions and open
+      questions are listed separately; questions that block design
+      direction are answered before moving to implementation.
+- [ ] **Proof obligations**: the discussion names obligations that
+      `proof` will turn into Proof Contracts.
+- [ ] **Sign-off**: every durable interface has an approved contract
+      before implementation; no implementation code for a durable
+      interface was written before user sign-off; the human agreed to
+      move from design discussion into RFC/ADR capture, planning, or
+      implementation before any code lands.
 
 ## Tripwires
 
@@ -185,21 +163,18 @@ completed discussion; it is not the starting point for the discussion.
 
 ## Handoffs
 
-- Use `domain-modeling` to formalize new invariants, states, transitions, and
-  parse-at-boundary discipline named in the discussion and RFC/ADR.
-- Use `architecture` when the discussion reveals a boundary problem — module
-  locality, layering, or DDD tactical patterns that need their own decision
-  before the contracts are drawn.
-- Use `api` when the changing surface is a public HTTP API; the discussion
-  names the contract, `api` shapes the wire-level details.
-- Use `database` when the changing surface includes schema, migrations,
-  indexes, transactions, or production data access.
-- Use `async-systems` when the changing surface includes events, queues,
-  streams, ordering, or delivery guarantees.
-- Use `proof` to convert RFC/ADR proof obligations and named contracts into
-  Proof Contracts before completion.
-- Use `documentation` to capture resolved decisions as ADRs when the
-  rationale is not recoverable from code or commit history.
+- `domain-modeling`: invariants, states, transitions, parse-at-boundary
+  discipline.
+- `architecture`: boundary problems revealed in the discussion
+  (locality, layering, DDD patterns).
+- `api`: HTTP wire-level details after the contract is named.
+- `database`: schema, migrations, indexes, transactions, production
+  data access.
+- `async-systems`: events, queues, streams, ordering, delivery
+  guarantees.
+- `proof`: convert RFC/ADR proof obligations into Proof Contracts.
+- `documentation`: capture decisions as ADRs when rationale isn't
+  recoverable from code or commit history.
 
 ## References
 

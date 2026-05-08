@@ -38,11 +38,10 @@ description: Use for refactoring, behavior-preserving change, legacy seams, test
 7. Do not assume backward compatibility is free or required. Ask which
    callers, data, and releases must keep working before adding shims,
    dual paths, or migration complexity.
-8. Simplification is refactoring when behavior must stay the same. Remove
-   accidental complexity only after naming the behavior being preserved and
-   the coupling being reduced. Use workflow's
-   `references/simple-not-easy.md` when shorter code, new helpers, or removed
-   paths might hide state, compatibility, ownership, or proof risk.
+8. Simplification is refactoring: remove accidental complexity only after
+   naming the behavior preserved and the coupling reduced. Load workflow's
+   `references/simple-not-easy.md` when shorter code, new helpers, or
+   removed paths might hide state, compatibility, ownership, or proof risk.
 
 ## Workflow
 
@@ -95,9 +94,8 @@ description: Use for refactoring, behavior-preserving change, legacy seams, test
 
 ## Handoffs
 
-- Use `proof` when refactor safety depends on explicit preservation
-  evidence.
-- Use `proof` for characterization and boundary tests.
+- Use `proof` for refactor preservation evidence, characterization, and
+  boundary tests.
 - Use `git-workflow` to group resulting changes cleanly.
 - Use `domain-modeling` when the refactor is mainly about untangling
   effects or domain shape.

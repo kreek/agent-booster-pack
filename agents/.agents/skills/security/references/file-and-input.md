@@ -125,3 +125,32 @@ risk.
   systems are deserialisation, not parsing; covered above. JSON: duplicate
   keys are parser-defined; pick a parser that rejects them or document the
   rule.
+
+## Prototype pollution
+
+User-controlled JSON merged into an object via deep-clone, deep-merge,
+or recursive copy can mutate `Object.prototype` if the merger walks the
+prototype chain. Many hand-rolled guards are illusory — for example, a
+`getPrototypeOf` check before `clone[key] = …` still walks the chain
+and lets `__proto__` keys land on the target. Once `Object.prototype`
+gains an attacker-controlled property (`isAdmin`, `polluted`, etc.),
+every plain object in the runtime inherits it.
+
+Write the negative test first: feed an input like
+`{"__proto__": {"polluted": 1}}` (and the equivalent
+`{"constructor": {"prototype": {"polluted": 1}}}`) through your merger
+and assert `Object.prototype.polluted` is `undefined` afterwards. If
+the test passes without your guard, the guard isn't doing anything; if
+the test can't be written, the guard is illusory.
+
+Prefer the structural fix over a guard:
+
+- `Object.create(null)` maps for untrusted key/value containers — no
+  prototype to pollute.
+- `Map` or `Set` instead of plain objects when keys are arbitrary.
+- Maintained merge libraries with current advisories checked rather
+  than hand-rolled recursion.
+
+If a guard is genuinely required, deny the dangerous keys at the parse
+boundary (`__proto__`, `prototype`, `constructor`) and ship the
+negative test alongside it.

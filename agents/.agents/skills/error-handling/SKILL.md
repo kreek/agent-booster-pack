@@ -34,19 +34,16 @@ description: Use for error handling, error types, propagation, retries, user mes
    recoverable cases.
 5. Classify errors as user-correctable, transient, or programmer/system
    faults.
-6. For REST APIs, translate failures by origin at the boundary: request
-   problems → `4xx`, upstream dependency failures → `502`/`503`/`504`,
-   unexpected application faults → `500`. Use `api` for the full
-   status-code taxonomy.
+6. For REST APIs, translate failures by origin at the boundary; use
+   `api` for the full status-code taxonomy.
 7. User-facing messages are safe and actionable; internal errors keep
    diagnostic detail under a correlation ID.
-8. Retrying is only for idempotent, transient failures. Retry in one
-   layer only, with a cap, jitter/backoff, and a budget.
-9. Remote calls need finite connect/read or equivalent timeouts derived
-   from observed latency, not defaults.
-10. Circuit breakers, bulkheads, and load shedding protect callers from
-   critical dependency failure.
-11. Panics/assertions are for impossible states and process boundaries,
+8. Remote calls: set finite connect/read timeouts derived from
+   observed latency (not defaults); retry only idempotent transient
+   failures, in one layer, with cap, jitter/backoff, and budget; add
+   circuit breakers, bulkheads, or load shedding to protect callers
+   from critical dependency failure.
+9. Panics/assertions are for impossible states and process boundaries,
    not routine control flow.
 
 ## Workflow
@@ -116,12 +113,7 @@ description: Use for error handling, error types, propagation, retries, user mes
 
 ## References
 
-- Go error wrapping: <https://go.dev/blog/go1.13-errors>
 - `../api/references/rest-error-status-codes.md`: local REST error
   status-code decision tree.
-- Rust error handling:
-  <https://doc.rust-lang.org/book/ch09-00-error-handling.html>
-- Dave Cheney, error handling:
-  <https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully>
 - AWS Builders' Library, timeouts/retries/backoff:
   <https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/>

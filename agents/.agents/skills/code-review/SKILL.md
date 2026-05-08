@@ -28,10 +28,6 @@ description: Use to review diffs and PRs for bugs, regressions, edge cases, proo
 
 ## Core Ideas
 
-The harness baseline for review is already: findings first, ordered by
-severity, with file/line anchors; review behavior, not just lines; correctness
-outranks style; do not invent issues. ABP adds:
-
 1. Every review includes a security pass, even when the diff doesn't look
    security-focused.
 2. Every non-trivial "looks fine" claim needs proof evidence or must be
@@ -60,9 +56,9 @@ outranks style; do not invent issues. ABP adds:
 
 1. Resolve the review target. Local: `git diff`, `git diff --cached`, or
    `git diff <base>...HEAD`. GitHub: `gh pr view` for metadata,
-   `gh pr diff --patch` for code, `gh api graphql` to fetch
-   `reviewThreads` (with `isResolved`, `isOutdated`, path, line) when
-   thread state matters; flat `comments` lose thread state.
+   `gh pr diff --patch` for code, and `gh api graphql` for
+   `reviewThreads` when thread state (resolved/outdated, path, line)
+   matters.
 2. Read the intent: what behavior, API, data shape, migration, UI, or
    workflow is supposed to change.
 3. Load the language reference under `references/` for every language in
@@ -100,14 +96,15 @@ outranks style; do not invent issues. ABP adds:
 ## Finding Format
 
 Each finding includes: file/line or PR thread anchor, issue, impact, concrete
-fix direction, and evidence or missing proof. Severity tags ABP uses on top
-of the harness's severity ordering: **Critical** for exploitable security,
-data loss, broken auth, destructive migration, or production outage risk;
-**High** for incorrect behavior, broken contract, missing authorization,
-race, or serious regression; **Medium** for maintainability, error handling,
-observability, compatibility, or test gaps likely to cause future defects;
-**Low** for non-blocking clarity issues — skip unless asked. Use questions
-only for ambiguity that blocks a finding or fix.
+fix direction, and evidence or missing proof. Use questions only for
+ambiguity that blocks a finding or fix.
+
+| Severity | When to use |
+|---|---|
+| Critical | Exploitable security, data loss, broken auth, destructive migration, production outage risk |
+| High | Incorrect behavior, broken contract, missing authorization, race, serious regression |
+| Medium | Maintainability, error handling, observability, compatibility, or test gaps likely to cause defects |
+| Low | Non-blocking clarity — skip unless asked |
 
 ## Verification
 
@@ -145,7 +142,7 @@ only for ambiguity that blocks a finding or fix.
 | "This compatibility shim is harmless" | Require owner, removal condition, and proof that callers still need it, or remove it in a proven refactor. | Public contract or migration policy explicitly requires it. |
 | "I trust this author" | Review the diff with the same lenses; trust changes tone, not coverage. | Pair review where the same evidence was already inspected in this turn. |
 | "Skip the security pass this once" | Run the security lens and name why it is or is not relevant. | Files are provably outside executable, config, dependency, and data surfaces. |
-| Test file in diff asserts substring presence in a config/Makefile/manifest, asserts a deleted file stays deleted, asserts a trivial constant, or asserts only that a mock was called | Flag as test theater. The test re-encodes the implementation and provides no signal independent of the code it tests; recommend deletion or rewrite to assert a behavior caused by the change. Cross-load the `proof` skill's test-theater tripwires for the matching guidance. | The asserted string is a public contract a downstream consumer parses, or the call itself is the contract under test (e.g. an outbox writer). |
+| Test re-encodes implementation: asserts substring in config/Makefile/manifest, deleted-file absence, trivial constants, or only that a mock was called | Flag as test theater. Recommend deletion or rewrite to assert behavior caused by the change. Load `proof` for the detailed test-theater taxonomy. | Asserted string is a public contract a downstream consumer parses, or the call itself is the contract (e.g. outbox writer). |
 
 ## Handoffs
 
@@ -156,9 +153,8 @@ only for ambiguity that blocks a finding or fix.
   dependencies, or injection risks.
 - Use `database` for migrations, locking, transactions, schema, indexes,
   or production data access.
-- Use `proof` when review claims need explicit proof obligations.
-- Use `proof` for proof obligations, test quality, missing behavior
-  coverage, mocks, or flakes.
+- Use `proof` for review-claim proof obligations, test quality, missing
+  behavior coverage, mocks, and flakes.
 - Use `git-workflow` for branch mechanics and packaging accepted
   fixes.
 

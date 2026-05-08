@@ -51,34 +51,22 @@ description: Use for proof and tests, claims, invariants, behavior specs, edge c
    pipeline or stage seam, parser or serializer edge, validator output,
    middleware boundary, or any function from raw input to a typed or
    normalized representation.
-7. In transformation chains and pipelines, the function call graph is
-   not the test surface. Tests belong at the seams where data shape
-   changes — extract -> transform -> load; raw -> parsed -> validated;
-   request -> middleware-N output -> handler input. Assert shape
+7. In transformation chains, tests belong at the seams where data
+   shape changes, not at every internal function. Assert shape
    (schema, types, key invariants) plus representative values at each
-   seam, plus one end-to-end happy path. A per-function unit test
-   inside the chain is a duplicate of the seam assertion above it
-   unless the function has non-trivial branching, accumulation, or
-   edge-case handling that the seam tests do not exercise. See
-   `references/data-shape-boundaries.md` for worked examples.
-8. Errors are shape changes too. An error envelope (`Result.Err`, HTTP
-   4xx, `ParseError`, `ValidationError`) is a different shape from the
-   success envelope at the same seam, and both deserve assertions. The
-   content of the user-facing error message is a value claim at the
-   outermost seam where the error becomes observable to the consumer:
-   assert the message, code, and structured fields the consumer relies
-   on, not just that an error happened. Per-error-class coverage lives
-   at the seam where the error becomes user-observable, not at every
+   seam, plus one end-to-end happy path. Keep a per-stage test only
+   when the stage has non-trivial branching or accumulated state the
+   seam tests cannot exercise. See `references/data-shape-boundaries.md`
+   for worked examples.
+8. Errors are shape changes too. Assert the user-facing error envelope
+   (message, code, structured fields the consumer relies on) at the
+   outermost seam where the consumer observes it, not at every
    internal function that could raise.
-9. Test placement is a code-organization signal. If a clean seam test
-   is hard to write, the seam is wrong: data and effects are tangled,
-   the boundary is leaking implementation, or the responsibility is
-   split awkwardly across functions. Simplify the code so the seam
-   becomes testable — extract the pure transform, push effects to the
-   edge, name the data shape — rather than adding test ceremony around
-   tangled code. A test that needs many mocks, deep setup, or
-   assertions on private call patterns is reporting that the design
-   needs refactoring, not that the test framework is inadequate.
+9. Test placement is a code-organization signal: if a clean seam test
+   is hard to write, simplify the code (extract pure transforms, push
+   effects to the edge, name the data shape) rather than piling on
+   mocks. A test that needs many mocks or deep setup is reporting a
+   design problem, not a test-framework limit.
 10. One test covers one behavior; if the name needs "and", split it.
 11. Prefer real collaborators until they cross a true system boundary.
     Mock only at edges: clock, network, third-party service, process,
@@ -96,10 +84,8 @@ For every non-trivial engineering claim, record:
 - Data invariant: the data shape, state rule, or type boundary that
   makes bad states impossible or visible.
 - Boundary: where the proof enters — the point at which data shape
-  or values change in a way the claim is about. Common cases: public
-  API, CLI, HTTP endpoint, UI flow, migration preflight, module
-  facade, pipeline or stage seam, parser output, validator output, or
-  reproducible command.
+  or values change in a way the claim is about (see Core Idea 6 for
+  common cases).
 - Check: the executable validation that would fail if the claim were
   false.
 - Evidence: command/result, test name, diff reference, observed
@@ -127,20 +113,19 @@ For every non-trivial engineering claim, record:
 
 ## Before Saying Done
 
-1. Re-read the latest user request and any corrections. Name the acceptance
-   claim in caller language.
-2. Inspect the final diff or touched surface. Confirm the change stayed within
-   scope and did not leave dead paths, stale docs, or unrelated edits behind.
-3. For setup, documentation, API, migration, or config work, check that
-   every named artifact exists by the requested name and that the proof
+1. Re-read the latest user request and corrections; name the
+   acceptance in caller language.
+2. Inspect the final diff: change stays in scope; no dead paths, stale
+   docs, or unrelated edits.
+3. For setup, documentation, API, migration, or config work, confirm
+   each named artifact exists by the requested name and that the proof
    command reads or executes it.
-4. Pick the command or inspection that would catch the failure: focused test,
-   full suite, build, lint/type check, migration check, CLI run, API contract,
-   UI flow, or code review of the diff.
-5. Run the relevant command now, after the last edit. Read the exit code and
-   the output that proves or disproves the claim.
-6. Report the actual state: proven, partially proven, blocked, or unproven.
-   Do not convert a partial check into a complete claim.
+4. Pick the command or inspection that would catch the failure
+   (focused test, full suite, build, lint/type, migration, CLI, API
+   contract, UI flow, or diff review). Run it after the last edit and
+   read the result.
+5. Report the actual state: proven, partially proven, blocked, or
+   unproven. Do not convert partial checks into complete claims.
 
 ## Verification
 
@@ -208,15 +193,13 @@ counts toward whichever claims it actually covers.
   unrepresentable.
 - Use `debugging` when the proof depends on root-cause evidence.
 - Use `api` when the claim is a public contract.
-- Use `refactoring` or `architecture` when test placement reveals a
-  tangled seam that needs simplification before it can be cleanly
-  proven; the inability to write a clean seam test is a code-
-  organization signal, not a test-framework limit.
+- Use `refactoring` for behavior-preservation evidence and when test
+  placement reveals a tangled seam that needs simplification before it
+  can be cleanly proven; pair with `architecture` when the tangle
+  spans module boundaries.
 - Use `error-handling` when the error envelope, message content, or
   recovery contract that proof must assert at the seam is itself
   unsettled; that skill owns the contract, this skill owns the proof.
-- Use `refactoring` when the proof is behavior preservation through
-  structural change.
 - Use `security` when proof requires abuse cases or trust-boundary
   checks.
 

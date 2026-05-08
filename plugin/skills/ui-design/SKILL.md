@@ -9,8 +9,6 @@ description: Use for frontend UI, layouts, components, responsive behavior, visu
 
 `START FROM THE USER TASK AND HIERARCHY; EVERY ELEMENT EARNS ITS PLACE.`
 
-Design quality comes from priority, restraint, and verification, not decoration.
-
 ## When to Use
 
 - Building or materially changing UI layout, components, design systems,
@@ -26,11 +24,6 @@ Design quality comes from priority, restraint, and verification, not decoration.
 - Performance profiling beyond UI design choices; use `performance`.
 
 ## Core Ideas
-
-The harness baseline for frontend already covers: avoid generic AI-look
-decoration, vary typography away from default stacks, do not rely on flat
-single-color backgrounds, ensure pages load on both desktop and mobile,
-preserve established patterns inside an existing design system. ABP adds:
 
 1. One screen has one primary action and a clear information order.
 2. Use a small token system for spacing, type, color, radius, and motion.
@@ -74,13 +67,9 @@ preserve established patterns inside an existing design system. ABP adds:
 
 ## References
 
-- `references/canon.md`: design principles and visual judgment, including
-  product/tool defaults (IBM Carbon, IBM Plex) and common failure modes
-  (marketing hero on a tool, oversized cards, empty-state-while-populated).
-- `references/frameworks.md`: frontend framework tradeoffs (Alpine.js for small
-  interactive surfaces, Svelte/SvelteKit for larger apps).
-- `references/platforms.md`: platform and government design systems (USWDS,
-  GOV.UK, Canada.ca, Apple HIG, Material).
+- `references/canon.md`: design principles, product/tool defaults, common
+  failure modes.
+- `references/frameworks.md`: frontend framework tradeoffs.
+- `references/platforms.md`: platform and government design systems.
 - `references/css.md`: modern CSS capabilities.
-- `references/typography.md`: Bringhurst-informed typography harmonized with
-  Swiss/product UI practice.
+- `references/typography.md`: Bringhurst-informed typography for product UI.

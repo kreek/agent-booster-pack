@@ -31,10 +31,10 @@ will construct it.
 ## Core Ideas
 
 1. Decide data shapes and invariants before writing transformations.
-2. Distinguish identity, state, value, and time. Prefer immutable values,
-   composition, and plain data shapes (records, sums, maps) over inheritance
-   hierarchies or classes that bundle behaviour with mutable state. A class
-   wrapping pure functions is a module.
+2. Distinguish identity, state, value, and time. Prefer immutable values
+   and plain data shapes (records, sums, maps) over inheritance or classes
+   that bundle behavior with mutable state; a class wrapping pure functions
+   is a module.
 3. Split code into data, calculations, and actions; maximize data/calculations
    and minimize actions.
 4. Parse at boundaries into trusted internal shapes; do not pass raw external
@@ -67,9 +67,8 @@ will construct it.
 
 ## Crosscutting Hazards
 
-Two topics cause more boundary bugs than any other: time and money. Both are
-canonical cases of the iron law: illegal states are easy to represent unless
-the type forces care. Load the right reference when either appears in the diff.
+Time and money cause more boundary bugs than any other domain. Load the
+matching reference whenever either appears in the diff.
 
 - `references/dates.md`: when storing, comparing, formatting, serialising, or
   computing on dates / times.
@@ -103,8 +102,8 @@ the type forces care. Load the right reference when either appears in the diff.
 - Use `database` when an invariant identified here must be enforced at the
   schema layer (uniqueness, referential integrity, exclusion). Domain-level
   invariants without DB-level enforcement race under concurrency.
-- Use `proof` when data claims need explicit proof obligations.
-- Use `proof` to prove domain behavior through public boundaries.
+- Use `proof` for data-claim proof obligations and for proving domain
+  behavior through public boundaries.
 - Use `error-handling` for parse failures, Result/Either shape, and error
   context.
 - Use `async-systems` when mutable places or ownership cross task/thread
@@ -121,10 +120,3 @@ the type forces care. Load the right reference when either appears in the diff.
   <https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/>
 - "Effective ML / Make Illegal States Unrepresentable":
   <https://blog.janestreet.com/effective-ml-revisited/>
-- "Designing with Types: Making Illegal States Unrepresentable":
-  <https://fsharpforfunandprofit.com/posts/designing-with-types-making-illegal-states-unrepresentable/>
-- "Railway Oriented Programming":
-  <https://fsharpforfunandprofit.com/rop/>
-- "What Color is Your Function?":
-  <https://journal.stuffwithstuff.com/2015/02/01/what-color-is-your-function/>
-- "The Value of Values": <https://www.infoq.com/presentations/Value-Values/>

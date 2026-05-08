@@ -67,14 +67,13 @@ where the specific resource, actor, and contract are visible.
 
 ## API Evolution
 
-Optional additive changes preserve the existing contract when existing
-calls keep working and existing consumers can ignore the new surface.
-Adding endpoints, optional query parameters, optional fields, and
-optional headers is usually evolutionary. Changing methods, status
-codes, header names/types, required fields, removals, or in-place
-renames breaks the existing contract. Rename by adding the successor,
-keeping the old name, and deprecating it. Prefer extensible object
-shapes over ordered or flat scalar payloads.
+| Safe (additive) | Breaking (needs successor or deprecation path) |
+|---|---|
+| New endpoints, optional fields, optional query params, optional headers, new methods on a resource | Removals, renames, required additions, header type/name changes, status-code changes, semantic changes |
+
+Rename by adding the successor, keeping the old name, and deprecating
+it. Prefer extensible object shapes over ordered or flat scalar
+payloads.
 
 ## HTTP Error Codes
 
@@ -106,8 +105,9 @@ server-origin failures into a client error.
    renames, removals, required additions, status-code changes, and
    semantic changes require a successor contract or deprecation path.
 4. For retryable public mutations, document the idempotency-key
-   contract and prove duplicate submissions cannot create duplicate
-   side effects.
+   contract (scope, replay window, duplicate response, conflict
+   semantics, as in Core Idea 5) and prove duplicate submissions
+   cannot create duplicate side effects.
 5. For request-pipeline concerns, decide whether the behavior belongs in
    middleware, an edge/gateway, or the endpoint handler. Keep
    route-specific business rules out of global middleware.
@@ -125,10 +125,10 @@ server-origin failures into a client error.
       errors.
 - [ ] Errors use a consistent Problem Details-style shape; status codes
       are selected by origin and don't leak implementation detail.
-- [ ] Non-idempotent mutations either accept an idempotency key or are
-      documented as unsafe to retry.
-- [ ] Public idempotency keys define scope, replay window, duplicate
-      response behavior, and conflict semantics.
+- [ ] Non-idempotent mutations either accept an idempotency key (with
+      the contract from Core Idea 5: scope, replay window, duplicate
+      response, conflict semantics) or are documented as unsafe to
+      retry.
 - [ ] Lists and streams have cursor/page-token or equivalent bounded
       pagination with a server-side cap, stable ordering, and explicit
       invalid-token behavior; bad continuation tokens do not silently
@@ -163,10 +163,8 @@ server-origin failures into a client error.
 - Use `architecture` when deciding whether request middleware is a real
   transport boundary or just a horizontal layer that scatters feature
   behavior.
-- Use `async-systems` for SSE/subscription transport and event-stream
-  semantics.
-- Use `async-systems` for idempotent async consumers and delivery
-  guarantees.
+- Use `async-systems` for SSE/subscription transport, event-stream
+  semantics, idempotent async consumers, and delivery guarantees.
 - Use `release` for the actual bump, CHANGELOG, and deprecation
   primitives.
 - Use `documentation` when deciding where API docs live; generated
