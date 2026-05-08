@@ -92,12 +92,13 @@ load them only when they change the outcome.
    criterion the user can accept or revise. Use `documentation` for PRDs,
    specs, issues, user stories, or other requirements artifacts.
 3. Interface Design Gate. When acceptance implies a durable interface (see
-   Core Ideas step 3), present the current interface (or "new interface"),
-   the proposed interface, and why this boundary belongs here. The agent may
-   propose the shape using ABP guidance, but the human must approve, revise,
-   or rule it out before implementation code or detailed file-by-file tasks
-   start. If the human rejects the proposal, continue the design conversation
-   until the interface is accepted, narrowed, or ruled out of scope.
+   Core Ideas step 3), use `contract-first`: present the current interface (or
+   "new interface"), the proposed interface, and why this boundary belongs
+   here. The agent may propose the shape using ABP guidance, but the human
+   must approve, revise, or rule it out before implementation code or detailed
+   file-by-file tasks start. If the human rejects the proposal, continue the
+   design conversation until the interface is accepted, narrowed, or ruled out
+   of scope.
    Skill-specific concerns stack on top after the interface is agreed: `api`
    shapes public HTTP contracts, `database` adds rollout/locking/recovery,
    `async-systems` adds delivery and ordering guarantees, `error-handling`
@@ -110,8 +111,9 @@ load them only when they change the outcome.
    trigger. Use this matrix only for risks that are actually present;
    do not load every row:
    - behavior or contract change -> `proof`, `code-review`;
-   - durable interface or cross-boundary contract -> `whiteboarding`,
-     `architecture` or `data-first` as needed, then user sign-off;
+   - durable interface or cross-boundary contract -> `contract-first`,
+     `whiteboarding`, `architecture` or `data-first` as needed, then user
+     sign-off;
    - auth, secrets, trust boundary, or user-controlled input ->
      `security`, `proof`;
    - persisted data, migrations, transactions, or deletion ->

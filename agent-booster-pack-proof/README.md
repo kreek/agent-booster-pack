@@ -1,6 +1,6 @@
 # agent-booster-pack-proof
 
-A proof-first extension for [Pi](https://pi.dev), the terminal coding agent.
+A proof-first extension and matching full `proof` skill for [Pi](https://pi.dev), the terminal coding agent.
 
 It nudges the agent into a red-green-refactor loop when the next change needs a test. It stays out of the way for docs, config, and exploration.
 

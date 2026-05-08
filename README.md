@@ -30,7 +30,7 @@ for agents that can read `~/.agents/skills/` or do not support plugins.
 
 ### Pi Package Install
 
-Pi is meant to be modular, so ABP for Pi is broken up into three extensions and a skill library.
+Pi is meant to be modular, so ABP for Pi is broken up into three extensions and a general skill library. Each extension ships its matching full skill; the skills package carries the remaining non-runtime skills.
 If you want everything, a meta package will install _all the things_.
 
 #### Meta Package
@@ -39,25 +39,25 @@ If you want everything, a meta package will install _all the things_.
 pi install npm:agent-booster-pack
 ```
 #### Skills
-[`agent-booster-pack-skills`](agent-booster-pack-skills/) All the engineering quality-focused skills, no runtime extension.
+[`agent-booster-pack-skills`](agent-booster-pack-skills/) The general engineering quality-focused skills, no runtime extension. Runtime-owned skills such as `proof`, `contract-first`, and `whiteboarding` ship with their matching extensions.
 ```sh
 pi install npm:agent-booster-pack-skills
 ```
 
 #### Contract-First Extension
-[`agent-booster-pack-contract-first`](agent-booster-pack-contract-first/) Interface Design Gate runtime. Requires human approval of contracts and interfaces to ensure code at the boundaries of components will play well with other components and systems.
+[`agent-booster-pack-contract-first`](agent-booster-pack-contract-first/) Interface Design Gate runtime plus the `contract-first` skill. Requires human approval of contracts and interfaces to ensure code at the boundaries of components will play well with other components and systems.
 ```sh
 pi install npm:agent-booster-pack-contract-first
 ```
 
 #### Proof Extension
-[`agent-booster-pack-proof`](agent-booster-pack-proof/) Make agents prove their work! Not strictly TDD in that tests/specs/proof can land any time during the dev cycle. But it does require proof that the agent has implemented what was asked for.
+[`agent-booster-pack-proof`](agent-booster-pack-proof/) Proof runtime plus the `proof` skill. Make agents prove their work! Not strictly TDD in that tests/specs/proof can land any time during the dev cycle. But it does require proof that the agent has implemented what was asked for.
 ```sh
 pi install npm:agent-booster-pack-proof
 ```
 
 #### Whiteboard Extension
-[`agent-booster-pack-whiteboard`](agent-booster-pack-whiteboard/) Enforces one user-facing question at a time during ABP whiteboarding sessions, activated by `/abp:whiteboard` or `/skill:whiteboarding`.
+[`agent-booster-pack-whiteboard`](agent-booster-pack-whiteboard/) Whiteboarding runtime plus the `whiteboarding` skill. Enforces one user-facing question at a time during ABP whiteboarding sessions, activated by `/abp:whiteboard` or `/skill:whiteboarding`.
 ```sh
 pi install npm:agent-booster-pack-whiteboard
 ```
@@ -247,6 +247,9 @@ they apply:
 - [`workflow`][skill-workflow]: choose the right ABP skills for the task, name
   what is being coupled, keep the work scoped, and connect completion claims to
   proof.
+- [`contract-first`][skill-contract-first]: Interface Design Gate approval for
+  durable function, API, CLI, config, event, schema, file format, or module
+  boundaries before implementation lands.
 - [`proof`][skill-proof]: proof obligations and behavior-focused tests for
   claims about behavior, contracts, invariants, root causes, refactor safety,
   and completion.
@@ -333,6 +336,7 @@ Shared language defaults live in
 [skill-accessibility]: agents/.agents/skills/accessibility/SKILL.md
 [skill-api]: agents/.agents/skills/api/SKILL.md
 [skill-whiteboarding]: agents/.agents/skills/whiteboarding/SKILL.md
+[skill-contract-first]: agents/.agents/skills/contract-first/SKILL.md
 [skill-async-systems]: agents/.agents/skills/async-systems/SKILL.md
 [skill-architecture]: agents/.agents/skills/architecture/SKILL.md
 [skill-data-first]: agents/.agents/skills/data-first/SKILL.md
@@ -372,8 +376,9 @@ After adding or renaming a skill:
 
 This reruns the per-agent symlink fan-out for manual installs and refreshes
 the generated `plugin/skills/` mirror used by packaged Claude Code and Codex
-plugin installs. The Pi package's `pi/skills/` is built from canonical at
-`npm pack` time via `pi/scripts/build-skills.mjs`, not committed.
+plugin installs. Pi npm packages build their `skills/` directories from the
+canonical source at `npm pack` time via each package's `scripts/build-skills.mjs`,
+not committed.
 
 Then update:
 

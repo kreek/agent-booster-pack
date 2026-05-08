@@ -1,22 +1,28 @@
 {
   "name": "agent-booster-pack-proof",
   "version": "2.0.0",
-  "description": "Proof-first Pi extension that uses a red-green-refactor cycle when behavior should be specified in tests first, with built-in parsing for popular test frameworks. Renamed from pi-proof; old name deprecated.",
+  "description": "Proof-first Pi extension plus proof skill. Uses a red-green-refactor cycle when behavior should be specified in tests first, with built-in parsing for popular test frameworks. Renamed from pi-proof; old name deprecated.",
   "type": "module",
   "pi": {
     "extensions": [
       "./src/index.ts"
+    ],
+    "skills": [
+      "./skills"
     ],
     "video": "https://github.com/kreek/agent-booster-pack/raw/refs/heads/main/agent-booster-pack-proof/assets/release/demo.mp4",
     "image": "https://github.com/kreek/agent-booster-pack/raw/refs/heads/main/agent-booster-pack-proof/assets/release/demo.gif"
   },
   "files": [
     "src",
+    "skills",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
-    "install-ext": "mkdir -p ~/.pi/agent/extensions && ln -sfn \"$(pwd)\" ~/.pi/agent/extensions/agent-booster-pack-proof && echo 'Installed to ~/.pi/agent/extensions/agent-booster-pack-proof -- run /reload in Pi to activate'",
+    "build": "node scripts/build-skills.mjs",
+    "prepack": "npm run build",
+    "install-ext": "npm run build && mkdir -p ~/.pi/agent/extensions && ln -sfn \"$(pwd)\" ~/.pi/agent/extensions/agent-booster-pack-proof && echo 'Installed to ~/.pi/agent/extensions/agent-booster-pack-proof -- run /reload in Pi to activate'",
     "install-hooks": "git config core.hooksPath .githooks && echo 'Installed Git hooks from .githooks/'",
     "uninstall-ext": "rm -f ~/.pi/agent/extensions/agent-booster-pack-proof && echo 'Uninstalled'",
     "lint": "biome check",

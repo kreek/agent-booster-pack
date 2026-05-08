@@ -1,7 +1,7 @@
 {
   "name": "agent-booster-pack-skills",
   "version": "5.1.0",
-  "description": "Agent Booster Pack skills for Pi: data, proof, security, debugging, refactoring, and more. Skills only — runtime gates ship as sibling packages (agent-booster-pack-contract-first, agent-booster-pack-proof). Renamed from pi-agent-booster-pack; old name deprecated.",
+  "description": "General Agent Booster Pack skills for Pi: data, security, debugging, refactoring, and more. Runtime-owned skills ship with their matching extension packages. Renamed from pi-agent-booster-pack; old name deprecated.",
   "type": "module",
   "engines": {
     "node": ">=18"

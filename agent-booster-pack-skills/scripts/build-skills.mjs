@@ -13,6 +13,7 @@ const pkgRoot = resolve(here, "..");
 const repoRoot = resolve(pkgRoot, "..");
 const src = join(repoRoot, "agents", ".agents", "skills");
 const dest = join(pkgRoot, "skills");
+const runtimeOwnedSkills = new Set(["contract-first", "proof", "whiteboarding"]);
 
 const srcStat = statSync(src, { throwIfNoEntry: false });
 if (!srcStat || !srcStat.isDirectory()) {
@@ -28,6 +29,7 @@ let count = 0;
 for (const entry of readdirSync(src).sort()) {
   const from = join(src, entry);
   if (!statSync(from).isDirectory()) continue;
+  if (runtimeOwnedSkills.has(entry)) continue;
   cpSync(from, join(dest, entry), { recursive: true });
   console.log(`copied ${entry}`);
   count += 1;

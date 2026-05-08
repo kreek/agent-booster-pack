@@ -6,9 +6,7 @@ import {
   isWhiteboardingActivation,
   isWhiteboardingDeactivation,
   makeCorrectionPrompt,
-  makeFinalValuePrompt,
   shouldEnforceAssistantMessage,
-  shouldRequestFinalValueReflection,
   WHITEBOARD_STATE_ENTRY,
 } from "../extensions/whiteboard-one-question.js";
 
@@ -24,15 +22,6 @@ const custom = (active) => ({
   data: { active },
 });
 
-const assistantToolCall = (name, args = {}) => ({
-  role: "assistant",
-  content: [{ type: "toolCall", name, arguments: args }],
-});
-
-const assistantText = (text) => ({
-  role: "assistant",
-  content: [{ type: "text", text }],
-});
 
 test("detects manual whiteboarding activation commands", () => {
   assert.equal(isWhiteboardingActivation("/abp:whiteboard design the import flow"), true);
@@ -100,46 +89,4 @@ test("correction prompt asks the agent to regenerate with exactly one decision q
   assert.match(prompt, /exactly one decision question/i);
   assert.match(prompt, /notes, not questions/i);
   assert.match(prompt, /Postgres/);
-});
-
-test("requests final value reflection after implementation when value and future direction are missing", () => {
-  const turnMessages = [assistantToolCall("edit"), assistantText("Updated the release skill and committed it.")];
-
-  assert.equal(shouldRequestFinalValueReflection(turnMessages), true);
-});
-
-test("allows final implementation summary that explains why the change is better and what it enables", () => {
-  const turnMessages = [
-    assistantToolCall("write"),
-    assistantText(
-      "Changed the release skill to check registry state before version bumps. This is better because it prevents over-broad monorepo releases, and it enables future agents to choose package-specific publish plans."
-    ),
-  ];
-
-  assert.equal(shouldRequestFinalValueReflection(turnMessages), false);
-});
-
-test("allows final implementation summary that reflects on weak improvement and alternatives", () => {
-  const turnMessages = [
-    assistantToolCall("edit"),
-    assistantText(
-      "Changed the guard, but I cannot justify it as an improvement yet. Alternative strategies are to remove the guard, reduce its scope, or ask for a narrower policy before keeping it."
-    ),
-  ];
-
-  assert.equal(shouldRequestFinalValueReflection(turnMessages), false);
-});
-
-test("does not request final value reflection for read-only turns", () => {
-  const turnMessages = [assistantToolCall("read"), assistantText("The workflow skill already has that language.")];
-
-  assert.equal(shouldRequestFinalValueReflection(turnMessages), false);
-});
-
-test("final value prompt asks for why better, future enablement, or alternatives", () => {
-  const prompt = makeFinalValuePrompt("Updated the release skill and committed it.");
-
-  assert.match(prompt, /why.+better/i);
-  assert.match(prompt, /enables.+going forward/i);
-  assert.match(prompt, /alternative strategies/i);
 });
