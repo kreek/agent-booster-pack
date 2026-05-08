@@ -24,6 +24,7 @@ export interface TestConfig {
 export type TestConfigUi = Pick<ExtensionContext["ui"], "input" | "select">;
 
 const TEST_RULES: TestRule[] = [
+  { marker: "Makefile", command: "make test", when: makefileHasTestTarget },
   { marker: "package.json", command: "npm test", when: hasNpmTestScript },
   { marker: "Cargo.toml", command: "cargo test" },
   { marker: "go.mod", command: "go test ./..." },
@@ -40,7 +41,6 @@ const TEST_RULES: TestRule[] = [
   { marker: "build.gradle.kts", command: "gradle test" },
   { marker: "phpunit.xml", command: "vendor/bin/phpunit" },
   { marker: "phpunit.xml.dist", command: "vendor/bin/phpunit" },
-  { marker: "Makefile", command: "make test", when: makefileHasTestTarget },
 ];
 
 async function fileExists(cwd: string, name: string): Promise<boolean> {

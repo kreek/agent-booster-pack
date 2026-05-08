@@ -385,16 +385,13 @@ Then update:
   repo-root [`AGENTS.md`](AGENTS.md#pack-versioning-marketplacejson--pluginjson)
 - `.agents/plugins/marketplace.json` and `plugin/.codex-plugin/plugin.json`
   when Codex plugin metadata or packaged skill content changes
-- `pi/package.json` when Pi package metadata or version changes (the
-  `scripts/release.sh` script bumps it in lockstep with the other manifests)
+- `agent-booster-pack*/package.json` when Pi package metadata, package
+  composition, or versions change
 
-Run the Python checks before publishing script updates:
+Run the full repo checks before publishing script updates:
 
 ```sh
-uv run pytest
-uv run ruff format --check .
-uv run ruff check .
-uv run refcheck . --no-color
+make test
 ```
 
 Use `uv run ruff format .` only when you intend to rewrite Python formatting in

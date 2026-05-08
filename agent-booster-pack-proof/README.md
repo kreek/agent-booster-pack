@@ -106,6 +106,7 @@ The extension finds your test command from what it sees in the project:
 
 | Detected | Runs |
 |----------|------|
+| `Makefile` with `test` target | `make test` |
 | `package.json` with test script | `npm test` |
 | `Cargo.toml` | `cargo test` |
 | `go.mod` | `go test ./...` |
