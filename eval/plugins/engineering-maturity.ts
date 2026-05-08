@@ -8,7 +8,7 @@ const KNOWN_SKILLS = [
   "workflow",
   "proof",
   "whiteboarding",
-  "data-first",
+  "domain-modeling",
   "architecture",
   "code-review",
   "debugging",

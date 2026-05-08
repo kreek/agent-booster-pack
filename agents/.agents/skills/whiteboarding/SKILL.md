@@ -55,7 +55,7 @@ description: Use for design discussions that map contracts, resolve questions, a
    Gate. Stop at design and do not implement until the human has approved,
    revised, or ruled out the shape. The agent should propose the concrete
    interface; the human does not have to design it from scratch.
-5. `data-first` is the always-on lens. Name new and changed states,
+5. `domain-modeling` is the always-on lens. Name new and changed states,
    transitions, and invariants. Make illegal states unrepresentable in the
    proposed shape. Apply `api`, `database`, `async-systems`, and other
    surface-specific lenses in addition when those surfaces are touched.
@@ -149,7 +149,7 @@ completed discussion; it is not the starting point for the discussion.
 - [ ] Each contract has its current shape with `file:line` evidence (or
       "doesn't exist yet" with adjacent conventions cited).
 - [ ] Each contract has its proposed shape shown concretely, not in prose.
-- [ ] `data-first` lens applied: new and changed states, transitions, and
+- [ ] `domain-modeling` lens applied: new and changed states, transitions, and
       invariants named; illegal states unrepresentable in the proposed shape.
 - [ ] When more than one service or component is touched, a Mermaid diagram
       or equivalent lightweight sketch shows the components and contracts
@@ -185,7 +185,7 @@ completed discussion; it is not the starting point for the discussion.
 
 ## Handoffs
 
-- Use `data-first` to formalize new invariants, states, transitions, and
+- Use `domain-modeling` to formalize new invariants, states, transitions, and
   parse-at-boundary discipline named in the discussion and RFC/ADR.
 - Use `architecture` when the discussion reveals a boundary problem — module
   locality, layering, or DDD tactical patterns that need their own decision

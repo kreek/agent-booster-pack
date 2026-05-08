@@ -1,9 +1,9 @@
 ---
-name: data-first
-description: Use for data-first design, models, invariants, state transitions, parsing, and effects.
+name: domain-modeling
+description: Use for domain modeling, data shapes, invariants, state transitions, parsing, and effects.
 ---
 
-# Data First
+# Domain Modeling
 
 ## Iron Law
 

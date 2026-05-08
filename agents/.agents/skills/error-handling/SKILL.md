@@ -109,7 +109,7 @@ description: Use for error handling, error types, propagation, retries, user mes
 - Use `api` for REST status-code selection, Problem Details/JSON:API
   error contracts, public idempotency-key contracts, OpenAPI response
   docs, and compatibility.
-- Use `data-first` when the error vocabulary is part of the domain
+- Use `domain-modeling` when the error vocabulary is part of the domain
   model or state machine.
 - Use `observability` for correlation IDs, logs, traces, and error-rate
   alerts, including critical dependency health.

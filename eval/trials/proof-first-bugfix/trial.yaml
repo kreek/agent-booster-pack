@@ -4,7 +4,7 @@ plugin: engineering-maturity
 features:
   - workflow
   - proof
-  - data-first
+  - domain-modeling
   - refactoring
 variants:
   default: {}

@@ -95,7 +95,7 @@ spec:
             - spec
             - none
           enumNames:
-            - 'malli — modern, data-first schemas'
+            - 'malli — modern, domain-modeling schemas'
             - 'clojure.spec — built-in spec library'
             - 'None'
         background_jobs:

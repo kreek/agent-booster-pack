@@ -38,7 +38,7 @@ const skillLayerCapabilities = [
   "architecture",
   "async-systems",
   "code-review",
-  "data-first",
+  "domain-modeling",
   "database",
   "debugging",
   "documentation",

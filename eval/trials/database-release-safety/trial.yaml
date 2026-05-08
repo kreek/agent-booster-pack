@@ -4,6 +4,6 @@ plugin: engineering-maturity
 features:
   - database
   - release
-  - data-first
+  - domain-modeling
 variants:
   default: {}

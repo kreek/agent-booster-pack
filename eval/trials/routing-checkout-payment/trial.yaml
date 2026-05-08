@@ -3,7 +3,7 @@ taskFile: task.md
 plugin: engineering-maturity
 features:
   - workflow
-  - data-first
+  - domain-modeling
   - security
   - database
   - api

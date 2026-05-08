@@ -112,7 +112,7 @@ load them only when they change the outcome.
    do not load every row:
    - behavior or contract change -> `proof`, `code-review`;
    - durable interface or cross-boundary contract -> `contract-first`,
-     `whiteboarding`, `architecture` or `data-first` as needed, then user
+     `whiteboarding`, `architecture` or `domain-modeling` as needed, then user
      sign-off;
    - auth, secrets, trust boundary, or user-controlled input ->
      `security`, `proof`;
@@ -135,7 +135,7 @@ load them only when they change the outcome.
    - whiteboard non-trivial changes with `whiteboarding` before drafting
      code; map current and proposed contracts and resolve open questions
      before invoking design-pass skills;
-   - model any feature/domain data and invariants with `data-first`
+   - model any feature/domain data and invariants with `domain-modeling`
      (first after scaffolding when specs are clear);
    - choose boundaries with `architecture`;
    - prove behavior with `proof`;
@@ -220,7 +220,7 @@ load them only when they change the outcome.
 | "Use every skill to be safe" | Pick the few skills that change the outcome. | Explicit audit/review request across the whole pack. |
 | "The user asked for lenses, so I should list ABP skills" | Translate internal routing into domain concerns such as data ownership, authz, API contract, rollout, observability, and proof. | The user explicitly asks which ABP skills to use. |
 | "The exclusions should name unused tools or skills" | Exclude product scope, architecture scope, dependencies, compatibility work, and operational work that are actually out of scope. | The user asks for ABP/tool routing exclusions. |
-| "This helper/layer/global will make it easy" | Name what it couples and route to `data-first`, `architecture`, `refactoring`, or `async-systems` before adding it. | Thin adapter required by an existing framework or public API. |
+| "This helper/layer/global will make it easy" | Name what it couples and route to `domain-modeling`, `architecture`, `refactoring`, or `async-systems` before adding it. | Thin adapter required by an existing framework or public API. |
 | "I'll branch at commit time" | Branch, or use a worktree for parallel or in-flight branch separation, before editing so the diff, tests, and commits belong to one scoped change. | Read-only research or a task explicitly done outside Git. |
 | "I'll make it flexible for later" | Build the direct requested behavior; add flexibility only when current acceptance or quality concern needs it. | Public library/API design where extension points are part of the requirement. |
 | "While I'm here, I'll handle this edge case too" | Start with the happy path. Add edge-case branches or guards when the requirement names them, when they are security- or data-loss-relevant, or when a real boundary (network, filesystem, DB, concurrency) forces them. Speculative coverage is bloat until a real case demands it. | The user explicitly named the case, or it sits at a true trust or effects boundary. |
@@ -239,10 +239,10 @@ load them only when they change the outcome.
 ## Handoffs
 
 - Use `whiteboarding` to map durable interfaces and current/proposed contracts
-  before any non-trivial change, ahead of `data-first`, `architecture`, and
+  before any non-trivial change, ahead of `domain-modeling`, `architecture`, and
   surface-specific design skills.
 - Use `proof` before claiming completion.
-- Use `data-first` when complexity starts with unclear data shape,
+- Use `domain-modeling` when complexity starts with unclear data shape,
   invalid states, parsing, mutation, or domain effects.
 - Use `architecture` when complexity starts with boundaries, ownership,
   layering, locality, or decisions that change at different rates.

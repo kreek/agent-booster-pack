@@ -260,9 +260,9 @@ they apply:
   that map current and proposed contracts (signatures, schemas, events, CLI,
   config, types), constraints, tradeoffs, and open questions before any
   non-trivial code lands, then capture the agreed result as an RFC or ADR;
-  mandatory upstream of `data-first` and `architecture` when more than one
+  mandatory upstream of `domain-modeling` and `architecture` when more than one
   contract changes or any durable interface is identified.
-- [`data-first`][skill-data-first]: any data modeling work, especially domain
+- [`domain-modeling`][skill-domain-modeling]: any data modeling work, especially domain
   data, fields, states, allowed combinations, transitions, effects, and the
   first design pass after scaffolding when specs are clear.
 - [`architecture`][skill-architecture]: module boundaries, domain/feature
@@ -339,7 +339,7 @@ Shared language defaults live in
 [skill-contract-first]: agents/.agents/skills/contract-first/SKILL.md
 [skill-async-systems]: agents/.agents/skills/async-systems/SKILL.md
 [skill-architecture]: agents/.agents/skills/architecture/SKILL.md
-[skill-data-first]: agents/.agents/skills/data-first/SKILL.md
+[skill-domain-modeling]: agents/.agents/skills/domain-modeling/SKILL.md
 [skill-database]: agents/.agents/skills/database/SKILL.md
 [skill-debugging]: agents/.agents/skills/debugging/SKILL.md
 [skill-documentation]: agents/.agents/skills/documentation/SKILL.md

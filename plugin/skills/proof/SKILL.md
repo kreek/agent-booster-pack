@@ -15,7 +15,7 @@ description: Use for proof and tests, claims, invariants, behavior specs, edge c
   migrations, or reviews where correctness depends on a claim being true.
 - Before saying work is done, fixed, ready to commit, ready for a PR, or
   passing.
-- Turning a data-first design into concrete invariants and executable
+- Turning a domain-modeling design into concrete invariants and executable
   checks.
 - Adding or reviewing behavior-focused tests that prove a feature, bug
   fix, refactor, flaky test fix, or untested behavior.
@@ -204,7 +204,7 @@ counts toward whichever claims it actually covers.
 
 - Use `whiteboarding` to convert the agreed RFC/ADR's proof obligations into
   Proof Contracts before claiming completion.
-- Use `data-first` to shape invariants and make invalid states
+- Use `domain-modeling` to shape invariants and make invalid states
   unrepresentable.
 - Use `debugging` when the proof depends on root-cause evidence.
 - Use `api` when the claim is a public contract.

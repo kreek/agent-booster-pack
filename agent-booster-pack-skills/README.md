@@ -92,7 +92,7 @@ The general ABP skills, grouped by the kind of engineering pressure they apply.
 
 ### Foundational design
 
-- `data-first` — domain data, fields, states, transitions, effects.
+- `domain-modeling` — domain data, fields, states, transitions, effects.
 - `architecture` — module boundaries, domain locality, DDD tactical
   patterns.
 
