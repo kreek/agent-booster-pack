@@ -110,46 +110,38 @@ load them only when they change the outcome.
 5. Select the smallest useful skill set by quality concern and risk
    trigger. Use this matrix only for risks that are actually present;
    do not load every row:
-   - behavior or contract change -> `proof`, `code-review`;
-   - durable interface or cross-boundary contract -> `contract-first`,
-     `whiteboarding`, `architecture` or `domain-modeling` as needed, then user
-     sign-off;
-   - auth, secrets, trust boundary, or user-controlled input ->
-     `security`, `proof`;
-   - persisted data, migrations, transactions, or deletion ->
-     `database`, `release`, `proof`;
-   - async work, retries, queues, workers, streams, or concurrency ->
-     `async-systems`, `observability`, `proof`;
-   - public HTTP/API/wire shape -> `api`, `error-handling`,
-     `proof`;
-   - UI or interaction flow -> `ui-design`, `accessibility`,
-     `proof`;
-   - requirements, ADRs, runbooks, public docs, or maintainer docs ->
-     `documentation`;
-   - repository setup, staging, commits, or history ->
-     `scaffolding`, `git-workflow`.
+
+   | Risk trigger | Skills |
+   |---|---|
+   | Behavior or contract change | `proof`, `code-review` |
+   | Durable interface or cross-boundary contract | `contract-first`, `whiteboarding`, `architecture` or `domain-modeling`, user sign-off |
+   | Auth, secrets, trust boundary, or user-controlled input | `security`, `proof` |
+   | Persisted data, migrations, transactions, or deletion | `database`, `release`, `proof` |
+   | Async work, retries, queues, workers, streams, or concurrency | `async-systems`, `observability`, `proof` |
+   | Public HTTP/API/wire shape | `api`, `error-handling`, `proof` |
+   | UI or interaction flow | `ui-design`, `accessibility`, `proof` |
+   | Requirements, ADRs, runbooks, public docs, or maintainer docs | `documentation` |
+   | Repository setup, staging, commits, or history | `scaffolding`, `git-workflow` |
+
    When the work depends on current framework, library, runtime, or
    platform behavior, read `references/version-verified.md` and use the
    host's normal documentation or browsing tools as needed.
    Then refine with the Handoffs graph:
-   - whiteboard non-trivial changes with `whiteboarding` before drafting
-     code; map current and proposed contracts and resolve open questions
-     before invoking design-pass skills;
-   - model any feature/domain data and invariants with `domain-modeling`
-     (first after scaffolding when specs are clear);
-   - choose boundaries with `architecture`;
-   - prove behavior with `proof`;
-   - investigate causes with `debugging`;
-   - review diffs with `code-review`;
-   - separate existing complexity without behavior change with `refactoring`;
-   - gate safety with `security` or `database`, and reduce release
-     toil/risk with `release`;
-   - improve operations with `observability`, `performance`, or
-     `async-systems`;
-   - improve user and maintainer surfaces with `api`, `documentation`,
-     `ui-design`, or `accessibility`;
-   - package repository work with `git-workflow` or `release`;
-   - start new projects or missing tooling with `scaffolding`.
+
+   - use `whiteboarding` before non-trivial design; map contracts and
+     open questions;
+   - use `domain-modeling` for feature data and invariants;
+   - use `architecture` for boundaries and ownership;
+   - use `proof`, `debugging`, or `code-review` for evidence, cause, or
+     diff review;
+   - use `refactoring` for existing complexity without behavior change;
+   - use `security`, `database`, and `release` for safety, data, and
+     rollout risk;
+   - use `observability`, `performance`, or `async-systems` for operations;
+   - use `api`, `documentation`, `ui-design`, or `accessibility` for user
+     or maintainer surfaces;
+   - use `git-workflow`, `release`, or `scaffolding` for repo packaging
+     or setup.
 6. Load only the skill bodies that materially change the next action or
    proof obligation. For read-only planning, triage, or readiness notes,
    use `workflow` as the entry point and load downstream skills only when
