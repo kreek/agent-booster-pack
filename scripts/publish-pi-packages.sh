@@ -2,31 +2,23 @@
 # Publish ABP Pi npm packages in dependency order.
 #
 # Usage:
-#   scripts/publish-pi-packages.sh [--dry-run] [--otp OTP]
+#   scripts/publish-pi-packages.sh [--dry-run]
 #
 # The package versions come from each package.json. Already-published exact
 # versions are skipped so the script can be re-run safely after a partial
 # publish. Actual publishing mutates npm registry state; run it only when the
-# release commit is clean and tagged.
+# release commit is clean and tagged. If your npm account requires 2FA, npm
+# will prompt for the OTP interactively.
 
 set -euo pipefail
 
 dry_run=false
-otp=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --dry-run)
       dry_run=true
       shift
-      ;;
-    --otp)
-      if [[ $# -lt 2 || -z "${2:-}" ]]; then
-        echo "error: --otp requires a value" >&2
-        exit 64
-      fi
-      otp="$2"
-      shift 2
       ;;
     -h|--help)
       sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'
@@ -110,11 +102,7 @@ publish_package() {
   fi
 
   echo "publishing $name@$version"
-  local args=(publish "./$package_dir" --access public)
-  if [[ -n "$otp" ]]; then
-    args+=(--otp "$otp")
-  fi
-  npm "${args[@]}"
+  npm publish "./$package_dir" --access public
   wait_until_published "$name" "$version"
 }
 
