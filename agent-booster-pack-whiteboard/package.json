@@ -1,7 +1,7 @@
 {
   "name": "agent-booster-pack-whiteboard",
   "version": "1.0.0",
-  "description": "Whiteboarding conversation guard for Pi: enforce one user-facing question at a time during ABP whiteboarding sessions.",
+  "description": "ABP Pi conversation guard: one whiteboarding question at a time plus final value reflection after implementation.",
   "type": "module",
   "engines": {
     "node": ">=18"

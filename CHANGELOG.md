@@ -44,6 +44,9 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `agent-booster-pack-skills`, `agent-booster-pack-contract-first`, and
   `agent-booster-pack-proof`. One-command install for the full ABP-on-Pi
   experience.
+- `agent-booster-pack-whiteboard` now includes a Pi final-response guard that
+  asks agents to explain what changed, why it is better than what came before,
+  and what it enables next after implementation work.
 
 ### Changed
 
