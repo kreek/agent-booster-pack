@@ -57,7 +57,7 @@ pi install npm:agent-booster-pack-proof
 ```
 
 #### Whiteboard Extension
-[`agent-booster-pack-whiteboard`](agent-booster-pack-whiteboard/) Enforces one user-facing question at a time during ABP whiteboarding sessions, activated by `/abp:whiteboard` or `/skill:whiteboarding`.
+[`agent-booster-pack-whiteboard`](agent-booster-pack-whiteboard/) Agent plan modes can get overwhelming. The whiteboard extension is a collaborative plan mode that works through one design clarification at a time.
 ```sh
 pi install npm:agent-booster-pack-whiteboard
 ```
