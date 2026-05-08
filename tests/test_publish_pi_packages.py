@@ -50,6 +50,7 @@ def make_repo(tmp_path: Path, *, dirty: bool = False, exact_tag: bool = True) ->
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir()
     log = tmp_path / "commands.log"
+    published_path = shlex.quote(str(tmp_path / "published.txt"))
     log_path = shlex.quote(str(log))
     root_path = shlex.quote(str(root))
     dirty_command = "printf 'dirty\\n'" if dirty else ":"
@@ -80,9 +81,11 @@ case "$1" in
     case "$2" in
       agent-booster-pack-contract-first@1.0.0|agent-booster-pack-proof@2.0.0)
         printf '%s\\n' "${{2##*@}}" ;;
-      *) exit 1 ;;
+      *) grep -Fxq "$2" {published_path} 2>/dev/null && printf '%s\\n' "${{2##*@}}" || exit 1 ;;
     esac ;;
-  publish) printf 'published %s\\n' "$2" ;;
+  publish)
+    node -e 'const fs = require("fs"); const pkg = JSON.parse(fs.readFileSync(process.argv[1] + "/package.json", "utf8")); console.log(pkg.name + "@" + pkg.version);' "$2" >> {published_path}
+    printf 'published %s\\n' "$2" ;;
   *) exit 0 ;;
 esac
 """,
@@ -138,6 +141,28 @@ def test_dry_run_reports_missing_packages_without_publishing(tmp_path: Path):
     assert "would publish agent-booster-pack-whiteboard@1.0.0" in result.stdout
     assert "would publish agent-booster-pack@5.1.0" in result.stdout
     assert "npm publish" not in command_log(tmp_path)
+
+
+def test_publish_waits_until_each_published_version_is_visible(tmp_path: Path):
+    root = make_repo(tmp_path)
+
+    result = run_script(tmp_path, root)
+
+    assert result.returncode == 0, result.stderr
+    lines = command_log(tmp_path).splitlines()
+    skills_publish = lines.index("npm publish ./agent-booster-pack-skills --access public")
+    skills_confirm = lines.index(
+        "npm view agent-booster-pack-skills@5.1.0 version", skills_publish + 1
+    )
+    whiteboard_publish = lines.index(
+        "npm publish ./agent-booster-pack-whiteboard --access public"
+    )
+    whiteboard_confirm = lines.index(
+        "npm view agent-booster-pack-whiteboard@1.0.0 version", whiteboard_publish + 1
+    )
+    meta_publish = lines.index("npm publish ./agent-booster-pack --access public")
+    assert skills_publish < skills_confirm < whiteboard_publish
+    assert whiteboard_publish < whiteboard_confirm < meta_publish
 
 
 def test_publish_allows_clean_commits_after_the_release_tag(tmp_path: Path):

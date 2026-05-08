@@ -63,6 +63,21 @@ is_published() {
   npm view "$name@$version" version >/dev/null 2>&1
 }
 
+wait_until_published() {
+  local name="$1"
+  local version="$2"
+
+  for _ in {1..12}; do
+    if is_published "$name" "$version"; then
+      return 0
+    fi
+    sleep 5
+  done
+
+  echo "error: $name@$version was published but is not visible from npm view yet" >&2
+  exit 1
+}
+
 require_publish_ready() {
   if [[ -n "$(git status --porcelain)" ]]; then
     echo "error: working tree is not clean" >&2
@@ -100,6 +115,7 @@ publish_package() {
     args+=(--otp "$otp")
   fi
   npm "${args[@]}"
+  wait_until_published "$name" "$version"
 }
 
 if ! $dry_run; then
