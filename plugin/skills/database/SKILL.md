@@ -36,14 +36,23 @@ description: Use for databases, schemas, migrations, indexes, transactions, quer
 4. Backfills are batched, resumable, observable, and rollback-aware.
 5. New indexes and constraints must be online or staged for the target
    database.
-6. Query changes need plans on production-shaped data.
-7. Isolation level is a design decision; retries are part of
+6. Indexes and unique constraints are part of design, not optimisation.
+   Before writing the migration, name (a) every uniqueness invariant
+   the domain requires and enforce it with a DB-level
+   `UNIQUE`/`EXCLUDE` constraint — never with an application-layer
+   check, which races under concurrency; (b) every column reached via
+   foreign key, `WHERE`, `JOIN`, or `ORDER BY` in known queries, and
+   ship the supporting index in the same migration. "We'll add the
+   index later when it's slow" is how production tables acquire
+   sequential scans on hot paths.
+7. Query changes need plans on production-shaped data.
+8. Isolation level is a design decision; retries are part of
    serializable correctness.
-8. State changes and durable publication need atomicity through
+9. State changes and durable publication need atomicity through
    transactional outbox, CDC, or an equivalent handoff when the two
    cannot silently diverge.
-9. Data recovery is part of the change: backup/PITR must cover the
-   blast radius.
+10. Data recovery is part of the change: backup/PITR must cover the
+    blast radius.
 
 ## Workflow
 
@@ -63,6 +72,12 @@ description: Use for databases, schemas, migrations, indexes, transactions, quer
       phases.
 - [ ] Backfills are batched and resumable; each batch holds locks
       briefly.
+- [ ] Every uniqueness invariant in the change is enforced by a DB
+      constraint (`UNIQUE`, `EXCLUDE`, or composite/partial
+      equivalent), not application-layer logic. New FK columns and
+      known query predicates (`WHERE`, `JOIN`, `ORDER BY`) have
+      supporting indexes shipped in the same migration, or the
+      omission is explicitly justified.
 - [ ] Index/constraint creation uses the online mechanism for the
       target database.
 - [ ] Engine-specific elaborations (partial unique constraints,
@@ -90,6 +105,8 @@ description: Use for databases, schemas, migrations, indexes, transactions, quer
 | "We'll backfill async later" | Ship the backfill plan now or leave the schema expand-only. | Follow-up migration already exists in the same rollout plan. |
 | "Soft delete is good enough" | Decide the lifecycle rule once and enforce reads/indexes/schema around it. | Explicit audit-retention requirement with tested filters. |
 | "No one's using that index" | Observe across a full traffic cycle before dropping it. | Brand-new unused index in an unshipped migration. |
+| "We'll enforce uniqueness in the application layer" | Add a DB-level `UNIQUE` (or `EXCLUDE`) constraint. Application-layer checks race under concurrency and fail open under retries; the DB is the only authoritative arbiter. | The field is genuinely advisory and a duplicate is a recoverable UX issue, not a correctness violation. |
+| "We can add the index later if queries get slow" | Add the index in the same migration when the access pattern is already known (FK columns, lookups in known `WHERE`/`JOIN`/`ORDER BY` clauses). Adding it later on a hot table requires `CONCURRENTLY` and rollout coordination. | The column is genuinely write-only or the query pattern is unknown and will be measured first. |
 | "Partial unique index gives me uniqueness" | A partial index does not satisfy a unique *constraint* on its own and cannot back an `ALTER TABLE … ADD CONSTRAINT … UNIQUE USING INDEX` in Postgres. Pick one: a full unique constraint, a partial unique *index* (and accept it does not enforce constraint semantics), or an `EXCLUDE` constraint. Verify your choice runs against the target engine. | The requirement explicitly asks for a partial unique *index* (not a constraint) and the migration was tested against that engine. |
 | "Adding a `password` column" | Load `security`. Store only an `argon2id`/`scrypt`/`bcrypt` hash in `password_hash`, never plaintext. The same applies to API keys, OAuth tokens, MFA secrets, and recovery codes. | Read-only mirror of an external auth source the app never writes to. |
 

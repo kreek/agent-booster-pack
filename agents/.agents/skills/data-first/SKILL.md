@@ -100,6 +100,9 @@ the type forces care. Load the right reference when either appears in the diff.
 - Use `architecture` when module boundaries, domain/feature locality, or
   layering decisions are in scope, especially when the question is what
   changes together rather than what data shape is valid.
+- Use `database` when an invariant identified here must be enforced at the
+  schema layer (uniqueness, referential integrity, exclusion). Domain-level
+  invariants without DB-level enforcement race under concurrency.
 - Use `proof` when data claims need explicit proof obligations.
 - Use `proof` to prove domain behavior through public boundaries.
 - Use `error-handling` for parse failures, Result/Either shape, and error
