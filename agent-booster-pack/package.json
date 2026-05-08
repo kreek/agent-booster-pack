@@ -27,13 +27,15 @@
   ],
   "scripts": {
     "test": "node --test test/*.test.js",
-    "prepack": "npm install --ignore-scripts --no-audit --no-fund"
+    "build:siblings": "npm --prefix ../agent-booster-pack-skills run build && npm --prefix ../agent-booster-pack-contract-first run build && npm --prefix ../agent-booster-pack-proof run build && npm --prefix ../agent-booster-pack-whiteboard run build",
+    "sync:bundled-skills": "node scripts/sync-bundled-skills.mjs",
+    "prepack": "npm run build:siblings && npm install --install-links --ignore-scripts --no-audit --no-fund && npm run sync:bundled-skills"
   },
   "dependencies": {
-    "agent-booster-pack-skills": "^5.1.0",
-    "agent-booster-pack-contract-first": "^1.0.1",
-    "agent-booster-pack-proof": "^2.0.1",
-    "agent-booster-pack-whiteboard": "^1.0.0"
+    "agent-booster-pack-skills": "file:../agent-booster-pack-skills",
+    "agent-booster-pack-contract-first": "file:../agent-booster-pack-contract-first",
+    "agent-booster-pack-proof": "file:../agent-booster-pack-proof",
+    "agent-booster-pack-whiteboard": "file:../agent-booster-pack-whiteboard"
   },
   "bundledDependencies": [
     "agent-booster-pack-skills",
