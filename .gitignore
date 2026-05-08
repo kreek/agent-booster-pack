@@ -8,4 +8,7 @@ node_modules/
 .idea/
 reference/
 agent-booster-pack-skills/skills/
+agent-booster-pack-proof/skills/
+agent-booster-pack-contract-first/skills/
+agent-booster-pack-whiteboard/skills/
 eval/runs

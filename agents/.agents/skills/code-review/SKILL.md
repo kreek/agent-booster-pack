@@ -145,6 +145,7 @@ only for ambiguity that blocks a finding or fix.
 | "This compatibility shim is harmless" | Require owner, removal condition, and proof that callers still need it, or remove it in a proven refactor. | Public contract or migration policy explicitly requires it. |
 | "I trust this author" | Review the diff with the same lenses; trust changes tone, not coverage. | Pair review where the same evidence was already inspected in this turn. |
 | "Skip the security pass this once" | Run the security lens and name why it is or is not relevant. | Files are provably outside executable, config, dependency, and data surfaces. |
+| Test file in diff asserts substring presence in a config/Makefile/manifest, asserts a deleted file stays deleted, asserts a trivial constant, or asserts only that a mock was called | Flag as test theater. The test re-encodes the implementation and provides no signal independent of the code it tests; recommend deletion or rewrite to assert a behavior caused by the change. Cross-load the `proof` skill's test-theater tripwires for the matching guidance. | The asserted string is a public contract a downstream consumer parses, or the call itself is the contract under test (e.g. an outbox writer). |
 
 ## Handoffs
 
