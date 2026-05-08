@@ -9,16 +9,22 @@
   "pi": {
     "extensions": [
       "./extensions"
+    ],
+    "skills": [
+      "./skills"
     ]
   },
   "files": [
     "extensions",
+    "skills",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
+    "build": "node scripts/build-skills.mjs",
+    "prepack": "npm run build",
     "test": "node --test test/*.test.js",
-    "install-ext": "mkdir -p ~/.pi/agent/extensions && ln -sfn \"$(pwd)\" ~/.pi/agent/extensions/agent-booster-pack-whiteboard && echo 'Installed to ~/.pi/agent/extensions/agent-booster-pack-whiteboard -- run /reload in Pi to activate'",
+    "install-ext": "npm run build && mkdir -p ~/.pi/agent/extensions && ln -sfn \"$(pwd)\" ~/.pi/agent/extensions/agent-booster-pack-whiteboard && echo 'Installed to ~/.pi/agent/extensions/agent-booster-pack-whiteboard -- run /reload in Pi to activate'",
     "uninstall-ext": "rm -f ~/.pi/agent/extensions/agent-booster-pack-whiteboard && echo 'Uninstalled'"
   },
   "repository": {
