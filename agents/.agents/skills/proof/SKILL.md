@@ -154,7 +154,9 @@ For every non-trivial engineering claim, record:
       call choreography.
 - [ ] Mocks appear only at true system boundaries or have a documented
       reason.
-- [ ] Tests would survive a contract-preserving implementation swap.
+- [ ] Each new test would fail if the production code under test were
+      replaced with an equivalent implementation. If not, delete it — a
+      test that cannot fail is noise.
 - [ ] Tests are order-independent and do not rely on arbitrary sleeps.
 - [ ] Evidence names the exact command, test, observed result, or
       blocker.
@@ -184,6 +186,10 @@ For every non-trivial engineering claim, record:
 | "Asserted an error happens, but not what the consumer sees" | The user-facing error message and envelope are the value claim at the outermost seam. Assert the message, code, and structured fields the consumer relies on. | The error path is purely internal and the consumer never observes it. |
 | "Test needs many mocks and deep setup to run" | The design is signaling tangle, not test framework limits. Simplify the seam — extract pure transforms, push effects to the edge — before piling on mocks. | The test crosses a true system boundary (clock, network, infra) that genuinely requires substitution. |
 | "I'll parameterize this across every input I can think of" | Tests cover behaviors named by the requirement and real boundary cases (security, data-loss, parsing edges that exist in production data). Speculative inputs are noise that locks in implementation detail. | The function is a parser, validator, or security gate where input-space coverage *is* the contract. |
+| "Asserted that a config, Makefile, manifest, or recipe contains a literal command string" | The implementation is the source of truth. Either expand and run the recipe (`make -n`, `npm run --silent`) and assert resulting behavior, or delete the test. Substring assertions over the implementation re-encode it 1:1 and only fail when you forget to update both in lockstep. | The string under test is a public contract a downstream consumer reads (e.g. a published config schema, a documented CLI flag list). |
+| "Tested that a removed file or directory stays absent" | Tests prove behavior, not repo structure. The same merge that resurrects the file deletes the test. If you need a guard against re-introduction, write a lint rule or pre-commit hook, not a unit test. | A migration-era guard explicitly time-boxed in a comment with a removal date. |
+| "Asserted that a function returns its hardcoded constant or trivial passthrough" | No behavior, no test. Delete it. The "smallest test that would fail if the code did nothing" rule does not justify writing a test when the code legitimately *is* nothing. | The constant is part of a public contract a consumer depends on (protocol version, error code, schema field name). |
+| "Asserted that a mock was called with X" without asserting resulting behavior | Test the outcome, not the interaction. If the only observable effect *is* the call (e.g. logging, telemetry), assert the resulting external state (log line in a captured stream, metric in a registry), not that the mock recorded it. | The call itself is the contract under test (e.g. an outbox writer where "row written to outbox" is the behavior). |
 
 ## Runtime Extensions
 
