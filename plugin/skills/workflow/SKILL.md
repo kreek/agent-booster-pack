@@ -34,11 +34,11 @@ description: Use first to route ABP work, choose skills, sequence handoffs, and 
 
 ## Core Ideas
 
-ABP is progressive enhancement for coding agents: the harness already knows
-how to code, scope work, plan, use tools, inspect browsers, manage context,
-and delegate. ABP adds engineering quality pressure when a risk trigger
-makes a quality concern matter to the next action. Skills are not a ritual;
-load them only when they change the outcome.
+Use `workflow` to decide whether ABP changes the next action, proof
+obligation, or user-facing tradeoff. Load downstream skills only when a
+quality or risk trigger makes their guidance material. Use the host agent's
+native planning, tools, browser/runtime inspection, context management, and
+delegation behavior for execution mechanics.
 
 1. Start from the quality and risk profile: correctness, data integrity,
    security, operability, performance, accessibility, compatibility, or
