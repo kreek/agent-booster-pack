@@ -24,7 +24,7 @@
     "prepack": "npm install --ignore-scripts --no-audit --no-fund"
   },
   "dependencies": {
-    "agent-booster-pack-skills": "^5.0.2",
+    "agent-booster-pack-skills": "^5.1.0",
     "agent-booster-pack-contract-first": "^1.0.1",
     "agent-booster-pack-proof": "^2.0.1",
     "agent-booster-pack-whiteboard": "^1.0.0"

@@ -6,6 +6,8 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [5.1.0] (2026-05-08)
+
 ### Added
 
 - `scaffolding` now ships a `java/service-quarkus` Backstage stack template
