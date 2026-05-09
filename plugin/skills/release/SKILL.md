@@ -1,6 +1,6 @@
 ---
 name: release
-description: Use for releases, SemVer, changelogs, CI/CD, rollout, rollback, flags, and migrations.
+description: Late gate for release prep — SemVer, CHANGELOG, deprecations, tags, rollout/rollback. Load on diff or request.
 ---
 
 # Release

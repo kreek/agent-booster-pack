@@ -139,11 +139,15 @@ failures.
 - `database`: use when changing schemas, migrations, indexes, queries,
   transactions, transactional outbox, connection pools, deletion semantics, or
   production data access.
-- `release`: use when preparing versions, CHANGELOG entries, deprecations,
-  release notes, tags, CI/CD checks, rollout plans, rollback notes,
-  feature-flag plans, or deploy-time coordination. It must not execute release
-  actions or mutate shared environments: deploys, rollbacks, promotions,
-  approvals, production config changes, or feature-flag flips.
+- `release`: late gate, not a startup skill. Load after a diff exists, during
+  code review when a concrete change touches release artifacts (version
+  manifests, CHANGELOG, lockfiles, tags, publish scripts, migrations,
+  feature flags), or when the user explicitly asks for release prep,
+  deprecation/migration notes, rollout, or rollback planning. Do not load
+  it just because future work might eventually need versioning or
+  packaging. It must not execute release actions or mutate shared
+  environments: deploys, rollbacks, promotions, approvals, production
+  config changes, or feature-flag flips.
 
 ### Correctness And Change Control
 

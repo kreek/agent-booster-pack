@@ -21,7 +21,10 @@ description: Use for documentation, READMEs, guides, ADRs, runbooks, API docs, c
 ## When NOT to Use
 
 - API contract design; use `api`.
-- Release coordination or changelog process; use `release`.
+- Release coordination or changelog process; use `release`. Do not edit
+  `CHANGELOG.md`, release notes, version manifests, or migration notes
+  from this skill, even when behavior changes. Those are release-prep
+  artifacts and only land when a release is being cut, under `release`.
 - Alert mechanics and dashboards; use `observability`.
 
 ## Core Ideas
@@ -68,7 +71,9 @@ description: Use for documentation, READMEs, guides, ADRs, runbooks, API docs, c
 ## Verification
 
 - [ ] Behavior-changing PRs update or deliberately delete affected
-      docs.
+      docs. CHANGELOG, release notes, and version manifests are out of
+      scope here; they are touched only during release prep under
+      `release`.
 - [ ] The doc has one mode and one audience situation.
 - [ ] Generated/reference facts link to the source of truth.
 - [ ] README content is limited to purpose, install/run, minimal

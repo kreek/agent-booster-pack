@@ -72,7 +72,8 @@ description: Use first to route ABP work, choose skills, sequence handoffs, and 
    or caller-visible surface changes, ask separately whether the work is
    breaking, aliased, or deprecation-pathed. Also ask whether release prep
    is in scope (code/docs only; version/changelog/lockfile; release notes;
-   tag/publish). If validation exposes release work outside the approved
+   tag/publish). This gate is a question to the user; do not load `release`
+   to run it. If validation exposes release work outside the approved
    scope, stop and ask before mutating those artifacts.
 5. **Work location gate.** At the start of a feature or bug fix, inspect
    branch and dirty state and ask the user once. Default: a topic branch in
@@ -97,9 +98,15 @@ description: Use first to route ABP work, choose skills, sequence handoffs, and 
    | Repository setup, staging, commits, history | `scaffolding`, `git-workflow` |
 
    For framework/library/runtime/platform-sensitive work, read
-   `references/version-verified.md`. `release` is a post-implementation
-   lens; load it when the diff exists, in code review, or when the user
-   asks for release prep.
+   `references/version-verified.md`. `release` is deliberately absent
+   from this matrix: it is a post-implementation lens, never a startup
+   or routing skill. Load it only after a concrete diff exists and
+   touches release artifacts (manifests, CHANGELOG, lockfiles, tags,
+   publish scripts), during code review when those artifacts surface,
+   or when the user explicitly asks for release prep, deprecation/
+   migration notes, rollout, or rollback planning. Mentioning release
+   risk, naming compatibility intent, or running step 4's gate does not
+   require loading `release`.
 7. **Load only the skill bodies that change the next action or proof
    obligation.** It's fine to name an engineering lens without loading its
    body. If skills conflict, prefer safety, data integrity, correctness,
