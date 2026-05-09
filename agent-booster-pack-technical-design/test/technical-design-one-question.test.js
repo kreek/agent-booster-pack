@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
+import technicalDesignOneQuestion, {
   countUserFacingQuestions,
   isTechnicalDesignActivation,
   isTechnicalDesignDeactivation,
@@ -20,6 +20,36 @@ const custom = (active) => ({
   customType: TECHNICAL_DESIGN_STATE_ENTRY,
   data: { active },
 });
+
+function makePiHarness() {
+  const commands = new Map();
+  const userMessages = [];
+  const notifications = [];
+
+  const pi = {
+    appendEntry() {},
+    sendMessage() {},
+    sendUserMessage(message) {
+      userMessages.push(message);
+    },
+    registerCommand(name, command) {
+      commands.set(name, command);
+    },
+    on() {},
+  };
+
+  const ctx = {
+    ui: {
+      notify(message, level) {
+        notifications.push({ message, level });
+      },
+    },
+  };
+
+  technicalDesignOneQuestion(pi);
+
+  return { commands, ctx, notifications, userMessages };
+}
 
 describe("technical-design one-question guard", () => {
   it("detects manual technical-design activation commands", () => {
@@ -85,6 +115,15 @@ Should the queue be durable?`;
     const history = [custom(true), custom(false)];
 
     expect(shouldEnforceAssistantMessage(history, "Should we use Postgres? Should we add Redis?")).toBe(false);
+  });
+
+
+  it("forwards command arguments through the Pi API, not the command context", async () => {
+    const { commands, ctx, userMessages } = makePiHarness();
+
+    await commands.get("abp:technical-design").handler("design the import flow", ctx);
+
+    expect(userMessages).toEqual(["design the import flow"]);
   });
 
   it("correction prompt asks the agent to regenerate with exactly one decision question", () => {
