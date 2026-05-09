@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  branchIsolationStatus,
+  BRANCH_GUARD_STATE_ENTRY,
+  handleBranchIsolation,
   hasAlreadyExplainedThisTurn,
   hasPreWorkExplanation,
   makePreWorkBlockReason,
@@ -30,6 +33,36 @@ const assistantToolCall = (name, args = {}) => ({
 });
 
 const customEntry = (customType, data = {}) => ({ type: "custom", customType, data });
+
+function makeExec(results) {
+  const calls = [];
+  const exec = async (command, args) => {
+    calls.push([command, args]);
+    const key = [command, ...args].join(" ");
+    const result = results[key];
+    if (!result) return { code: 0, stdout: "", stderr: "" };
+    return { code: 0, stdout: "", stderr: "", ...result };
+  };
+  exec.calls = calls;
+  return exec;
+}
+
+function makeUi(choices) {
+  const prompts = [];
+  const ui = {
+    async select(prompt, options) {
+      prompts.push({ prompt, options });
+      return choices.shift();
+    },
+    async input(prompt) {
+      prompts.push({ prompt });
+      return choices.shift();
+    },
+    notify() {},
+  };
+  ui.prompts = prompts;
+  return ui;
+}
 
 describe("pre-work guard", () => {
 it("does not trigger on read-only tool calls", () => {
@@ -123,6 +156,87 @@ it("state from prior turn is stale once a new user message arrives", () => {
   expect(hasAlreadyExplainedThisTurn(entries)).toBe(false);
   const verdict = shouldBlockPreWork("edit", { path: "src/formatter.js" }, entries);
   expect(verdict, "expected the gate to fire again on the second turn").toBeTruthy();
+});
+
+it("detects protected branches as risky before mutation", async () => {
+  const exec = makeExec({
+    "git rev-parse --is-inside-work-tree": { stdout: "true\n" },
+    "git branch --show-current": { stdout: "main\n" },
+    "git status --porcelain": { stdout: "" },
+  });
+
+  await expect(branchIsolationStatus(exec)).resolves.toMatchObject({ kind: "protected_branch", branch: "main" });
+});
+
+it("detects committed work that is not merged to main", async () => {
+  const exec = makeExec({
+    "git rev-parse --is-inside-work-tree": { stdout: "true\n" },
+    "git branch --show-current": { stdout: "feature/current\n" },
+    "git status --porcelain": { stdout: "" },
+    "git rev-parse --verify main": { stdout: "abc123\n" },
+    "git merge-base --is-ancestor HEAD main": { code: 1 },
+  });
+
+  await expect(branchIsolationStatus(exec)).resolves.toMatchObject({ kind: "unmerged_branch", branch: "feature/current" });
+});
+
+it("detects committed work that is not merged to master when main is absent", async () => {
+  const exec = makeExec({
+    "git rev-parse --is-inside-work-tree": { stdout: "true\n" },
+    "git branch --show-current": { stdout: "feature/current\n" },
+    "git status --porcelain": { stdout: "" },
+    "git rev-parse --verify main": { code: 1 },
+    "git rev-parse --verify master": { stdout: "abc123\n" },
+    "git merge-base --is-ancestor HEAD master": { code: 1 },
+  });
+
+  await expect(branchIsolationStatus(exec)).resolves.toMatchObject({ kind: "unmerged_branch", branch: "feature/current" });
+});
+
+it("lets the user create a topic branch in the current worktree", async () => {
+  const exec = makeExec({
+    "git rev-parse --is-inside-work-tree": { stdout: "true\n" },
+    "git branch --show-current": { stdout: "main\n" },
+    "git status --porcelain": { stdout: "" },
+  });
+  const ui = makeUi(["Create/switch to a topic branch in this worktree", "fix/branch-guard"]);
+  const appended = [];
+
+  const result = await handleBranchIsolation({ exec, ui, hasUI: true, entries: [], appendEntry: (...args) => appended.push(args) });
+
+  expect(result).toBeUndefined();
+  expect(exec.calls).toContainEqual(["git", ["switch", "-c", "fix/branch-guard"]]);
+  expect(appended.at(-1)?.[0]).toBe(BRANCH_GUARD_STATE_ENTRY);
+});
+
+it("does not auto-create worktrees; choosing worktree blocks with instructions", async () => {
+  const exec = makeExec({
+    "git rev-parse --is-inside-work-tree": { stdout: "true\n" },
+    "git branch --show-current": { stdout: "feature/current\n" },
+    "git status --porcelain": { stdout: " M src/x.js\n" },
+  });
+  const ui = makeUi(["Create a separate worktree + topic branch"]);
+
+  const result = await handleBranchIsolation({ exec, ui, hasUI: true, entries: [], appendEntry: () => {} });
+
+  expect(result.block).toBe(true);
+  expect(result.reason).toMatch(/git worktree add/);
+  expect(exec.calls.some(([, args]) => args[0] === "worktree")).toBe(false);
+});
+
+it("allows explicit continue on a dirty topic branch for the current turn", async () => {
+  const exec = makeExec({
+    "git rev-parse --is-inside-work-tree": { stdout: "true\n" },
+    "git branch --show-current": { stdout: "feature/current\n" },
+    "git status --porcelain": { stdout: " M src/x.js\n" },
+  });
+  const ui = makeUi(["Continue on current branch"]);
+  const appended = [];
+
+  const result = await handleBranchIsolation({ exec, ui, hasUI: true, entries: [], appendEntry: (...args) => appended.push(args) });
+
+  expect(result).toBeUndefined();
+  expect(appended.at(-1)?.[0]).toBe(BRANCH_GUARD_STATE_ENTRY);
 });
 
 it("registers before_agent_start handler that appends the pre-work reminder", async () => {

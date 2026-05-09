@@ -103,9 +103,10 @@ next action.
    `async-systems` adds delivery and ordering guarantees, `error-handling`
    shapes public error contracts, and `proof` records proof obligations.
 4. Start work on a topic branch, not `main`. Create or switch branches
-   before editing files, running generators, or mutating the worktree. Use
-   a separate worktree with its own topic branch for parallel work or when
-   the current branch has unrelated in-flight changes.
+   before editing files, running generators, or mutating the worktree. If
+   existing work needs isolation, offer the user a choice: branch in the
+   current worktree, separate worktree plus branch, continue explicitly,
+   or stop. Do not silently choose a worktree.
 5. Select the smallest useful skill set by quality concern and risk
    trigger. Use this matrix only for risks that are actually present;
    do not load every row:
@@ -175,8 +176,9 @@ next action.
       the relevant skill.
 - [ ] **Scope**: work matches the user's goal and local project
       conventions.
-- [ ] **Branch isolation**: work began on a topic branch, or in a
-      separate worktree when existing changes needed isolation.
+- [ ] **Branch isolation**: work began on a topic branch; when existing
+      changes needed isolation, the user chose branch, worktree,
+      continue, or stop rather than the agent silently choosing.
 - [ ] **Proof**: completion claims are backed by `proof` evidence or
       reported as unproven; user-not-named behavior-bearing
       elaborations (extra checks, indexes, wrappers, abstractions)

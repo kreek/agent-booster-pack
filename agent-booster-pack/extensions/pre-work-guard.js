@@ -1,6 +1,12 @@
 const PRE_WORK_MARKER = "ABP Pre-Work Reflection Gate";
 const PRE_WORK_STATE_ENTRY = "abp-pre-work-explained";
+export const BRANCH_GUARD_STATE_ENTRY = "abp-branch-isolation-accepted";
 
+const PROTECTED_BRANCHES = new Set(["main", "master"]);
+const BRANCH_CHOICE = "Create/switch to a topic branch in this worktree";
+const WORKTREE_CHOICE = "Create a separate worktree + topic branch";
+const CONTINUE_CHOICE = "Continue on current branch";
+const STOP_CHOICE = "Stop and let me handle Git";
 const CHANGE_TOOL_NAMES = new Set(["edit", "write"]);
 const MUTATING_BASH_PATTERN = /(\btee\b|\bpython\b[\s\S]*\bopen\([^)]*['"]w|\bnode\b[\s\S]*writeFile|\bperl\s+-pi\b|\bsed\s+-i\b|\bmv\b|\bcp\b|\btouch\b|\bchmod\b|\bgit\s+apply\b|\bpatch\b)/i;
 
@@ -80,13 +86,109 @@ function lastUserMessageIndex(entries) {
   return -1;
 }
 
-export function hasAlreadyExplainedThisTurn(entries) {
+function hasCustomEntryThisTurn(entries, customType) {
   const cutoff = lastUserMessageIndex(entries);
   for (let index = entries.length - 1; index > cutoff; index -= 1) {
     const entry = entries[index];
-    if (entry?.type === "custom" && entry?.customType === PRE_WORK_STATE_ENTRY) return true;
+    if (entry?.type === "custom" && entry?.customType === customType) return true;
   }
   return false;
+}
+
+export function hasAlreadyExplainedThisTurn(entries) {
+  return hasCustomEntryThisTurn(entries, PRE_WORK_STATE_ENTRY);
+}
+
+function hasAcceptedBranchIsolationThisTurn(entries) {
+  return hasCustomEntryThisTurn(entries, BRANCH_GUARD_STATE_ENTRY);
+}
+
+async function git(exec, ...args) {
+  return exec("git", args);
+}
+
+export async function branchIsolationStatus(exec) {
+  const inside = await git(exec, "rev-parse", "--is-inside-work-tree");
+  if (inside.code !== 0 || inside.stdout.trim() !== "true") return null;
+
+  const branchResult = await git(exec, "branch", "--show-current");
+  const branch = branchResult.stdout.trim() || "(detached HEAD)";
+  const statusResult = await git(exec, "status", "--porcelain");
+  const dirty = statusResult.stdout.trim().length > 0;
+
+  if (PROTECTED_BRANCHES.has(branch)) return { kind: "protected_branch", branch, dirty };
+  if (dirty) return { kind: "dirty_branch", branch, dirty };
+
+  for (const baseBranch of PROTECTED_BRANCHES) {
+    const baseExists = await git(exec, "rev-parse", "--verify", baseBranch);
+    if (baseExists.code !== 0) continue;
+
+    const merged = await git(exec, "merge-base", "--is-ancestor", "HEAD", baseBranch);
+    if (merged.code !== 0) return { kind: "unmerged_branch", branch, dirty };
+    break;
+  }
+
+  return null;
+}
+
+function branchGuardPrompt(status) {
+  const reason =
+    status.kind === "protected_branch"
+      ? `You are on protected branch ${status.branch}. Start implementation on a topic branch.`
+      : status.kind === "unmerged_branch"
+        ? `Current branch ${status.branch} has commits not merged to main. Choose how to isolate this work.`
+        : `Current branch ${status.branch} has uncommitted changes. Choose how to isolate this work.`;
+  return `${reason}\n\nPick the next Git step:`;
+}
+
+function worktreeInstructions() {
+  return [
+    "ABP Branch Isolation Guard: create a separate worktree before continuing.",
+    "Suggested command:",
+    "git worktree add ../<repo>-<topic> -b <type/topic> HEAD",
+    "Then run this task from that new worktree. The guard did not create a worktree automatically.",
+  ].join("\n");
+}
+
+function invalidBranchName(name) {
+  return !name || /\s/.test(name) || name.startsWith("-");
+}
+
+export async function handleBranchIsolation({ exec, ui, hasUI, entries, appendEntry }) {
+  if (hasAcceptedBranchIsolationThisTurn(entries)) return;
+
+  const status = await branchIsolationStatus(exec);
+  if (!status) return;
+
+  if (!hasUI) {
+    return { block: true, reason: "ABP Branch Isolation Guard: create or switch to a topic branch before mutating files." };
+  }
+
+  const choices = [BRANCH_CHOICE, WORKTREE_CHOICE, CONTINUE_CHOICE, STOP_CHOICE];
+  const choice = await ui.select(branchGuardPrompt(status), choices);
+
+  if (choice === BRANCH_CHOICE) {
+    const branchName = String(await ui.input("Topic branch name (example: fix/customer-cache)") ?? "").trim();
+    if (invalidBranchName(branchName)) {
+      return { block: true, reason: "ABP Branch Isolation Guard: no valid topic branch name was provided." };
+    }
+
+    const result = await git(exec, "switch", "-c", branchName);
+    if (result.code !== 0) {
+      return { block: true, reason: result.stderr.trim() || `ABP Branch Isolation Guard: could not create ${branchName}.` };
+    }
+
+    appendEntry(BRANCH_GUARD_STATE_ENTRY, { choice, branch: branchName, acceptedAt: Date.now() });
+    return;
+  }
+
+  if (choice === WORKTREE_CHOICE) return { block: true, reason: worktreeInstructions() };
+  if (choice === CONTINUE_CHOICE) {
+    appendEntry(BRANCH_GUARD_STATE_ENTRY, { choice, branch: status.branch, acceptedAt: Date.now() });
+    return;
+  }
+
+  return { block: true, reason: "ABP Branch Isolation Guard: stopped so you can handle Git state." };
 }
 
 export function shouldBlockPreWork(toolName, input, entries) {
@@ -126,6 +228,16 @@ export default function preWorkGuard(pi) {
   pi.on("tool_call", async (event, ctx) => {
     const entries = ctx.sessionManager.getBranch();
     if (classifyToolCall(event.toolName, event.input) !== "mutating") return;
+
+    const branchResult = await handleBranchIsolation({
+      exec: (...args) => pi.exec(...args, { signal: ctx.signal, timeout: 5000 }),
+      ui: ctx.ui,
+      hasUI: ctx.hasUI,
+      entries,
+      appendEntry: (...args) => pi.appendEntry(...args),
+    });
+    if (branchResult) return branchResult;
+
     if (hasAlreadyExplainedThisTurn(entries)) return;
 
     const verdict = shouldBlockPreWork(event.toolName, event.input, entries);

@@ -43,6 +43,9 @@ recoverable, scoped, and honest.
 7. Test hook policy, not hook wrappers. Tiny hooks that only `exec` a repo
    script do not need dedicated tests; test the script when it selects
    commands, blocks branches, routes staged files, or handles failures.
+8. When a branch already has in-flight or completed work, do not stack a
+   new task on it by default. Offer a branch/worktree/continue/stop choice;
+   worktrees are user-selected isolation, not an automatic agent choice.
 
 ## Workflow
 
@@ -71,6 +74,8 @@ recoverable, scoped, and honest.
       reflog/recovery point is available for rollback.
 - [ ] Hook tests, when present, cover policy-bearing scripts rather than
       trivial wrapper files.
+- [ ] New work was not stacked on unrelated in-flight or completed branch
+      work unless the user explicitly chose to continue.
 
 ## Handoffs
 
