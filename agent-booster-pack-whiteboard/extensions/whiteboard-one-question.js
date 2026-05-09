@@ -86,7 +86,7 @@ export default function whiteboardOneQuestion(pi) {
       pi.sendMessage(stateMessage(true, "command"), { deliverAs: "nextTurn" });
       ctx.ui.notify("ABP whiteboarding guard enabled", "info");
 
-      if (args?.trim()) await ctx.sendUserMessage(args.trim());
+      if (args?.trim()) await pi.sendUserMessage(args.trim());
     },
   });
 

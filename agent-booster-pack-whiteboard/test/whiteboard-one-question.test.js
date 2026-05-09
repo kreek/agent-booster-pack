@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
+import whiteboardOneQuestion, {
   countUserFacingQuestions,
   isWhiteboardingActivation,
   isWhiteboardingDeactivation,
@@ -20,6 +20,36 @@ const custom = (active) => ({
   customType: WHITEBOARD_STATE_ENTRY,
   data: { active },
 });
+
+function makePiHarness() {
+  const commands = new Map();
+  const userMessages = [];
+  const notifications = [];
+
+  const pi = {
+    appendEntry() {},
+    sendMessage() {},
+    sendUserMessage(message) {
+      userMessages.push(message);
+    },
+    registerCommand(name, command) {
+      commands.set(name, command);
+    },
+    on() {},
+  };
+
+  const ctx = {
+    ui: {
+      notify(message, level) {
+        notifications.push({ message, level });
+      },
+    },
+  };
+
+  whiteboardOneQuestion(pi);
+
+  return { commands, ctx, notifications, userMessages };
+}
 
 describe("whiteboard one-question guard", () => {
 it("detects manual whiteboarding activation commands", () => {
@@ -80,6 +110,14 @@ it("latest persisted whiteboarding state wins", () => {
   const history = [custom(true), custom(false)];
 
   expect(shouldEnforceAssistantMessage(history, "Should we use Postgres? Should we add Redis?")).toBe(false);
+});
+
+it("forwards command arguments through the Pi API, not the command context", async () => {
+  const { commands, ctx, userMessages } = makePiHarness();
+
+  await commands.get("abp:whiteboard").handler("design the import flow", ctx);
+
+  expect(userMessages).toEqual(["design the import flow"]);
 });
 
 it("correction prompt asks the agent to regenerate with exactly one decision question", () => {
