@@ -94,7 +94,7 @@ matching reference whenever either appears in the diff.
 
 ## Handoffs
 
-- Use `whiteboarding` upstream to enumerate the contracts whose data shape
+- Use `technical-design` upstream to enumerate the contracts whose data shape
   you are modeling, before formalizing invariants here.
 - Use `architecture` when module boundaries, domain/feature locality, or
   layering decisions are in scope, especially when the question is what

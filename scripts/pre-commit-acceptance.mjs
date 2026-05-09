@@ -86,7 +86,7 @@ export function selectChecks(paths) {
   const packageChecks = [
     ["agent-booster-pack", "agent-booster-pack Vitest suite passes"],
     ["agent-booster-pack-contract-first", "contract-first Vitest suite passes"],
-    ["agent-booster-pack-whiteboard", "whiteboard Vitest suite passes"],
+    ["agent-booster-pack-technical-design", "technical-design Vitest suite passes"],
     ["agent-booster-pack-proof", "proof Vitest suite passes"],
   ];
   for (const [prefix, reason] of packageChecks) {

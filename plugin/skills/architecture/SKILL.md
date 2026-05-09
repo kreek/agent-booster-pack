@@ -51,7 +51,7 @@ description: Use for architecture decisions, module boundaries, coupling, layeri
    what internal details must not leak. Public HTTP contracts belong to
    `api`; exact parsed shapes and invariants belong to `domain-modeling`.
 6. If a proposed boundary is a durable interface, route to the `workflow` sign-off
-   gate via `whiteboarding` before shaping code around it.
+   gate via `technical-design` before shaping code around it.
 7. Bounded contexts beat shared models. When two parts of the system mean
    subtly different things by the same word, give each context its own type.
 8. Separate things that change for different reasons. A simple boundary
@@ -110,7 +110,7 @@ description: Use for architecture decisions, module boundaries, coupling, layeri
 
 ## Handoffs
 
-- Use `whiteboarding` upstream to map the terrain — current and proposed
+- Use `technical-design` upstream to map the terrain — current and proposed
   contracts — before deciding module boundaries.
 - Use `domain-modeling` to design data shapes, invariants, and effect isolation
   inside a module, including the exact parsed and output shapes.

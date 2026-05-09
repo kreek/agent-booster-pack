@@ -25,7 +25,7 @@ done. Prefer concrete behavior over product theater.
 
 ## Vague Idea Refinement
 
-Use this before `whiteboarding` when the user has a rough idea but no
+Use this before `technical-design` when the user has a rough idea but no
 proposal worth designing yet. The goal is not a full PRD; it is a small,
 reviewable brief that prevents the agent from inventing product behavior.
 
@@ -41,7 +41,7 @@ Capture:
   first slice works.
 
 If the idea changes public contracts, data shape, workflow ownership, or
-module boundaries, hand off to `whiteboarding` after this brief is clear.
+module boundaries, hand off to `technical-design` after this brief is clear.
 
 ## User Stories
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Copies the whiteboarding and workflow skills into ./skills before npm
+// Copies the technical-design and workflow skills into ./skills before npm
 // pack/publish so users who install this sibling alone get the matching
 // doctrine. The meta-package agent-booster-pack loads skills only from
 // agent-booster-pack-skills, so the bundled copy here sits unused (no
@@ -9,7 +9,7 @@ import { cpSync, mkdirSync, readdirSync, rmSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const SKILLS = ["whiteboarding", "workflow"];
+const SKILLS = ["technical-design", "workflow"];
 
 const here = dirname(fileURLToPath(import.meta.url));
 const pkgRoot = resolve(here, "..");

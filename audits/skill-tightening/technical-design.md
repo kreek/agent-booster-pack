@@ -1,6 +1,6 @@
-# Whiteboarding Skill Tightening Audit
+# Technical Design Skill Tightening Audit
 
-Source: `agents/.agents/skills/whiteboarding/SKILL.md`
+Source: `agents/.agents/skills/technical-design/SKILL.md`
 
 Current length: 1,986 words.
 

@@ -3,7 +3,7 @@ taskFile: task.md
 plugin: engineering-maturity
 features:
   - workflow
-  - whiteboarding
+  - technical-design
   - architecture
   - documentation
 variants:

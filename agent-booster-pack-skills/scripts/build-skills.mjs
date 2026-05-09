@@ -13,7 +13,7 @@ const pkgRoot = resolve(here, "..");
 const repoRoot = resolve(pkgRoot, "..");
 const src = join(repoRoot, "agents", ".agents", "skills");
 const dest = join(pkgRoot, "skills");
-const runtimeOwnedSkills = new Set(["contract-first", "proof", "whiteboarding"]);
+const runtimeOwnedSkills = new Set(["contract-first", "proof", "technical-design"]);
 
 const srcStat = statSync(src, { throwIfNoEntry: false });
 if (!srcStat || !srcStat.isDirectory()) {

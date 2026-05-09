@@ -38,7 +38,7 @@ package_dirs=(
   "agent-booster-pack-skills"
   "agent-booster-pack-contract-first"
   "agent-booster-pack-proof"
-  "agent-booster-pack-whiteboard"
+  "agent-booster-pack-technical-design"
   "agent-booster-pack"
 )
 

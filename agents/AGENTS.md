@@ -58,13 +58,20 @@
   boundary callers outside the module will bind to — design the contract/API
   and high-level plan first, then get the user's approval before
   implementation continues. The full enumeration and the gate's required
-  artifacts live in the `workflow` skill.
+  artifacts live in the `workflow` skill. For public renames or removals,
+  ask separately whether the change is breaking, aliased, deprecated, or
+  compatibility-neutral; approval of the new name/shape is not approval to
+  remove old surfaces.
 - Start with the happy path. Add edge cases when the requirement names them,
   they are security- or data-loss-relevant, or they are needed for a real
   boundary such as network, filesystem, database, or concurrency.
 - Preserve backwards compatibility only when required or clearly valuable. If
   compatibility expectations are unclear, ask before adding shims or making a
   breaking change.
+- Treat release prep as a separate decision from implementation. Do not bump
+  versions, edit changelogs or package lockfiles for release, create tags,
+  publish packages, or check registries unless the user requested or approved
+  that release scope.
 
 ## Skills
 
@@ -104,7 +111,7 @@ They shape the problem, not just the implementation.
 - `contract-first`: use when an Interface Design Gate must approve a durable
   function, API, CLI, config, event, schema, file format, or module boundary
   before implementation lands.
-- `whiteboarding`: use for collaborative design discussions that map current
+- `technical-design`: use for collaborative design discussions that map current
   and proposed contracts (function signatures, exported types, schemas,
   events/queues, CLI flags, config keys, file formats), constraints, tradeoffs,
   and open questions before any non-trivial code lands, then capture the agreed
@@ -313,9 +320,14 @@ ABP adds:
 
 - Branch names use a type prefix: `feature/`, `fix/`, `refactor/`, `chore/`
   (e.g. `fix/null-on-login`).
-- Use or request a separate worktree when parallel work is expected, or when
-  the current branch already has in-flight work that should stay separate.
-  Each worktree still gets its own topic branch.
+- Branch and worktree are separate choices, and a branch is the normal path.
+  On `main`/`master`, require either **Create a new branch** or **Create a
+  separate worktree and branch**; recommend the branch unless parallel or
+  conflicting work needs isolation. On a topic branch with distinct new work,
+  require **Continue on this branch**, **Create a new branch from this branch**,
+  or **Create a separate worktree from main with a new branch**. Worktrees are
+  rare: use them for parallel work, conflicts, or when the current checkout
+  must stay untouched.
 - Review your own staged diff before every commit: catch debug prints, dead
   code, stale paths, and stray changes before anyone else sees them.
 - Commit only after the relevant proof or acceptance check is current. If a

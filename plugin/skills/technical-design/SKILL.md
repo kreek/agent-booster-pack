@@ -1,9 +1,9 @@
 ---
-name: whiteboarding
+name: technical-design
 description: Use for design discussions that map contracts, resolve questions, and capture the result as an RFC/ADR.
 ---
 
-# Whiteboarding
+# Technical Design
 
 ## Iron Law
 
@@ -37,8 +37,8 @@ description: Use for design discussions that map contracts, resolve questions, a
 
 ## Core Ideas
 
-1. Whiteboarding starts as a collaborative design conversation, not plan mode
-   and not a document to fill in. The first output is shared understanding:
+1. Technical design starts as a collaborative engineering conversation, not
+   plan mode and not a document to fill in. The first output is shared understanding:
    what the system is today, what shape is possible, what tradeoffs exist, and
    what decisions still need the human. After agreement, capture the decision
    as an RFC or ADR.
@@ -63,18 +63,17 @@ description: Use for design discussions that map contracts, resolve questions, a
    lightweight diagram in the conversation. Boxes and arrows force you to see
    the whole shape; prose hides what the diagram exposes. Mermaid is fine when
    it helps, but a diagram is a discussion aid, not a required file.
-7. Do not create a file called `whiteboard` or `docs/whiteboard/...`. Do not
-   create any design artifact before the discussion has converged. Once the
-   human agrees on the direction, write the result as an RFC or ADR using the
-   repo's existing convention, or ask where RFCs/ADRs should live if no
-   convention exists.
-8. The whiteboard is iterative. Offer an initial read of the code and design
+7. Do not create a scratch design artifact before the discussion has
+   converged. Once the human agrees on the direction, write the result as an
+   RFC or ADR using the repo's existing convention, or ask where RFCs/ADRs
+   should live if no convention exists.
+8. The discussion is iterative. Offer an initial read of the code and design
    shape, then ask the next meaningful question. Revise the shape as the human
    answers. Do not collapse the session into a one-shot plan.
 9. Keep the conversation high-level enough to preserve design options. If you
    are writing step-by-step implementation tasks, pseudocode, or file-by-file
-   edits, you have left whiteboarding and entered planning.
-10. Architecture is downstream of whiteboarding. The whiteboard maps the
+   edits, you have left technical design and entered planning.
+10. Architecture is downstream of technical design. This skill maps the
    terrain; `architecture` decides module boundaries on top of the map. Bring
    `architecture` in only when boundary changes are part of the work.
 
@@ -116,8 +115,7 @@ artifact records the completed discussion, not the start of one.
 
 ## Verification
 
-- [ ] **No premature artifact**: no `whiteboard` or
-      `docs/whiteboard/...` file; no persistent design artifact before
+- [ ] **No premature artifact**: no persistent design artifact before
       convergence; after convergence the agreed design was captured as
       an RFC or ADR in the repo's convention, or the human was asked
       where it should live.
@@ -149,17 +147,17 @@ artifact records the completed discussion, not the start of one.
 
 | Trigger | Do this instead | False alarm |
 |---|---|---|
-| "I'll just code it, no design needed" | Check the When to Use criteria. If more than one contract changes, whiteboard first. | Trivial typo, formatting, or dep-bump per the When NOT to Use list. |
+| "I'll just code it, no design needed" | Check the When to Use criteria. If more than one contract changes, use technical design first. | Trivial typo, formatting, or dep-bump per the When NOT to Use list. |
 | "This interface is obvious" | Show the current interface, proposed interface, and why this boundary belongs here, then ask the human to approve or revise it before implementation. | Private helper or one-file refactor with no durable caller dependency. |
-| "I'll create a whiteboard file so the session is formal" | Keep the design in chat until it converges, then capture the result as an RFC or ADR. | The user explicitly asks to draft an RFC/ADR first as the discussion medium. |
+| "I'll create a scratch design file so the session is formal" | Keep the design in chat until it converges, then capture the result as an RFC or ADR. | The user explicitly asks to draft an RFC/ADR first as the discussion medium. |
 | "We agreed, so no doc is needed" | Capture the agreed decision as an RFC or ADR before handing off to planning or implementation. | Trivial change covered by When NOT to Use. |
 | "I'll produce the plan now" | Stay at the contract and tradeoff level. Ask the next design question before task sequencing. | The human has agreed on the design and asked to plan or implement. |
-| "I'll write pseudocode so the agent knows what to write" | Delete the pseudocode. Whiteboarding names contracts, not implementation. | Naming a one-line shape change like `id: string -> id: UserId` for clarity. |
+| "I'll write pseudocode so the agent knows what to write" | Delete the pseudocode. Technical design names contracts, not implementation. | Naming a one-line shape change like `id: string -> id: UserId` for clarity. |
 | "API just means HTTP" | Re-read Core Idea 3. CLI flags, env vars, schemas, events, file formats, and types are all contracts. | The change really is HTTP-only and no other surface is touched. |
 | "I'll draft the contracts from memory" | Open the code, read it, cite `file:line` for every existing surface. | Pure greenfield with no existing code to cite, with adjacent patterns named instead. |
 | "The user will catch open questions in code review" | Ask the design question now and revise the shared shape from the answer. | The user has already stated a position; record it as a resolved decision. |
 | "I'll skip the diagram, the prose covers it" | If more than one component is touched, draw the diagram. Visual shape catches what prose hides. | Single-component change where the diagram would be one box. |
-| "Architecture first, then design" | Whiteboard the terrain first. Bring `architecture` in only when boundary changes are part of the work. | The user has explicitly asked for an architecture decision before any contract drafting. |
+| "Architecture first, then design" | Map the technical design terrain first. Bring `architecture` in only when boundary changes are part of the work. | The user has explicitly asked for an architecture decision before any contract drafting. |
 
 ## Handoffs
 

@@ -40,6 +40,15 @@ recoverable, scoped, and honest.
    changes.
 6. Resolve conflicts by preserving intent from both sides, then run the
    relevant checks.
+7. Branch and worktree are separate decisions, but branch is the normal path.
+   On `main`/`master`, offer **Create a new branch** by default; offer
+   **Create a separate worktree and branch** only for parallel work or work
+   that would conflict with the current checkout.
+8. On a topic branch, when the request is distinct from the current or
+   just-completed work, offer **Continue on this branch**, **Create a new
+   branch from this branch**, or **Create a separate worktree from main with a
+   new branch**. Worktrees are rare: use them for parallel work, conflicting
+   work, or when the current checkout must stay untouched.
 
 ## Workflow
 
@@ -47,13 +56,19 @@ recoverable, scoped, and honest.
    and recent log. Stop on unexpected state.
 2. Detect hazards: conflicts, secrets, generated churn, mixed changes in one
    file, unrelated staged work, shared history rewrites, or in-flight work
-   that needs a separate branch/worktree.
-3. For commits, propose logical groups with subject, files, and why. A
+   that needs a new branch or a separate worktree.
+3. For new work location decisions, use the branch-aware menu. On
+   `main`/`master`: **Create a new branch**, or **Create a separate worktree
+   and branch**. On a topic branch with distinct new work: **Continue on this
+   branch**, **Create a new branch from this branch**, or **Create a separate
+   worktree from main with a new branch**. Recommend worktrees only for
+   parallel work, conflicts, or keeping the current checkout untouched.
+4. For commits, propose logical groups with subject, files, and why. A
    direct "commit this" / `$git-workflow` request is approval to package the
    current reviewed work, not unrelated files.
-4. For history operations, name the recovery point and whether the branch
+5. For history operations, name the recovery point and whether the branch
    is local/solo/shared before rewriting, deleting, or force-pushing.
-5. Execute the smallest safe operation. Verify log/range-diff, status, file
+6. Execute the smallest safe operation. Verify log/range-diff, status, file
    membership, and relevant tests or repro commands.
 
 ## Verification
@@ -66,6 +81,9 @@ recoverable, scoped, and honest.
       used lease/inclusion protection.
 - [ ] `range-diff` or log inspection confirms intended commits remain; a
       reflog/recovery point is available for rollback.
+- [ ] Work-location choices matched the current branch state: new branch vs
+      separate worktree on `main`/`master`; continue, branch from this branch,
+      or separate worktree from main on a topic branch with distinct work.
 
 ## Handoffs
 
