@@ -24,8 +24,8 @@ The meta-package also includes cross-cutting runtime gates:
 
 - **Branch Isolation Guard** runs before mutating tool calls. It blocks
   work on protected branches and prompts when the current branch is dirty,
-  offering branch, worktree, continue, or stop choices. It never creates a
-  worktree automatically.
+  offering branch, continue, or stop choices. It does not create or
+  propose worktrees.
 - **Pre-Work Reflection Gate** soft-blocks the first mutating tool call of
   a turn until the agent's latest message explains the plan and why it's
   an improvement (single-file edits) or also names the alternatives

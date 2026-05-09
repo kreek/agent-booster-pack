@@ -43,12 +43,13 @@ recoverable, scoped, and honest.
 7. **Test hook policy, not hook wrappers.** Tiny hooks that only `exec` a
    repo script don't need dedicated tests; test the script when it selects
    commands, blocks branches, routes staged files, or handles failures.
-8. **At the start of a feature or bug fix, ask the user once**: a topic
-   branch in the current worktree (default), or a separate worktree +
-   branch (secondary, for parallel work or isolating unrelated dirty
-   changes). On a topic branch with distinct new work, ask once between
-   continue here or branch off `main`. Don't re-prompt during the same
-   piece of work.
+8. **At the start of a feature or bug fix, ask the user once**: create or
+   switch to a topic branch in the current checkout. On a topic branch
+   with distinct new work, ask once between continue here or branch off
+   `main`. Don't re-prompt during the same piece of work. Don't create
+   git worktrees: this codebase has repeatedly accumulated stale,
+   divergent worktree state. Use a topic branch unless the user
+   explicitly asks for a worktree.
 
 ## Workflow
 
@@ -77,10 +78,10 @@ recoverable, scoped, and honest.
       reflog/recovery point is available for rollback.
 - [ ] Hook tests, when present, cover policy-bearing scripts rather than
       trivial wrapper files.
-- [ ] At the start of work, the user picked a topic branch (default) or a
-      separate worktree + branch. The menu did not re-fire during continued
-      work on the same branch, and new work wasn't silently stacked on
-      unrelated branch work.
+- [ ] At the start of work, the user picked a topic branch in the
+      current checkout. The menu did not re-fire during continued work on
+      the same branch, no worktree was created, and new work wasn't
+      silently stacked on unrelated branch work.
 
 ## Handoffs
 
