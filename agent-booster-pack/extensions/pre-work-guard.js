@@ -4,9 +4,6 @@ const PRE_WORK_STATE_ENTRY = "abp-pre-work-explained";
 const CHANGE_TOOL_NAMES = new Set(["edit", "write"]);
 const MUTATING_BASH_PATTERN = /(\btee\b|\bpython\b[\s\S]*\bopen\([^)]*['"]w|\bnode\b[\s\S]*writeFile|\bperl\s+-pi\b|\bsed\s+-i\b|\bmv\b|\bcp\b|\btouch\b|\bchmod\b|\bgit\s+apply\b|\bpatch\b)/i;
 
-const PLAN_PATTERN = /\b(I'll|I will|going to|plan to|next I'll|about to|will (add|change|create|edit|write|update|introduce|refactor|extract|move|rename|remove|delete|fix))\b/i;
-const WHY_PATTERN = /\b(better|because|so that|to (?:improve|simplify|fix|prevent|reduce|avoid|enable|unblock|clarify)|in order to|this avoids|this prevents|this simplifies|safer|clearer|simpler|reliable)\b/i;
-const ALTERNATIVES_PATTERN = /\b(alternative|considered|instead of|rather than|rejected|ruled out|trade[- ]?off|other option|could also|vs\.?|versus)\b/i;
 
 export function messageText(value) {
   if (typeof value === "string") return value;
@@ -54,12 +51,20 @@ export function preWorkChangeKind(toolName, input) {
   return { subject, size: "small" };
 }
 
+function labelContent(text, label, labels) {
+  const labelAlternatives = labels.join("|");
+  const pattern = new RegExp(
+    `(^|\\n)\\s*(-\\s*)?${label}:[ \\t]*([\\s\\S]*?)(?=\\n\\s*(-\\s*)?(${labelAlternatives}):|$)`,
+    "i"
+  );
+  return text.match(pattern)?.[3]?.trim() ?? "";
+}
+
 export function missingElements(text, size) {
-  const missing = [];
-  if (!PLAN_PATTERN.test(text)) missing.push("plan");
-  if (!WHY_PATTERN.test(text)) missing.push("why");
-  if (size === "normal" && !ALTERNATIVES_PATTERN.test(text)) missing.push("alternatives");
-  return missing;
+  const labels = size === "normal" ? ["Plan", "Why", "Alternatives"] : ["Plan", "Why"];
+  return labels
+    .filter((label) => labelContent(text, label, labels).length === 0)
+    .map((label) => label.toLowerCase());
 }
 
 export function hasPreWorkExplanation(text, size) {
@@ -98,19 +103,19 @@ export function shouldBlockPreWork(toolName, input, entries) {
 export function makePreWorkBlockReason(missing, kind) {
   const subject = kind.subject === "documentation" ? "the document" : "the implementation";
   const elementPhrases = {
-    plan: "a concrete plan for what will change (e.g., \"I'll add…\", \"I'll update…\")",
-    why: "a rationale for why the change is an improvement (\"because\", \"better\", \"safer\", etc.)",
-    alternatives: "the alternatives you considered or rejected (\"considered\", \"instead of\", \"rather than\")",
+    plan: "Plan: a concrete description of what will change",
+    why: "Why: why the change is worth doing or safer than the current state",
+    alternatives: "Alternatives: the options considered or rejected",
   };
 
   const items = missing.map((key) => `- ${elementPhrases[key]}`).join("\n");
-  const tier = kind.size === "small" ? "one sentence is fine" : "a brief paragraph";
+  const tier = kind.size === "small" ? "two labeled lines are fine" : "three labeled lines are fine";
 
-  return `${PRE_WORK_MARKER}: your last message is missing ${missing.join(" and ")} for ${subject}. Add a brief pre-work explanation (${tier}) that includes:\n${items}\n\nThen retry the tool call.`;
+  return `${PRE_WORK_MARKER}: your last message is missing ${missing.join(" and ")} for ${subject}. Add a brief pre-work explanation (${tier}) using these labels:\n${items}\n\nThen retry the tool call.`;
 }
 
 export function preWorkReminder() {
-  return `\n\n${PRE_WORK_MARKER}:\nBefore your first mutating tool call (edit, write, mutating bash) in a turn, write a brief pre-work explanation. For a single-file edit, one sentence covering the plan and why is enough. For multi-file or mutating-bash changes, also name the alternatives you considered or rejected. The explanation teaches the user the codebase you are writing and gives them a chance to redirect before code lands.`;
+  return `\n\n${PRE_WORK_MARKER}:\nBefore your first mutating tool call (edit, write, mutating bash) in a turn, write a brief pre-work explanation with non-empty labels. For a single-file edit, use Plan: and Why:. For multi-file or mutating-bash changes, use Plan:, Why:, and Alternatives:. The explanation teaches the user the codebase you are writing and gives them a chance to redirect before code lands.`;
 }
 
 export default function preWorkGuard(pi) {
