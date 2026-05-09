@@ -102,10 +102,10 @@ next action.
    shapes public HTTP contracts, `database` adds rollout/locking/recovery,
    `async-systems` adds delivery and ordering guarantees, `error-handling`
    shapes public error contracts, and `proof` records proof obligations.
-4. Use a separate worktree (each with its own topic branch) when parallel
-   work is expected, or when the current branch has in-flight work that
-   should stay separate. Do not wait until commit time to isolate the
-   change. (Branch-per-change and no-edits-on-main are harness baseline.)
+4. Start work on a topic branch, not `main`. Create or switch branches
+   before editing files, running generators, or mutating the worktree. Use
+   a separate worktree with its own topic branch for parallel work or when
+   the current branch has unrelated in-flight changes.
 5. Select the smallest useful skill set by quality concern and risk
    trigger. Use this matrix only for risks that are actually present;
    do not load every row:
@@ -175,6 +175,8 @@ next action.
       the relevant skill.
 - [ ] **Scope**: work matches the user's goal and local project
       conventions.
+- [ ] **Branch isolation**: work began on a topic branch, or in a
+      separate worktree when existing changes needed isolation.
 - [ ] **Proof**: completion claims are backed by `proof` evidence or
       reported as unproven; user-not-named behavior-bearing
       elaborations (extra checks, indexes, wrappers, abstractions)
@@ -196,7 +198,7 @@ next action.
 
 | Trigger | Do this instead | False alarm |
 |---|---|---|
-| "I'll just code it" | Name the goal, quality/risk profile, and smallest useful skill set first. | Trivial edits may exit workflow at step 1. |
+| "I'll just code it" | Name the goal, risk profile, skill set, and branch/worktree first. | Trivial edits may exit workflow at step 1. |
 | "I'll infer the product behavior" | Draft likely acceptance criteria and ask only about behavior, scope, data, compatibility, UX, safety, or proof that changes the implementation. | Mechanical edits or explicit implementation-only tasks. |
 | "I'll design and implement this boundary in one pass" | For durable interfaces, stop at current/proposed interface and boundary rationale; get approval before implementation. | Private helper extraction with no durable caller dependency. |
 | "Use every skill to be safe" | Load only skills that change the next action or proof obligation. | Explicit audit/review request across the whole pack. |
@@ -210,6 +212,7 @@ next action.
 | "This is only docs" | Check whether the docs change behavior, install path, commands, or user expectations. | Pure typo with no procedural meaning. |
 | "This hardening / extra check / extra layer makes it safer" | Prove the named failure mode with evidence, or drop the elaboration. | The user requested the hardening and proof is already in the diff. |
 | "I'll just list files changed" | Explain why the change improves the system or what it enables next, tied to the user's goal. | Mechanical typo or formatting-only edit. |
+| "I'll branch later before committing" | Branch before editing; use a separate worktree if the current branch has unrelated work. | Read-only investigation or a user explicitly asks not to change branches. |
 | "I just wrote it, I know it's fine" | Self-review the diff before `proof` or any done claim. | Trivial edits that exited workflow at step 1. |
 
 ## Handoffs
