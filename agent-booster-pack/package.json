@@ -1,7 +1,7 @@
 {
   "name": "agent-booster-pack",
-  "version": "6.0.0",
-  "description": "Agent Booster Pack for Pi: skills + Interface Design Gate runtime + proof-first runtime + technical-design guard + final value guard, in one install. Meta-package; depends on the four siblings.",
+  "version": "7.0.0",
+  "description": "Agent Booster Pack for Pi: skills + Interface Design Gate runtime + proof-first runtime + specify guard + final value guard, in one install. Meta-package; depends on the four siblings.",
   "type": "module",
   "engines": {
     "node": ">=18"
@@ -10,14 +10,14 @@
     "extensions": [
       "./node_modules/agent-booster-pack-contract-first/extensions",
       "./node_modules/agent-booster-pack-proof/src/index.ts",
-      "./node_modules/agent-booster-pack-technical-design/extensions",
+      "./node_modules/agent-booster-pack-specify/extensions",
       "./extensions"
     ],
     "skills": [
       "./node_modules/agent-booster-pack-skills/skills",
       "./node_modules/agent-booster-pack-contract-first/skills/contract-first",
       "./node_modules/agent-booster-pack-proof/skills/proof",
-      "./node_modules/agent-booster-pack-technical-design/skills/technical-design"
+      "./node_modules/agent-booster-pack-specify/skills/specify"
     ]
   },
   "files": [
@@ -27,7 +27,7 @@
   ],
   "scripts": {
     "test": "vitest run test",
-    "build:siblings": "npm --prefix ../agent-booster-pack-skills run build && npm --prefix ../agent-booster-pack-contract-first run build && npm --prefix ../agent-booster-pack-proof run build && npm --prefix ../agent-booster-pack-technical-design run build",
+    "build:siblings": "npm --prefix ../agent-booster-pack-skills run build && npm --prefix ../agent-booster-pack-contract-first run build && npm --prefix ../agent-booster-pack-proof run build && npm --prefix ../agent-booster-pack-specify run build",
     "sync:bundled-packages": "node scripts/sync-bundled-packages.mjs",
     "prepack": "npm run build:siblings && npm install --install-links --ignore-scripts --no-audit --no-fund && npm run sync:bundled-packages"
   },
@@ -35,13 +35,13 @@
     "agent-booster-pack-skills": "file:../agent-booster-pack-skills",
     "agent-booster-pack-contract-first": "file:../agent-booster-pack-contract-first",
     "agent-booster-pack-proof": "file:../agent-booster-pack-proof",
-    "agent-booster-pack-technical-design": "file:../agent-booster-pack-technical-design"
+    "agent-booster-pack-specify": "file:../agent-booster-pack-specify"
   },
   "bundledDependencies": [
     "agent-booster-pack-skills",
     "agent-booster-pack-contract-first",
     "agent-booster-pack-proof",
-    "agent-booster-pack-technical-design"
+    "agent-booster-pack-specify"
   ],
   "devDependencies": {
     "vitest": "^3.2.1"

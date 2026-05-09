@@ -12,7 +12,7 @@ test:
 	cd agent-booster-pack && npm test
 	cd agent-booster-pack-contract-first && npm test
 	cd agent-booster-pack-proof && npm test
-	cd agent-booster-pack-technical-design && npm test
+	cd agent-booster-pack-specify && npm test
 	cd eval && npm test
 	cd eval && npm run typecheck
 

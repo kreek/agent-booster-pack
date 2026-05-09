@@ -12,7 +12,7 @@ const siblingPackages = [
   "agent-booster-pack-skills",
   "agent-booster-pack-contract-first",
   "agent-booster-pack-proof",
-  "agent-booster-pack-technical-design",
+  "agent-booster-pack-specify",
 ];
 
 const here = dirname(fileURLToPath(import.meta.url));

@@ -1,6 +1,6 @@
-# Technical Design Skill Tightening Audit
+# Specify Skill Tightening Audit
 
-Source: `agents/.agents/skills/technical-design/SKILL.md`
+Source: `agents/.agents/skills/specify/SKILL.md`
 
 Current length: 1,986 words.
 

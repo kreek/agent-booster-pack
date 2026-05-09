@@ -15,10 +15,10 @@ This is a **meta-package**: it installs the sibling ABP packages and adds the cr
 - [`agent-booster-pack-proof`](../agent-booster-pack-proof/) —
   proof-first red-green-refactor runtime. Enforces a failing test
   before production code lands. Includes the `proof` skill.
-- [`agent-booster-pack-technical-design`](../agent-booster-pack-technical-design/) —
-  technical-design conversation guard. Enforces one user-facing question at
-  a time while ABP technical-design mode is active. Includes the
-  `technical-design` skill.
+- [`agent-booster-pack-specify`](../agent-booster-pack-specify/) —
+  Specify conversation guard. Design before code; enforces one user-facing
+  decision question at a time while ABP Specify mode is active. Includes the
+  `specify` skill.
 
 The meta-package also includes cross-cutting runtime gates:
 

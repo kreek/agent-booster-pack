@@ -52,7 +52,7 @@ const skillLayerCapabilities = [
   "scaffolding",
   "security",
   "ui-design",
-  "technical-design",
+  "specify",
   "workflow",
 ];
 

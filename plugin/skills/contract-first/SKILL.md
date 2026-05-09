@@ -26,7 +26,7 @@ description: Use when an Interface Design Gate must approve durable function, AP
   effect.
 - Broad routing and skill selection; use `workflow`.
 - Collaborative design exploration before a concrete interface proposal; use
-  `technical-design`.
+  `specify`.
 
 ## Workflow
 
@@ -60,7 +60,7 @@ description: Use when an Interface Design Gate must approve durable function, AP
 
 - Use `workflow` to choose all relevant skills and keep the broad ABP routing
   context.
-- Use `technical-design` when the contract shape is still being explored.
+- Use `specify` when the contract shape is still being explored.
 - Use `api`, `database`, `async-systems`, or `security` when the interface
   crosses those domain boundaries.
 - Use `proof` to turn the approved contract into executable acceptance checks.

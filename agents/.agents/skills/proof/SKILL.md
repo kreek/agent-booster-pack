@@ -187,8 +187,8 @@ counts toward whichever claims it actually covers.
 
 ## Handoffs
 
-- Use `technical-design` to convert the agreed RFC/ADR's proof obligations into
-  Proof Contracts before claiming completion.
+- Use `specify` to convert the agreed ADR, RFC, tech spec, or note's proof
+  obligations into Proof Contracts before claiming completion.
 - Use `domain-modeling` to shape invariants and make invalid states
   unrepresentable.
 - Use `debugging` when the proof depends on root-cause evidence.

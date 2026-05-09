@@ -1,7 +1,7 @@
 {
-  "name": "agent-booster-pack-technical-design",
+  "name": "agent-booster-pack-specify",
   "version": "1.0.0",
-  "description": "ABP Pi technical-design guard plus technical-design skill: one user-facing question at a time.",
+  "description": "ABP Pi Specify guard plus specify skill: design before code, one decision question at a time.",
   "type": "module",
   "engines": {
     "node": ">=18"
@@ -24,8 +24,8 @@
     "build": "node scripts/build-skills.mjs",
     "prepack": "npm run build",
     "test": "vitest run test",
-    "install-ext": "npm run build && mkdir -p ~/.pi/agent/extensions && ln -sfn \"$(pwd)\" ~/.pi/agent/extensions/agent-booster-pack-technical-design && echo 'Installed to ~/.pi/agent/extensions/agent-booster-pack-technical-design -- run /reload in Pi to activate'",
-    "uninstall-ext": "rm -f ~/.pi/agent/extensions/agent-booster-pack-technical-design && echo 'Uninstalled'"
+    "install-ext": "npm run build && mkdir -p ~/.pi/agent/extensions && ln -sfn \"$(pwd)\" ~/.pi/agent/extensions/agent-booster-pack-specify && echo 'Installed to ~/.pi/agent/extensions/agent-booster-pack-specify -- run /reload in Pi to activate'",
+    "uninstall-ext": "rm -f ~/.pi/agent/extensions/agent-booster-pack-specify && echo 'Uninstalled'"
   },
   "devDependencies": {
     "vitest": "^3.2.1"
@@ -33,7 +33,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/kreek/agent-booster-pack.git",
-    "directory": "agent-booster-pack-technical-design"
+    "directory": "agent-booster-pack-specify"
   },
   "author": "Alastair Dawson",
   "license": "MIT",
@@ -43,7 +43,7 @@
     "pi",
     "abp",
     "agent-booster-pack",
-    "technical-design",
+    "specify",
     "conversation-guard",
     "coding-agent"
   ]

@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import technicalDesignOneQuestion, {
+import specifyOneQuestion, {
   countUserFacingQuestions,
-  isTechnicalDesignActivation,
-  isTechnicalDesignDeactivation,
+  isSpecifyActivation,
+  isSpecifyDeactivation,
   makeCorrectionPrompt,
   shouldEnforceAssistantMessage,
-  TECHNICAL_DESIGN_STATE_ENTRY,
-} from "../extensions/technical-design-one-question.js";
+  SPECIFY_STATE_ENTRY,
+} from "../extensions/specify-one-question.js";
 
 const messages = (...items) =>
   items.map(([role, content]) => ({
@@ -17,7 +17,7 @@ const messages = (...items) =>
 
 const custom = (active) => ({
   type: "custom",
-  customType: TECHNICAL_DESIGN_STATE_ENTRY,
+  customType: SPECIFY_STATE_ENTRY,
   data: { active },
 });
 
@@ -46,31 +46,31 @@ function makePiHarness() {
     },
   };
 
-  technicalDesignOneQuestion(pi);
+  specifyOneQuestion(pi);
 
   return { commands, ctx, notifications, userMessages };
 }
 
-describe("technical-design one-question guard", () => {
-  it("detects manual technical-design activation commands", () => {
-    expect(isTechnicalDesignActivation("/abp:technical-design design the import flow")).toBe(true);
-    expect(isTechnicalDesignActivation(" /abp:technical-design")).toBe(true);
-    expect(isTechnicalDesignActivation("/abp:technical-design-off")).toBe(false);
+describe("specify one-question guard", () => {
+  it("detects manual specify activation commands", () => {
+    expect(isSpecifyActivation("/abp:specify design the import flow")).toBe(true);
+    expect(isSpecifyActivation(" /abp:specify")).toBe(true);
+    expect(isSpecifyActivation("/abp:specify-off")).toBe(false);
   });
 
   it("detects explicit skill invocation as automatic activation", () => {
-    expect(isTechnicalDesignActivation("/skill:technical-design design the API")).toBe(true);
-    expect(isTechnicalDesignActivation("/skill:proof add tests")).toBe(false);
+    expect(isSpecifyActivation("/skill:specify design the API")).toBe(true);
+    expect(isSpecifyActivation("/skill:proof add tests")).toBe(false);
   });
 
-  it("detects manual technical-design deactivation", () => {
-    expect(isTechnicalDesignDeactivation("/abp:technical-design-off")).toBe(true);
-    expect(isTechnicalDesignDeactivation("/abp:technical-design off")).toBe(false);
+  it("detects manual specify deactivation", () => {
+    expect(isSpecifyDeactivation("/abp:specify-off")).toBe(true);
+    expect(isSpecifyDeactivation("/abp:specify off")).toBe(false);
   });
 
-  it("does not treat old whiteboard commands as activation aliases", () => {
-    expect(isTechnicalDesignActivation("/abp:whiteboard design the import flow")).toBe(false);
-    expect(isTechnicalDesignActivation("/skill:whiteboarding design the API")).toBe(false);
+  it("does not treat old technical-design commands as activation aliases", () => {
+    expect(isSpecifyActivation("/abp:technical-design design the import flow")).toBe(false);
+    expect(isSpecifyActivation("/skill:technical-design design the API")).toBe(false);
   });
 
   it("counts user-facing questions but ignores uncertainty notes", () => {
@@ -93,25 +93,25 @@ Should the queue be durable?`;
     expect(countUserFacingQuestions(text)).toBe(2);
   });
 
-  it("does not enforce outside active technical-design mode", () => {
+  it("does not enforce outside active specify mode", () => {
     const history = messages(["assistant", "Should we use Postgres? Should we add Redis?"]);
 
     expect(shouldEnforceAssistantMessage(history, "Should we use Postgres? Should we add Redis?")).toBe(false);
   });
 
-  it("enforces multi-question assistant messages while technical-design is active", () => {
+  it("enforces multi-question assistant messages while specify is active", () => {
     const history = [custom(true), ...messages(["assistant", "Goal noted."])];
 
     expect(shouldEnforceAssistantMessage(history, "Should we use Postgres? Should we add Redis?")).toBe(true);
   });
 
-  it("allows a single question while technical-design is active", () => {
+  it("allows a single question while specify is active", () => {
     const history = [custom(true), ...messages(["assistant", "Goal noted."])];
 
     expect(shouldEnforceAssistantMessage(history, "Should we use Postgres?")).toBe(false);
   });
 
-  it("latest persisted technical-design state wins", () => {
+  it("latest persisted specify state wins", () => {
     const history = [custom(true), custom(false)];
 
     expect(shouldEnforceAssistantMessage(history, "Should we use Postgres? Should we add Redis?")).toBe(false);
@@ -121,7 +121,7 @@ Should the queue be durable?`;
   it("forwards command arguments through the Pi API, not the command context", async () => {
     const { commands, ctx, userMessages } = makePiHarness();
 
-    await commands.get("abp:technical-design").handler("design the import flow", ctx);
+    await commands.get("abp:specify").handler("design the import flow", ctx);
 
     expect(userMessages).toEqual(["design the import flow"]);
   });

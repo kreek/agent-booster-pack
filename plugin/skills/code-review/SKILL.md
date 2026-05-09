@@ -152,9 +152,9 @@ ambiguity that blocks a finding or fix.
 
 ## Handoffs
 
-- Use `technical-design` to compare the diff against the agreed RFC/ADR and
-  catch plan-to-code divergence; missing or contradicted contracts are
-  blocking findings.
+- Use `specify` to compare the diff against the agreed ADR, RFC, tech spec,
+  or note and catch plan-to-code divergence; missing or contradicted contracts
+  are blocking findings.
 - Use `security` for auth, trust boundaries, secrets, crypto,
   dependencies, or injection risks.
 - Use `database` for migrations, locking, transactions, schema, indexes,

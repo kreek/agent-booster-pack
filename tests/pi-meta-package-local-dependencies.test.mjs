@@ -9,7 +9,7 @@ const SIBLING_PACKAGES = [
   "agent-booster-pack-skills",
   "agent-booster-pack-contract-first",
   "agent-booster-pack-proof",
-  "agent-booster-pack-technical-design",
+  "agent-booster-pack-specify",
 ];
 
 function readPackage(packageDir) {
@@ -48,7 +48,7 @@ describe("Pi meta-package local dependencies", () => {
       "./node_modules/agent-booster-pack-skills/skills",
       "./node_modules/agent-booster-pack-contract-first/skills/contract-first",
       "./node_modules/agent-booster-pack-proof/skills/proof",
-      "./node_modules/agent-booster-pack-technical-design/skills/technical-design",
+      "./node_modules/agent-booster-pack-specify/skills/specify",
     ]);
   });
 

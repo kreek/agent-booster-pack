@@ -7,7 +7,7 @@ const TEXT_FILE_EXTENSIONS = new Set([".html", ".js", ".json", ".md", ".sql", ".
 const KNOWN_SKILLS = [
   "workflow",
   "proof",
-  "technical-design",
+  "specify",
   "domain-modeling",
   "architecture",
   "code-review",

@@ -111,14 +111,13 @@ They shape the problem, not just the implementation.
 - `contract-first`: use when an Interface Design Gate must approve a durable
   function, API, CLI, config, event, schema, file format, or module boundary
   before implementation lands.
-- `technical-design`: use for collaborative design discussions that map current
-  and proposed contracts (function signatures, exported types, schemas,
-  events/queues, CLI flags, config keys, file formats), constraints, tradeoffs,
-  and open questions before any non-trivial code lands, then capture the agreed
-  result as an RFC or ADR. Mandatory when more than one contract changes, when
-  a new public surface is added, when a module boundary is crossed, or when any
-  durable interface is identified. Upstream of `domain-modeling` and `architecture`, not a
-  substitute for built-in plan mode.
+- `specify`: use to design before code: map current and proposed contracts,
+  constraints, tradeoffs, states, and open questions, route durable interfaces
+  through `contract-first`, then capture the agreed result as an ADR, RFC,
+  tech spec, or note. Mandatory when more than one contract changes, when a new
+  public surface is added, when a module boundary is crossed, or when any
+  durable interface is identified. Upstream of `domain-modeling` and
+  `architecture`, not a substitute for built-in plan mode.
 - `domain-modeling`: use for any data modeling work: domain data, fields, states,
   inputs, invariants, allowed combinations, transitions, or effects. Use it
   first after scaffolding when specs are clear and the next step is shaping

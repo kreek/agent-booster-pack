@@ -13,7 +13,7 @@ const evalDir = path.resolve(import.meta.dirname, "..");
 const expectedReadmeSkills = [
   "workflow",
   "proof",
-  "technical-design",
+  "specify",
   "domain-modeling",
   "architecture",
   "code-review",
@@ -427,7 +427,7 @@ describe("ABP eval config", () => {
     const finalAnswer = [
       "Goal: saved payment methods at checkout.",
       "Risk profile: payment token storage and rollout.",
-      "Use workflow, proof, technical-design, domain-modeling, architecture, code-review, debugging, refactoring, error-handling, security, database, release, observability, async-systems, performance, api, documentation, ui-design, accessibility, git-workflow, and scaffolding.",
+      "Use workflow, proof, specify, domain-modeling, architecture, code-review, debugging, refactoring, error-handling, security, database, release, observability, async-systems, performance, api, documentation, ui-design, accessibility, git-workflow, and scaffolding.",
       "Exclude broad wallet management UX.",
       "Exclude provider abstraction.",
       "Evidence plan: tokenized payment reference contract tests, account endpoint contract checks, unauthorized cross-account negative trust-boundary cases, and flagged rollout/rollback checks.",

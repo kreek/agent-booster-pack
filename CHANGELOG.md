@@ -8,13 +8,13 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
-- BREAKING: Renamed the `whiteboarding` skill, `/skill:whiteboarding`
-  invocation, Pi guard command `/abp:whiteboard`, and
-  `agent-booster-pack-whiteboard` runtime package to `technical-design`,
-  `/skill:technical-design`, `/abp:technical-design`, and
-  `agent-booster-pack-technical-design`. The new name describes the
-  collaborative engineering-design discussion without implying a literal
-  whiteboard session or colliding with agent plan mode.
+- BREAKING: Renamed the `technical-design` skill, `/skill:technical-design`
+  invocation, Pi guard command `/abp:technical-design`, and
+  `agent-booster-pack-technical-design` runtime package to `specify`,
+  `/skill:specify`, `/abp:specify`, and
+  `agent-booster-pack-specify`. Specify keeps the design-before-code
+  conversation guard, routes durable interfaces through `contract-first`, and
+  captures the agreed result as an ADR, RFC, tech spec, or note.
 - Workflow guidance now separates work-location choices by branch state: on
   `main`/`master`, create a new branch or create a separate worktree and
   branch; on topic branches with distinct work, continue here, branch from

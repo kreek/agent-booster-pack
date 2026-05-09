@@ -87,7 +87,7 @@ description: Use first to route ABP work, choose skills, sequence handoffs, and 
    | Risk trigger | Skills |
    |---|---|
    | Behavior or contract change | `proof`, `code-review` |
-   | Durable interface or cross-boundary contract | `contract-first`, `technical-design`, `architecture` or `domain-modeling`, user sign-off |
+   | Durable interface or cross-boundary contract | `contract-first`, `specify`, `architecture` or `domain-modeling`, user sign-off |
    | Auth, secrets, trust boundary, or user-controlled input | `security`, `proof` |
    | Persisted data, migrations, transactions, or deletion | `database`, `proof` |
    | Async, retries, queues, workers, streams, concurrency | `async-systems`, `observability`, `proof` |

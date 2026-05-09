@@ -9,7 +9,7 @@ const SIBLING_PACKAGES = [
   "agent-booster-pack-skills",
   "agent-booster-pack-proof",
   "agent-booster-pack-contract-first",
-  "agent-booster-pack-technical-design",
+  "agent-booster-pack-specify",
 ];
 
 function bundledSkillDirs() {
