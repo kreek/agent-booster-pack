@@ -39,7 +39,7 @@ If you want everything, a meta package will install _all the things_.
 pi install npm:agent-booster-pack
 ```
 #### Skills
-[`agent-booster-pack-skills`](agent-booster-pack-skills/) The general engineering quality-focused skills, no runtime extension. Runtime-owned skills such as `proof`, `contract-first`, and `whiteboarding` ship with their matching extensions.
+[`agent-booster-pack-skills`](agent-booster-pack-skills/) The general engineering quality-focused skills, no runtime extension. Runtime-owned skills such as `proof`, `contract-first`, and `technical-design` ship with their matching extensions.
 ```sh
 pi install npm:agent-booster-pack-skills
 ```
@@ -56,10 +56,10 @@ pi install npm:agent-booster-pack-contract-first
 pi install npm:agent-booster-pack-proof
 ```
 
-#### Whiteboard Extension
-[`agent-booster-pack-whiteboard`](agent-booster-pack-whiteboard/) Agent plan modes can get overwhelming. The whiteboard extension provides a whiteboarding runtime plus the `whiteboarding` skill — a collaborative plan mode that works through one design clarification at a time. Activated by `/abp:whiteboard` or `/skill:whiteboarding`.
+#### Technical Design Extension
+[`agent-booster-pack-technical-design`](agent-booster-pack-technical-design/) Agent plan modes can get overwhelming. The technical-design extension provides a conversation guard plus the `technical-design` skill — a collaborative engineering-design mode that works through one design clarification at a time before implementation planning. Activated by `/abp:technical-design` or `/skill:technical-design`.
 ```sh
-pi install npm:agent-booster-pack-whiteboard
+pi install npm:agent-booster-pack-technical-design
 ```
 
 Once you've run one of the install commands, you may need to reload things, from within Pi run reload:
@@ -256,7 +256,7 @@ they apply:
 
 ### Foundational design
 
-- [`whiteboarding`][skill-whiteboarding]: collaborative design discussions
+- [`technical-design`][skill-technical-design]: collaborative design discussions
   that map current and proposed contracts (signatures, schemas, events, CLI,
   config, types), constraints, tradeoffs, and open questions before any
   non-trivial code lands, then capture the agreed result as an RFC or ADR;
@@ -335,7 +335,7 @@ Shared language defaults live in
 
 [skill-accessibility]: agents/.agents/skills/accessibility/SKILL.md
 [skill-api]: agents/.agents/skills/api/SKILL.md
-[skill-whiteboarding]: agents/.agents/skills/whiteboarding/SKILL.md
+[skill-technical-design]: agents/.agents/skills/technical-design/SKILL.md
 [skill-contract-first]: agents/.agents/skills/contract-first/SKILL.md
 [skill-async-systems]: agents/.agents/skills/async-systems/SKILL.md
 [skill-architecture]: agents/.agents/skills/architecture/SKILL.md

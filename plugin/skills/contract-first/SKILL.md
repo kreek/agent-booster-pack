@@ -26,7 +26,7 @@ description: Use when an Interface Design Gate must approve durable function, AP
   effect.
 - Broad routing and skill selection; use `workflow`.
 - Collaborative design exploration before a concrete interface proposal; use
-  `whiteboarding`.
+  `technical-design`.
 
 ## Workflow
 
@@ -35,10 +35,12 @@ description: Use when an Interface Design Gate must approve durable function, AP
 2. Name the current interface with file/line evidence, or state "new
    interface" for greenfield work.
 3. Propose the concrete interface shape: function signature, type, endpoint,
-   CLI, config, event, schema, or file format.
+   CLI, config, event, schema, or file format. For public renames or removals,
+   separate the desired new shape from the compatibility plan: breaking change,
+   alias/shim, deprecation path, or old surface retained.
 4. Explain why this boundary belongs here and what owns each side of it.
 5. Ask the user to approve, revise, or rule it out. Treat silence as not
-   approved.
+   approved, and do not treat name/shape approval as compatibility approval.
 6. After approval, implement only the approved shape. If the implementation
    discovers a materially different contract, return to the gate.
 
@@ -47,6 +49,8 @@ description: Use when an Interface Design Gate must approve durable function, AP
 - [ ] The current interface is named with evidence, or marked as new.
 - [ ] The proposed interface is concrete enough for callers to bind to.
 - [ ] Ownership and boundary placement are explained.
+- [ ] Public renames/removals have an explicit compatibility decision, or
+      compatibility was left out of scope.
 - [ ] The user approved, revised, or rejected the interface before
       implementation landed.
 - [ ] The implemented contract matches the approved shape, or the gate was
@@ -56,7 +60,7 @@ description: Use when an Interface Design Gate must approve durable function, AP
 
 - Use `workflow` to choose all relevant skills and keep the broad ABP routing
   context.
-- Use `whiteboarding` when the contract shape is still being explored.
+- Use `technical-design` when the contract shape is still being explored.
 - Use `api`, `database`, `async-systems`, or `security` when the interface
   crosses those domain boundaries.
 - Use `proof` to turn the approved contract into executable acceptance checks.

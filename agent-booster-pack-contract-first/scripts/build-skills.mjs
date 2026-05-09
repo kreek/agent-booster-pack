@@ -2,7 +2,7 @@
 // Copies the contract-first skill into ./skills before npm pack/publish so
 // users who install this sibling alone get the matching doctrine. The
 // meta-package agent-booster-pack loads this exact skill path to avoid
-// double-loading shared workflow or whiteboarding skills.
+// double-loading shared workflow or technical-design skills.
 
 import { cpSync, mkdirSync, readdirSync, rmSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";

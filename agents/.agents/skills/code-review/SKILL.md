@@ -70,8 +70,12 @@ description: Use to review diffs and PRs for bugs, regressions, edge cases, proo
    `security` pass for any auth, trust-boundary, input, dependency, secret,
    crypto, logging-redaction, or user-controlled-sink concern. Add others
    as triggered: `database`, `api`, `proof`, `domain-modeling`, `architecture`,
-   `error-handling`, `async-systems`, `release`, `observability`,
-   `ui-design`, `accessibility`, `documentation`, `performance`.
+   `error-handling`, `async-systems`, `observability`, `ui-design`,
+   `accessibility`, `documentation`, `performance`. Use `release` here only
+   when the concrete diff contains version/changelog/package/CI/publish
+   artifacts, feature flags, migrations with rollout implications, or the user
+   asked for release readiness; do not load it just because early planning
+   mentioned possible future release risk.
 5. Sweep for harmful duplication, orphaned code, unreachable branches, dead
    feature flags, unused public surface, and stale tests/docs/config. For
    maintainability, ask what independent concerns the diff couples or
@@ -123,7 +127,8 @@ ambiguity that blocks a finding or fix.
 - [ ] Simplification claims were checked for preserved behavior, not only
       fewer files or fewer lines.
 - [ ] Triggered domain skills and language reference(s) were loaded and
-      named.
+      named; `release` was loaded only for concrete release artifacts,
+      rollout obligations, or explicit release-readiness review.
 - [ ] Findings are ordered by severity and grounded in file/line or PR
       thread anchors; each blocking finding explains impact and fix.
 - [ ] Test, build, CI, or proof evidence was checked, or missing
@@ -137,6 +142,7 @@ ambiguity that blocks a finding or fix.
 |---|---|---|
 | "Small PR, skim is enough" | Sweep lifecycle, security, data, tests, and dead-code risk anyway. | Documentation-only typo with no executable surface. |
 | "Tests pass, ship it" | Check what the tests prove and still review safety/data lenses. | The task is only to report current CI status. |
+| "This might need a release later" | Note the risk without loading `release`; load `release` only when the diff has release artifacts/rollout obligations or the user asked for release readiness. | The review target is explicitly a release PR or includes version/changelog/package/publish/migration rollout files. |
 | "Style nits are blocking" | Separate style notes from correctness, security, and maintainability findings. | Style issue hides a real ambiguity or risky control flow. |
 | "This is simpler because it has fewer files" | Check whether the diff couples independent behavior, data, effects, or lifecycles. | Generated or framework-required layout with no hand-written behavior. |
 | "This compatibility shim is harmless" | Require owner, removal condition, and proof that callers still need it, or remove it in a proven refactor. | Public contract or migration policy explicitly requires it. |
@@ -146,13 +152,16 @@ ambiguity that blocks a finding or fix.
 
 ## Handoffs
 
-- Use `whiteboarding` to compare the diff against the agreed RFC/ADR and
+- Use `technical-design` to compare the diff against the agreed RFC/ADR and
   catch plan-to-code divergence; missing or contradicted contracts are
   blocking findings.
 - Use `security` for auth, trust boundaries, secrets, crypto,
   dependencies, or injection risks.
 - Use `database` for migrations, locking, transactions, schema, indexes,
   or production data access.
+- Use `release` after the diff exists when version/changelog/package/publish
+  artifacts, feature flags, rollout plans, or migration rollout obligations
+  need release-readiness review.
 - Use `proof` for review-claim proof obligations, test quality, missing
   behavior coverage, mocks, and flakes.
 - Use `git-workflow` for branch mechanics and packaging accepted

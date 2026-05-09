@@ -10,8 +10,8 @@ This package is **skills only** and carries the general ABP skills. Runtime-owne
   `contract-first` skill.
 - `agent-booster-pack-proof` — proof-first red-green-refactor runtime plus the
   `proof` skill.
-- `agent-booster-pack-whiteboard` — one-question whiteboarding runtime plus the
-  `whiteboarding` skill.
+- `agent-booster-pack-technical-design` — one-question technical-design runtime plus the
+  `technical-design` skill.
 
 The pack covers data modeling, code review, security, debugging, refactoring,
 and more. The canonical skill source lives at

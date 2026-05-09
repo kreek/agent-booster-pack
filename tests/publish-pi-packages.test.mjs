@@ -9,7 +9,7 @@ const VERSIONS = {
   "agent-booster-pack-skills": "5.1.0",
   "agent-booster-pack-contract-first": "1.0.0",
   "agent-booster-pack-proof": "2.0.0",
-  "agent-booster-pack-whiteboard": "1.0.0",
+  "agent-booster-pack-technical-design": "1.0.0",
   "agent-booster-pack": "5.1.0",
 };
 
@@ -103,7 +103,7 @@ describe("Pi package npm publish script", () => {
       .filter((line) => line.startsWith("npm publish"));
     expect(publishLines).toEqual([
       "npm publish ./agent-booster-pack-skills --access public",
-      "npm publish ./agent-booster-pack-whiteboard --access public",
+      "npm publish ./agent-booster-pack-technical-design --access public",
       "npm publish ./agent-booster-pack --access public",
     ]);
     expect(publishLines.join("\n")).not.toContain("agent-booster-pack-contract-first");
@@ -118,7 +118,7 @@ describe("Pi package npm publish script", () => {
 
     expect(result.status).toBe(0);
     expect(result.stdout).toContain("would publish agent-booster-pack-skills@5.1.0");
-    expect(result.stdout).toContain("would publish agent-booster-pack-whiteboard@1.0.0");
+    expect(result.stdout).toContain("would publish agent-booster-pack-technical-design@1.0.0");
     expect(result.stdout).toContain("would publish agent-booster-pack@5.1.0");
     expect(commandLog()).not.toContain("npm publish");
   });
@@ -133,13 +133,16 @@ describe("Pi package npm publish script", () => {
     const lines = commandLog().split(/\r?\n/);
     const skillsPublish = lines.indexOf("npm publish ./agent-booster-pack-skills --access public");
     const skillsConfirm = lines.indexOf("npm view agent-booster-pack-skills@5.1.0 version", skillsPublish + 1);
-    const whiteboardPublish = lines.indexOf("npm publish ./agent-booster-pack-whiteboard --access public");
-    const whiteboardConfirm = lines.indexOf("npm view agent-booster-pack-whiteboard@1.0.0 version", whiteboardPublish + 1);
+    const technicalDesignPublish = lines.indexOf("npm publish ./agent-booster-pack-technical-design --access public");
+    const technicalDesignConfirm = lines.indexOf(
+      "npm view agent-booster-pack-technical-design@1.0.0 version",
+      technicalDesignPublish + 1,
+    );
     const metaPublish = lines.indexOf("npm publish ./agent-booster-pack --access public");
     expect(skillsPublish).toBeLessThan(skillsConfirm);
-    expect(skillsConfirm).toBeLessThan(whiteboardPublish);
-    expect(whiteboardPublish).toBeLessThan(whiteboardConfirm);
-    expect(whiteboardConfirm).toBeLessThan(metaPublish);
+    expect(skillsConfirm).toBeLessThan(technicalDesignPublish);
+    expect(technicalDesignPublish).toBeLessThan(technicalDesignConfirm);
+    expect(technicalDesignConfirm).toBeLessThan(metaPublish);
   });
 
   it("allows clean commits after the release tag", () => {

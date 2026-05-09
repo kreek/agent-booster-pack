@@ -8,6 +8,21 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- BREAKING: Renamed the `whiteboarding` skill, `/skill:whiteboarding`
+  invocation, Pi guard command `/abp:whiteboard`, and
+  `agent-booster-pack-whiteboard` runtime package to `technical-design`,
+  `/skill:technical-design`, `/abp:technical-design`, and
+  `agent-booster-pack-technical-design`. The new name describes the
+  collaborative engineering-design discussion without implying a literal
+  whiteboard session or colliding with agent plan mode.
+- Workflow guidance now separates work-location choices by branch state: on
+  `main`/`master`, create a new branch or create a separate worktree and
+  branch; on topic branches with distinct work, continue here, branch from
+  this branch, or create a separate worktree from main. It also requires
+  explicit compatibility decisions for public renames/removals, treats release
+  prep as separate from implementation approval, and defers `release` to
+  explicit release-prep requests or post-implementation/code-review checks so
+  startup routing cannot silently expand into npm/version/changelog work.
 - Renamed the `data-first` skill to `domain-modeling`. The new
   `contract-first` skill (Pi Interface Design Gate) owns the temporal
   "first" position in the workflow; `data-first` was always a doctrine

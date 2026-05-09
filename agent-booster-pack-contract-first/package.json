@@ -1,6 +1,6 @@
 {
   "name": "agent-booster-pack-contract-first",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Interface Design Gate for Pi plus contract-first skill: pause and require human approval of contract/API shape before implementation lands.",
   "type": "module",
   "engines": {
