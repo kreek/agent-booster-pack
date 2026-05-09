@@ -46,10 +46,7 @@ recoverable, scoped, and honest.
 8. **At the start of a feature or bug fix, ask the user once**: create or
    switch to a topic branch in the current checkout. On a topic branch
    with distinct new work, ask once between continue here or branch off
-   `main`. Don't re-prompt during the same piece of work. Don't create
-   git worktrees: this codebase has repeatedly accumulated stale,
-   divergent worktree state. Use a topic branch unless the user
-   explicitly asks for a worktree.
+   `main`. Don't re-prompt during the same piece of work.
 
 ## Workflow
 
@@ -80,8 +77,8 @@ recoverable, scoped, and honest.
       trivial wrapper files.
 - [ ] At the start of work, the user picked a topic branch in the
       current checkout. The menu did not re-fire during continued work on
-      the same branch, no worktree was created, and new work wasn't
-      silently stacked on unrelated branch work.
+      the same branch, and new work wasn't silently stacked on unrelated
+      branch work.
 
 ## Handoffs
 

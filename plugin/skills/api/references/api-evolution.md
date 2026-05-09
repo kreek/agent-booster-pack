@@ -54,3 +54,49 @@ evolutionary only if the original call without those parameters still
 behaves as before. If `GET /claims` used to return the full collection,
 then `GET /claims?pageNumber=2&pageSize=10` can be added without a
 major version only if `GET /claims` does not silently become paged.
+
+## Versioning Strategies
+
+When a change cannot be evolved in place, ship the successor contract
+under a new version. Pick one strategy per service and apply it
+consistently:
+
+- **URL path** (`/v1/...`, `/v2/...`): most discoverable, simplest to
+  route and cache. Major versions only; minor and patch live inside
+  the same path.
+- **Media type** (`application/vnd.example.v1+json`): clean
+  separation but harder to debug; tools and CDNs may not vary on
+  `Accept` by default.
+- **Header** (`API-Version: 1`, `X-API-Version: 2024-01-15`):
+  flexible but invisible in URLs and access logs unless explicitly
+  captured.
+- **Date-based** (`API-Version: 2024-01-15`): every breaking change
+  pins a date; clients lock to a date and migrate explicitly.
+
+Mixing strategies fragments client tooling. Document the chosen
+strategy in the API reference and stick to it.
+
+## Bumping
+
+- Bump the major version only when the change is breaking under the
+  Evolutionary/Breaking rules above.
+- Compatible additive changes never re-version; the same major can
+  carry many minor additions.
+- Pre-release contracts (`v0.x`, alpha, beta) may break without a
+  major bump if the contract is documented as unstable.
+
+## Overlap Windows and Sunset
+
+Every retired version needs an overlap window during which both
+versions serve traffic:
+
+- Announce deprecation in API docs, response headers (`Deprecation`,
+  `Sunset`), and changelog entries.
+- Run the old version long enough for active consumers to migrate;
+  measure adoption before removal.
+- Hand the bump, CHANGELOG entry, and `Sunset`/`Deprecation` header
+  scheduling to `release`.
+- Remove the old contract only after the announced sunset date and
+  observed traffic decline.
+
+See RFC 8594 (`Sunset` header) and RFC 9745 (`Deprecation` header).

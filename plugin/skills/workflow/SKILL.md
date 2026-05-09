@@ -14,8 +14,6 @@ description: Use first to route ABP work, choose skills, sequence handoffs, and 
 - Building a feature, fixing a bug, prototyping, refactoring, reviewing,
   scaffolding, or changing tests, docs, architecture, data, operations, or
   release paths.
-- The user asks how to use ABP, or asks for safer, more correct, more
-  maintainable, more accessible, or more performant software.
 - Config, CI/CD, infra-as-code, dependency changes, exploratory research, or
   read-only code questions where the answer informs later engineering work.
 
@@ -59,32 +57,30 @@ description: Use first to route ABP work, choose skills, sequence handoffs, and 
 1. **State the goal and risk profile** in one or two sentences. Surface
    obvious coupling or complexity risk so the user can correct course before
    any code lands.
-2. **Check acceptance clarity** before editing. Draft acceptance criteria;
-   ask one focused question (with a concrete proposal) if behavior, scope,
-   data shape, compatibility, UX, safety, or verification is ambiguous. Use
-   `documentation` for requirements artifacts.
+2. **Check acceptance clarity** before editing. Draft acceptance criteria.
+   When decisions are ambiguous, ask **one question per turn** — the next
+   smallest decision question that changes the design or implementation,
+   with a concrete proposal the user can confirm or redirect. List
+   remaining uncertainties as notes in the same response; do not phrase
+   them as additional questions, and do not silently default them.
+   Iterate decision-by-decision rather than batching a question barrage.
+   Use `documentation` for requirements artifacts. The `/abp:specify`
+   command in Pi enforces this conversation shape at runtime.
 3. **Interface Design Gate.** When acceptance implies a durable interface
    (Core Idea 3), use `contract-first`: present current interface (or
    "new"), proposed interface, and why this boundary belongs here. The agent
    may propose; the human must approve, revise, or rule it out before
    implementation starts.
-4. **Compatibility and release-intent gate.** For public renames, removals,
-   or caller-visible surface changes, ask separately whether the work is
-   breaking, aliased, or deprecation-pathed. Also ask whether release prep
-   is in scope (code/docs only; version/changelog/lockfile; release notes;
-   tag/publish). This gate is a question to the user; do not load `release`
-   to run it. If validation exposes release work outside the approved
-   scope, stop and ask before mutating those artifacts.
-5. **Work location gate.** At the start of a feature or bug fix, inspect
+4. **Work location gate.** At the start of a feature or bug fix, inspect
    branch and dirty state and ask the user once: create or switch to a
    topic branch in the current checkout (`feature/`, `fix/`, `refactor/`,
    `chore/`). On a topic branch with distinct new work, ask once between
    continue here or branch off `main`. Don't re-prompt during the same
-   piece of work. Don't create git worktrees: this codebase has
-   repeatedly accumulated stale, divergent worktree state. Use a topic
-   branch unless the user explicitly asks for a worktree.
-6. **Select the smallest useful skill set** by quality concern. Use this
-   matrix only for risks that are actually present:
+   piece of work.
+5. **Select the smallest useful skill set** by quality concern. Use this
+   matrix only for risks that are actually present, and load only the
+   skill bodies that change the next action or proof obligation —
+   naming a lens without loading its body is fine.
 
    | Risk trigger | Skills |
    |---|---|
@@ -99,32 +95,21 @@ description: Use first to route ABP work, choose skills, sequence handoffs, and 
    | Repository setup, staging, commits, history | `scaffolding`, `git-workflow` |
 
    For framework/library/runtime/platform-sensitive work, read
-   `references/version-verified.md`. `release` is deliberately absent
-   from this matrix: it is a post-implementation lens, never a startup
-   or routing skill. Load it only after a concrete diff exists and
-   touches release artifacts (manifests, CHANGELOG, lockfiles, tags,
-   publish scripts), during code review when those artifacts surface,
-   or when the user explicitly asks for release prep, deprecation/
-   migration notes, rollout, or rollback planning. Mentioning release
-   risk, naming compatibility intent, or running step 4's gate does not
-   require loading `release`.
-7. **Load only the skill bodies that change the next action or proof
-   obligation.** It's fine to name an engineering lens without loading its
-   body. If skills conflict, prefer safety, data integrity, correctness,
-   proof, and user trust over convenience or style.
-8. **For non-trivial implementation, follow the completion loop**:
+   `references/version-verified.md`. `release` is intentionally absent:
+   it owns its own gating and only loads after a concrete diff touches
+   release artifacts. If skills conflict, prefer safety, data integrity,
+   correctness, proof, and user trust over convenience or style.
+6. **For non-trivial implementation, follow the completion loop**:
    implement → self-review diff (`code-review`) → fix findings →
    documentation check → `proof` → final scoped claim. The documentation
    check asks whether changed behavior, setup, config, APIs, operations, or
    maintainer expectations need updated docs, examples, or comments.
    Trivial edits skip this loop.
-9. **Finish by naming what was proven, what's unproven, and what a human
-   should review.** Explain what was built or changed, why it's better than
-   what it replaced, and what it enables next. If the diff added a
-   behavior-bearing elaboration the requirement didn't name (a partial
-   index beyond a plain index, a retry beyond a single call, a custom
-   validator beyond a maintained library), name it and state the proof — or
-   mark it explicitly unproven.
+7. **Close out scoped.** Name what was proven, what's unproven, and what
+   a human should review. If the diff added a behavior the requirement
+   didn't name (a partial index beyond a plain index, a retry beyond a
+   single call, a custom validator beyond a maintained library), name it
+   explicitly and state the proof — or mark it unproven.
 
 ## Verification
 
@@ -132,12 +117,14 @@ description: Use first to route ABP work, choose skills, sequence handoffs, and 
       correctness, safety, accessibility, performance, and operability
       claims routed to the relevant skill.
 - [ ] **Scope**: work matches the user's goal and local conventions.
-- [ ] **Compatibility / release intent**: public renames, removals, aliases,
-      deprecations, version/changelog/lockfile edits, tags, and publish
-      steps were explicitly approved or left out of scope.
+- [ ] **No surprise compatibility or release work**: public renames,
+      removals, aliases, deprecations, version/changelog/lockfile edits,
+      tags, or publish steps that landed in the diff were explicitly
+      approved (compatibility via `contract-first`; release via
+      `release`) or left out of scope.
 - [ ] **Work location**: at the start, the user picked a topic branch in
       the current checkout; the menu did not re-fire during continued
-      work on the same branch and no worktree was created.
+      work on the same branch.
 - [ ] **Proof**: completion claims are backed by `proof` evidence or
       reported as unproven; user-not-named behavior-bearing elaborations
       each have a named proof obligation discharged or reported unproven
@@ -165,7 +152,7 @@ description: Use first to route ABP work, choose skills, sequence handoffs, and 
 | "I'll make it flexible for later" | Build the direct requested behavior; add flexibility only when current acceptance or quality concern needs it. | Public library/API design where extension points are part of the requirement. |
 | "While I'm here, I'll handle this edge case too" | Start with the happy path; add edge cases only when required, security/data-loss-relevant, or at a real boundary. | The user named the case, or it sits at a true trust/effects boundary. |
 | "I'll preserve old behavior just in case" | Ask whether backward compatibility is required before adding shims or dual paths. | Existing public contract or migration policy already requires it. |
-| "The user approved the name/interface" | Ask the separate compatibility and release-intent questions before removing old surfaces, adding aliases, bumping versions, editing changelogs, or touching package-lock/registry. Don't load `release` just to start. | The user approved the compatibility and release scope in the same decision. |
+| "The user approved the name/interface" | Compatibility intent (breaking, aliased, deprecation-pathed) goes through `contract-first` when the durable interface is being approved. Release intent (versions, changelogs, lockfiles, tags, publish) goes through `release` only after a concrete diff exists. Don't remove old surfaces, add aliases, bump versions, edit changelogs, or touch package-lock/registry without that explicit approval. | The user approved the compatibility and release scope in the same decision. |
 | "I'll re-ask the branch menu every turn" | Fire it once at the start of a feature or bug fix; suppress it during continued work on the same branch. | The user switched branches or started a new feature. |
 | "I'll spin up a worktree to isolate this" | Use a topic branch in the current checkout. Worktrees in this codebase have repeatedly produced stale, divergent state and are not part of the default isolation flow. | The user explicitly asked for a worktree. |
 | "I remember this framework API" | Check the local version and current official source, or mark the pattern unverified. | Stable language syntax or project-local helper with tests. |

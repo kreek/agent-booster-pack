@@ -50,8 +50,9 @@ description: Use for architecture decisions, module boundaries, coupling, layeri
    should say what shape crosses it, what assumptions are guaranteed, and
    what internal details must not leak. Public HTTP contracts belong to
    `api`; exact parsed shapes and invariants belong to `domain-modeling`.
-6. If a proposed boundary is a durable interface, route to the `workflow` sign-off
-   gate via `specify` before shaping code around it.
+6. If a proposed boundary is a durable interface, route to
+   `contract-first` before shaping code around it; use `specify` to
+   capture the design when the contract is non-trivial.
 7. Bounded contexts beat shared models. When two parts of the system mean
    subtly different things by the same word, give each context its own type.
 8. Separate things that change for different reasons. A simple boundary
@@ -74,7 +75,7 @@ description: Use for architecture decisions, module boundaries, coupling, layeri
 1. Name the business capability and its transitions before drawing modules.
 2. Sketch the module surface from the caller's view: what it accepts, what
    it returns, what it must never expose.
-3. If the surface is a durable interface, route to the `workflow` sign-off gate
+3. If the surface is a durable interface, route to `contract-first`
    before implementation.
 4. Sketch the internal data path: where external data enters, where it is
    parsed into a trusted shape, where domain work happens, where output data

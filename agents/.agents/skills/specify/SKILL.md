@@ -1,6 +1,6 @@
 ---
 name: specify
-description: Use to design before code: map contracts, tradeoffs, and capture ADRs, RFCs, tech specs, or notes.
+description: Design before code — map contracts, capture ADRs, RFCs, tech specs, or notes.
 ---
 
 # Specify

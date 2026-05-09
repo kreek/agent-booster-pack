@@ -1,13 +1,13 @@
 ---
 name: api
-description: Use for HTTP APIs, OpenAPI, request/response shape, status codes, auth, and webhooks.
+description: Use for REST API contract design, evolution, versioning, status codes, and error shape.
 ---
 
 # API
 
 ## Iron Law
 
-`DESIGN THE CONTRACT BEFORE THE IMPLEMENTATION. GET SIGN-OFF FOR DURABLE API INTERFACES. NEVER BREAK A PUBLISHED CONTRACT IN PLACE.`
+`DESIGN THE CONTRACT FIRST. EVOLVE WITHOUT BREAKING. PICK STATUS BY ORIGIN.`
 
 ## When to Use
 
@@ -23,95 +23,71 @@ description: Use for HTTP APIs, OpenAPI, request/response shape, status codes, a
 - Auth, secrets, or trust-boundary review beyond API shape; use
   `security`.
 - Database schema design; use `database`.
+- Non-REST API styles (gRPC, GraphQL, message queues): contract,
+  error, and evolution conventions differ; use `architecture` for
+  style-of-API decisions and the relevant ecosystem's conventions for
+  shape.
 
 ## Core Ideas
 
-1. Contract first: sketch or update OpenAPI/equivalent before
-   controller code. Implement from the contract, not the other way
-   around.
-2. When a public API surface is a durable interface, the `workflow` sign-off gate
-   applies. The api-specific addition is error shape: present it alongside
-   the standard gate artifacts so callers know which `4xx`/`5xx` they must
-   handle.
-3. Resource names are nouns; verbs belong in HTTP methods unless the
-   operation is truly non-resource.
-4. Every response shape is explicit, including errors, empty states,
-   pagination, and auth failures.
-5. Mutations are safe to retry only when the public contract defines an
-   idempotency strategy: key scope, replay window, duplicate response
-   behavior, and conflict semantics.
-6. List and stream endpoints have bounded pagination, stable ordering,
-   and explicit continuation-token semantics. Opaque cursors, page
-   tokens, sync tokens, and resume tokens are caller input: malformed,
-   tampered, expired, or out-of-range tokens fail with a client error
-   or a documented empty-result behavior, never a silent fallback to an
-   earlier position.
-7. Compatibility is a feature: optional additive changes can evolve an
-   API without a new contract version; removals, renames, required
-   additions, status-code changes, and semantic changes need a
-   successor contract or deprecation path. Hand off the bump,
-   CHANGELOG, and deprecation primitives to `release`.
-8. Webhooks are APIs too: sign payloads, version events, and make
-   receivers idempotent.
+1. **Contract first.** Sketch OpenAPI/equivalent before controller
+   code; implement *from* the contract, not toward it. Every response
+   shape is explicit, including errors, empty states, pagination, and
+   auth failures. Durable API interfaces route through `contract-first`
+   for sign-off; error shape is part of the contract.
 
-## Request Pipeline and Middleware
+2. **Evolution: additive in place; breaking needs a path forward.**
+   Optional fields, query params, headers, methods, and endpoints
+   evolve in place. Renames, removals, required additions, status-code
+   changes, and semantic changes need a successor contract or
+   deprecation path — never break in place. See
+   `references/api-evolution.md`.
 
-Move behavior into middleware only when it is a transport-wide request
-pipeline concern with the same rule for many routes: request IDs,
-logging, tracing, CORS, security headers, body parsing, authentication
-context, coarse rate limiting, or final error-shape translation.
-Middleware may establish context and reject requests that fail a global
-gate, but endpoint-specific validation, resource ownership, privileged
-authorisation, and domain invariants stay in handlers or domain code
-where the specific resource, actor, and contract are visible.
+3. **Versioning: one strategy per service.** Pick URL path, media
+   type, header, or date and apply it consistently. Major bumps for
+   breaking changes only; compatible additions never re-version.
+   Retire versions with an overlap window; route deprecation
+   primitives through `release`. See `references/api-evolution.md`.
 
-## API Evolution
+4. **Errors: status by origin, shape by contract.** `4xx` for
+   consumer-request problems, `5xx` for upstream or your-service
+   problems; never mix origins in one response. Use the chosen data
+   model's native error shape (JSON:API `errors[]`, FHIR
+   `OperationOutcome`, or RFC 9457 Problem Details) — these are
+   structurally distinct conventions, not interchangeable. Never leak
+   raw upstream or internal errors. See
+   `references/rest-error-status-codes.md`.
 
-| Safe (additive) | Breaking (needs successor or deprecation path) |
-|---|---|
-| New endpoints, optional fields, optional query params, optional headers, new methods on a resource | Removals, renames, required additions, header type/name changes, status-code changes, semantic changes |
-
-Rename by adding the successor, keeping the old name, and deprecating
-it. Prefer extensible object shapes over ordered or flat scalar
-payloads.
-
-## HTTP Error Codes
-
-Choose status by **origin**, then map to a stable public contract.
-Never pass raw upstream or internal errors through.
-
-| Origin | Use |
-|---|---|
-| Consumer request problem | `4xx`: `400` malformed, `401` unauthenticated, `403` unauthorized, `404` missing, `422` semantically invalid, `429` rate limited |
-| Upstream dependency problem | `503` upstream unavailable, `504` upstream timeout, `502` upstream responded but failed |
-| Your service problem | `500` for unexpected application faults; platform may surface `503`/`504` at gateway boundary |
-
-Return multiple `4xx` request errors together when practical (most
-specific `4xx` or `400` with per-field details). Never mix client and
-server-origin failures into a client error.
+5. **Default to JSON:API; switch only when the domain has its own
+   standard.** JSON:API is the default for REST resource APIs (envelope
+   with `id`/`type`/`attributes`/`relationships`, sparse fieldsets,
+   includes, pagination conventions, error array). Switch to a
+   domain-specific standard when one applies — FHIR for healthcare,
+   HAL for hypermedia-centric APIs, JSON-LD when semantic-web interop
+   matters. Document deviations from the chosen standard explicitly.
+   See `references/data-models.md`.
 
 ## Workflow
 
-1. Identify the caller and the contract surface they will bind to.
-   Define paths, methods, request/response bodies, status codes, auth,
+1. Identify the caller and the contract surface they bind to. Define
+   paths, methods, request/response bodies, status codes, auth,
    pagination, idempotency, and error shape.
-2. When the surface is a durable API interface, route through the
-   `workflow` sign-off gate before controller, client, SDK, webhook, or
-   integration implementation continues. Add error shape to the gate
-   artifacts.
-3. For each error response, pick status by origin (request, upstream,
-   your service). Check compatibility: new optional fields, query
-   parameters, headers, methods, and endpoints are usually safe;
-   renames, removals, required additions, status-code changes, and
-   semantic changes require a successor contract or deprecation path.
-4. For retryable public mutations, document the idempotency-key
-   contract (scope, replay window, duplicate response, conflict
-   semantics, as in Core Idea 5) and prove duplicate submissions
-   cannot create duplicate side effects.
-5. For request-pipeline concerns, decide whether the behavior belongs in
-   middleware, an edge/gateway, or the endpoint handler. Keep
-   route-specific business rules out of global middleware.
-6. For each public contract change, record a Proof Contract: contract
+2. Durable API interfaces: route through `contract-first` before
+   controller, client, SDK, webhook, or integration implementation
+   continues. Add error shape to the contract artifacts.
+3. Errors: pick status by origin
+   (`references/rest-error-status-codes.md`); compatibility-check the
+   change (`references/api-evolution.md`).
+4. Mutations: define the idempotency contract
+   (`references/idempotency.md`).
+5. Lists and streams: define cursor and bounded-pagination semantics
+   (`references/pagination.md`).
+6. Webhooks: sign, version, and deduplicate
+   (`references/webhooks.md`).
+7. Pipeline: place transport-wide concerns in middleware; keep
+   route-specific logic in handlers
+   (`references/middleware-vs-handler.md`).
+8. For each public contract change, record a Proof Contract: contract
    claim, data invariant, public boundary, check, evidence. Add
    contract or behavior tests at the outermost boundary; update
    generated/source-of-truth docs only.
@@ -123,20 +99,23 @@ server-origin failures into a client error.
       implementation continues.
 - [ ] Every endpoint documents request, responses by status, auth, and
       errors.
-- [ ] Errors use a consistent Problem Details-style shape; status codes
-      are selected by origin and don't leak implementation detail.
+- [ ] Errors use one consistent shape across the API matching the
+      chosen data model (JSON:API errors by default; FHIR
+      `OperationOutcome` for healthcare; Problem Details for plain
+      JSON); status codes are selected by origin and don't leak
+      implementation detail.
+- [ ] Request and response bodies use JSON:API by default, or a
+      domain-specific standard (FHIR, HAL, JSON-LD) when the domain
+      has one. Custom shapes are documented with equivalent rigor;
+      deviations from the chosen standard are explicit.
 - [ ] Non-idempotent mutations either accept an idempotency key (with
-      the contract from Core Idea 5: scope, replay window, duplicate
-      response, conflict semantics) or are documented as unsafe to
-      retry.
-- [ ] Lists and streams have cursor/page-token or equivalent bounded
-      pagination with a server-side cap, stable ordering, and explicit
-      invalid-token behavior; bad continuation tokens do not silently
-      restart, rewind, or skip position.
+      scope, replay window, duplicate response, conflict semantics) or
+      are documented as unsafe to retry.
+- [ ] Lists and streams have bounded pagination, stable ordering, and
+      explicit invalid-token behavior; bad continuation tokens do not
+      silently restart, rewind, or skip position.
 - [ ] Additive changes are optional; old calls and consumers that
       ignore new fields, parameters, headers, or endpoints still work.
-- [ ] Request and response bodies use extensible object shapes and
-      specific field names rather than ordered or flat scalar payloads.
 - [ ] No existing contract is broken in place; incompatible changes
       have a successor contract or deprecation path with overlap and
       migration guidance.
@@ -172,15 +151,21 @@ server-origin failures into a client error.
 
 ## References
 
-- RFC 9457 Problem Details: <https://www.rfc-editor.org/rfc/rfc9457>
-- `references/rest-error-status-codes.md`: local REST error status-code
-  decision tree.
-- `references/api-evolution.md`: optional additive API evolution and
-  extensibility guidance.
+- `references/api-evolution.md`: evolution rules and versioning
+  strategies.
+- `references/rest-error-status-codes.md`: status-by-origin decision
+  tree.
+- `references/data-models.md`: JSON:API as the REST default; FHIR,
+  HAL, JSON-LD when the domain calls for them.
+- `references/idempotency.md`: idempotency-key contract.
+- `references/pagination.md`: cursor and bounded-pagination semantics.
+- `references/webhooks.md`: signing, versioning, replay protection.
+- `references/middleware-vs-handler.md`: request-pipeline placement.
 - `../security/references/web-app.md`: CSRF middleware, security
   headers, and CORS.
 - `../security/references/api-and-auth.md`: handler-level
   authorisation caveats for privileged endpoints.
+- RFC 9457 Problem Details: <https://www.rfc-editor.org/rfc/rfc9457>
 - Idempotency-Key draft:
   <https://datatracker.ietf.org/doc/draft-ietf-httpapi-idempotency-key-header/>
 - RateLimit headers draft:

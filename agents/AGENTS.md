@@ -325,9 +325,7 @@ ABP adds:
   (e.g. `fix/null-on-login`).
 - At the start of each feature or bug fix, ask once and create or switch
   to a topic branch in the current checkout. Don't re-prompt during
-  continued work on the same branch. Don't create git worktrees: this
-  codebase has repeatedly accumulated stale, divergent worktree state.
-  See `git-workflow` for details.
+  continued work on the same branch. See `git-workflow` for details.
 - Review your own staged diff before every commit: catch debug prints, dead
   code, stale paths, and stray changes before anyone else sees them.
 - Commit only after the relevant proof or acceptance check is current. If a

@@ -54,14 +54,26 @@ metrics, traces, and correlation IDs can explain it.
 
 ## Response Shape
 
-Use one consistent error schema per API. Problem Details, JSON:API errors, or a
-domain-required schema such as FHIR OperationOutcome are all acceptable when
-used consistently.
+Use one consistent error schema per API matching the chosen data
+model. JSON:API errors, RFC 9457 Problem Details, and FHIR
+`OperationOutcome` are *structurally distinct conventions* with
+different envelopes, field names, and types — they are not
+interchangeable. Pick one per API; do not hybridize fields across
+shapes.
 
-- `status` matches the HTTP status code.
-- `title` names the generic error class and remains stable across the API.
-- `detail` explains the specific failure in safe, actionable language.
-- `source` points to the offending request field, parameter, or header when the
-  error originates in the request.
-- `correlation_id` or equivalent connects the consumer-facing error to internal
-  logs without exposing internals.
+See `data-models.md` for spec-correct fields per standard.
+
+Whatever the chosen shape, the API contract should expose:
+
+- A status indicator that matches the HTTP status code (string in
+  JSON:API, integer in Problem Details).
+- A stable, human-readable summary of the error class (JSON:API
+  `title`; Problem Details `title`; FHIR `issue.code` + `details`).
+- An occurrence-specific explanation in safe, actionable language
+  (`detail` in JSON:API and Problem Details; `diagnostics` in FHIR).
+- A way to point at the offending input (JSON:API `source.pointer`/
+  `parameter`/`header`; FHIR `location` and `expression`; Problem
+  Details extensions).
+- A correlation handle linking the consumer-facing error to internal
+  logs without leaking internals (JSON:API `id` or `meta`; Problem
+  Details `instance` or extension; FHIR `id`).
