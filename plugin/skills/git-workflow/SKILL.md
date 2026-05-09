@@ -40,6 +40,9 @@ recoverable, scoped, and honest.
    changes.
 6. Resolve conflicts by preserving intent from both sides, then run the
    relevant checks.
+7. Test hook policy, not hook wrappers. Tiny hooks that only `exec` a repo
+   script do not need dedicated tests; test the script when it selects
+   commands, blocks branches, routes staged files, or handles failures.
 
 ## Workflow
 
@@ -66,6 +69,8 @@ recoverable, scoped, and honest.
       used lease/inclusion protection.
 - [ ] `range-diff` or log inspection confirms intended commits remain; a
       reflog/recovery point is available for rollback.
+- [ ] Hook tests, when present, cover policy-bearing scripts rather than
+      trivial wrapper files.
 
 ## Handoffs
 
