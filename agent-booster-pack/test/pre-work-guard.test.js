@@ -57,26 +57,28 @@ it("blocks first edit when latest assistant text has no plan or why", () => {
   expect(reason).toMatch(/why/);
 });
 
-it("partial explanation passes for single-file edit (small tier)", () => {
+it("labeled explanation passes for single-file edit (small tier)", () => {
   const entries = [
     userText("speed up cache lookups"),
-    assistantText("I'll update src/cache.js to use a Map because it's simpler than the current Set+Array combo."),
+    assistantText("Plan: update src/cache.js to use a Map.\nWhy: it simplifies the current Set+Array combo."),
   ];
 
   expect(shouldBlockPreWork("edit", { path: "src/cache.js" }, entries)).toBeNull();
 });
 
-it("full explanation passes for mutating bash (normal tier)", () => {
-  const fullText =
-    "I'll rename the helper across src/ because the existing name is misleading. " +
-    "Considered keeping the old name and aliasing it, but that leaves two ways to refer to the same function. Rejected.";
+it("labeled explanation passes for mutating bash (normal tier)", () => {
+  const fullText = [
+    "Plan: rename the helper across src/.",
+    "Why: the existing name is misleading.",
+    "Alternatives: considered keeping the old name and aliasing it, but that leaves two names for one function.",
+  ].join("\n");
   const entries = [userText("rename helper"), assistantText(fullText)];
 
   expect(shouldBlockPreWork("bash", { command: "sed -i 's/oldHelper/newHelper/g' src/*.js" }, entries)).toBeNull();
 });
 
-it("small/normal split is observable on the same text", () => {
-  const partialText = "I'll update src/cache.js to use a Map because it's simpler than the current implementation.";
+it("small/normal split is observable on the same labeled text", () => {
+  const partialText = "Plan: update src/cache.js to use a Map.\nWhy: it simplifies the current implementation.";
   const entries = [userText("speed up cache"), assistantText(partialText)];
 
   expect(shouldBlockPreWork("edit", { path: "src/cache.js" }, entries)).toBeNull();
@@ -86,10 +88,19 @@ it("small/normal split is observable on the same text", () => {
   expect(verdict.missing).toEqual(["alternatives"]);
 });
 
+it("empty labeled slots do not satisfy the pre-work explanation", () => {
+  const entries = [userText("update cache"), assistantText("Plan:\nWhy: simplify cache behavior")];
+
+  const verdict = shouldBlockPreWork("edit", { path: "src/cache.js" }, entries);
+
+  expect(verdict, "expected empty Plan: label to block").toBeTruthy();
+  expect(verdict.missing).toEqual(["plan"]);
+});
+
 it("second edit in same turn passes after the explained-this-turn marker is present", () => {
   const entries = [
     userText("update cache"),
-    assistantText("I'll update src/cache.js to use a Map because it's simpler."),
+    assistantText("Plan: update src/cache.js to use a Map.\nWhy: it is simpler."),
     assistantToolCall("edit", { path: "src/cache.js" }),
     customEntry(PRE_WORK_STATE_ENTRY, { explainedAt: 1 }),
     assistantText("Now applying the second part."),
@@ -103,7 +114,7 @@ it("second edit in same turn passes after the explained-this-turn marker is pres
 it("state from prior turn is stale once a new user message arrives", () => {
   const entries = [
     userText("update cache"),
-    assistantText("I'll update src/cache.js to use a Map because it's simpler."),
+    assistantText("Plan: update src/cache.js to use a Map.\nWhy: it is simpler."),
     customEntry(PRE_WORK_STATE_ENTRY, { explainedAt: 1 }),
     userText("now also tweak the formatter"),
     assistantText("Sure."),
@@ -151,9 +162,9 @@ it("preWorkChangeKind classifies edit as small implementation by default", () =>
   expect(preWorkChangeKind("read", {})).toBeNull();
 });
 
-it("hasPreWorkExplanation matches plan + why for small, plan + why + alternatives for normal", () => {
-  const partial = "I'll add a guard because it's safer.";
-  const full = partial + " Considered inlining it, but rejected that.";
+it("hasPreWorkExplanation matches labeled plan + why for small, plus alternatives for normal", () => {
+  const partial = "Plan: add a guard.\nWhy: it is safer.";
+  const full = partial + "\nAlternatives: considered inlining it, but rejected that.";
 
   expect(hasPreWorkExplanation(partial, "small")).toBe(true);
   expect(hasPreWorkExplanation(partial, "normal")).toBe(false);
