@@ -5,7 +5,7 @@ SvelteKit code in the diff. Apply this alongside the main `code-review`
 skill workflow. Targets TS ≥ 5.5 with `strict` plus
 `noUncheckedIndexedAccess` plus `verbatimModuleSyntax` as the floor.
 
-## Data-first bias (apply first)
+## Domain-modeling bias (apply first)
 
 Classes are easy to reach for in TS and rarely the right tool. The
 `domain-modeling` skill's doctrine is canonical:

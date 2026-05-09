@@ -3,7 +3,7 @@
 Use when reviewing F# code in the diff. Apply this alongside the main
 `code-review` skill workflow.
 
-## Data-first bias (apply first)
+## Domain-modeling bias (apply first)
 
 F# is a natural fit for the `domain-modeling` skill's doctrine, but the
 ecosystem leaks OOP habits from C#. Lean into the functional core:

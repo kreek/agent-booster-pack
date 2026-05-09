@@ -3,7 +3,7 @@
 Use when reviewing Java code in the diff. Apply this alongside the
 main `code-review` skill workflow.
 
-## Data-first bias (apply first)
+## Domain-modeling bias (apply first)
 
 The Java ecosystem grew up on mutable POJOs. The `domain-modeling`
 skill's doctrine is canonical:

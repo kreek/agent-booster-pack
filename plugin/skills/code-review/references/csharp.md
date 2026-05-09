@@ -3,7 +3,7 @@
 Use when reviewing C# code in the diff. Apply this alongside the main
 `code-review` skill workflow.
 
-## Data-first bias (apply first)
+## Domain-modeling bias (apply first)
 
 C# has matured toward the `domain-modeling` skill's doctrine over the last few
 versions; lean into the modern features:

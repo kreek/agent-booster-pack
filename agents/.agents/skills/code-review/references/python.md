@@ -6,7 +6,7 @@ guidance, read the repo's declared Python support from `pyproject.toml`,
 `setup.cfg`, classifiers, CI, Docker images, and README. Repo compatibility
 wins: Python 3.8 libraries do not get Python 3.10+ syntax findings.
 
-## Data-first bias (apply first)
+## Domain-modeling bias (apply first)
 
 Even though Python supports OOP, the `domain-modeling` skill's doctrine
 is canonical:

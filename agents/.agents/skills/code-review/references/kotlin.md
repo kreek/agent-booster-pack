@@ -3,7 +3,7 @@
 Use when reviewing Kotlin code in the diff. Apply this alongside the
 main `code-review` skill workflow.
 
-## Data-first bias (apply first)
+## Domain-modeling bias (apply first)
 
 Kotlin gives you the tools for domain-modeling design out of the box. The
 `domain-modeling` skill's doctrine is canonical:

@@ -4,7 +4,7 @@ Use when reviewing Ruby (or Rails) code in the diff. Apply this
 alongside the main `code-review` skill workflow. Targets Ruby 3.x on
 Rails 7.x / 8.x.
 
-## Data-first bias (apply first)
+## Domain-modeling bias (apply first)
 
 Ruby's culture leans heavily on objects with state. The
 `domain-modeling` skill's doctrine still applies:
