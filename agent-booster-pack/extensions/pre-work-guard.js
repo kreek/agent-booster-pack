@@ -4,7 +4,6 @@ export const BRANCH_GUARD_STATE_ENTRY = "abp-branch-isolation-accepted";
 
 const PROTECTED_BRANCHES = new Set(["main", "master"]);
 const BRANCH_CHOICE = "Create/switch to a topic branch in this worktree";
-const WORKTREE_CHOICE = "Create a separate worktree + topic branch";
 const CONTINUE_CHOICE = "Continue on current branch";
 const STOP_CHOICE = "Stop and let me handle Git";
 const CHANGE_TOOL_NAMES = new Set(["edit", "write"]);
@@ -152,15 +151,6 @@ function branchGuardPrompt(status) {
   return `${reason}\n\nPick the next Git step:`;
 }
 
-function worktreeInstructions() {
-  return [
-    "ABP Branch Isolation Guard: create a separate worktree before continuing.",
-    "Suggested command:",
-    "git worktree add ../<repo>-<topic> -b <type/topic> HEAD",
-    "Then run this task from that new worktree. The guard did not create a worktree automatically.",
-  ].join("\n");
-}
-
 function invalidBranchName(name) {
   return !name || /\s/.test(name) || name.startsWith("-");
 }
@@ -174,7 +164,7 @@ export async function handleBranchIsolation({ exec, ui, hasUI, entries, appendEn
     return { block: true, reason: "ABP Branch Isolation Guard: create or switch to a topic branch before mutating files." };
   }
 
-  const choices = [BRANCH_CHOICE, WORKTREE_CHOICE, CONTINUE_CHOICE, STOP_CHOICE];
+  const choices = [BRANCH_CHOICE, CONTINUE_CHOICE, STOP_CHOICE];
   const choice = await ui.select(branchGuardPrompt(status), choices);
 
   if (choice === BRANCH_CHOICE) {
@@ -192,7 +182,6 @@ export async function handleBranchIsolation({ exec, ui, hasUI, entries, appendEn
     return;
   }
 
-  if (choice === WORKTREE_CHOICE) return { block: true, reason: worktreeInstructions() };
   if (choice === CONTINUE_CHOICE) {
     appendEntry(BRANCH_GUARD_STATE_ENTRY, { choice, branch: status.branch, acceptedAt: Date.now() });
     return;

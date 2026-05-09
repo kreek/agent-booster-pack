@@ -209,18 +209,25 @@ it("lets the user create a topic branch in the current worktree", async () => {
   expect(appended.at(-1)?.[0]).toBe(BRANCH_GUARD_STATE_ENTRY);
 });
 
-it("does not auto-create worktrees; choosing worktree blocks with instructions", async () => {
+it("does not offer a worktree choice", async () => {
   const exec = makeExec({
     "git rev-parse --is-inside-work-tree": { stdout: "true\n" },
     "git branch --show-current": { stdout: "feature/current\n" },
     "git status --porcelain": { stdout: " M src/x.js\n" },
   });
-  const ui = makeUi(["Create a separate worktree + topic branch"]);
+  const offered = [];
+  const ui = {
+    select: async (_prompt, choices) => {
+      offered.push(...choices);
+      return "Stop and let me handle Git";
+    },
+    input: async () => "",
+  };
 
-  const result = await handleBranchIsolation({ exec, ui, hasUI: true, entries: [], appendEntry: () => {} });
+  await handleBranchIsolation({ exec, ui, hasUI: true, entries: [], appendEntry: () => {} });
 
-  expect(result.block).toBe(true);
-  expect(result.reason).toMatch(/git worktree add/);
+  expect(offered).not.toContain("Create a separate worktree + topic branch");
+  expect(offered.some((c) => /separate worktree/i.test(c))).toBe(false);
   expect(exec.calls.some(([, args]) => args[0] === "worktree")).toBe(false);
 });
 
