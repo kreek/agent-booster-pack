@@ -31,22 +31,16 @@ describe("pre-commit acceptance command selection", () => {
     expect(commands).toContain("node scripts/validate-skill-anatomy.mjs");
   });
 
-  it("checks markdown links for markdown changes", () => {
-    expect(commandStrings(["README.md"])).toContain("uv run refcheck . --no-color");
+  it("keeps markdown link checks out of pre-commit", () => {
+    expect(commandStrings(["README.md"])).not.toContain("uv run refcheck . --no-color");
   });
 
-  it("checks root Vitest for repo scripts and tests", () => {
-    const commands = commandStrings(["scripts/pre-commit-acceptance.mjs"]);
+  it("keeps Vitest suites out of pre-commit", () => {
+    const scriptCommands = commandStrings(["scripts/pre-commit-acceptance.mjs"]);
+    const packageCommands = commandStrings(["agent-booster-pack-contract-first/extensions/interface-design-gate.js"]);
 
-    expect(commands).toContain("npm test");
-    expect(commands).not.toContain("uv run pytest");
-    expect(commands).not.toContain("uv run ruff format --check .");
-  });
-
-  it("checks package Vitest suites for package changes", () => {
-    const commands = commandStrings(["agent-booster-pack-contract-first/extensions/interface-design-gate.js"]);
-
-    expect(commands).toContain("npm --prefix agent-booster-pack-contract-first test");
+    expect(scriptCommands).not.toContain("npm test");
+    expect(packageCommands).not.toContain("npm --prefix agent-booster-pack-contract-first test");
   });
 
   it("checks shell scripts with shellcheck and shfmt", () => {

@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+# Repository-local ABP pre-push acceptance gate.
+exec node scripts/pre-push-acceptance.mjs

@@ -66,35 +66,6 @@ export function selectChecks(paths) {
     );
   }
 
-  if (hasAny(paths, (path) => path.endsWith(".md") || path.endsWith("AGENTS.md"))) {
-    checks.push(new Check("local markdown links and anchors resolve", ["uv", "run", "refcheck", ".", "--no-color"], ["uv"]));
-  }
-
-  if (
-    hasAny(paths, (path) =>
-      path.endsWith(".mjs") ||
-      path.endsWith(".js") ||
-      path.endsWith(".ts") ||
-      pathMatches(path, "scripts", "tests") ||
-      path === "package.json" ||
-      path === "package-lock.json",
-    )
-  ) {
-    checks.push(new Check("repo Vitest suite passes", ["npm", "test"], ["npm"]));
-  }
-
-  const packageChecks = [
-    ["agent-booster-pack", "agent-booster-pack Vitest suite passes"],
-    ["agent-booster-pack-contract-first", "contract-first Vitest suite passes"],
-    ["agent-booster-pack-specify", "specify Vitest suite passes"],
-    ["agent-booster-pack-proof", "proof Vitest suite passes"],
-  ];
-  for (const [prefix, reason] of packageChecks) {
-    if (hasAny(paths, (path) => pathMatches(path, prefix))) {
-      checks.push(new Check(reason, ["npm", "--prefix", prefix, "test"], ["npm"]));
-    }
-  }
-
   const stagedShell = shellPaths(paths);
   if (stagedShell.length > 0) {
     checks.push(new Check("shell scripts pass shellcheck", ["shellcheck", ...stagedShell], ["shellcheck"]));
