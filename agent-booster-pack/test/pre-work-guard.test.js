@@ -224,6 +224,71 @@ it("does not auto-create worktrees; choosing worktree blocks with instructions",
   expect(exec.calls.some(([, args]) => args[0] === "worktree")).toBe(false);
 });
 
+it("does not re-prompt when the current branch was already accepted", async () => {
+  const exec = makeExec({
+    "git rev-parse --is-inside-work-tree": { stdout: "true\n" },
+    "git branch --show-current": { stdout: "feature/current\n" },
+    "git status --porcelain": { stdout: "" },
+    "git rev-parse --verify main": { stdout: "abc123\n" },
+    "git merge-base --is-ancestor HEAD main": { code: 1 },
+  });
+  const ui = makeUi([]);
+  const entries = [
+    userText("start a feature"),
+    customEntry(BRANCH_GUARD_STATE_ENTRY, {
+      choice: "Create/switch to a topic branch in this worktree",
+      branch: "feature/current",
+      acceptedAt: 1,
+    }),
+    userText("now keep going"),
+  ];
+
+  const result = await handleBranchIsolation({
+    exec,
+    ui,
+    hasUI: true,
+    entries,
+    appendEntry: () => {},
+  });
+
+  expect(result).toBeUndefined();
+  expect(ui.prompts).toEqual([]);
+});
+
+it("re-prompts after switching to a different branch", async () => {
+  const exec = makeExec({
+    "git rev-parse --is-inside-work-tree": { stdout: "true\n" },
+    "git branch --show-current": { stdout: "main\n" },
+    "git status --porcelain": { stdout: "" },
+  });
+  const ui = makeUi([
+    "Create/switch to a topic branch in this worktree",
+    "feature/next",
+  ]);
+  const appended = [];
+  const entries = [
+    userText("first feature"),
+    customEntry(BRANCH_GUARD_STATE_ENTRY, {
+      choice: "Create/switch to a topic branch in this worktree",
+      branch: "feature/prev",
+      acceptedAt: 1,
+    }),
+    userText("now start a new feature"),
+  ];
+
+  const result = await handleBranchIsolation({
+    exec,
+    ui,
+    hasUI: true,
+    entries,
+    appendEntry: (...args) => appended.push(args),
+  });
+
+  expect(result).toBeUndefined();
+  expect(exec.calls).toContainEqual(["git", ["switch", "-c", "feature/next"]]);
+  expect(appended.at(-1)?.[0]).toBe(BRANCH_GUARD_STATE_ENTRY);
+});
+
 it("allows explicit continue on a dirty topic branch for the current turn", async () => {
   const exec = makeExec({
     "git rev-parse --is-inside-work-tree": { stdout: "true\n" },
