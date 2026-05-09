@@ -99,8 +99,19 @@ export function hasAlreadyExplainedThisTurn(entries) {
   return hasCustomEntryThisTurn(entries, PRE_WORK_STATE_ENTRY);
 }
 
-function hasAcceptedBranchIsolationThisTurn(entries) {
-  return hasCustomEntryThisTurn(entries, BRANCH_GUARD_STATE_ENTRY);
+export function lastBranchIsolationEntry(entries) {
+  for (let index = entries.length - 1; index >= 0; index -= 1) {
+    const entry = entries[index];
+    if (entry?.type === "custom" && entry?.customType === BRANCH_GUARD_STATE_ENTRY) {
+      return entry.data ?? null;
+    }
+  }
+  return null;
+}
+
+export function branchIsolationAcceptedFor(entries, branch) {
+  const last = lastBranchIsolationEntry(entries);
+  return last != null && last.branch === branch;
 }
 
 async function git(exec, ...args) {
@@ -155,10 +166,9 @@ function invalidBranchName(name) {
 }
 
 export async function handleBranchIsolation({ exec, ui, hasUI, entries, appendEntry }) {
-  if (hasAcceptedBranchIsolationThisTurn(entries)) return;
-
   const status = await branchIsolationStatus(exec);
   if (!status) return;
+  if (branchIsolationAcceptedFor(entries, status.branch)) return;
 
   if (!hasUI) {
     return { block: true, reason: "ABP Branch Isolation Guard: create or switch to a topic branch before mutating files." };
