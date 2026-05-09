@@ -2,7 +2,7 @@ const PRE_WORK_MARKER = "ABP Pre-Work Reflection Gate";
 const PRE_WORK_STATE_ENTRY = "abp-pre-work-explained";
 
 const CHANGE_TOOL_NAMES = new Set(["edit", "write"]);
-const MUTATING_BASH_PATTERN = /(>>?|\btee\b|\bpython\b[\s\S]*\bopen\([^)]*['"]w|\bnode\b[\s\S]*writeFile|\bperl\s+-pi\b|\bsed\s+-i\b|\bmv\b|\bcp\b|\btouch\b|\bchmod\b|\bgit\s+apply\b|\bpatch\b)/i;
+const MUTATING_BASH_PATTERN = /(\btee\b|\bpython\b[\s\S]*\bopen\([^)]*['"]w|\bnode\b[\s\S]*writeFile|\bperl\s+-pi\b|\bsed\s+-i\b|\bmv\b|\bcp\b|\btouch\b|\bchmod\b|\bgit\s+apply\b|\bpatch\b)/i;
 
 const PLAN_PATTERN = /\b(I'll|I will|going to|plan to|next I'll|about to|will (add|change|create|edit|write|update|introduce|refactor|extract|move|rename|remove|delete|fix))\b/i;
 const WHY_PATTERN = /\b(better|because|so that|to (?:improve|simplify|fix|prevent|reduce|avoid|enable|unblock|clarify)|in order to|this avoids|this prevents|this simplifies|safer|clearer|simpler|reliable)\b/i;

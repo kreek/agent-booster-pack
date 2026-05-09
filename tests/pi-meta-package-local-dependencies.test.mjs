@@ -41,6 +41,17 @@ describe("Pi meta-package local dependencies", () => {
     expect(scripts["sync:bundled-packages"]).toBe("node scripts/sync-bundled-packages.mjs");
   });
 
+  it("loads only non-overlapping sibling skill paths", () => {
+    const pkg = readPackage(META_PACKAGE);
+
+    expect(pkg.pi.skills).toEqual([
+      "./node_modules/agent-booster-pack-skills/skills",
+      "./node_modules/agent-booster-pack-contract-first/skills/contract-first",
+      "./node_modules/agent-booster-pack-proof/skills/proof",
+      "./node_modules/agent-booster-pack-whiteboard/skills/whiteboarding",
+    ]);
+  });
+
   it("has a bundled package sync script", () => {
     const text = readFileSync(join(META_PACKAGE, "scripts/sync-bundled-packages.mjs"), "utf8");
 

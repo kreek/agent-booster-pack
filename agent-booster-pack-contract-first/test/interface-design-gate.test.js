@@ -7,6 +7,7 @@ import {
   hasInterfaceGateApproval,
   hasInterfaceGatePrompt,
   hasInterfaceUiAllowThisTurn,
+  hasOpenInterfaceGatePrompt,
   isPotentialInterfaceImplementation,
 } from "../extensions/interface-design-gate.js";
 
@@ -82,22 +83,52 @@ it("detects mutating bash commands that likely write code", () => {
   expect(classifyToolCall("bash", { command: "rg interface" })).toBe("read_only");
 });
 
-it("flags implementation when interface intent exists without approval", () => {
+it("does not classify read-only bash with stderr redirects as mutating", () => {
+  expect(classifyToolCall("bash", { command: 'rg "contract-first" /Users/alastair/.pi 2>/dev/null' })).toBe(
+    "read_only"
+  );
+});
+
+it("does not infer interface intent from assistant prose without a gate packet", () => {
   const history = messages([
     "assistant",
     "I'll add a new exported class contract for the cache adapter, then edit the files.",
   ]);
 
-  expect(isPotentialInterfaceImplementation("edit", {}, history)).toBe(true);
+  expect(isPotentialInterfaceImplementation("edit", {}, history)).toBe(false);
 });
 
-it("flags implementation when the user requested an interface change", () => {
+it("does not infer interface intent from user prose without a gate packet", () => {
   const history = messages([
     "user",
     "Add a public function interface for configuring the cache adapter.",
   ]);
 
+  expect(isPotentialInterfaceImplementation("edit", {}, history)).toBe(false);
+});
+
+it("flags implementation after an explicit gate packet without approval", () => {
+  const history = messages([
+    "assistant",
+    `Interface Design Gate
+
+Current interface: new adapter
+Proposed interface: export function createClient(options)
+Why this boundary: callers should not know transport details
+User decision: approve or revise`,
+  ]);
+
+  expect(hasOpenInterfaceGatePrompt(history)).toBe(true);
   expect(isPotentialInterfaceImplementation("edit", {}, history)).toBe(true);
+});
+
+it("does not treat hyphenated package names as interface intent", () => {
+  const history = messages([
+    "user",
+    "Resolve the agent-booster-pack-contract-first package collision; I only want the npm installed version.",
+  ]);
+
+  expect(isPotentialInterfaceImplementation("edit", {}, history)).toBe(false);
 });
 
 it("does not flag implementation after the user approves the gate", () => {
@@ -142,7 +173,7 @@ User decision: approve or revise`,
   expect(isPotentialInterfaceImplementation("edit", {}, history)).toBe(false);
 });
 
-it("new intent after a closed cycle reopens the gate", () => {
+it("new prose after a closed cycle does not reopen the gate without a packet", () => {
   const history = [
     closedCycleEntry(),
     ...messages(
@@ -151,15 +182,20 @@ it("new intent after a closed cycle reopens the gate", () => {
     ),
   ];
 
-  expect(isPotentialInterfaceImplementation("edit", {}, history)).toBe(true);
+  expect(isPotentialInterfaceImplementation("edit", {}, history)).toBe(false);
 });
 
-it("UI allow within the current turn suppresses the gate", () => {
+it("UI allow within the current turn suppresses an explicit open gate", () => {
   const history = [
-    ...messages(
-      ["user", "Redesign the API for the cache adapter."],
-      ["assistant", "Working on it."]
-    ),
+    ...messages([
+      "assistant",
+      `Interface Design Gate
+
+Current interface: new adapter
+Proposed interface: export function createClient(options)
+Why this boundary: callers should not know transport details
+User decision: approve or revise`,
+    ]),
     uiAllowEntry(),
   ];
 
@@ -169,10 +205,15 @@ it("UI allow within the current turn suppresses the gate", () => {
 
 it("UI allow does not leak across turns", () => {
   const history = [
-    ...messages(
-      ["user", "Redesign the API for the cache adapter."],
-      ["assistant", "Working on it."]
-    ),
+    ...messages([
+      "assistant",
+      `Interface Design Gate
+
+Current interface: new adapter
+Proposed interface: export function createClient(options)
+Why this boundary: callers should not know transport details
+User decision: approve or revise`,
+    ]),
     uiAllowEntry(),
     ...messages(["user", "Now also tweak the formatter."]),
   ];

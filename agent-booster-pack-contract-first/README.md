@@ -22,7 +22,7 @@ soft runtime check — false positives can be allowed through.
 
 This package includes both the runtime gate and the matching full
 `contract-first` skill. The skill carries the doctrine; this package enforces
-it at tool-call time inside Pi.
+an explicit gate packet at tool-call time inside Pi.
 
 ## Install
 
@@ -56,17 +56,15 @@ The extension hooks two Pi events:
   knows to produce the gate packet (Current/Proposed/Why/User decision)
   whenever work touches a durable interface.
 - **`tool_call`** — soft-blocks mutating tool calls (`edit`, `write`, and
-  shell commands that match a write pattern like `>`, `tee`, `sed -i`,
-  `mv`, `cp`, `git apply`, etc.) when conversation contains interface-intent
-  keywords without a recent gate approval. In a UI session, the user is
-  prompted to allow the action; without a UI, the call is blocked.
+  shell commands that match a write pattern like file redirects, `tee`,
+  `sed -i`, `mv`, `cp`, `git apply`, etc.) after an explicit Interface
+  Design Gate packet has been shown without a recent gate approval. In a
+  UI session, the user is prompted to allow the action; without a UI, the
+  call is blocked.
 
-The gate fires only when **interface intent** is present in recent chat
-(keywords like `interface`, `contract`, `api`, `class`, `method`, `module
-facade`, `exported type`, `adapter`, `service boundary`, `component
-props`, `schema`, `endpoint`, `config key`, `file format`, `event
-payload`). Internal helper extractions, formatting changes, and unrelated
-work are unaffected.
+The runtime no longer infers interface intent from keywords. Semantic
+classification belongs to the agent and ABP skills; the extension enforces
+only the approval protocol once the agent opens the gate.
 
 ## Approving the gate
 

@@ -12,10 +12,10 @@ const REQUIRED_GATE_FIELDS = [
   "user decision:",
 ];
 
-const INTERFACE_INTENT_PATTERN = /\b(interface|contract|api|class|method|module facade|exported type|export(?:ed)? function|public function|adapter|service boundary|component props|schema|endpoint|config key|file format|event payload|message payload)\b/i;
 const APPROVAL_PATTERN = /\b(approve|approved|yes|looks good|go ahead|ship it|implement it|proceed)\b/i;
 const REJECTION_PATTERN = /\b(reject|rejected|no|revise|change it|not that|don't implement|do not implement)\b/i;
-const MUTATING_BASH_PATTERN = /(>>?|\btee\b|\bpython\b[\s\S]*\bopen\([^)]*['"]w|\bnode\b[\s\S]*writeFile|\bperl\s+-pi\b|\bsed\s+-i\b|\bmv\b|\bcp\b|\btouch\b|\bchmod\b|\bgit\s+apply\b|\bpatch\b)/i;
+const SHELL_FILE_REDIRECT_PATTERN = /(?:^|[^\d])>>?\s*(?!&|\d)(?!\/dev\/null\b)\S/i;
+const MUTATING_BASH_PATTERN = /(\btee\b|\bpython\b[\s\S]*\bopen\([^)]*['"]w|\bnode\b[\s\S]*writeFile|\bperl\s+-pi\b|\bsed\s+-i\b|\bmv\b|\bcp\b|\btouch\b|\bchmod\b|\bgit\s+apply\b|\bpatch\b)/i;
 
 /**
  * Return normalized text content for a Pi session message-like value.
@@ -45,11 +45,14 @@ export function chatMessages(entries) {
 
 /** Return true when recent chat contains the lean Interface Design Gate packet. */
 export function hasInterfaceGatePrompt(entries) {
-  return chatMessages(entries).some(
-    (message) =>
-      message.role === "assistant" &&
-      message.text.includes(GATE_TITLE) &&
-      REQUIRED_GATE_FIELDS.every((field) => message.text.toLowerCase().includes(field))
+  return chatMessages(entries).some(isInterfaceGatePrompt);
+}
+
+function isInterfaceGatePrompt(message) {
+  return (
+    message.role === "assistant" &&
+    message.text.includes(GATE_TITLE) &&
+    REQUIRED_GATE_FIELDS.every((field) => message.text.toLowerCase().includes(field))
   );
 }
 
@@ -150,32 +153,31 @@ export function classifyToolCall(toolName, input) {
   if (toolName !== "bash") return "read_only";
 
   const command = typeof input?.command === "string" ? input.command : "";
-  return MUTATING_BASH_PATTERN.test(command) ? "mutating" : "read_only";
+  return MUTATING_BASH_PATTERN.test(command) || SHELL_FILE_REDIRECT_PATTERN.test(command)
+    ? "mutating"
+    : "read_only";
 }
 
 /**
- * Return true when recent chat suggests an interface design decision is in
- * play. Scoped to entries since the last closed cycle so a stale mention
- * from a prior, settled design decision does not keep firing the gate.
+ * Return true when the current cycle has an Interface Design Gate packet whose
+ * approval protocol is still open. Semantic detection belongs to the agent and
+ * ABP skills; the runtime only enforces an explicit gate packet once shown.
  */
-export function hasInterfaceIntent(entries) {
+export function hasOpenInterfaceGatePrompt(entries) {
   const cycleStart = lastClosedCycleIndex(entries) + 1;
-  return chatMessages(entries.slice(cycleStart)).some((message) =>
-    INTERFACE_INTENT_PATTERN.test(message.text)
-  );
+  return chatMessages(entries.slice(cycleStart)).some(isInterfaceGatePrompt);
 }
 
 /**
  * Decide whether a mutating tool call should trigger Pi's soft interface gate.
- * The gate fires only when interface intent exists in the current cycle, no
- * user approval follows the latest gate prompt, and no UI allow has cleared
- * the gate within this turn.
+ * The gate fires only after an explicit gate packet exists, no user approval
+ * follows the latest gate prompt, and no UI allow has cleared this turn.
  */
 export function isPotentialInterfaceImplementation(toolName, input, entries) {
   if (classifyToolCall(toolName, input) !== "mutating") return false;
   if (hasInterfaceUiAllowThisTurn(entries)) return false;
   if (hasInterfaceGateApproval(entries)) return false;
-  return hasInterfaceIntent(entries);
+  return hasOpenInterfaceGatePrompt(entries);
 }
 
 function gateReminder() {

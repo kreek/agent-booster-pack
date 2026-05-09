@@ -1,7 +1,9 @@
 SHELL := /bin/bash
 .SHELLFLAGS := -euo pipefail -c
 
-.PHONY: test publish-pi publish-pi-dry-run
+.PHONY: test pi-install-local pi-uninstall-local publish-pi publish-pi-dry-run
+
+ABP_PI_LOCAL_PACKAGE := $(abspath agent-booster-pack)
 
 test:
 	npm test
@@ -13,6 +15,13 @@ test:
 	cd agent-booster-pack-whiteboard && npm test
 	cd eval && npm test
 	cd eval && npm run typecheck
+
+pi-install-local:
+	npm --prefix agent-booster-pack run prepack
+	pi install "$(ABP_PI_LOCAL_PACKAGE)"
+
+pi-uninstall-local:
+	pi remove "$(ABP_PI_LOCAL_PACKAGE)"
 
 publish-pi:
 	scripts/publish-pi-packages.sh

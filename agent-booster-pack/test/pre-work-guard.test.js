@@ -37,6 +37,13 @@ it("does not trigger on read-only tool calls", () => {
   expect(shouldBlockPreWork("read", { path: "src/x.js" }, entries)).toBeNull();
 });
 
+it("does not treat stderr redirection to /dev/null as mutating bash", () => {
+  const entries = [userText("look around"), assistantText("I'll inspect the code because I need the current shape first.")];
+
+  expect(shouldBlockPreWork("bash", { command: "rg TODO 2>/dev/null" }, entries)).toBeNull();
+  expect(preWorkChangeKind("bash", { command: "rg TODO 2>/dev/null" })).toBeNull();
+});
+
 it("blocks first edit when latest assistant text has no plan or why", () => {
   const entries = [userText("update cache"), assistantText("Sure, here we go.")];
   const verdict = shouldBlockPreWork("edit", { path: "src/cache.js" }, entries);

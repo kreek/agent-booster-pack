@@ -9,9 +9,9 @@ This is a **meta-package**: it installs the sibling ABP packages and adds the cr
   accessibility, and more). Runtime-owned skills ship with their matching
   extension packages.
 - [`agent-booster-pack-contract-first`](../agent-booster-pack-contract-first/)
-  — Interface Design Gate runtime. Soft-blocks mutating tool calls
-  when interface/contract intent appears in conversation without an
-  approved gate packet. Includes the `contract-first` skill.
+  — Interface Design Gate runtime. Enforces approval after the agent
+  opens an explicit Interface Design Gate packet. Includes the
+  `contract-first` skill.
 - [`agent-booster-pack-proof`](../agent-booster-pack-proof/) —
   proof-first red-green-refactor runtime. Enforces a failing test
   before production code lands. Includes the `proof` skill.

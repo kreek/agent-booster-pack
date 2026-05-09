@@ -1,15 +1,14 @@
 #!/usr/bin/env node
-// Copies the whiteboarding and workflow skills into ./skills before npm
-// pack/publish so users who install this sibling alone get the matching
-// doctrine. The meta-package agent-booster-pack loads skills only from
-// agent-booster-pack-skills, so the bundled copy here sits unused (no
-// double-load) when the meta is installed.
+// Copies the contract-first skill into ./skills before npm pack/publish so
+// users who install this sibling alone get the matching doctrine. The
+// meta-package agent-booster-pack loads this exact skill path to avoid
+// double-loading shared workflow or whiteboarding skills.
 
 import { cpSync, mkdirSync, readdirSync, rmSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const SKILLS = ["whiteboarding", "workflow"];
+const SKILLS = ["contract-first"];
 
 const here = dirname(fileURLToPath(import.meta.url));
 const pkgRoot = resolve(here, "..");
