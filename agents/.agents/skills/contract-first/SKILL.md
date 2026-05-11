@@ -7,7 +7,7 @@ description: Use when an Interface Design Gate must approve durable function, AP
 
 ## Iron Law
 
-`NO DURABLE INTERFACE LANDS BEFORE THE HUMAN APPROVES THE SHAPE.`
+`ALL DURABLE INTERFACES MUST BE APPROVED AND DESIGNED BEFORE IMPLEMENTATION.`
 
 ## When to Use
 
