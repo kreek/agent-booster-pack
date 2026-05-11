@@ -23,9 +23,10 @@ This is a **meta-package**: it installs the sibling ABP packages and adds the cr
 The meta-package also includes cross-cutting runtime gates:
 
 - **Branch Isolation Guard** runs before mutating tool calls. It blocks
-  work on protected branches and prompts when the current branch is dirty,
-  offering branch, continue, or stop choices. It does not create or
-  propose worktrees.
+  work on protected branches and prompts when a non-topic branch is dirty,
+  offering branch, continue, or stop choices. Dirty `feature/`, `fix/`,
+  `refactor/`, and `chore/` branches are treated as already isolated. It
+  does not create or propose worktrees.
 - **Pre-Work Reflection Gate** soft-blocks the first mutating tool call of
   a turn until the agent's latest message explains the plan and why it's
   an improvement (single-file edits) or also names the alternatives
@@ -35,14 +36,6 @@ The meta-package also includes cross-cutting runtime gates:
 - **Final Value Guard** prompts for a better final summary after durable
   file changes. One-file changes get a short one-sentence nudge; larger
   changes get a fuller reflection prompt.
-- **Design-Moment Guard** pauses the first mutating tool call that
-  writes to a public surface (API/CLI/schema/contract paths, new
-  exported symbols) when no `Interface Design Gate` packet has been
-  approved yet. With a UI it asks for an explicit allow; headless it
-  blocks with the packet template inline. It is conservative on path
-  and content patterns to avoid firing on internal refactors or tests.
-  To disable, remove `extensions/design-moment-guard.js` from the
-  package install or drop the file in a fork.
 
 If you want only some of the four, install them individually instead
 of this meta-package. See each package's README for details.
@@ -65,8 +58,9 @@ gate without uninstalling, see the relevant package's README.
 ## Migration from `pi-agent-booster-pack`
 
 If you were on `pi-agent-booster-pack@4.x`, this package replaces it
-and adds the two runtime gates. The old name is deprecated. Switch
-your install to `agent-booster-pack` to stay current.
+and adds the cross-cutting runtime gates described above. The old name
+is deprecated. Switch your install to `agent-booster-pack` to stay
+current.
 
 If you were on `pi-proof@1.x`, that's now `agent-booster-pack-proof`
 and is included here. The old name is deprecated.

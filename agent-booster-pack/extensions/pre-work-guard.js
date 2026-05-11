@@ -8,6 +8,7 @@ const CONTINUE_CHOICE = "Continue on current branch";
 const STOP_CHOICE = "Stop and let me handle Git";
 const CHANGE_TOOL_NAMES = new Set(["edit", "write"]);
 const MUTATING_BASH_PATTERN = /(\btee\b|\bpython\b[\s\S]*\bopen\([^)]*['"]w|\bnode\b[\s\S]*writeFile|\bperl\s+-pi\b|\bsed\s+-i\b|\bmv\b|\bcp\b|\btouch\b|\bchmod\b|\bgit\s+apply\b|\bpatch\b)/i;
+const TOPIC_BRANCH_PATTERN = /^(feature|fix|refactor|chore)\//;
 
 
 export function messageText(value) {
@@ -127,6 +128,7 @@ export async function branchIsolationStatus(exec) {
   const dirty = statusResult.stdout.trim().length > 0;
 
   if (PROTECTED_BRANCHES.has(branch)) return { kind: "protected_branch", branch, dirty };
+  if (dirty && TOPIC_BRANCH_PATTERN.test(branch)) return null;
   if (dirty) return { kind: "dirty_branch", branch, dirty };
 
   for (const baseBranch of PROTECTED_BRANCHES) {

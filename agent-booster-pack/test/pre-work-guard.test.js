@@ -296,10 +296,26 @@ it("re-prompts after switching to a different branch", async () => {
   expect(appended.at(-1)?.[0]).toBe(BRANCH_GUARD_STATE_ENTRY);
 });
 
-it("allows explicit continue on a dirty topic branch for the current turn", async () => {
+it("does not re-prompt after work dirties an already-isolated topic branch", async () => {
   const exec = makeExec({
     "git rev-parse --is-inside-work-tree": { stdout: "true\n" },
-    "git branch --show-current": { stdout: "feature/current\n" },
+    "git branch --show-current": { stdout: "fix/topic-branch-prompt\n" },
+    "git status --porcelain": { stdout: " M agent-booster-pack/test/pre-work-guard.test.js\n" },
+  });
+  const ui = makeUi([]);
+  const appended = [];
+
+  const result = await handleBranchIsolation({ exec, ui, hasUI: true, entries: [], appendEntry: (...args) => appended.push(args) });
+
+  expect(result).toBeUndefined();
+  expect(ui.prompts).toEqual([]);
+  expect(appended).toEqual([]);
+});
+
+it("still prompts on dirty non-topic branches", async () => {
+  const exec = makeExec({
+    "git rev-parse --is-inside-work-tree": { stdout: "true\n" },
+    "git branch --show-current": { stdout: "scratch\n" },
     "git status --porcelain": { stdout: " M src/x.js\n" },
   });
   const ui = makeUi(["Continue on current branch"]);
@@ -308,6 +324,7 @@ it("allows explicit continue on a dirty topic branch for the current turn", asyn
   const result = await handleBranchIsolation({ exec, ui, hasUI: true, entries: [], appendEntry: (...args) => appended.push(args) });
 
   expect(result).toBeUndefined();
+  expect(ui.prompts).toHaveLength(1);
   expect(appended.at(-1)?.[0]).toBe(BRANCH_GUARD_STATE_ENTRY);
 });
 
