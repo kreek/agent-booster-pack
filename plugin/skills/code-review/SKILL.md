@@ -7,7 +7,7 @@ description: Use to review diffs and PRs for bugs, regressions, edge cases, proo
 
 ## Iron Law
 
-`FINDINGS FIRST. BLOCK ON CORRECTNESS, SAFETY, DATA LOSS, AND UNPROVEN CLAIMS; DO NOT BLOCK ON TASTE.`
+`FINDINGS FIRST. BLOCK ON CORRECTNESS, SAFETY, DATA LOSS, AND UNPROVEN CLAIMS`
 
 ## When to Use
 
@@ -40,7 +40,8 @@ description: Use to review diffs and PRs for bugs, regressions, edge cases, proo
    and refactors, verify old paths were fully removed or intentionally
    preserved, and that callers reach the intended path.
 5. AI-generated code is untrusted until behavior, tests, and
-   security-sensitive paths are verified.
+   security-sensitive paths are verified. The patterned failures are
+   enumerated under AI-Agent Failure Modes.
 6. Maintainability findings are valid when complexity creates real risk:
    deep nesting, long functions, hidden mutable state, clever expressions,
    unnecessary indirection, or behavior scattered across unrelated places.
@@ -52,6 +53,45 @@ description: Use to review diffs and PRs for bugs, regressions, edge cases, proo
    duplicated rule with divergent meaning, or behavior split across
    unrelated lifecycles.
 
+## AI-Agent Failure Modes
+
+Agent-generated diffs fail in patterned ways. Treat each as a blocking
+finding unless the diff names a real caller, requirement, or removal
+condition. Blocking means the done or merge claim is blocked and the
+finding is surfaced to the user, not that the review loops internally:
+make one pass, list findings, hand back. Do not re-review after fixing
+unless the user asks.
+
+1. **Speculative abstraction.** New interface, factory, generic, strategy,
+   wrapper, or config knob with fewer than two real callers in this or a
+   queued diff. Inline or delete.
+2. **Unnecessary backwards compatibility.** Deprecated alias, old-name
+   shim, or compatibility branch lacking (a) a named caller that needs
+   it, (b) a removal trigger, and (c) an owner. Concentrate at a single
+   translation boundary or remove. Approval of a new name or shape is
+   not approval to keep the old one.
+3. **Dead defensive code.** Guard, sentinel, try/except, fallback, or
+   default-return covering a state no in-scope caller produces. Convert
+   to a boundary assertion or remove. Swallowed exceptions and silent
+   fallbacks are data-loss risk, not robustness.
+4. **Test theater.** Assertions of `mock.was_called` without an
+   observable side effect, return value, or persisted state; assertions
+   against the implementation's own constants, regex, or string literals
+   imported from the module under test; snapshot updates without a
+   behavior-change reason; suites that survive a one-assertion or
+   one-branch mutation. Rewrite to assert user-visible behavior at the
+   data-shape boundary (see `proof`).
+5. **Fabricated API.** Imported symbol, method, parameter, framework
+   feature, or CLI flag the type checker, language server, or installed
+   package cannot resolve. Block until resolved against the declared
+   toolchain.
+6. **Scope creep.** Requested change bundled with reformatting, import
+   reordering, unrelated docstrings, or speculative refactors. Require a
+   split before deep review.
+7. **Refactor drift.** Diff labeled refactor or cleanup but observable
+   return, effect, error shape, or ordering changes. Reclassify as a
+   feature change and route to `proof`.
+
 ## Workflow
 
 1. Resolve the review target. Local: `git diff`, `git diff --cached`, or
@@ -59,14 +99,22 @@ description: Use to review diffs and PRs for bugs, regressions, edge cases, proo
    `gh pr diff --patch` for code, and `gh api graphql` for
    `reviewThreads` when thread state (resolved/outdated, path, line)
    matters.
-2. Read the intent: what behavior, API, data shape, migration, UI, or
+2. Pre-flight before deep review. Note CI status: green, red and scope
+   the review as unproven and surface the failing check, or not yet run
+   and review can still proceed. Confirm the diff's intent and impact
+   are stated: in self-review the task context is the intent, in PR or
+   inbound review a missing description on a non-trivial diff is itself
+   a finding. For diffs above roughly 400 changed lines, sweep by risk
+   area and declare partial scope explicitly. This is a one-time gate,
+   not a loop: run it once per review pass.
+3. Read the intent: what behavior, API, data shape, migration, UI, or
    workflow is supposed to change.
-3. Load the language reference under `references/` for every language in
+4. Load the language reference under `references/` for every language in
    the diff (`rust.md`, `fsharp.md`, `csharp.md`, `python.md`,
    `typescript.md`, `ruby.md`, `java.md`, `kotlin.md`, `bash.md`,
    `sql.md`). Defer recommendations incompatible with the repo's
    declared toolchain.
-4. Load triggered domain skills as mandatory lenses. Always include a
+5. Load triggered domain skills as mandatory lenses. Always include a
    `security` pass for any auth, trust-boundary, input, dependency, secret,
    crypto, logging-redaction, or user-controlled-sink concern. Add others
    as triggered: `database`, `api`, `proof`, `domain-modeling`, `architecture`,
@@ -76,13 +124,16 @@ description: Use to review diffs and PRs for bugs, regressions, edge cases, proo
    artifacts, feature flags, migrations with rollout implications, or the user
    asked for release readiness; do not load it just because early planning
    mentioned possible future release risk.
-5. Sweep for harmful duplication, orphaned code, unreachable branches, dead
+6. Run the AI-Agent Failure Modes pass on every agent-generated diff.
+   Name each blocking finding by its mode (speculative abstraction,
+   compatibility shim, dead defensive code, test theater, fabricated
+   API, scope creep, refactor drift).
+7. Sweep for harmful duplication, orphaned code, unreachable branches, dead
    feature flags, unused public surface, and stale tests/docs/config. For
    maintainability, ask what independent concerns the diff couples or
    separates, and whether simplification preserves behavior with evidence.
-6. Don't review generated, vendored, or lockfile churn as if it were
-   hand-written; sample only enough to detect obvious risk. If the diff
-   is too large, review by risk area and state the partial scope.
+8. Don't review generated, vendored, or lockfile churn as if it were
+   hand-written; sample only enough to detect obvious risk.
 
 ## Addressing Review Feedback
 
@@ -108,7 +159,7 @@ ambiguity that blocks a finding or fix.
 | Critical | Exploitable security, data loss, broken auth, destructive migration, production outage risk |
 | High | Incorrect behavior, broken contract, missing authorization, race, serious regression |
 | Medium | Maintainability, error handling, observability, compatibility, or test gaps likely to cause defects |
-| Low | Non-blocking clarity — skip unless asked |
+| Low | Non-blocking clarity, skip unless asked |
 
 ## Verification
 
@@ -119,6 +170,12 @@ ambiguity that blocks a finding or fix.
 - [ ] Duplication and dead-code risks were checked, especially for
       removals, refactors, renames, feature flags, routes, jobs,
       exports, and tests.
+- [ ] AI-Agent Failure Modes were checked: speculative abstraction,
+      unnecessary backwards compatibility, dead defensive code, test
+      theater, fabricated APIs, scope creep, and refactor drift.
+- [ ] Pre-flight was confirmed: CI green or scoped unproven, description
+      states intent and impact, and oversized diffs were scoped as
+      partial review.
 - [ ] Complexity risks were checked: deep nesting, oversized functions,
       hidden mutable state, clever code, and unnecessary indirection.
 - [ ] Coupling risks were checked: business logic mixed with I/O,
@@ -149,6 +206,11 @@ ambiguity that blocks a finding or fix.
 | "I trust this author" | Review the diff with the same lenses; trust changes tone, not coverage. | Pair review where the same evidence was already inspected in this turn. |
 | "Skip the security pass this once" | Run the security lens and name why it is or is not relevant. | Files are provably outside executable, config, dependency, and data surfaces. |
 | Test re-encodes implementation: asserts substring in config/Makefile/manifest, deleted-file absence, trivial constants, or only that a mock was called | Flag as test theater. Recommend deletion or rewrite to assert behavior caused by the change. Load `proof` for the detailed test-theater taxonomy. | Asserted string is a public contract a downstream consumer parses, or the call itself is the contract (e.g. outbox writer). |
+| New interface, factory, generic, wrapper, or config knob with fewer than two real callers | Block. Demand inlining or deletion until a second real caller exists. | Boundary required by an external contract, public API, or documented extension point. |
+| Guard, try/except, fallback, or default-return for a state no in-scope caller produces | Block. Remove or convert to a boundary assertion. | Documented invariant whose violation must surface as a tracked error. |
+| Diff labeled refactor or cleanup but observable return, effect, error, or ordering changes | Reclassify as feature change and route to `proof`. | Behavior delta is the documented intent of the refactor. |
+| By inspection, the test suite would still pass if one assertion or one branch were flipped | Mark as test theater. Recommend rewriting to assert user-visible behavior at the data-shape boundary. Do not run mutation tooling unless the project already uses it. | Mutated branch is defensive code already known to be unreachable. |
+| PR bundles requested change with reformatting, import reordering, or unrelated docstrings | Require a split before deep review. | Reorganization itself is the requested change. |
 
 ## Handoffs
 
@@ -183,3 +245,7 @@ ambiguity that blocks a finding or fix.
   <https://docs.github.com/en/copilot/responsible-use/code-review>
 - NIST DevSecOps, AI Validation Guidance:
   <https://pages.nist.gov/nccoe-devsecops/introduction.html>
+- Sentry, Reviewing AI-Generated Code:
+  <https://develop.sentry.dev/sdk/getting-started/playbooks/development/reviewing-ai-generated-code/>
+- Conventional Comments:
+  <https://conventionalcomments.org/>
