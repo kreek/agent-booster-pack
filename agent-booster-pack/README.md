@@ -33,6 +33,12 @@ The meta-package also includes cross-cutting runtime gates:
   considered (multi-file or mutating-bash changes). Once satisfied, the
   rest of the turn proceeds without re-prompting; the gate resets at the
   next user message.
+- **Code Review Runtime** registers `/review [target]`, where `target`
+  defaults to `working-tree` and may be `staged`, `branch`, or a Git rev
+  range. It starts an active review session, asks the agent to use the
+  `code-review` skill, and exposes `review_check` / `review_complete`
+  tools. The runtime blocks completion until every checklist item has
+  `Checked`, `Not applicable`, or `Unproven` status with concrete evidence.
 - **Final Value Guard** prompts for a better final summary after durable
   file changes. One-file changes get a short one-sentence nudge; larger
   changes get a fuller reflection prompt.
