@@ -50,6 +50,10 @@ recoverable, scoped, and honest.
    switch to a topic branch in the current checkout. On a topic branch
    with distinct new work, ask once between continue here or branch off
    `main`. Don't re-prompt during the same piece of work.
+9. **Ask before any GitHub CLI command.** `gh` can make network calls and
+   use the user's authenticated account. Get explicit permission before
+   running any `gh` command, including read-only commands such as
+   `gh pr view`, `gh pr diff`, or `gh run view`.
 
 ## Workflow
 
@@ -66,7 +70,9 @@ recoverable, scoped, and honest.
    the current reviewed work, not unrelated files.
 5. For history operations, name the recovery point and whether the branch
    is local/solo/shared before rewriting, deleting, or force-pushing.
-6. Execute the smallest safe operation. Verify log/range-diff, status, file
+6. Before GitHub CLI use, ask for permission for the exact `gh` command or
+   command class needed. Do not treat read-only intent as permission.
+7. Execute the smallest safe operation. Verify log/range-diff, status, file
    membership, and relevant tests or repro commands.
 
 ## Verification
@@ -85,6 +91,8 @@ recoverable, scoped, and honest.
       current checkout. The menu did not re-fire during continued work on
       the same branch, and new work wasn't silently stacked on unrelated
       branch work.
+- [ ] No `gh` command was run without explicit user permission for that
+      command or command class.
 
 ## Handoffs
 

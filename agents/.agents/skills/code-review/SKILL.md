@@ -95,7 +95,8 @@ unless the user asks.
 ## Workflow
 
 1. Resolve the review target. Local: `git diff`, `git diff --cached`, or
-   `git diff <base>...HEAD`. GitHub: `gh pr view` for metadata,
+   `git diff <base>...HEAD`. GitHub: ask before running any `gh`
+   command. With permission, use `gh pr view` for metadata,
    `gh pr diff --patch` for code, and `gh api graphql` for
    `reviewThreads` when thread state (resolved/outdated, path, line)
    matters.
@@ -143,6 +144,9 @@ unless the user asks.
 - Cluster comments by behavior or file; fix the smallest coherent set.
 - If a comment asks for explanation rather than code, draft a reply
   instead of forcing a code change.
+- Do not run `gh` commands unless the user explicitly permits that command;
+  read-only GitHub CLI commands still use the network and the user's
+  authenticated account.
 - Do not post comments, submit reviews, resolve threads, or push fixes
   unless the user explicitly asks for that GitHub write.
 - If comments conflict or imply a behavior regression, stop and surface
@@ -190,6 +194,7 @@ ambiguity that blocks a finding or fix.
       thread anchors; each blocking finding explains impact and fix.
 - [ ] Test, build, CI, or proof evidence was checked, or missing
       evidence was reported as unproven.
+- [ ] No `gh` command was run without explicit user permission.
 - [ ] GitHub writes were not performed without explicit user request.
 - [ ] If no issues, residual risk and unreviewed scope were named.
 
