@@ -11,69 +11,84 @@ description: Use for proof and tests, claims, invariants, behavior specs, edge c
 
 ## When to Use
 
-- Feature work, bug fixes, refactors, API changes, domain modeling, data
-  migrations, or reviews where correctness depends on a claim being true.
+Completion gate:
+
 - Before saying work is done, fixed, ready to commit, ready for a PR, or
-  passing.
-- Turning a domain-modeling design into concrete invariants and executable
-  checks.
+  passing. This includes marking a claim explicitly `unproven` with a
+  named blocker.
+
+Main skill when the requested work is proof itself:
+
 - Adding or reviewing behavior-focused tests that prove a feature, bug
   fix, refactor, flaky test fix, or untested behavior.
 - Deciding what deserves coverage and which boundary the proof should
   enter through.
+- Converting an agreed spec, domain model, contract, or root-cause
+  finding into Proof Contracts and executable checks.
 
 ## When NOT to Use
 
 - Pure formatting, typo fixes, or mechanical file moves with no behavior,
   data, or contract claim.
-- Commit grouping after evidence already exists; use `git-workflow`.
-- Load testing, profiling, or benchmark design; use `performance`.
-- Pure toolchain setup; use `scaffolding`.
+- Mechanical refactors with no behavior surface (rename, file move,
+  comment-only edits) verified by diff or tooling. Behavior-preserving
+  refactors that change a seam still need `proof`.
+- Investigating an unconfirmed bug or symptom where the cause is not yet
+  established. Use `debugging` until there is a claim to assert, then
+  return for the Proof Contract.
+- Reviewing diffs for design, complexity, naming, or structure. Use
+  `code-review`. Load `proof` only when the question is whether evidence
+  is sufficient.
+- Load testing, profiling, or benchmark design. Use `performance`.
+- Pure toolchain setup (test runner, lint, typecheck baseline). Use
+  `scaffolding`.
+
+## Timing
+
+Test-first is optional. Test-at-all is not. Tests for the claims this skill
+names must exist before the change is committed, before a PR is opened, or —
+on a personal project merging straight to main — before the merge. Writing
+tests after the implementation is fine; shipping without them is not.
 
 ## Core Ideas
 
 1. A proof is a named obligation tied to a claim. Missing evidence is an
    explicit `unproven` status, not silence that implies correctness.
-2. Data claims need invariants, not prose; behavior claims need boundary
-   checks, not helper-only assertions.
-3. Bug-fix claims need root-cause evidence and a regression guard.
-   Refactor claims need before/after behavior preservation evidence.
-4. Prefer one proof at the outermost useful boundary over many
-   helper-level checks.
-5. A completion claim is still an engineering claim. Passing checks are
-   only relevant when they prove the latest request was actually satisfied.
-   Use workflow's `references/simple-not-easy.md` when a "safer" hardening
-   step lacks a named failure mode and evidence.
-6. Test behavior, not implementation: assertions describe what a
-   caller, downstream stage, or consumer observes. Enter at the
-   outermost practical boundary — anywhere data shape or values change
-   observably. Common cases: HTTP, CLI, UI, public API, module facade,
-   pipeline or stage seam, parser or serializer edge, validator output,
-   middleware boundary, or any function from raw input to a typed or
-   normalized representation.
-7. In transformation chains, tests belong at the seams where data
-   shape changes, not at every internal function. Assert shape
-   (schema, types, key invariants) plus representative values at each
-   seam, plus one end-to-end happy path. Keep a per-stage test only
-   when the stage has non-trivial branching or accumulated state the
-   seam tests cannot exercise. See `references/data-shape-boundaries.md`
-   for worked examples.
-8. Errors are shape changes too. Assert the user-facing error envelope
+2. A completion claim is still an engineering claim. Passing checks count
+   only when they prove the latest request was actually satisfied.
+3. Different claims need different evidence: data claims need invariants,
+   behavior claims need boundary checks, bug-fix claims need root-cause
+   evidence plus a regression guard, refactor claims need before/after
+   behavior preservation.
+4. Test behavior, not implementation. Assertions describe what a caller,
+   downstream stage, or consumer observes. A good test would survive an
+   implementation swap that preserves the contract.
+5. Enter at the outermost practical seam where data shape or values
+   change observably. One proof at that seam beats many helper-level
+   checks. In transformation chains, assert shape (schema, types, key
+   invariants) plus representative values at each seam, plus one
+   end-to-end happy path. Keep an internal-stage test only when the
+   stage has non-trivial branching or accumulated state the seam cannot
+   exercise. See `references/data-shape-boundaries.md` for worked
+   examples.
+6. Errors are shape changes too. Assert the user-facing error envelope
    (message, code, structured fields the consumer relies on) at the
-   outermost seam where the consumer observes it, not at every
-   internal function that could raise.
-9. Test placement is a code-organization signal: if a clean seam test
-   is hard to write, simplify the code (extract pure transforms, push
-   effects to the edge, name the data shape) rather than piling on
-   mocks. A test that needs many mocks or deep setup is reporting a
-   design problem, not a test-framework limit.
-10. One test covers one behavior; if the name needs "and", split it.
-11. Prefer real collaborators until they cross a true system boundary.
-    Mock only at edges: clock, network, third-party service, process,
-    filesystem, or expensive infrastructure not under test.
-12. A good test would survive a full implementation swap that preserves
-    the contract.
-13. Flaky tests are bugs in the test, code, or environment; do not
+   seam where the consumer observes it, not at every internal function
+   that could raise.
+7. The framework or language is not under test. Trust the framework to
+   honor its own contract; cover your business logic on top of it and
+   the seam where your code binds to it.
+8. Mock only at true system boundaries: clock, network, third-party
+   service, process, filesystem, or expensive infrastructure not under
+   test. If a seam test still needs many mocks or deep setup, the
+   design is signaling tangle: simplify the code (extract pure
+   transforms, push effects to the edge, name the data shape) before
+   adding more mocks.
+9. One test covers one behavior; if the name needs "and", split it.
+   Prefer BDD-shaped runners (vitest, RSpec, Jest, pytest with
+   descriptive names, ExUnit's `describe`, Go's table-driven subtests)
+   so nested labels compose into a readable behavior sentence.
+10. Flaky tests are bugs in the test, code, or environment. Do not
     hide them with sleeps or retries.
 
 ## Proof Contract
@@ -84,8 +99,8 @@ For every non-trivial engineering claim, record:
 - Data invariant: the data shape, state rule, or type boundary that
   makes bad states impossible or visible.
 - Boundary: where the proof enters — the point at which data shape
-  or values change in a way the claim is about (see Core Idea 6 for
-  common cases).
+  or values change in a way the claim is about (see
+  `references/data-shape-boundaries.md` for common cases).
 - Check: the executable validation that would fail if the claim were
   false.
 - Evidence: command/result, test name, diff reference, observed
@@ -93,9 +108,12 @@ For every non-trivial engineering claim, record:
 
 ## Workflow
 
-1. List the claims introduced or relied on by the change. Drop those
-   that don't matter to user behavior, domain correctness, safety, or
-   maintainability.
+1. Proof targets business logic — features a caller or user observes,
+   contracts external callers bind to, invariants the domain requires,
+   and the main error cases users can actually hit. List the claims
+   introduced or relied on by the change and keep only those.
+   Speculative edge cases, framework-guaranteed behavior, and re-tests
+   of the language's own semantics are noise.
 2. For each remaining claim, fill the Proof Contract before declaring
    the work complete.
 3. When the request names files, scripts, config, endpoints, commands,
@@ -107,9 +125,6 @@ For every non-trivial engineering claim, record:
 5. When a claim needs a test, name the behavior in caller language.
    Arrange only the state a real caller needs; act once; assert on
    externally visible state, output, response, event, or error.
-6. Run the check fresh after the final edit when the environment
-   permits it. If it can't run, state the missing dependency and mark
-   the claim unproven.
 
 ## Before Saying Done
 
@@ -139,9 +154,8 @@ For every non-trivial engineering claim, record:
       call choreography.
 - [ ] Mocks appear only at true system boundaries or have a documented
       reason.
-- [ ] Each new test would fail if the production code under test were
-      replaced with an equivalent implementation. If not, delete it — a
-      test that cannot fail is noise.
+- [ ] Each new test would fail if production code were swapped for a
+      behavior-equivalent implementation.
 - [ ] Tests are order-independent and do not rely on arbitrary sleeps.
 - [ ] Evidence names the exact command, test, observed result, or
       blocker.
@@ -172,18 +186,20 @@ For every non-trivial engineering claim, record:
 | "Test needs many mocks and deep setup to run" | The design is signaling tangle, not test framework limits. Simplify the seam — extract pure transforms, push effects to the edge — before piling on mocks. | The test crosses a true system boundary (clock, network, infra) that genuinely requires substitution. |
 | "I'll parameterize this across every input I can think of" | Tests cover behaviors named by the requirement and real boundary cases (security, data-loss, parsing edges that exist in production data). Speculative inputs are noise that locks in implementation detail. | The function is a parser, validator, or security gate where input-space coverage *is* the contract. |
 | "Asserted that a config, Makefile, manifest, or recipe contains a literal command string" | The implementation is the source of truth. Either expand and run the recipe (`make -n`, `npm run --silent`) and assert resulting behavior, or delete the test. Substring assertions over the implementation re-encode it 1:1 and only fail when you forget to update both in lockstep. | The string under test is a public contract a downstream consumer reads (e.g. a published config schema, a documented CLI flag list). |
+| "Wrote a test asserting the framework or language behaves as documented" | Trust the framework's contract. Test your code's use of it at the seam where you bind to it, not the framework's own behavior. | A specific framework bug or version pin where the guard is the claim, with a comment naming the bug. |
 | "Tested that a removed file or directory stays absent" | Tests prove behavior, not repo structure. The same merge that resurrects the file deletes the test. If you need a guard against re-introduction, write a lint rule or pre-commit hook, not a unit test. | A migration-era guard explicitly time-boxed in a comment with a removal date. |
 | "Asserted that a function returns its hardcoded constant or trivial passthrough" | No behavior, no test. Delete it. The "smallest test that would fail if the code did nothing" rule does not justify writing a test when the code legitimately *is* nothing. | The constant is part of a public contract a consumer depends on (protocol version, error code, schema field name). |
 | "Asserted that a mock was called with X" without asserting resulting behavior | Test the outcome, not the interaction. If the only observable effect *is* the call (e.g. logging, telemetry), assert the resulting external state (log line in a captured stream, metric in a registry), not that the mock recorded it. | The call itself is the contract under test (e.g. an outbox writer where "row written to outbox" is the behavior). |
 
 ## Runtime Extensions
 
-When this skill runs inside Pi with the `pi-proof` extension loaded, its
-`/proof` command runs a red-green-refactor cycle. Use it when behavior
-tests are the right vehicle for showing the work. This skill still owns
-the broader proof contract — data invariants, root cause, refactor safety,
-completion checks, and any other evidence — and pi-proof's cycle output
-counts toward whichever claims it actually covers.
+When this skill runs inside Pi with the `agent-booster-pack-proof`
+extension loaded, its `/proof` command runs a red-green-refactor cycle.
+Use it when behavior tests are the right vehicle for showing the work.
+This skill still owns the broader proof contract — data invariants, root
+cause, refactor safety, completion checks, and any other evidence — and
+the extension's cycle output counts toward whichever claims it actually
+covers.
 
 ## Handoffs
 
@@ -211,5 +227,4 @@ counts toward whichever claims it actually covers.
   `references/data-shape-boundaries.md`.
 - `agent-booster-pack-proof` Pi runtime companion: ships from this repo
   at `agent-booster-pack-proof/` and enforces the red-green-refactor
-  loop at tool-call time. (Renamed from `pi-proof`; old npm name
-  deprecated.)
+  loop at tool-call time.
