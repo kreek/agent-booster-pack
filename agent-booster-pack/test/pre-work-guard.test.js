@@ -365,6 +365,14 @@ it("preWorkChangeKind classifies edit as small implementation by default", () =>
   expect(preWorkChangeKind("read", {})).toBeNull();
 });
 
+it("does not require pre-work explanation for version-control packaging", () => {
+  const entries = [userText("commit and merge that to main"), assistantText("I'll inspect git state first.")];
+
+  expect(preWorkChangeKind("bash", { command: "git add src/x.js && git commit -m 'Update x'" })).toBeNull();
+  expect(preWorkChangeKind("bash", { command: "git checkout main && git merge --ff-only fix/x" })).toBeNull();
+  expect(shouldBlockPreWork("bash", { command: "git add src/x.js && git commit -m 'Update x'" }, entries)).toBeNull();
+});
+
 it("hasPreWorkExplanation matches labeled plan + why for small, plus alternatives for normal", () => {
   const partial = "Plan: add a guard.\nWhy: it is safer.";
   const full = partial + "\nAlternatives: considered inlining it, but rejected that.";
@@ -377,10 +385,11 @@ it("hasPreWorkExplanation matches labeled plan + why for small, plus alternative
   expect(missingElements(partial, "normal")).toEqual(["alternatives"]);
 });
 
-it("preWorkReminder mentions the gate, plan, and alternatives", () => {
+it("preWorkReminder mentions the gate, plan, alternatives, and Git packaging exception", () => {
   const reminder = preWorkReminder();
   expect(reminder).toMatch(/Pre-Work Reflection Gate/);
   expect(reminder).toMatch(/plan/i);
   expect(reminder).toMatch(/alternatives/i);
+  expect(reminder).toMatch(/git add\/commit\/merge/i);
 });
 });

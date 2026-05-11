@@ -218,7 +218,7 @@ export function makePreWorkBlockReason(missing, kind) {
 }
 
 export function preWorkReminder() {
-  return `\n\n${PRE_WORK_MARKER}:\nBefore your first mutating tool call (edit, write, mutating bash) in a turn, write a brief pre-work explanation with non-empty labels. For a single-file edit, use Plan: and Why:. For multi-file or mutating-bash changes, use Plan:, Why:, and Alternatives:. The explanation teaches the user the codebase you are writing and gives them a chance to redirect before code lands.`;
+  return `\n\n${PRE_WORK_MARKER}:\nBefore your first mutating tool call (edit, write, mutating bash) in a turn, write a brief pre-work explanation with non-empty labels. For a single-file edit, use Plan: and Why:. For multi-file or mutating-bash changes, use Plan:, Why:, and Alternatives:. Git packaging commands such as git add/commit/merge do not need this explainer. The explanation teaches the user the codebase you are writing and gives them a chance to redirect before code lands.`;
 }
 
 export default function preWorkGuard(pi) {
