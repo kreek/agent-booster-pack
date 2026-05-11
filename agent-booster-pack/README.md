@@ -35,6 +35,14 @@ The meta-package also includes cross-cutting runtime gates:
 - **Final Value Guard** prompts for a better final summary after durable
   file changes. One-file changes get a short one-sentence nudge; larger
   changes get a fuller reflection prompt.
+- **Design-Moment Guard** pauses the first mutating tool call that
+  writes to a public surface (API/CLI/schema/contract paths, new
+  exported symbols) when no `Interface Design Gate` packet has been
+  approved yet. With a UI it asks for an explicit allow; headless it
+  blocks with the packet template inline. It is conservative on path
+  and content patterns to avoid firing on internal refactors or tests.
+  To disable, remove `extensions/design-moment-guard.js` from the
+  package install or drop the file in a fork.
 
 If you want only some of the four, install them individually instead
 of this meta-package. See each package's README for details.

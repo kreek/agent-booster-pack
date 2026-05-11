@@ -28,6 +28,21 @@ description: Use when an Interface Design Gate must approve durable function, AP
 - Collaborative design exploration before a concrete interface proposal; use
   `specify`.
 
+## Runtime backstop
+
+Two Pi runtime gates support this skill:
+
+1. The Interface Design Gate (in this package) fires after you have opened a
+   packet, blocking implementation until the user approves the proposed shape.
+2. The Design-Moment Guard (in the `agent-booster-pack` meta-package) fires
+   before you have opened a packet, when a mutating tool call writes to a
+   public-surface path (API, CLI, schema, contract, migration) or introduces a
+   new exported symbol. It asks you to open a Gate packet first, or to
+   explicitly note that the change is not a new surface.
+
+If either gate blocks a tool call, open the packet (Current interface, Proposed
+interface, Why this boundary, User decision) and retry.
+
 ## Workflow
 
 1. Stop before implementation code lands. Do not write source, migration, or
