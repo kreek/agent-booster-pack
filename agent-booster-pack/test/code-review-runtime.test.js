@@ -153,17 +153,22 @@ describe("code review runtime", () => {
     expect(tools.get("review_complete")).toBeTruthy();
   });
 
-  it("renders checklist progress with blank and checked squares", () => {
-    const session = updateReviewCheck(startReviewSession("working-tree"), {
+  it("renders review_check as a compact progress update", () => {
+    const updatedCheck = {
       item: CHECKLIST_ITEMS[0],
       status: "Checked",
       evidence: "Inspected package.json.",
-    }).session;
+    };
+    const session = updateReviewCheck(startReviewSession("working-tree"), updatedCheck).session;
 
-    const lines = renderReviewCheckResult({ session }).render(120);
+    const lines = renderReviewCheckResult({ details: { session, check: updatedCheck } }).render(120);
+    const text = lines.join("\n");
 
-    expect(lines.join("\n")).toContain("☑ Runtime/toolchain constraints checked");
-    expect(lines.join("\n")).toContain("☐ Diff intent and impact identified");
+    expect(lines).toHaveLength(2);
+    expect(text).toContain("ABP code-review progress");
+    expect(text).toContain("☑ Runtime/toolchain constraints checked — Checked");
+    expect(text).toContain("1/10 resolved");
+    expect(text).not.toContain("☐ Diff intent and impact identified");
   });
 
   it("renders review findings with priority square badges", () => {
@@ -262,7 +267,10 @@ describe("code review runtime", () => {
       recommendation: "Approve with residual risk",
     });
     expect(complete.isError).toBeUndefined();
-    expect(complete.content[0].text).toContain("Review Target: working-tree");
+    expect(complete.content[0].text).toBe("Review complete: Approve with residual risk");
+    expect(complete.content[0].text).not.toContain("Findings:");
+    expect(complete.details.summary).toContain("Review Target: working-tree");
+    expect(complete.details.summary).toContain("Findings: No findings.");
 
     const afterComplete = await tools.get("review_complete").execute("tool-3", {
       findings: "No findings.",

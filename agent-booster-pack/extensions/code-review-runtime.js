@@ -177,13 +177,28 @@ function statusColor(status, theme, value) {
   return theme.fg("dim", value);
 }
 
+function resolvedCheckCount(checks) {
+  return checks.filter((check) => check.status !== "Pending" && text(check.evidence).length > 0).length;
+}
+
+function latestResolvedCheck(checks) {
+  return checks.findLast?.((check) => check.status !== "Pending" && text(check.evidence).length > 0)
+    ?? [...checks].reverse().find((check) => check.status !== "Pending" && text(check.evidence).length > 0)
+    ?? null;
+}
+
 export function renderReviewCheckResult(result, _options, theme) {
   const session = result?.details?.session ?? result?.session;
   const checks = Array.isArray(session?.checks) ? session.checks : [];
-  const lines = ["ABP code-review checklist", ...checks.map((check) => {
-    const label = `${checklistIcon(check.status)} ${check.item}`;
-    return `${statusColor(check.status, theme, label)} — ${check.status}`;
-  })];
+  const check = result?.details?.check ?? result?.check ?? latestResolvedCheck(checks);
+  const resolved = resolvedCheckCount(checks);
+  const total = checks.length || CHECKLIST_ITEMS.length;
+  const label = check ? `${checklistIcon(check.status)} ${check.item}` : "☐ Review checklist";
+  const status = check?.status ?? "Pending";
+  const lines = [
+    "ABP code-review progress",
+    `${statusColor(status, theme, label)} — ${status} (${resolved}/${total} resolved)`,
+  ];
   return textComponent(lines, theme);
 }
 
@@ -285,7 +300,10 @@ export default function codeReviewRuntime(pi) {
 
       activeSession = result.session;
       persistSession();
-      return toolText(`Recorded review check: ${params.item} — ${params.status}`, { session: activeSession });
+      return toolText(`Recorded review check: ${params.item} — ${params.status}`, {
+        session: activeSession,
+        check: activeSession.checks.find((check) => check.item === params.item),
+      });
     },
   });
 
@@ -307,7 +325,9 @@ export default function codeReviewRuntime(pi) {
 
       activeSession = null;
       persistSession();
-      return toolText(result.summary, { summary: result.summary });
+      return toolText(`Review complete: ${params.recommendation}`, {
+        summary: result.summary,
+      });
     },
   });
 }
