@@ -155,8 +155,71 @@ const reviewCompleteParameters = {
   required: ["findings", "proof", "residualRisk", "recommendation"],
 };
 
-function toolText(value) {
-  return { content: [{ type: "text", text: value }] };
+function textComponent(lines, theme) {
+  return {
+    render(width) {
+      return lines.map((line) => String(line).slice(0, width));
+    },
+    invalidate() {},
+  };
+}
+
+function checklistIcon(status) {
+  if (status === "Pending") return "☐";
+  return "☑";
+}
+
+function statusColor(status, theme, value) {
+  if (!theme) return value;
+  if (status === "Unproven") return theme.fg("warning", value);
+  if (status === "Not applicable") return theme.fg("muted", value);
+  if (status === "Checked") return theme.fg("success", value);
+  return theme.fg("dim", value);
+}
+
+export function renderReviewCheckResult(result, _options, theme) {
+  const session = result?.details?.session ?? result?.session;
+  const checks = Array.isArray(session?.checks) ? session.checks : [];
+  const lines = ["ABP code-review checklist", ...checks.map((check) => {
+    const label = `${checklistIcon(check.status)} ${check.item}`;
+    return `${statusColor(check.status, theme, label)} — ${check.status}`;
+  })];
+  return textComponent(lines, theme);
+}
+
+function findingPriority(line) {
+  if (/^(Critical|High)\b/i.test(line)) return { badge: "■ P1", color: "error" };
+  if (/^Medium\b/i.test(line)) return { badge: "■ P2", color: "warning" };
+  if (/^Low\b/i.test(line)) return { badge: "■ P3", color: "warning" };
+  return null;
+}
+
+function summarySection(summary, name, nextName) {
+  const start = summary.indexOf(`${name}:`);
+  if (start === -1) return "";
+  const bodyStart = start + name.length + 1;
+  const end = nextName ? summary.indexOf(`\n\n${nextName}:`, bodyStart) : -1;
+  return summary.slice(bodyStart, end === -1 ? undefined : end).trim();
+}
+
+function renderFindingLine(line, theme) {
+  const priority = findingPriority(line);
+  if (!priority) return line;
+
+  const badge = theme ? theme.fg(priority.color, priority.badge) : priority.badge;
+  return `${badge} ${line}`;
+}
+
+export function renderReviewCompleteResult(result, _options, theme) {
+  const summary = String(result?.details?.summary ?? result?.summary ?? result?.content?.[0]?.text ?? "");
+  const findings = summarySection(summary, "Findings", "Proof");
+  const lines = ["ABP code-review findings"];
+  lines.push(...(findings || "No findings").split("\n").map((line) => renderFindingLine(line.trim(), theme)));
+  return textComponent(lines, theme);
+}
+
+function toolText(value, details) {
+  return { content: [{ type: "text", text: value }], details };
 }
 
 function toolError(reason) {
@@ -213,6 +276,7 @@ export default function codeReviewRuntime(pi) {
     promptGuidelines: [
       "Use review_check during /review after completing each checklist pass; provide concrete evidence and mark unknowns Unproven.",
     ],
+    renderResult: renderReviewCheckResult,
     async execute(_toolCallId, params) {
       if (!activeSession) return toolError("No active ABP review session. Run /review [target] first.");
 
@@ -221,7 +285,7 @@ export default function codeReviewRuntime(pi) {
 
       activeSession = result.session;
       persistSession();
-      return toolText(`Recorded review check: ${params.item} — ${params.status}`);
+      return toolText(`Recorded review check: ${params.item} — ${params.status}`, { session: activeSession });
     },
   });
 
@@ -234,6 +298,7 @@ export default function codeReviewRuntime(pi) {
     promptGuidelines: [
       "Use review_complete only after all /review checklist items have been recorded with review_check.",
     ],
+    renderResult: renderReviewCompleteResult,
     async execute(_toolCallId, params) {
       if (!activeSession) return toolError("No active ABP review session. Run /review [target] first.");
 
@@ -242,7 +307,7 @@ export default function codeReviewRuntime(pi) {
 
       activeSession = null;
       persistSession();
-      return toolText(result.summary);
+      return toolText(result.summary, { summary: result.summary });
     },
   });
 }

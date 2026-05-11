@@ -8,6 +8,8 @@ import codeReviewRuntime, {
   startReviewSession,
   updateReviewCheck,
   completeReview,
+  renderReviewCheckResult,
+  renderReviewCompleteResult,
 } from "../extensions/code-review-runtime.js";
 
 describe("code review runtime", () => {
@@ -149,6 +151,48 @@ describe("code review runtime", () => {
 
     expect(tools.get("review_check")).toBeTruthy();
     expect(tools.get("review_complete")).toBeTruthy();
+  });
+
+  it("renders checklist progress with blank and checked squares", () => {
+    const session = updateReviewCheck(startReviewSession("working-tree"), {
+      item: CHECKLIST_ITEMS[0],
+      status: "Checked",
+      evidence: "Inspected package.json.",
+    }).session;
+
+    const lines = renderReviewCheckResult({ session }).render(120);
+
+    expect(lines.join("\n")).toContain("☑ Runtime/toolchain constraints checked");
+    expect(lines.join("\n")).toContain("☐ Diff intent and impact identified");
+  });
+
+  it("renders review findings with priority square badges", () => {
+    const result = completeReview(
+      CHECKLIST_ITEMS.reduce((current, item) => {
+        return updateReviewCheck(current, {
+          item,
+          status: "Checked",
+          evidence: `Evidence for ${item}`,
+        }).session;
+      }, startReviewSession("working-tree")),
+      {
+        findings: [
+          "High — src/a.js:1: breaks auth.",
+          "Medium — src/b.js:2: missing test.",
+          "Low — src/c.js:3: clarify name.",
+        ].join("\n"),
+        proof: "npm test passed.",
+        residualRisk: "CI not checked.",
+        recommendation: "Request changes",
+      }
+    );
+
+    const lines = renderReviewCompleteResult({ summary: result.summary }).render(120);
+    const text = lines.join("\n");
+
+    expect(text).toContain("■ P1 High — src/a.js:1: breaks auth.");
+    expect(text).toContain("■ P2 Medium — src/b.js:2: missing test.");
+    expect(text).toContain("■ P3 Low — src/c.js:3: clarify name.");
   });
 
   it("records review_check progress only after /review starts a session", async () => {
