@@ -27,8 +27,11 @@ recoverable, scoped, and honest.
 
 ## Core Ideas
 
-1. **Inspect before mutation**: status, staged state, diff stats, branch,
-   upstream, merge/rebase state, recent log. Stop on unexpected state.
+1. **Inspect before mutation, lean by default**: read one compact preflight
+   covering status, branch/upstream, staged and unstaged diff stats, and
+   recent log. Expand into merge/rebase/conflict details only when the
+   compact status or requested operation shows risk. Stop on unexpected
+   state.
 2. **Name files explicitly when staging**; never `git add .` or
    `git add -A` in a messy tree.
 3. **Prefer `--force-with-lease --force-if-includes`** over bare force when
@@ -50,17 +53,20 @@ recoverable, scoped, and honest.
 
 ## Workflow
 
-1. Read status, staged/unstaged diffs, branch/upstream, merge/rebase state,
-   and recent log. Stop on unexpected state.
-2. Detect hazards: conflicts, secrets, generated churn, mixed changes in
+1. Read one compact preflight: status, branch/upstream, staged and unstaged
+   diff stats, and recent log. Stop on unexpected state.
+2. Expand inspection only when risk appears or the operation requires it:
+   merge/rebase state, conflict markers, full diffs, upstream divergence, or
+   recovery points.
+3. Detect hazards: conflicts, secrets, generated churn, mixed changes in
    one file, unrelated staged work, shared history rewrites, or in-flight
    work that needs isolation.
-3. For commits, propose logical groups with subject, files, and why. A
+4. For commits, propose logical groups with subject, files, and why. A
    direct "commit this" / `$git-workflow` request is approval to package
    the current reviewed work, not unrelated files.
-4. For history operations, name the recovery point and whether the branch
+5. For history operations, name the recovery point and whether the branch
    is local/solo/shared before rewriting, deleting, or force-pushing.
-5. Execute the smallest safe operation. Verify log/range-diff, status, file
+6. Execute the smallest safe operation. Verify log/range-diff, status, file
    membership, and relevant tests or repro commands.
 
 ## Verification
