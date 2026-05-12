@@ -109,6 +109,11 @@ deterministic checks into `scripts/`, and move nuance, citations, examples, and
 deep ecosystem notes into targeted `references/` files that are loaded only
 when needed.
 
+Write skill prose in short, plain sentences. Prefer concrete verbs and familiar
+words. If a sentence needs rereading, split it. If a heading names an abstract
+process, rewrite it as the action the agent should take. Do not use ornate or
+literary phrasing when direct engineering language will do.
+
 For `agents/.agents/skills/code-review/references/<language>.md`, do not
 duplicate anything a linter, formatter, type checker, syntax checker, or
 compiler already catches. Those files should focus on high-signal review risks:

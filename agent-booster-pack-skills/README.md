@@ -1,8 +1,8 @@
 # Agent Booster Pack — Skills
 
 ABP skills packaged for [Pi](https://pi.dev), the terminal coding agent.
-Helps Pi produce code that is well-organized, low in complexity and side
-effects, and is secure and performant.
+Helps Pi collaborate with humans on code that is well-organized, low in
+complexity and side effects, and secure, provable, accessible, and performant.
 
 This package is **skills only** and carries the general ABP skills. Runtime-owned skills ship with their matching sibling packages:
 
@@ -10,11 +10,11 @@ This package is **skills only** and carries the general ABP skills. Runtime-owne
   `contract-first` skill.
 - `agent-booster-pack-proof` — proof-first red-green-refactor runtime plus the
   `proof` skill.
-- `agent-booster-pack-specify` — one-question specify runtime plus the
+- `agent-booster-pack-specify` — one-question Design-partner runtime plus the
   `specify` skill.
 
-The pack covers data modeling, code review, security, debugging, refactoring,
-and more. The canonical skill source lives at
+The pack covers working mode, data modeling, code review, security,
+debugging, refactoring, official-source checks, and more. The canonical skill source lives at
 `agents/.agents/skills/` in the parent repository; `skills/` here is
 built from that source at npm-pack time and is not committed.
 
@@ -86,9 +86,9 @@ The general ABP skills, grouped by the kind of engineering pressure they apply.
 
 ### Entry point
 
-- `workflow` — choose the right ABP skills for the task, name what is
-  being coupled, keep the work scoped, and connect completion claims to
-  proof.
+- `workflow` — choose the working mode and right ABP skills for the
+  task, name what is being coupled, keep the work scoped, and connect
+  completion claims to proof.
 
 ### Foundational design
 
@@ -102,6 +102,7 @@ The general ABP skills, grouped by the kind of engineering pressure they apply.
 - `debugging` — root-cause investigation.
 - `refactoring` — behavior-preserving structure changes.
 - `error-handling` — error types, propagation, retries, recovery.
+- `official-source-check` — official-source checks for external behavior.
 
 ### Safety gates
 

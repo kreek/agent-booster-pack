@@ -1,6 +1,6 @@
 ---
 name: documentation
-description: Use for documentation, READMEs, guides, ADRs, runbooks, API docs, comments, and structure.
+description: Use for docs, READMEs, guides, ADRs, runbooks, API docs, comments, and structure.
 ---
 
 # Documentation

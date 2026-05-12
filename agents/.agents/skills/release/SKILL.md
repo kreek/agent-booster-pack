@@ -1,6 +1,6 @@
 ---
 name: release
-description: Late gate for release prep — SemVer, CHANGELOG, deprecations, tags, rollout/rollback. Load on diff or request.
+description: Late gate for release prep, versions, changelogs, rollout, and rollback. Load on diff or request.
 ---
 
 # Release

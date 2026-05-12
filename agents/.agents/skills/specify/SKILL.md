@@ -1,13 +1,13 @@
 ---
 name: specify
-description: Design before code — map contracts, capture ADRs, RFCs, tech specs, or notes.
+description: Design-partner mode for discovery, tradeoffs, decisions, and agreed design artifacts.
 ---
 
 # Specify
 
 ## Iron Law
 
-`DESIGN BEFORE CODE: READ THE SYSTEM, DISCUSS THE SHAPE, THEN RECORD THE AGREED ARTIFACT.`
+`DESIGN-PARTNER MODE: READ THE SYSTEM, DECIDE THE SHAPE TOGETHER, THEN RECORD WHAT WAS AGREED.`
 
 ## When to Use
 
@@ -20,6 +20,9 @@ description: Design before code — map contracts, capture ADRs, RFCs, tech spec
   goals into an approved design direction before code lands.
 - The user asks to design, specify, draft an ADR/RFC/tech spec, or capture a
   design note.
+- `workflow` chooses the Design-partner mode because architecture, domain
+  modeling, durable interfaces, cross-boundary contracts, or multi-component
+  choices need human participation.
 - Before drafting an implementation plan or writing code for any non-trivial
   change.
 
@@ -37,9 +40,10 @@ description: Design before code — map contracts, capture ADRs, RFCs, tech spec
 
 ## Core Ideas
 
-1. Specify is a collaborative engineering conversation, not a document-filling
-   exercise. The first output is shared understanding: current system, possible
-   target shape, tradeoffs, decisions, and open questions.
+1. Specify is the Design-partner engine for ABP. It is a collaborative
+   engineering conversation, not a document-filling exercise and not maximum
+   autonomous coding. The first output is shared understanding: current
+   system, possible target shape, tradeoffs, decisions, and open questions.
 2. Read the code before proposing the shape. Cite `file:line` for existing
    contracts. For greenfield work, cite adjacent conventions, framework idioms,
    or sibling features the new work will live among.
@@ -51,32 +55,39 @@ description: Design before code — map contracts, capture ADRs, RFCs, tech spec
    compare, and record contracts, but implementation still waits for the
    Interface Design Gate packet: current interface, proposed interface, boundary
    reason, and human approval.
-5. `domain-modeling` is the always-on lens. Name new and changed states,
+5. Ask one meaningful decision question at a time. The agent should propose
+   concrete options and a recommendation, then revise the shared shape from the
+   user's answer. List secondary uncertainties as notes, not as a question
+   barrage.
+6. `domain-modeling` is the always-on lens. Name new and changed states,
    transitions, effects, and invariants. Make illegal states unrepresentable in
    the proposed shape.
-6. Use specialist lenses when the design touches their domain: `api`,
+7. Use specialist lenses when the design touches their domain: `api`,
    `database`, `async-systems`, `security`, `error-handling`, `observability`,
    `performance`, `ui-design`, `accessibility`, or `release`.
-7. Do not create a persistent artifact before the discussion converges unless
+8. Do not create a persistent artifact before the discussion converges unless
    the user explicitly asks to use the artifact as the discussion medium.
-8. Keep design above implementation sequencing. If you are writing file-by-file
+9. Keep design above implementation sequencing. If you are writing file-by-file
    edits, pseudocode, or task checklists, you have left Specify and entered
-   planning.
-9. Capture the agreed result where it will rot least: private `.pi/specify/`
+   planning. Hand off to `workflow` or the harness planning mode only after the
+   design direction is agreed.
+10. Capture the agreed result where it will rot least: private `.pi/specify/`
    for local agent memory or checked-in `docs/` when the team should review and
    keep it.
 
 ## Workflow
 
 1. State the user-visible goal in one or two sentences and frame the turn as
-   design-before-code, not implementation planning.
+   Design-partner work: the agent will read, propose, ask, revise, and wait for
+   agreement before planning or coding.
 2. Read the relevant code or conventions. Summarize current contracts, data
    shapes, states, constraints, and ownership with citations.
 3. Offer one or more feasible target shapes at the contract level. Name
    tradeoffs, compatibility concerns, migration pressure, risks, and what each
    option makes easier or harder.
-4. Ask the smallest next decision question that changes the design. List other
-   uncertainties as notes, not a question list.
+4. Ask the smallest next decision question that changes the design, with a
+   concrete recommended option when one is defensible. List other uncertainties
+   as notes, not a question list.
 5. When a durable interface appears, route through `contract-first`. Record the
    approved shape in the Specify artifact, but do not treat the artifact itself
    as interface approval.
@@ -109,6 +120,8 @@ Default locations when the repo has no convention:
       greenfield adjacent conventions are named.
 - [ ] **Conversational**: the agent asked one meaningful decision question at a
       time and revised the shape with the user's answers.
+- [ ] **Design-partner mode**: implementation planning and code waited until
+      architecture, domain, boundary, or multi-component decisions converged.
 - [ ] **Contracts named**: every changing contract has current shape (or "new"),
       proposed shape, owner, compatibility pressure, and proof obligation.
 - [ ] **Contract-first boundary**: durable interfaces received explicit
@@ -133,6 +146,8 @@ Default locations when the repo has no convention:
 | "I'll create a design file so the session feels formal" | Keep design in chat until it converges, then capture the agreed artifact. | The user explicitly asks to draft the artifact as the discussion medium. |
 | "The artifact approves the interface" | Record the approval, but route the actual interface gate through `contract-first`. | The artifact quotes an already-approved gate packet. |
 | "I'll produce the plan now" | Stay at the contract, state, tradeoff, and risk level; ask the next design question. | The human agreed on the design and asked to plan or implement. |
+| "I'll ask everything up front" | Ask the next meaningful decision question and list secondary uncertainties as notes. | The user explicitly requests a full questionnaire. |
+| "Design-partner means the user must design it" | Propose concrete options and a recommendation; ask the human to approve, revise, or rule it out. | The user asks to supply their own architecture. |
 | "API just means HTTP" | Re-read Core Idea 3; CLI flags, env vars, schemas, events, file formats, and types are contracts too. | The change is truly HTTP-only. |
 | "The user will catch open questions in review" | Ask the blocking design question now and revise the shared shape from the answer. | The user already stated the decision; record it as resolved. |
 | "Architecture first, then Specify" | Use Specify to map current and proposed terrain; bring `architecture` in when boundaries are the decision. | The user explicitly asked for an architecture decision before contract drafting. |

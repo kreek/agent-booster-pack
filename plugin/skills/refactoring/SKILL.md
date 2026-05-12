@@ -1,6 +1,6 @@
 ---
 name: refactoring
-description: Use for refactoring, behavior-preserving change, legacy seams, tests, and safe rewrites.
+description: Use for refactoring, behavior-preserving change, tests, and safe rewrites.
 ---
 
 # Refactoring

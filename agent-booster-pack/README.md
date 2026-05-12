@@ -1,13 +1,13 @@
 # Agent Booster Pack
 
-The full ABP experience for [Pi](https://pi.dev), in one install.
+The full collaborative ABP experience for [Pi](https://pi.dev), in one install.
 
 This is a **meta-package**: it installs the sibling ABP packages and adds the cross-cutting final value guard.
 
 - [`agent-booster-pack-skills`](../agent-booster-pack-skills/) — the general
-  ABP skills (data, security, debugging, refactoring, code review,
-  accessibility, and more). Runtime-owned skills ship with their matching
-  extension packages.
+  ABP skills (collaborative routing, data, security, debugging, refactoring,
+  official-source checks, code review, accessibility, and more). Runtime-owned
+  skills ship with their matching extension packages.
 - [`agent-booster-pack-contract-first`](../agent-booster-pack-contract-first/)
   — Interface Design Gate runtime. Enforces approval after the agent
   opens an explicit Interface Design Gate packet. Includes the
@@ -16,9 +16,10 @@ This is a **meta-package**: it installs the sibling ABP packages and adds the cr
   proof-first red-green-refactor runtime. Enforces a failing test
   before production code lands. Includes the `proof` skill.
 - [`agent-booster-pack-specify`](../agent-booster-pack-specify/) —
-  Specify conversation guard. Design before code; enforces one user-facing
-  decision question at a time while ABP Specify mode is active. Includes the
-  `specify` skill.
+  Specify conversation guard. Design-partner mode for architecture, domain,
+  durable-interface, and other multi-boundary decisions; enforces one
+  user-facing decision question at a time while ABP Specify mode is active.
+  Includes the `specify` skill.
 
 The meta-package also includes cross-cutting runtime gates:
 

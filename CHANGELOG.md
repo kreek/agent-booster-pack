@@ -31,6 +31,10 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   Cross-references in canonical skills, AGENTS, README, the npm package
   README, and the eval harness have been updated. The plugin mirror at
   `plugin/skills/` is regenerated from canonical.
+- Promoted the workflow-only official-source rule into a canonical
+  `official-source-check` skill. `workflow`, `agents/AGENTS.md`, and README
+  now route framework, library, runtime, SDK, browser, cloud, and platform
+  checks through that skill instead of hiding the rule in a reference file.
 
 ## [5.1.0] (2026-05-08)
 

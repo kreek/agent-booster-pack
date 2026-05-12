@@ -1,6 +1,6 @@
 ---
 name: git-workflow
-description: Use for git workflow, branch hygiene, history edits, conflict recovery, staging, and commits.
+description: Use for git branches, history edits, conflicts, staging, and commits.
 ---
 
 # Git Workflow
