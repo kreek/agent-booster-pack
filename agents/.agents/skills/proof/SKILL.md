@@ -116,9 +116,20 @@ For every non-trivial engineering claim, record:
    or documents, make an acceptance map: requirement -> artifact ->
    check. A passing command is incomplete proof if it does not exercise
    the artifact the requirement asked for.
-4. Load `references/recipes.md` when the proof shape is unclear or
+4. For removals, prove the old surface is gone without creating test
+   theater. Prefer this order:
+   - Remove the implementation path.
+   - Remove or update stale docs, examples, commands, and tests that
+     named the removed surface.
+   - Run existing boundary tests that would fail if supported callers
+     still depended on the removed surface.
+   - Use search or diff inspection to prove no stale references remain.
+   Add a new absence test only when absence is itself a durable public
+   contract, such as a security blocklist, deprecated API rejection, or
+   migration guard with an owner and removal condition.
+5. Load `references/recipes.md` when the proof shape is unclear or
    domain-specific.
-5. When a claim needs a test, name the behavior in caller language.
+6. When a claim needs a test, name the behavior in caller language.
    Arrange only the state a real caller needs; act once; assert on
    externally visible state, output, response, event, or error.
 
@@ -126,8 +137,12 @@ For every non-trivial engineering claim, record:
 
 1. Re-read the latest user request and corrections; name the
    acceptance in caller language.
-2. Inspect the final diff: change stays in scope; no dead paths, stale
-   docs, or unrelated edits.
+2. Inspect the final diff once per coherent work item, after the last
+   edit and before claiming completion: change stays in scope; no dead
+   paths, stale docs, or unrelated edits. Do not repeat diff review
+   after every intermediate edit. For tiny approved prose or config
+   edits, a targeted validator, exact file read, or mirror check may
+   replace full diff review.
 3. For setup, documentation, API, migration, or config work, confirm
    each named artifact exists by the requested name and that the proof
    command reads or executes it.
@@ -176,6 +191,7 @@ For every non-trivial engineering claim, record:
 | "The check passed but I can't explain the behavior" | Rewrite the proof claim in caller language and add missing evidence. | The command was only a smoke check and is reported as partial. |
 | "Refactor only, no behavior change" | Provide before/after preservation evidence or mark unproven. | Mechanical rename verified by diff/tooling with no behavior surface. |
 | "Too simple to test" | Write the smallest behavior test that would fail if the code did nothing. | Pure formatting, copy, or generated metadata changes. |
+| "I removed an alias, command, flag, file, or compatibility path, so I should add a test proving it is absent" | First remove or update stale tests/docs and run existing boundary checks plus search. Add a new absence test only when absence is the durable behavior contract. | Security blocklists, explicit API rejection behavior, or migration guards with an owner and removal condition. |
 | "Already covered by another test" | Name the existing behavior test or add the missing assertion. | The named test enters through the same caller boundary and would fail for this bug. |
 | "Mock is faster than a fixture" | Use the real collaborator unless it crosses a true system boundary. | Clock, network, third-party service, process, filesystem, or expensive infrastructure. |
 | "I'll add tests after the feature lands" | Add the behavior assertion before claiming the feature is done. | Exploratory spike explicitly marked as not complete. |
