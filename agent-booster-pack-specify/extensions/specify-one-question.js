@@ -52,13 +52,14 @@ export function makeCorrectionPrompt(blockedText) {
   return `ABP Specify Guard blocked this response because it asked multiple user-facing questions during Specify.
 
 Continue with exactly one decision question. Keep any other uncertainties as notes, not questions. Do not use a question list.
+Before the question, state the current understanding in one short sentence so the user can correct the design.
 
 Blocked response:
 ${blockedText}`;
 }
 
 function activeReminder() {
-  return `\n\nABP Specify Guard is active. During Specify, ask at most one user-facing question per assistant turn. You may list uncertainties as notes, but do not phrase more than one item as a question. If several decisions are open, ask only the next smallest decision question that changes the design.`;
+  return `\n\nABP Specify Guard is active. During Specify, ask at most one user-facing question per assistant turn. State the current understanding before the question so the human can correct the shape. You may list uncertainties as notes, but do not phrase more than one item as a question. If several decisions are open, ask only the next smallest decision question that changes the design.`;
 }
 
 function replacementMessage(message, replacementText) {

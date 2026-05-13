@@ -228,8 +228,12 @@ export function manualPreWorkPrompt(intent) {
     "",
     "State:",
     "- Plan: what will change",
+    "- Acceptance: what will be true when the work is done",
     "- Why: why this is better or safer than the current state",
+    "- Proof: how you will check the result",
     "- Alternatives: options considered or rejected",
+    "",
+    "Keep it short and write it so the human can correct the shape before code lands.",
     "",
     subject ? `Intent: ${subject}` : "Then wait for the user's next instruction before implementation.",
   ].join("\n");

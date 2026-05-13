@@ -50,6 +50,8 @@ describe("code review runtime", () => {
     expect(prompt).toMatch(/AI-agent failure modes/i);
     expect(prompt).toMatch(/security pass/i);
     expect(prompt).toMatch(/tests\/proof evidence/i);
+    expect(prompt).toMatch(/human-understanding check/i);
+    expect(prompt).toMatch(/comprehension debt/i);
   });
 
   it("registers review commands that send the structured prompt", async () => {
@@ -192,7 +194,7 @@ describe("code review runtime", () => {
     expect(lines[0]).toContain("┌");
     expect(lines.at(-1)).toContain("┘");
     expect(text).toContain("ABP CODE REVIEW");
-    expect(text).toContain("1/10 resolved");
+    expect(text).toContain(`1/${CHECKLIST_ITEMS.length} resolved`);
     expect(text).toContain("☑ Runtime/toolchain constraints checked");
     expect(text).toContain("Evidence: Inspected package.json.");
     expect(text).not.toContain("☐ Diff intent and impact identified");
@@ -215,7 +217,7 @@ describe("code review runtime", () => {
     expect(text).toContain("Contract/API/schema/config");
     expect(text).toContain("changes checked");
     expect(text).toContain("Checked");
-    expect(text).toContain("1/10 resolved");
+    expect(text).toContain(`1/${CHECKLIST_ITEMS.length} resolved`);
     expect(text).toContain("runtime configuration.");
   });
 

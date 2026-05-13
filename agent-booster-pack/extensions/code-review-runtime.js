@@ -16,6 +16,7 @@ export const CHECKLIST_ITEMS = [
   "Contract/API/schema/config changes checked",
   "Error handling and edge cases checked",
   "Tests/proof evidence checked",
+  "Human understanding and comprehension debt checked",
   "Dead code, duplication, generated drift checked",
   "AI-agent failure modes checked",
   "Release/version/migration implications checked or marked not applicable",
@@ -145,6 +146,7 @@ Checklist:
 ${checklistLines()}
 
 While reviewing, complete the checklist in one review_complete call. Pass checks as an array with every checklist item, each marked Checked, Not applicable, or Unproven with concrete evidence. The legacy review_check tool is available for step-by-step progress, but normal review completion should not require multiple tool calls.
+For the human-understanding check, decide whether the durable diff is small enough to review, tied to the stated intent, and explainable by the person who will own it.
 
 Findings:
 List findings in severity order. For each finding include file/line or anchor, issue, impact, fix direction, and evidence or missing proof. If there are no findings, write "No findings" and do not omit Residual Risk.

@@ -89,7 +89,7 @@ function labelContent(text, label, labels) {
 function hasRequiredFinalStructure(text, changeKind) {
   if (changeKind.size === "small") return text.trim().length >= 80;
 
-  const labels = changeKind.size === "medium" ? ["Changed", "Why", "Enables"] : ["Changed", "Why", "Enables", "Proof", "Unproven"];
+  const labels = changeKind.size === "medium" ? ["Changed", "Why", "Insight"] : ["Changed", "Why", "Insight", "Proof", "Unproven"];
   return labels.every((label) => labelContent(text, label, labels).length > 0);
 }
 
@@ -133,7 +133,7 @@ ${finalText}`;
 The turn changed ${scope}. Replace the previous final response with a concise 3-bullet summary using exactly these labels:
 - Changed: what changed in the ${subject}
 - Why: why this is better or safer than what came before
-- Enables: what it enables next
+- Insight: the key system insight the work revealed
 
 If the change may not be an improvement, say that under Why: and name the safer alternative.
 
@@ -147,7 +147,7 @@ The turn changed ${scope}. Replace the previous final response with a concise fi
 
 - Changed: what changed
 - Why: why the new ${subject} is better or safer than what came before
-- Enables: what it enables going forward
+- Insight: the key system insight the work revealed
 - Proof: what was proven by the validation evidence
 - Unproven: what remains unproven or needs human review
 
@@ -165,7 +165,7 @@ function genericFinalValuePrompt(args) {
     "Give a concise close-out that states:",
     "- Changed: what changed",
     "- Why: why it is better or safer",
-    "- Enables: what it enables next",
+    "- Insight: the key system insight the work revealed",
     "- Proof: what was proven",
     "- Unproven: what remains unproven or needs human review",
     "",

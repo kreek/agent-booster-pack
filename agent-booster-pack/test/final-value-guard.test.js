@@ -73,6 +73,7 @@ describe("final value guard", () => {
     });
 
     expect(sent[0]).toMatch(/Changed:/);
+    expect(sent[0]).toMatch(/Insight:/);
     expect(sent[0]).toMatch(/Proof:/);
     expect(sent[0]).toMatch(/summarize the release/);
   });
@@ -128,7 +129,7 @@ describe("final value guard", () => {
     expect(prompt).toMatch(/3-bullet summary/i);
     expect(prompt).toMatch(/Changed: what changed/);
     expect(prompt).toMatch(/Why: why this is better or safer/);
-    expect(prompt).toMatch(/Enables: what it enables next/);
+    expect(prompt).toMatch(/Insight: the key system insight/);
   });
 
   it("uses a medium implementation prompt for pathless mutating bash", () => {
@@ -154,7 +155,7 @@ describe("final value guard", () => {
 
     const prompt = finalValuePromptFor(turnMessages);
 
-    expect(prompt).toMatch(/Enables: what it enables going forward/i);
+    expect(prompt).toMatch(/Insight: the key system insight/i);
     expect(prompt).toMatch(/Proof: what was proven/i);
     expect(prompt).toMatch(/Unproven: what remains unproven/i);
   });
@@ -180,7 +181,7 @@ describe("final value guard", () => {
 
 Why: the PRD is now a runnable local application with a tested service boundary and explicit SQLite persistence.
 
-Enables: future provider and UI changes can build on stable domain and HTTP seams.
+Insight: the provider and UI can now change independently because the service boundary owns the domain rules.
 
 Proof: validation covered domain calculations, cache behavior, HTTP endpoints, linting, formatting, typing, and app import.
 
@@ -221,7 +222,7 @@ Validation:
       assistantToolCall("write", { path: "tests/test_app.py" }),
       assistantText(`Changed:
 Why:
-Enables:
+Insight:
 Proof:
 Unproven:`),
     ];
@@ -239,7 +240,7 @@ Unproven:`),
     });
 
     expect(prompt).toMatch(/better or safer/i);
-    expect(prompt).toMatch(/enables going forward/i);
+    expect(prompt).toMatch(/key system insight/i);
     expect(prompt).toMatch(/alternative strategies/i);
   });
 

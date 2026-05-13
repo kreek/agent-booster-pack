@@ -138,6 +138,7 @@ Should the queue be durable?`;
     expect(prompt).toMatch(/exactly one decision question/i);
     expect(prompt).toMatch(/continue/i);
     expect(prompt).toMatch(/notes, not questions/i);
+    expect(prompt).toMatch(/current understanding/i);
     expect(prompt).toMatch(/Postgres/);
   });
 

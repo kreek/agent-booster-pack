@@ -80,6 +80,7 @@ it("manual command activates the gate and sends the contract prompt", async () =
 
   expect(appended.at(-1)).toMatchObject({ customType: INTERFACE_GATE_STATE_ENTRY, data: { active: true } });
   expect(sent[0]).toContain("Interface Design Gate");
+  expect(sent[0]).toContain("Acceptance and proof:");
   expect(sent[0]).toContain("Intent: design the cache adapter");
   expect(notifications.at(-1).message).toMatch(/enabled/i);
 });
@@ -104,6 +105,7 @@ it("does not block tool calls before the manual workflow is active", async () =>
 Current interface: new adapter
 Proposed interface: export function createClient(options)
 Why this boundary: callers should not know transport details
+Acceptance and proof: caller behavior is covered by tests
 User decision: approve or revise`,
   ]);
   const { handlers, ctx, confirms } = makePiHarness(history);
@@ -124,6 +126,7 @@ it("blocks an open gate only after the manual workflow is active", async () => {
 Current interface: new adapter
 Proposed interface: export function createClient(options)
 Why this boundary: callers should not know transport details
+Acceptance and proof: caller behavior is covered by tests
 User decision: approve or revise`,
     ]),
   ];
@@ -134,6 +137,7 @@ User decision: approve or revise`,
   expect(result).toBeUndefined();
   expect(confirms).toHaveLength(1);
   expect(confirms[0].title).toBe("Interface Design Gate");
+  expect(confirms[0].message).toMatch(/acceptance\/proof/i);
 });
 
 it("detects an interface gate prompt with the required lean fields", () => {
@@ -144,10 +148,31 @@ it("detects an interface gate prompt with the required lean fields", () => {
 Current interface: new module facade
 Proposed interface: export function parseConfig(path)
 Why this boundary: parsing stays at the IO edge
+Acceptance and proof: parser behavior is covered by tests
 User decision: approve or revise this interface before I implement it`,
   ]);
 
   expect(hasInterfaceGatePrompt(history)).toBe(true);
+});
+
+it("treats an incomplete gate packet as open until the full packet is shown", () => {
+  const history = messages(
+    [
+      "assistant",
+      `Interface Design Gate
+
+Current interface: new adapter
+Proposed interface: export function createClient(options)
+Why this boundary: callers should not know transport details
+User decision: approve or revise`,
+    ],
+    ["user", "Approved, please implement."]
+  );
+
+  expect(hasInterfaceGatePrompt(history)).toBe(false);
+  expect(hasInterfaceGateApproval(history)).toBe(false);
+  expect(hasOpenInterfaceGatePrompt(history)).toBe(true);
+  expect(isPotentialInterfaceImplementation("edit", {}, history)).toBe(true);
 });
 
 it("requires approval after the latest interface gate prompt", () => {
@@ -159,6 +184,7 @@ it("requires approval after the latest interface gate prompt", () => {
 Current interface: new adapter
 Proposed interface: export function createClient(options)
 Why this boundary: callers should not know transport details
+Acceptance and proof: caller behavior is covered by tests
 User decision: approve or revise`,
     ],
     ["user", "Yes, approved. Implement it."]
@@ -177,6 +203,7 @@ it("does not treat approval before a later interface gate prompt as sign-off", (
 Current interface: new adapter
 Proposed interface: export function createClient(options)
 Why this boundary: callers should not know transport details
+Acceptance and proof: caller behavior is covered by tests
 User decision: approve or revise`,
     ]
   );
@@ -228,6 +255,7 @@ it("flags implementation after an explicit gate packet without approval", () => 
 Current interface: new adapter
 Proposed interface: export function createClient(options)
 Why this boundary: callers should not know transport details
+Acceptance and proof: caller behavior is covered by tests
 User decision: approve or revise`,
   ]);
 
@@ -253,6 +281,7 @@ it("does not flag implementation after the user approves the gate", () => {
 Current interface: new adapter
 Proposed interface: export function createClient(options)
 Why this boundary: callers should not know transport details
+Acceptance and proof: caller behavior is covered by tests
 User decision: approve or revise`,
     ],
     ["user", "Approved, please implement."]
@@ -272,6 +301,7 @@ it("stale interface intent does not fire the gate after a closed cycle", () => {
 Current interface: new adapter
 Proposed interface: export function createClient(options)
 Why this boundary: callers should not know transport details
+Acceptance and proof: caller behavior is covered by tests
 User decision: approve or revise`,
       ],
       ["user", "Approved, please implement."]
@@ -307,6 +337,7 @@ it("UI allow within the current turn suppresses an explicit open gate", () => {
 Current interface: new adapter
 Proposed interface: export function createClient(options)
 Why this boundary: callers should not know transport details
+Acceptance and proof: caller behavior is covered by tests
 User decision: approve or revise`,
     ]),
     uiAllowEntry(),
@@ -325,6 +356,7 @@ it("UI allow does not leak across turns", () => {
 Current interface: new adapter
 Proposed interface: export function createClient(options)
 Why this boundary: callers should not know transport details
+Acceptance and proof: caller behavior is covered by tests
 User decision: approve or revise`,
     ]),
     uiAllowEntry(),
@@ -344,6 +376,7 @@ it("rejection of the gate prompt keeps the cycle open", () => {
 Current interface: new adapter
 Proposed interface: export function createClient(options)
 Why this boundary: callers should not know transport details
+Acceptance and proof: caller behavior is covered by tests
 User decision: approve or revise`,
     ],
     ["user", "No, revise the error response shape first."]

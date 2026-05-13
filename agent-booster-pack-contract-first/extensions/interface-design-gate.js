@@ -10,6 +10,7 @@ const REQUIRED_GATE_FIELDS = [
   "current interface:",
   "proposed interface:",
   "why this boundary:",
+  "acceptance and proof:",
   "user decision:",
 ];
 
@@ -65,6 +66,10 @@ function isInterfaceGatePrompt(message) {
   );
 }
 
+function isInterfaceGateAttempt(message) {
+  return message.role === "assistant" && message.text.includes(GATE_TITLE);
+}
+
 /**
  * Return the entry index of the most recent closed-cycle marker, or -1.
  * A closed cycle scopes intent and approval lookups: anything before the
@@ -117,9 +122,7 @@ export function hasInterfaceUiAllowThisTurn(entries) {
 export function hasInterfaceGateApproval(entries) {
   const cycleStart = lastClosedCycleIndex(entries) + 1;
   const messages = chatMessages(entries.slice(cycleStart));
-  const latestGateIndex = messages.findLastIndex(
-    (message) => message.role === "assistant" && message.text.includes(GATE_TITLE)
-  );
+  const latestGateIndex = messages.findLastIndex(isInterfaceGatePrompt);
 
   if (latestGateIndex === -1) return false;
 
@@ -139,7 +142,7 @@ function latestApprovingUserMessageEntryIndex(entries) {
   for (let index = entries.length - 1; index >= 0; index -= 1) {
     const message = entries[index]?.message ?? entries[index];
     if (message?.role !== "assistant") continue;
-    if (messageText(message.content).includes(GATE_TITLE)) {
+    if (isInterfaceGatePrompt({ role: "assistant", text: messageText(message.content) })) {
       latestGateEntryIndex = index;
       break;
     }
@@ -174,7 +177,7 @@ export function classifyToolCall(toolName, input) {
  */
 export function hasOpenInterfaceGatePrompt(entries) {
   const cycleStart = lastClosedCycleIndex(entries) + 1;
-  return chatMessages(entries.slice(cycleStart)).some(isInterfaceGatePrompt);
+  return chatMessages(entries.slice(cycleStart)).some(isInterfaceGateAttempt);
 }
 
 /**
@@ -199,13 +202,14 @@ Interface Design Gate
 Current interface: existing shape or "new interface"
 Proposed interface: concrete function/class/module/API/config/event shape
 Why this boundary: why this interface belongs here
+Acceptance and proof: what must be true, and how the result will be checked
 User decision: ask the user to approve, revise, or rule it out
 
 The agent may propose the shape, but the user must approve or revise it before implementation code lands.`;
 }
 
 function blockReason() {
-  return "Interface Design Gate: show the current interface, proposed interface, and why this boundary belongs here, then ask the user to approve or revise before implementation.";
+  return "Interface Design Gate: show the current interface, proposed interface, why this boundary belongs here, and acceptance/proof, then ask the user to approve or revise before implementation.";
 }
 
 /**

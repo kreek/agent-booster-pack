@@ -359,8 +359,11 @@ it("manual prework command sends a concise reflection prompt", async () => {
 
   expect(sent).toHaveLength(1);
   expect(sent[0]).toMatch(/Plan:/);
+  expect(sent[0]).toMatch(/Acceptance:/);
   expect(sent[0]).toMatch(/Why:/);
+  expect(sent[0]).toMatch(/Proof:/);
   expect(sent[0]).toMatch(/Alternatives:/);
+  expect(sent[0]).toMatch(/human can correct the shape/i);
   expect(sent[0]).toMatch(/refactor the cache/);
 });
 
@@ -441,7 +444,9 @@ it("manualPreWorkPrompt names the labels without making a blocking gate", () => 
   const prompt = manualPreWorkPrompt("update the API");
 
   expect(prompt).toMatch(/Plan:/);
+  expect(prompt).toMatch(/Acceptance:/);
   expect(prompt).toMatch(/Why:/);
+  expect(prompt).toMatch(/Proof:/);
   expect(prompt).toMatch(/Alternatives:/);
   expect(prompt).toMatch(/update the API/);
 });
