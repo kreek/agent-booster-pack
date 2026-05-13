@@ -13,6 +13,13 @@ import codeReviewRuntime, {
 } from "../extensions/code-review-runtime.js";
 
 describe("code review runtime", () => {
+  const fullChecks = () =>
+    CHECKLIST_ITEMS.map((item) => ({
+      item,
+      status: item.includes("Release") ? "Not applicable" : "Checked",
+      evidence: `Evidence for ${item}`,
+    }));
+
   it("normalizes omitted review target to working-tree", () => {
     expect(normalizeReviewTarget("")).toBe("working-tree");
     expect(normalizeReviewTarget(undefined)).toBe("working-tree");
@@ -45,7 +52,7 @@ describe("code review runtime", () => {
     expect(prompt).toMatch(/tests\/proof evidence/i);
   });
 
-  it("registers a review command that sends the structured prompt", async () => {
+  it("registers review commands that send the structured prompt", async () => {
     const commands = new Map();
     const sent = [];
     const fakePi = {
@@ -59,13 +66,17 @@ describe("code review runtime", () => {
     const command = commands.get("review");
     expect(command).toBeTruthy();
     expect(command.description).toMatch(/code review/i);
+    expect(commands.get("abp:review")).toBeTruthy();
 
     await command.handler("staged", { ui: { notify() {} } });
+    await commands.get("abp:review").handler("branch", { ui: { notify() {} } });
 
-    expect(sent).toHaveLength(1);
+    expect(sent).toHaveLength(2);
     expect(sent[0]).toContain("Review Target: staged");
     expect(sent[0]).toContain("Findings:");
     expect(sent[0]).toContain("Recommendation:");
+    expect(sent[0]).toContain("one review_complete call");
+    expect(sent[1]).toContain("Review Target: branch");
   });
 
   it("starts a review session with every checklist item pending", () => {
@@ -140,6 +151,20 @@ describe("code review runtime", () => {
     expect(result.summary).toContain("Residual Risk: No CI status checked.");
   });
 
+  it("accepts single-call review completion with structured checks", () => {
+    const result = completeReview(startReviewSession("staged"), {
+      checks: fullChecks(),
+      findings: "No findings.",
+      proof: "npm test passed.",
+      residualRisk: "No CI status checked.",
+      recommendation: "Approve with residual risk",
+    });
+
+    expect(result.ok).toBe(true);
+    expect(result.summary).toContain("Review Target: staged");
+    expect(result.summary).toContain("Runtime/toolchain constraints checked: Checked");
+  });
+
   it("registers review_check and review_complete tools", () => {
     const tools = new Map();
     const fakePi = {
@@ -153,7 +178,7 @@ describe("code review runtime", () => {
     expect(tools.get("review_complete")).toBeTruthy();
   });
 
-  it("renders review_check as a compact progress update", () => {
+  it("renders review_check as a bordered progress panel", () => {
     const updatedCheck = {
       item: CHECKLIST_ITEMS[0],
       status: "Checked",
@@ -161,43 +186,79 @@ describe("code review runtime", () => {
     };
     const session = updateReviewCheck(startReviewSession("working-tree"), updatedCheck).session;
 
-    const lines = renderReviewCheckResult({ details: { session, check: updatedCheck } }).render(120);
+    const lines = renderReviewCheckResult({ details: { session, check: updatedCheck } }).render(58);
     const text = lines.join("\n");
 
-    expect(lines).toHaveLength(2);
-    expect(text).toContain("ABP code-review progress");
-    expect(text).toContain("☑ Runtime/toolchain constraints checked — Checked");
+    expect(lines[0]).toContain("┌");
+    expect(lines.at(-1)).toContain("┘");
+    expect(text).toContain("ABP CODE REVIEW");
     expect(text).toContain("1/10 resolved");
+    expect(text).toContain("☑ Runtime/toolchain constraints checked");
+    expect(text).toContain("Evidence: Inspected package.json.");
     expect(text).not.toContain("☐ Diff intent and impact identified");
+    expect(lines.every((line) => line.length <= 58)).toBe(true);
   });
 
-  it("renders review findings with priority square badges", () => {
-    const result = completeReview(
-      CHECKLIST_ITEMS.reduce((current, item) => {
-        return updateReviewCheck(current, {
-          item,
-          status: "Checked",
-          evidence: `Evidence for ${item}`,
-        }).session;
-      }, startReviewSession("working-tree")),
-      {
-        findings: [
-          "High — src/a.js:1: breaks auth.",
-          "Medium — src/b.js:2: missing test.",
-          "Low — src/c.js:3: clarify name.",
-        ].join("\n"),
-        proof: "npm test passed.",
-        residualRisk: "CI not checked.",
-        recommendation: "Request changes",
-      }
-    );
+  it("wraps review_check progress instead of cutting off long checklist items", () => {
+    const updatedCheck = {
+      item: CHECKLIST_ITEMS[4],
+      status: "Checked",
+      evidence: "Inspected API and config changes across OpenAPI, env, and runtime configuration.",
+    };
+    const session = updateReviewCheck(startReviewSession("working-tree"), updatedCheck).session;
 
-    const lines = renderReviewCompleteResult({ summary: result.summary }).render(120);
+    const lines = renderReviewCheckResult({ details: { session, check: updatedCheck } }).render(36);
     const text = lines.join("\n");
 
-    expect(text).toContain("■ P1 High — src/a.js:1: breaks auth.");
-    expect(text).toContain("■ P2 Medium — src/b.js:2: missing test.");
-    expect(text).toContain("■ P3 Low — src/c.js:3: clarify name.");
+    expect(lines.length).toBeGreaterThan(5);
+    expect(lines.every((line) => line.length <= 36)).toBe(true);
+    expect(text).toContain("Contract/API/schema/config");
+    expect(text).toContain("changes checked");
+    expect(text).toContain("Checked");
+    expect(text).toContain("1/10 resolved");
+    expect(text).toContain("runtime configuration.");
+  });
+
+  it("renders review completion as a compact summary panel", () => {
+    const result = completeReview(startReviewSession("working-tree"), {
+      checks: fullChecks(),
+      findings: ["P1 — src/auth.js:12: auth bypass.", "P2 — src/form.js:34: missing regression test."].join("\n"),
+      proof: "npm test passed.",
+      residualRisk: "CI not checked.",
+      recommendation: "Request changes",
+    });
+
+    const lines = renderReviewCompleteResult({ summary: result.summary }).render(58);
+    const text = lines.join("\n");
+
+    expect(lines[0]).toContain("┌");
+    expect(lines.at(-1)).toContain("┘");
+    expect(text).toContain("ABP CODE REVIEW");
+    expect(text).toContain("Target: working-tree");
+    expect(text).toContain("Recommendation: Request changes");
+    expect(text).toContain("Findings: 2");
+    expect(text).toContain("Proof: npm test passed.");
+    expect(text).toContain("Residual risk: CI not checked.");
+    expect(lines.every((line) => line.length <= 58)).toBe(true);
+  });
+
+  it("wraps compact review completion proof and residual risk", () => {
+    const result = completeReview(startReviewSession("working-tree"), {
+      checks: fullChecks(),
+      findings: "No findings.",
+      proof: "Ran npm test and inspected the implementation diff against the requested behavior.",
+      residualRisk: "CI was not checked, and generated lockfile changes still need human review.",
+      recommendation: "Approve with residual risk",
+    });
+
+    const lines = renderReviewCompleteResult({ summary: result.summary }).render(42);
+    const text = lines.join("\n");
+
+    expect(lines.length).toBeGreaterThan(6);
+    expect(lines.every((line) => line.length <= 42)).toBe(true);
+    expect(text).toContain("Findings: 0");
+    expect(text).toContain("requested behavior.");
+    expect(text).toContain("human review.");
   });
 
   it("records review_check progress only after /review starts a session", async () => {
@@ -230,7 +291,7 @@ describe("code review runtime", () => {
     expect(afterStart.content[0].text).toContain(CHECKLIST_ITEMS[0]);
   });
 
-  it("keeps review_complete blocked through the tools until every item has evidence", async () => {
+  it("lets review_complete finish with one structured checklist payload", async () => {
     const commands = new Map();
     const tools = new Map();
     const fakePi = {
@@ -251,16 +312,8 @@ describe("code review runtime", () => {
     expect(incomplete.isError).toBe(true);
     expect(incomplete.content[0].text).toContain(CHECKLIST_ITEMS[0]);
 
-    for (const item of CHECKLIST_ITEMS) {
-      const result = await tools.get("review_check").execute("tool-check", {
-        item,
-        status: item.includes("Release") ? "Not applicable" : "Checked",
-        evidence: `Evidence for ${item}`,
-      });
-      expect(result.isError).toBeUndefined();
-    }
-
     const complete = await tools.get("review_complete").execute("tool-2", {
+      checks: fullChecks(),
       findings: "No findings.",
       proof: "npm test passed.",
       residualRisk: "No CI status checked.",

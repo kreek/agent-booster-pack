@@ -6,12 +6,12 @@ complexity and side effects, and secure, provable, accessible, and performant.
 
 This package is **skills only** and carries the general ABP skills. Runtime-owned skills ship with their matching sibling packages:
 
-- `agent-booster-pack-contract-first` — Interface Design Gate runtime plus the
-  `contract-first` skill.
+- `agent-booster-pack-contract-first` — manual Interface Design Gate workflow
+  plus the `contract-first` skill.
 - `agent-booster-pack-proof` — proof-first red-green-refactor runtime plus the
   `proof` skill.
-- `agent-booster-pack-specify` — one-question Design-partner runtime plus the
-  `specify` skill.
+- `agent-booster-pack-specify` — manual one-question Design-partner workflow
+  plus the `specify` skill.
 
 The pack covers working mode, data modeling, code review, security,
 debugging, refactoring, official-source checks, and more. The canonical skill source lives at
@@ -37,7 +37,7 @@ Then in Pi:
 /reload
 ```
 
-For the full ABP experience (general skills + runtime-owned skills + gates), install
+For the full ABP experience (general skills + runtime-owned skills + commands), install
 the meta-package instead:
 
 ```sh
@@ -143,9 +143,8 @@ subdirectory under `skills/`. Each subdirectory is one skill, with a
 Pi loads when the skill description matches a task. No code runs from
 this package.
 
-The runtime gates that enforce ABP workflow phases live in the sibling
-packages above. Install them separately if you want runtime
-enforcement.
+Proof runtime and manual ABP workflow commands live in the sibling packages
+above. Install them separately if you want Pi runtime support.
 
 ## Build pipeline
 

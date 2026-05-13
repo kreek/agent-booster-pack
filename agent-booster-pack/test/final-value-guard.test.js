@@ -7,6 +7,8 @@ import {
   shouldRequestFinalValueReflection,
 } from "../extensions/final-value-guard.js";
 
+import finalValueGuard from "../extensions/final-value-guard.js";
+
 const assistantToolCall = (name, args = {}) => ({
   role: "assistant",
   content: [{ type: "toolCall", name, arguments: args }],
@@ -20,6 +22,61 @@ const assistantText = (text) => ({
 const entry = (role, content) => ({ type: "message", message: { role, content } });
 
 describe("final value guard", () => {
+  it("registers a manual command and no passive agent_end hook", () => {
+    const commands = new Map();
+    const handlers = new Map();
+    const fakePi = {
+      registerCommand: (name, definition) => commands.set(name, definition),
+      on: (eventName, handler) => handlers.set(eventName, handler),
+    };
+
+    finalValueGuard(fakePi);
+
+    expect(commands.get("abp:final-value")).toBeTruthy();
+    expect(handlers.get("agent_end")).toBeUndefined();
+  });
+
+  it("manual command asks for final value reflection from current session changes", async () => {
+    const commands = new Map();
+    const sent = [];
+    const sessionEntries = [
+      entry("user", "implement the cache"),
+      entry("assistant", [{ type: "toolCall", name: "write", arguments: { path: "src/cache.js" } }]),
+      entry("assistant", [{ type: "text", text: "Done." }]),
+    ];
+    const fakePi = {
+      registerCommand: (name, definition) => commands.set(name, definition),
+      sendUserMessage: (message) => sent.push(message),
+    };
+
+    finalValueGuard(fakePi);
+    await commands.get("abp:final-value").handler("", {
+      sessionManager: { getBranch: () => sessionEntries },
+    });
+
+    expect(sent).toHaveLength(1);
+    expect(sent[0]).toMatch(/one concise sentence/i);
+    expect(sent[0]).toMatch(/Previous final response:\nDone\./);
+  });
+
+  it("manual command falls back to a generic reflection prompt without detected changes", async () => {
+    const commands = new Map();
+    const sent = [];
+    const fakePi = {
+      registerCommand: (name, definition) => commands.set(name, definition),
+      sendUserMessage: (message) => sent.push(message),
+    };
+
+    finalValueGuard(fakePi);
+    await commands.get("abp:final-value").handler("summarize the release", {
+      sessionManager: { getBranch: () => [] },
+    });
+
+    expect(sent[0]).toMatch(/Changed:/);
+    expect(sent[0]).toMatch(/Proof:/);
+    expect(sent[0]).toMatch(/summarize the release/);
+  });
+
   it("does not request final value reflection for read-only turns", () => {
     const turnMessages = [assistantToolCall("read"), assistantText("The workflow skill already has that language.")];
 

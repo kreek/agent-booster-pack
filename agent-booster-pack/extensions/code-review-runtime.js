@@ -37,7 +37,7 @@ export function normalizeReviewTarget(value) {
 }
 
 function checklistLines() {
-  return CHECKLIST_ITEMS.map((item) => `- ${item}: Pending until review_check records Checked | Not applicable | Unproven with evidence`).join("\n");
+  return CHECKLIST_ITEMS.map((item) => `- ${item}: Checked | Not applicable | Unproven with evidence`).join("\n");
 }
 
 function text(value) {
@@ -73,17 +73,41 @@ export function updateReviewCheck(session, params) {
   };
 }
 
+function applyReviewChecks(session, checks) {
+  if (checks == null) return { ok: true, session };
+  if (!Array.isArray(checks)) return { ok: false, reason: "checks must be an array." };
+
+  let current = session;
+  for (const check of checks) {
+    const result = updateReviewCheck(current, check);
+    if (!result.ok) return result;
+    current = result.session;
+  }
+
+  const provided = new Set(checks.map((check) => text(check?.item)));
+  const missing = CHECKLIST_ITEMS.filter((item) => !provided.has(item));
+  if (missing.length > 0) {
+    return { ok: false, reason: `checks must include every review checklist item. Missing: ${missing.join(", ")}` };
+  }
+
+  return { ok: true, session: current };
+}
+
 function requiredText(params, key) {
   const value = text(params?.[key]);
   return value.length === 0 ? null : value;
 }
 
 export function completeReview(session, params) {
-  const unresolved = unresolvedChecks(session);
+  const applied = applyReviewChecks(session, params?.checks);
+  if (!applied.ok) return applied;
+
+  const completedSession = applied.session;
+  const unresolved = unresolvedChecks(completedSession);
   if (unresolved.length > 0) {
     return {
       ok: false,
-      reason: `Review checklist is not complete. Resolve these items first: ${unresolved.map((check) => check.item).join(", ")}`,
+      reason: `Review checklist is not complete. Pass a checks array to review_complete or resolve these items first: ${unresolved.map((check) => check.item).join(", ")}`,
     };
   }
 
@@ -100,7 +124,8 @@ export function completeReview(session, params) {
 
   return {
     ok: true,
-    summary: `Review Target: ${session.target}\n\nChecklist:\n${session.checks
+    session: completedSession,
+    summary: `Review Target: ${completedSession.target}\n\nChecklist:\n${completedSession.checks
       .map((check) => `- ${check.item}: ${check.status} — ${check.evidence}`)
       .join("\n")}\n\nFindings: ${findings}\n\nProof: ${proof}\n\nResidual Risk: ${residualRisk}\n\nRecommendation: ${recommendation}`,
   };
@@ -119,7 +144,7 @@ State what diff or PR scope you reviewed. If the target is ambiguous or unavaila
 Checklist:
 ${checklistLines()}
 
-While reviewing, call review_check after each checklist pass with the item, status, and concrete evidence. You cannot complete the review until every item has a status and non-empty evidence. Then call review_complete with findings, proof, residualRisk, and recommendation.
+While reviewing, complete the checklist in one review_complete call. Pass checks as an array with every checklist item, each marked Checked, Not applicable, or Unproven with concrete evidence. The legacy review_check tool is available for step-by-step progress, but normal review completion should not require multiple tool calls.
 
 Findings:
 List findings in severity order. For each finding include file/line or anchor, issue, impact, fix direction, and evidence or missing proof. If there are no findings, write "No findings" and do not omit Residual Risk.
@@ -147,6 +172,18 @@ const reviewCheckParameters = {
 const reviewCompleteParameters = {
   type: "object",
   properties: {
+    checks: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          item: { type: "string", enum: CHECKLIST_ITEMS },
+          status: { type: "string", enum: REVIEW_STATUSES },
+          evidence: { type: "string" },
+        },
+        required: ["item", "status", "evidence"],
+      },
+    },
     findings: { type: "string" },
     proof: { type: "string" },
     residualRisk: { type: "string" },
@@ -155,13 +192,20 @@ const reviewCompleteParameters = {
   required: ["findings", "proof", "residualRisk", "recommendation"],
 };
 
-function textComponent(lines, theme) {
-  return {
-    render(width) {
-      return lines.map((line) => String(line).slice(0, width));
-    },
-    invalidate() {},
-  };
+function wrapPlainLine(line, width) {
+  const value = String(line);
+  if (width <= 0 || value.length <= width) return [value];
+
+  const wrapped = [];
+  let remaining = value;
+  while (remaining.length > width) {
+    const breakAt = remaining.lastIndexOf(" ", width);
+    const splitAt = breakAt > 0 ? breakAt : width;
+    wrapped.push(remaining.slice(0, splitAt).trimEnd());
+    remaining = remaining.slice(splitAt).trimStart();
+  }
+  if (remaining.length > 0) wrapped.push(remaining);
+  return wrapped;
 }
 
 function checklistIcon(status) {
@@ -187,26 +231,36 @@ function latestResolvedCheck(checks) {
     ?? null;
 }
 
+function renderProgressPanel(check, resolved, total, width, theme) {
+  const innerWidth = Math.max(1, width - 4);
+  const topBorder = borderText(theme, `┌${"─".repeat(innerWidth + 2)}┐`);
+  const bottomBorder = borderText(theme, `└${"─".repeat(innerWidth + 2)}┘`);
+  const status = check?.status ?? "Pending";
+  const item = check ? `${checklistIcon(status)} ${check.item}` : "☐ Review checklist";
+  const itemLines = wrapPlainLine(item, innerWidth).map((line) => statusColor(status, theme, line));
+  const content = [
+    `ABP CODE REVIEW · ${resolved}/${total} resolved`,
+    ...itemLines,
+    `Status: ${status}`,
+    ...wrapPlainLine(`Evidence: ${check?.evidence ?? "Waiting for evidence."}`, innerWidth),
+  ];
+
+  return [topBorder, ...content.map((line) => frameLine(line, innerWidth, theme)), bottomBorder];
+}
+
 export function renderReviewCheckResult(result, _options, theme) {
   const session = result?.details?.session ?? result?.session;
   const checks = Array.isArray(session?.checks) ? session.checks : [];
   const check = result?.details?.check ?? result?.check ?? latestResolvedCheck(checks);
   const resolved = resolvedCheckCount(checks);
   const total = checks.length || CHECKLIST_ITEMS.length;
-  const label = check ? `${checklistIcon(check.status)} ${check.item}` : "☐ Review checklist";
-  const status = check?.status ?? "Pending";
-  const lines = [
-    "ABP code-review progress",
-    `${statusColor(status, theme, label)} — ${status} (${resolved}/${total} resolved)`,
-  ];
-  return textComponent(lines, theme);
-}
 
-function findingPriority(line) {
-  if (/^(Critical|High)\b/i.test(line)) return { badge: "■ P1", color: "error" };
-  if (/^Medium\b/i.test(line)) return { badge: "■ P2", color: "warning" };
-  if (/^Low\b/i.test(line)) return { badge: "■ P3", color: "warning" };
-  return null;
+  return {
+    render(width) {
+      return renderProgressPanel(check, resolved, total, width, theme);
+    },
+    invalidate() {},
+  };
 }
 
 function summarySection(summary, name, nextName) {
@@ -217,20 +271,63 @@ function summarySection(summary, name, nextName) {
   return summary.slice(bodyStart, end === -1 ? undefined : end).trim();
 }
 
-function renderFindingLine(line, theme) {
-  const priority = findingPriority(line);
-  if (!priority) return line;
+function colorText(theme, color, value) {
+  return theme ? theme.fg(color, value) : value;
+}
 
-  const badge = theme ? theme.fg(priority.color, priority.badge) : priority.badge;
-  return `${badge} ${line}`;
+function stripAnsi(value) {
+  return String(value).replace(/\u001b\[[^m]*m/g, "");
+}
+
+function visibleLength(value) {
+  return stripAnsi(value).length;
+}
+
+function borderText(theme, value) {
+  return colorText(theme, "borderMuted", value);
+}
+
+function frameLine(content, innerWidth, theme) {
+  const value = String(content);
+  const padding = Math.max(0, innerWidth - visibleLength(value));
+  return `${borderText(theme, "│")} ${value}${" ".repeat(padding)} ${borderText(theme, "│")}`;
+}
+
+function countFindingLines(findings) {
+  const value = text(findings);
+  if (!value || /^no findings\.?$/i.test(value)) return 0;
+  return value.split("\n").map((line) => line.trim()).filter(Boolean).length;
+}
+
+function compactReviewPanel(summary, width, theme) {
+  const target = summarySection(summary, "Review Target", "Checklist") || "unknown";
+  const findings = summarySection(summary, "Findings", "Proof");
+  const proof = summarySection(summary, "Proof", "Residual Risk") || "Unproven";
+  const residualRisk = summarySection(summary, "Residual Risk", "Recommendation") || "Unproven";
+  const recommendation = summarySection(summary, "Recommendation") || "No recommendation because review is unproven";
+  const innerWidth = Math.max(1, width - 4);
+  const topBorder = borderText(theme, `┌${"─".repeat(innerWidth + 2)}┐`);
+  const bottomBorder = borderText(theme, `└${"─".repeat(innerWidth + 2)}┘`);
+  const content = [
+    "ABP CODE REVIEW",
+    `Target: ${target}`,
+    ...wrapPlainLine(`Recommendation: ${recommendation}`, innerWidth),
+    `Findings: ${countFindingLines(findings)}`,
+    ...wrapPlainLine(`Proof: ${proof}`, innerWidth),
+    ...wrapPlainLine(`Residual risk: ${residualRisk}`, innerWidth),
+  ];
+
+  return [topBorder, ...content.map((line) => frameLine(line, innerWidth, theme)), bottomBorder];
 }
 
 export function renderReviewCompleteResult(result, _options, theme) {
   const summary = String(result?.details?.summary ?? result?.summary ?? result?.content?.[0]?.text ?? "");
-  const findings = summarySection(summary, "Findings", "Proof");
-  const lines = ["ABP code-review findings"];
-  lines.push(...(findings || "No findings").split("\n").map((line) => renderFindingLine(line.trim(), theme)));
-  return textComponent(lines, theme);
+  return {
+    render(width) {
+      return compactReviewPanel(summary, width, theme);
+    },
+    invalidate() {},
+  };
 }
 
 function toolText(value, details) {
@@ -282,6 +379,15 @@ export default function codeReviewRuntime(pi) {
     },
   });
 
+  pi.registerCommand("abp:review", {
+    description: "Run an ABP code review with the runtime checklist",
+    handler: async (args) => {
+      activeSession = startReviewSession(args);
+      persistSession();
+      pi.sendUserMessage(makeCodeReviewPrompt(args));
+    },
+  });
+
   pi.registerTool({
     name: "review_check",
     label: "Review Check",
@@ -310,11 +416,12 @@ export default function codeReviewRuntime(pi) {
   pi.registerTool({
     name: "review_complete",
     label: "Review Complete",
-    description: "Complete an ABP code review after every checklist item has evidenced status.",
+    description: "Complete an ABP code review with a structured checklist, findings, proof, risk, and recommendation.",
     parameters: reviewCompleteParameters,
-    promptSnippet: "Complete the active ABP code review only after every review_check item is resolved.",
+    promptSnippet: "Complete the active ABP code review with checks, findings, proof, residualRisk, and recommendation.",
     promptGuidelines: [
-      "Use review_complete only after all /review checklist items have been recorded with review_check.",
+      "Use review_complete once for normal /review completion; include every checklist item in checks with concrete evidence.",
+      "Use review_check only for optional step-by-step progress before review_complete.",
     ],
     renderResult: renderReviewCompleteResult,
     async execute(_toolCallId, params) {

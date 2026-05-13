@@ -6,6 +6,7 @@ import {
   handleBranchIsolation,
   hasAlreadyExplainedThisTurn,
   hasPreWorkExplanation,
+  manualPreWorkPrompt,
   makePreWorkBlockReason,
   missingElements,
   preWorkChangeKind,
@@ -328,23 +329,66 @@ it("still prompts on dirty non-topic branches", async () => {
   expect(appended.at(-1)?.[0]).toBe(BRANCH_GUARD_STATE_ENTRY);
 });
 
-it("registers before_agent_start handler that appends the pre-work reminder", async () => {
+it("registers manual branch and prework commands without passive hooks", () => {
   const handlers = new Map();
+  const commands = new Map();
   const fakePi = {
     on: (eventName, handler) => handlers.set(eventName, handler),
+    registerCommand: (name, definition) => commands.set(name, definition),
     appendEntry: () => {},
   };
 
   preWorkGuard(fakePi);
 
-  const handler = handlers.get("before_agent_start");
-  expect(handler, "expected a before_agent_start handler to be registered").toBeTruthy();
+  expect(commands.get("abp:branch")).toBeTruthy();
+  expect(commands.get("abp:prework")).toBeTruthy();
+  expect(handlers.get("before_agent_start")).toBeUndefined();
+  expect(handlers.get("tool_call")).toBeUndefined();
+});
 
-  const result = await handler({ systemPrompt: "base." });
-  expect(result.systemPrompt).toMatch(/^base\./);
-  expect(result.systemPrompt).toMatch(/Pre-Work Reflection Gate/);
-  expect(result.systemPrompt).toMatch(/plan/i);
-  expect(result.systemPrompt).toMatch(/alternatives/i);
+it("manual prework command sends a concise reflection prompt", async () => {
+  const commands = new Map();
+  const sent = [];
+  const fakePi = {
+    registerCommand: (name, definition) => commands.set(name, definition),
+    sendUserMessage: (message) => sent.push(message),
+  };
+
+  preWorkGuard(fakePi);
+  await commands.get("abp:prework").handler("refactor the cache");
+
+  expect(sent).toHaveLength(1);
+  expect(sent[0]).toMatch(/Plan:/);
+  expect(sent[0]).toMatch(/Why:/);
+  expect(sent[0]).toMatch(/Alternatives:/);
+  expect(sent[0]).toMatch(/refactor the cache/);
+});
+
+it("manual branch command runs the branch isolation workflow only when called", async () => {
+  const commands = new Map();
+  const appended = [];
+  const exec = makeExec({
+    "git rev-parse --is-inside-work-tree": { stdout: "true\n" },
+    "git branch --show-current": { stdout: "main\n" },
+    "git status --porcelain": { stdout: "" },
+  });
+  const ui = makeUi(["Continue on current branch"]);
+  const fakePi = {
+    registerCommand: (name, definition) => commands.set(name, definition),
+    exec,
+    appendEntry: (...args) => appended.push(args),
+  };
+  const ctx = {
+    ui,
+    hasUI: true,
+    sessionManager: { getBranch: () => [] },
+  };
+
+  preWorkGuard(fakePi);
+  await commands.get("abp:branch").handler("", ctx);
+
+  expect(ui.prompts).toHaveLength(1);
+  expect(appended.at(-1)?.[0]).toBe(BRANCH_GUARD_STATE_ENTRY);
 });
 
 it("past-tense reflection does not satisfy the future-tense plan requirement", () => {
@@ -391,5 +435,14 @@ it("preWorkReminder mentions the gate, plan, alternatives, and Git packaging exc
   expect(reminder).toMatch(/plan/i);
   expect(reminder).toMatch(/alternatives/i);
   expect(reminder).toMatch(/git add\/commit\/merge/i);
+});
+
+it("manualPreWorkPrompt names the labels without making a blocking gate", () => {
+  const prompt = manualPreWorkPrompt("update the API");
+
+  expect(prompt).toMatch(/Plan:/);
+  expect(prompt).toMatch(/Why:/);
+  expect(prompt).toMatch(/Alternatives:/);
+  expect(prompt).toMatch(/update the API/);
 });
 });

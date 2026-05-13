@@ -1,6 +1,5 @@
 const CHANGE_TOOL_NAMES = new Set(["edit", "write"]);
 const FINAL_VALUE_GUARD_MARKER = "ABP Final Value Guard";
-const FINAL_VALUE_GUARD_MESSAGE = "abp-final-value-guard";
 const MUTATING_BASH_PATTERN = /(\btee\b|\bpython\b[\s\S]*\bopen\([^)]*['"]w|\bnode\b[\s\S]*writeFile|\bperl\s+-pi\b|\bsed\s+-i\b|\bmv\b|\bcp\b|\btouch\b|\bchmod\b|\bgit\s+apply\b|\bpatch\b)/i;
 
 function messageText(value) {
@@ -158,20 +157,29 @@ Previous final response:
 ${finalText}`;
 }
 
-export default function finalValueGuard(pi) {
-  pi.on("agent_end", async (event, ctx) => {
-    const branchMessages = latestUserScopedMessages(ctx.sessionManager.getBranch());
-    const prompt = finalValuePromptFor(branchMessages) ?? finalValuePromptFor(event.messages);
-    if (!prompt) return;
+function genericFinalValuePrompt(args) {
+  const intent = String(args ?? "").trim();
+  return [
+    "Use ABP final-value reflection.",
+    "",
+    "Give a concise close-out that states:",
+    "- Changed: what changed",
+    "- Why: why it is better or safer",
+    "- Enables: what it enables next",
+    "- Proof: what was proven",
+    "- Unproven: what remains unproven or needs human review",
+    "",
+    intent ? `Focus: ${intent}` : "If no files changed, say so and keep the answer short.",
+  ].join("\n");
+}
 
-    pi.sendMessage(
-      {
-        customType: FINAL_VALUE_GUARD_MESSAGE,
-        content: prompt,
-        display: false,
-        details: { source: FINAL_VALUE_GUARD_MARKER },
-      },
-      { deliverAs: "followUp", triggerTurn: true }
-    );
+export default function finalValueGuard(pi) {
+  pi.registerCommand("abp:final-value", {
+    description: "Ask for an ABP final value reflection",
+    handler: async (args, ctx) => {
+      const branchEntries = ctx.sessionManager?.getBranch?.() ?? [];
+      const prompt = finalValuePromptForSessionEntries(branchEntries) ?? genericFinalValuePrompt(args);
+      await pi.sendUserMessage(prompt);
+    },
   });
 }

@@ -47,41 +47,12 @@ describe("permission guard", () => {
     expect(ghPermissionVerdict("bash", { command: "echo ghost" })).toBeNull();
   });
 
-  it("blocks gh commands when no interactive UI can ask the user", async () => {
+  it("does not register automatic gh tool-call prompting", async () => {
     const pi = makePi();
     permissionGuard(pi);
 
     const result = await pi.callTool({ toolName: "bash", input: { command: "gh pr view" } }, makeCtx({ hasUI: false }));
 
-    expect(result).toEqual({
-      block: true,
-      reason: "ABP Permission Guard: `gh` commands require explicit user permission before execution.",
-    });
-  });
-
-  it("asks before allowing a gh command in interactive mode", async () => {
-    const pi = makePi();
-    const ctx = makeCtx({ allowed: true });
-    permissionGuard(pi);
-
-    const result = await pi.callTool({ toolName: "bash", input: { command: "gh pr diff --patch" } }, ctx);
-
     expect(result).toBeUndefined();
-    expect(ctx.confirms).toHaveLength(1);
-    expect(ctx.confirms[0].title).toBe("ABP Permission Guard");
-    expect(ctx.confirms[0].message).toContain("gh pr diff --patch");
-  });
-
-  it("blocks when the user denies a gh command", async () => {
-    const pi = makePi();
-    const ctx = makeCtx({ allowed: false });
-    permissionGuard(pi);
-
-    const result = await pi.callTool({ toolName: "bash", input: { command: "gh api repos/example/project" } }, ctx);
-
-    expect(result).toEqual({
-      block: true,
-      reason: "ABP Permission Guard: user denied `gh` command.",
-    });
   });
 });

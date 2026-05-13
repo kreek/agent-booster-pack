@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   INTERFACE_GATE_CYCLE_ENTRY,
+  INTERFACE_GATE_STATE_ENTRY,
   INTERFACE_GATE_UI_ALLOW_ENTRY,
   classifyToolCall,
   hasInterfaceGateApproval,
@@ -9,7 +10,10 @@ import {
   hasInterfaceUiAllowThisTurn,
   hasOpenInterfaceGatePrompt,
   isPotentialInterfaceImplementation,
+  latestInterfaceGateState,
 } from "../extensions/interface-design-gate.js";
+
+import interfaceDesignGate from "../extensions/interface-design-gate.js";
 
 const messages = (...items) =>
   items.map(([role, content]) => ({
@@ -21,8 +25,117 @@ const customEntry = (customType, data = {}) => ({ type: "custom", customType, da
 
 const closedCycleEntry = () => customEntry(INTERFACE_GATE_CYCLE_ENTRY, { state: "closed", at: 1 });
 const uiAllowEntry = () => customEntry(INTERFACE_GATE_UI_ALLOW_ENTRY, { allowedAt: 1 });
+const stateEntry = (active) => customEntry(INTERFACE_GATE_STATE_ENTRY, { active });
+
+function makePiHarness(entries = []) {
+  const commands = new Map();
+  const handlers = new Map();
+  const sent = [];
+  const appended = [];
+  const notifications = [];
+  const confirms = [];
+
+  const pi = {
+    registerCommand: (name, definition) => commands.set(name, definition),
+    on: (eventName, handler) => handlers.set(eventName, handler),
+    appendEntry: (customType, data) => {
+      appended.push({ customType, data });
+      entries.push({ type: "custom", customType, data });
+    },
+    sendUserMessage: (message) => sent.push(message),
+  };
+
+  const ctx = {
+    hasUI: true,
+    sessionManager: { getBranch: () => entries },
+    ui: {
+      notify: (message, level) => notifications.push({ message, level }),
+      confirm: async (title, message) => {
+        confirms.push({ title, message });
+        return true;
+      },
+    },
+  };
+
+  interfaceDesignGate(pi);
+  return { commands, handlers, sent, appended, notifications, confirms, ctx };
+}
 
 describe("interface design gate", () => {
+it("starts inactive and only registers manual commands plus scoped tool enforcement", () => {
+  const { commands, handlers } = makePiHarness();
+
+  expect(commands.get("abp:contract")).toBeTruthy();
+  expect(commands.get("abp:contract-off")).toBeTruthy();
+  expect(handlers.get("before_agent_start")).toBeUndefined();
+  expect(handlers.get("tool_call")).toBeTruthy();
+});
+
+it("manual command activates the gate and sends the contract prompt", async () => {
+  const { commands, sent, appended, notifications } = makePiHarness();
+
+  await commands.get("abp:contract").handler("design the cache adapter", {
+    ui: { notify: (message, level) => notifications.push({ message, level }) },
+  });
+
+  expect(appended.at(-1)).toMatchObject({ customType: INTERFACE_GATE_STATE_ENTRY, data: { active: true } });
+  expect(sent[0]).toContain("Interface Design Gate");
+  expect(sent[0]).toContain("Intent: design the cache adapter");
+  expect(notifications.at(-1).message).toMatch(/enabled/i);
+});
+
+it("manual off command deactivates the gate", async () => {
+  const { commands, appended, notifications } = makePiHarness([stateEntry(true)]);
+
+  await commands.get("abp:contract-off").handler("", {
+    ui: { notify: (message, level) => notifications.push({ message, level }) },
+  });
+
+  expect(appended.at(-1)).toMatchObject({ customType: INTERFACE_GATE_STATE_ENTRY, data: { active: false } });
+  expect(latestInterfaceGateState([stateEntry(true), stateEntry(false)])).toBe(false);
+  expect(notifications.at(-1).message).toMatch(/disabled/i);
+});
+
+it("does not block tool calls before the manual workflow is active", async () => {
+  const history = messages([
+    "assistant",
+    `Interface Design Gate
+
+Current interface: new adapter
+Proposed interface: export function createClient(options)
+Why this boundary: callers should not know transport details
+User decision: approve or revise`,
+  ]);
+  const { handlers, ctx, confirms } = makePiHarness(history);
+
+  const result = await handlers.get("tool_call")({ toolName: "edit", input: { path: "src/client.js" } }, ctx);
+
+  expect(result).toBeUndefined();
+  expect(confirms).toEqual([]);
+});
+
+it("blocks an open gate only after the manual workflow is active", async () => {
+  const history = [
+    stateEntry(true),
+    ...messages([
+      "assistant",
+      `Interface Design Gate
+
+Current interface: new adapter
+Proposed interface: export function createClient(options)
+Why this boundary: callers should not know transport details
+User decision: approve or revise`,
+    ]),
+  ];
+  const { handlers, ctx, confirms } = makePiHarness(history);
+
+  const result = await handlers.get("tool_call")({ toolName: "edit", input: { path: "src/client.js" } }, ctx);
+
+  expect(result).toBeUndefined();
+  expect(confirms).toHaveLength(1);
+  expect(confirms[0].title).toBe("Interface Design Gate");
+});
+
 it("detects an interface gate prompt with the required lean fields", () => {
   const history = messages([
     "assistant",

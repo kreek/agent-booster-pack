@@ -23,11 +23,15 @@ const custom = (active) => ({
 
 function makePiHarness() {
   const commands = new Map();
+  const handlers = new Map();
   const userMessages = [];
   const notifications = [];
+  const appended = [];
 
   const pi = {
-    appendEntry() {},
+    appendEntry(customType, data) {
+      appended.push({ customType, data });
+    },
     sendMessage() {},
     sendUserMessage(message) {
       userMessages.push(message);
@@ -35,7 +39,9 @@ function makePiHarness() {
     registerCommand(name, command) {
       commands.set(name, command);
     },
-    on() {},
+    on(eventName, handler) {
+      handlers.set(eventName, handler);
+    },
   };
 
   const ctx = {
@@ -48,7 +54,7 @@ function makePiHarness() {
 
   specifyOneQuestion(pi);
 
-  return { commands, ctx, notifications, userMessages };
+  return { commands, ctx, handlers, notifications, userMessages, appended };
 }
 
 describe("specify one-question guard", () => {
@@ -58,7 +64,7 @@ describe("specify one-question guard", () => {
     expect(isSpecifyActivation("/abp:specify-off")).toBe(false);
   });
 
-  it("detects explicit skill invocation as automatic activation", () => {
+  it("detects explicit skill invocation as manual activation", () => {
     expect(isSpecifyActivation("/skill:specify design the API")).toBe(true);
     expect(isSpecifyActivation("/skill:proof add tests")).toBe(false);
   });
@@ -126,11 +132,41 @@ Should the queue be durable?`;
     expect(userMessages).toEqual(["design the import flow"]);
   });
 
-  it("correction prompt asks the agent to regenerate with exactly one decision question", () => {
+  it("correction prompt asks the agent to continue with exactly one decision question", () => {
     const prompt = makeCorrectionPrompt("Should we use Postgres? Should we add Redis?");
 
     expect(prompt).toMatch(/exactly one decision question/i);
+    expect(prompt).toMatch(/continue/i);
     expect(prompt).toMatch(/notes, not questions/i);
     expect(prompt).toMatch(/Postgres/);
+  });
+
+  it("replaces multi-question output visibly without hidden follow-up turns", async () => {
+    const { handlers, userMessages } = makePiHarness();
+    const event = {
+      message: {
+        role: "assistant",
+        content: [{ type: "text", text: "Should we use Postgres? Should we add Redis?" }],
+      },
+    };
+    const ctx = {
+      sessionManager: { getEntries: () => [custom(true)] },
+    };
+
+    const result = await handlers.get("message_end")(event, ctx);
+
+    expect(userMessages).toEqual([]);
+    expect(result.message.content[0].text).toMatch(/ABP Specify Guard blocked this response/i);
+    expect(result.message.content[0].text).toMatch(/Continue with exactly one decision question/i);
+  });
+
+  it("manual commands write explicit active and inactive state", async () => {
+    const { commands, ctx, appended } = makePiHarness();
+
+    await commands.get("abp:specify").handler("design the import flow", ctx);
+    await commands.get("abp:specify-off").handler("", ctx);
+
+    expect(appended[0]).toMatchObject({ customType: SPECIFY_STATE_ENTRY, data: { active: true } });
+    expect(appended[1]).toMatchObject({ customType: SPECIFY_STATE_ENTRY, data: { active: false } });
   });
 });

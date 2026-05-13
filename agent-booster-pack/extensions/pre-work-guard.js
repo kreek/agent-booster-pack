@@ -221,31 +221,42 @@ export function preWorkReminder() {
   return `\n\n${PRE_WORK_MARKER}:\nBefore your first mutating tool call (edit, write, mutating bash) in a turn, write a brief pre-work explanation with non-empty labels. For a single-file edit, use Plan: and Why:. For multi-file or mutating-bash changes, use Plan:, Why:, and Alternatives:. Git packaging commands such as git add/commit/merge do not need this explainer. The explanation teaches the user the codebase you are writing and gives them a chance to redirect before code lands.`;
 }
 
+export function manualPreWorkPrompt(intent) {
+  const subject = String(intent ?? "").trim();
+  return [
+    "Use ABP pre-work reflection before changing files.",
+    "",
+    "State:",
+    "- Plan: what will change",
+    "- Why: why this is better or safer than the current state",
+    "- Alternatives: options considered or rejected",
+    "",
+    subject ? `Intent: ${subject}` : "Then wait for the user's next instruction before implementation.",
+  ].join("\n");
+}
+
 export default function preWorkGuard(pi) {
-  pi.on("before_agent_start", async (event) => ({
-    systemPrompt: event.systemPrompt + preWorkReminder(),
-  }));
+  pi.registerCommand("abp:branch", {
+    description: "Run ABP branch isolation check",
+    handler: async (_args, ctx) => {
+      const entries = ctx.sessionManager?.getBranch?.() ?? [];
+      const branchResult = await handleBranchIsolation({
+        exec: (...args) => pi.exec(...args, { signal: ctx.signal, timeout: 5000 }),
+        ui: ctx.ui,
+        hasUI: ctx.hasUI,
+        entries,
+        appendEntry: (...args) => pi.appendEntry(...args),
+      });
 
-  pi.on("tool_call", async (event, ctx) => {
-    const entries = ctx.sessionManager.getBranch();
-    if (classifyToolCall(event.toolName, event.input) !== "mutating") return;
+      if (branchResult) return branchResult;
+      ctx.ui.notify("ABP branch check complete", "info");
+    },
+  });
 
-    const branchResult = await handleBranchIsolation({
-      exec: (...args) => pi.exec(...args, { signal: ctx.signal, timeout: 5000 }),
-      ui: ctx.ui,
-      hasUI: ctx.hasUI,
-      entries,
-      appendEntry: (...args) => pi.appendEntry(...args),
-    });
-    if (branchResult) return branchResult;
-
-    if (hasAlreadyExplainedThisTurn(entries)) return;
-
-    const verdict = shouldBlockPreWork(event.toolName, event.input, entries);
-    if (verdict) {
-      return { block: true, reason: makePreWorkBlockReason(verdict.missing, verdict.kind) };
-    }
-
-    pi.appendEntry(PRE_WORK_STATE_ENTRY, { explainedAt: Date.now() });
+  pi.registerCommand("abp:prework", {
+    description: "Ask the agent for an ABP pre-work reflection",
+    handler: async (args) => {
+      await pi.sendUserMessage(manualPreWorkPrompt(args));
+    },
   });
 }

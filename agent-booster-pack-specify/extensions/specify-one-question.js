@@ -49,9 +49,9 @@ export function shouldEnforceAssistantMessage(entries, assistantText) {
 }
 
 export function makeCorrectionPrompt(blockedText) {
-  return `ABP Specify Guard blocked your previous response because it asked multiple user-facing questions during Specify.
+  return `ABP Specify Guard blocked this response because it asked multiple user-facing questions during Specify.
 
-Regenerate the response with exactly one decision question. Keep any other uncertainties as notes, not questions. Do not use a question list.
+Continue with exactly one decision question. Keep any other uncertainties as notes, not questions. Do not use a question list.
 
 Blocked response:
 ${blockedText}`;
@@ -59,15 +59,6 @@ ${blockedText}`;
 
 function activeReminder() {
   return `\n\nABP Specify Guard is active. During Specify, ask at most one user-facing question per assistant turn. You may list uncertainties as notes, but do not phrase more than one item as a question. If several decisions are open, ask only the next smallest decision question that changes the design.`;
-}
-
-function stateMessage(active, source) {
-  return {
-    customType: SPECIFY_STATE_ENTRY,
-    content: active ? "ABP specify one-question mode enabled." : "ABP specify one-question mode disabled.",
-    display: false,
-    details: { active, source },
-  };
 }
 
 function replacementMessage(message, replacementText) {
@@ -83,7 +74,6 @@ export default function specifyOneQuestion(pi) {
     description: "Start ABP specify mode with one-question-at-a-time enforcement",
     handler: async (args, ctx) => {
       pi.appendEntry(SPECIFY_STATE_ENTRY, { active: true, source: "command" });
-      pi.sendMessage(stateMessage(true, "command"), { deliverAs: "nextTurn" });
       ctx.ui.notify("ABP specify guard enabled", "info");
 
       if (args?.trim()) await pi.sendUserMessage(args.trim());
@@ -94,7 +84,6 @@ export default function specifyOneQuestion(pi) {
     description: "Stop ABP specify one-question enforcement",
     handler: async (_args, ctx) => {
       pi.appendEntry(SPECIFY_STATE_ENTRY, { active: false, source: "command" });
-      pi.sendMessage(stateMessage(false, "command"), { deliverAs: "nextTurn" });
       ctx.ui.notify("ABP specify guard disabled", "info");
     },
   });
@@ -126,12 +115,10 @@ export default function specifyOneQuestion(pi) {
     if (!shouldEnforceAssistantMessage(ctx.sessionManager.getEntries(), text)) return;
 
     const correction = makeCorrectionPrompt(text);
-    pi.sendUserMessage(correction, { deliverAs: "followUp" });
-
     return {
       message: replacementMessage(
         event.message,
-        "ABP Specify Guard blocked a response that asked multiple questions. Regenerating with one decision question."
+        correction
       ),
     };
   });

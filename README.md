@@ -34,11 +34,11 @@ for agents that can read `~/.agents/skills/` or do not support plugins.
 
 ### Pi Package Install
 
-Pi is meant to be modular, so ABP for Pi is broken up into three extensions and a general skill library. Each extension ships its matching full skill; the skills package carries the remaining non-runtime skills.
+Pi is meant to be modular, so ABP for Pi is broken up into three workflow packages and a general skill library. Proof is the only default active runtime. The other workflows install manual commands and stay quiet until the user starts them.
 If you want everything, a meta package will install _all the things_.
 
 #### Meta Package
-[`agent-booster-pack`](agent-booster-pack/) Installs all the packages below.
+[`agent-booster-pack`](agent-booster-pack/) Installs all the packages below: proof runtime, all skills, and manual ABP workflow commands.
 ```sh
 pi install npm:agent-booster-pack
 ```
@@ -49,7 +49,7 @@ pi install npm:agent-booster-pack-skills
 ```
 
 #### Contract-First Extension
-[`agent-booster-pack-contract-first`](agent-booster-pack-contract-first/) Interface Design Gate runtime plus the `contract-first` skill. Requires human approval of contracts and interfaces to ensure code at the boundaries of components will play well with other components and systems.
+[`agent-booster-pack-contract-first`](agent-booster-pack-contract-first/) Manual Interface Design Gate workflow plus the `contract-first` skill. Start it with `/abp:contract` when a contract or interface needs human approval before code lands.
 ```sh
 pi install npm:agent-booster-pack-contract-first
 ```
@@ -61,7 +61,7 @@ pi install npm:agent-booster-pack-proof
 ```
 
 #### Specify Extension
-[`agent-booster-pack-specify`](agent-booster-pack-specify/) Design-partner mode
+[`agent-booster-pack-specify`](agent-booster-pack-specify/) Manual Design-partner mode
 for humans who want to stay involved in architecture and design. The Specify
 extension provides a conversation guard plus the `specify` skill: read the
 system, discuss target shapes and tradeoffs, ask one meaningful design decision

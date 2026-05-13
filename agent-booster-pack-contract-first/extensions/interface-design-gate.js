@@ -4,6 +4,7 @@ const GATE_TITLE = "Interface Design Gate";
 
 export const INTERFACE_GATE_CYCLE_ENTRY = "abp-interface-gate-cycle";
 export const INTERFACE_GATE_UI_ALLOW_ENTRY = "abp-interface-gate-ui-allowed";
+export const INTERFACE_GATE_STATE_ENTRY = "abp-interface-gate-state";
 
 const REQUIRED_GATE_FIELDS = [
   "current interface:",
@@ -46,6 +47,14 @@ export function chatMessages(entries) {
 /** Return true when recent chat contains the lean Interface Design Gate packet. */
 export function hasInterfaceGatePrompt(entries) {
   return chatMessages(entries).some(isInterfaceGatePrompt);
+}
+
+export function latestInterfaceGateState(entries) {
+  const stateEntry = entries
+    .filter((entry) => entry?.type === "custom" && entry.customType === INTERFACE_GATE_STATE_ENTRY)
+    .at(-1);
+
+  return stateEntry?.data?.active === true;
 }
 
 function isInterfaceGatePrompt(message) {
@@ -181,7 +190,18 @@ export function isPotentialInterfaceImplementation(toolName, input, entries) {
 }
 
 function gateReminder() {
-  return `\n\nABP Interface Design Gate:\nWhen work defines or materially changes a durable interface/contract between components, stop before implementation. Show:\n- Current interface: existing shape or "new interface"\n- Proposed interface: concrete function/class/module/API/config/event shape\n- Why this boundary: why this interface belongs here\n- User decision: ask the user to approve, revise, or rule it out\nThe agent may propose the shape, but the user must approve or revise it before implementation code lands.`;
+  return `Use the contract-first skill for this Interface Design Gate workflow.
+
+Before implementing a durable interface or contract, show:
+
+Interface Design Gate
+
+Current interface: existing shape or "new interface"
+Proposed interface: concrete function/class/module/API/config/event shape
+Why this boundary: why this interface belongs here
+User decision: ask the user to approve, revise, or rule it out
+
+The agent may propose the shape, but the user must approve or revise it before implementation code lands.`;
 }
 
 function blockReason() {
@@ -205,12 +225,29 @@ function reconcileClosedCycle(pi, entries) {
 
 /** Register the Interface Design Gate extension with Pi. */
 export default function interfaceDesignGate(pi) {
-  pi.on("before_agent_start", async (event) => ({
-    systemPrompt: event.systemPrompt + gateReminder(),
-  }));
+  pi.registerCommand("abp:contract", {
+    description: "Start ABP Interface Design Gate workflow",
+    handler: async (args, ctx) => {
+      pi.appendEntry(INTERFACE_GATE_STATE_ENTRY, { active: true, source: "command", at: Date.now() });
+      ctx.ui.notify("ABP Interface Design Gate enabled", "info");
+
+      const intent = String(args ?? "").trim();
+      await pi.sendUserMessage(intent ? `${gateReminder()}\n\nIntent: ${intent}` : gateReminder());
+    },
+  });
+
+  pi.registerCommand("abp:contract-off", {
+    description: "Stop ABP Interface Design Gate workflow",
+    handler: async (_args, ctx) => {
+      pi.appendEntry(INTERFACE_GATE_STATE_ENTRY, { active: false, source: "command", at: Date.now() });
+      ctx.ui.notify("ABP Interface Design Gate disabled", "info");
+    },
+  });
 
   pi.on("tool_call", async (event, ctx) => {
     const entries = ctx.sessionManager.getBranch();
+    if (!latestInterfaceGateState(entries)) return;
+
     reconcileClosedCycle(pi, entries);
 
     const refreshed = ctx.sessionManager.getBranch();
