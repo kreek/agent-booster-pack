@@ -153,8 +153,6 @@ It updates after each test run.
 | `proof_done` | Agent tool. Exits proof mode. |
 | `/proof` | Slash command. Manual toggle. |
 
-The legacy `tdd_start`, `tdd_done`, and `/tdd` still work.
-
 ## Limits
 
 This extension enforces the loop, not the quality of the tests.
