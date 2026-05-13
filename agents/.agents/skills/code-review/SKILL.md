@@ -7,7 +7,7 @@ description: Use to review diffs and PRs for bugs, regressions, edge cases, proo
 
 ## Iron Law
 
-`FINDINGS FIRST. BLOCK ON CORRECTNESS, SAFETY, DATA LOSS, AND UNPROVEN CLAIMS`
+`FINDINGS FIRST. BLOCK ON CORRECTNESS, SAFETY, DATA LOSS, AND UNPROVEN CLAIMS.`
 
 ## When to Use
 
@@ -42,25 +42,17 @@ description: Use to review diffs and PRs for bugs, regressions, edge cases, proo
 5. AI-generated code is untrusted until behavior, tests, and
    security-sensitive paths are verified. The patterned failures are
    enumerated under AI-Agent Failure Modes.
-6. Maintainability findings are valid when complexity creates real risk:
-   deep nesting, long functions, hidden mutable state, clever expressions,
-   unnecessary indirection, or behavior scattered across unrelated places.
-7. Simpler-looking code is not automatically simpler. Fewer files, shared
-   helpers, or a new layer are findings when they couple concerns that change
-   independently or hide state/effects from callers.
-8. Complexity findings should name the concrete cost: hidden state,
-   tangled effect, broad abstraction, dead compatibility shim, stale flag,
-   duplicated rule with divergent meaning, or behavior split across
-   unrelated lifecycles.
+6. Maintainability findings must name a concrete risk: hidden state, coupled
+   effect, broad abstraction, dead compatibility shim, stale flag, duplicated
+   rule with divergent meaning, or behavior split across unrelated lifecycles.
 
 ## AI-Agent Failure Modes
 
-Agent-generated diffs fail in patterned ways. Treat each as a blocking
-finding unless the diff names a real caller, requirement, or removal
-condition. Blocking means the done or merge claim is blocked and the
-finding is surfaced to the user, not that the review loops internally:
-make one pass, list findings, hand back. Do not re-review after fixing
-unless the user asks.
+Agent-generated diffs fail in patterned ways. Treat each as a blocking finding
+unless the diff names a real caller, requirement, or removal condition.
+Blocking means the done or merge claim is blocked and the finding is surfaced
+to the user. It does not mean the review loops internally. Make one pass, list
+findings, and hand back. Do not re-review after fixing unless the user asks.
 
 1. **Speculative abstraction.** New interface, factory, generic, strategy,
    wrapper, or config knob with fewer than two real callers in this or a
@@ -79,7 +71,7 @@ unless the user asks.
    against the implementation's own constants, regex, or string literals
    imported from the module under test; snapshot updates without a
    behavior-change reason; suites that survive a one-assertion or
-   one-branch mutation. Rewrite to assert user-visible behavior at the
+   one-branch mutation. Rewrite to assert caller-visible behavior at the
    data-shape boundary (see `proof`).
 5. **Fabricated API.** Imported symbol, method, parameter, framework
    feature, or CLI flag the type checker, language server, or installed
@@ -100,12 +92,12 @@ unless the user asks.
    `gh pr diff --patch` for code, and `gh api graphql` for
    `reviewThreads` when thread state (resolved/outdated, path, line)
    matters.
-2. Pre-flight before deep review. Note CI status: green, red and scope
-   the review as unproven and surface the failing check, or not yet run
-   and review can still proceed. Confirm the diff's intent and impact
-   are stated: in self-review the task context is the intent, in PR or
-   inbound review a missing description on a non-trivial diff is itself
-   a finding. For diffs above roughly 400 changed lines, sweep by risk
+2. Pre-flight before deep review. Note CI status. If CI is red, scope
+   the review as unproven and surface the failing check. If CI has not
+   run, say so and continue. Confirm the diff's intent and impact are
+   stated. In self-review, the task context is the intent. In PR or
+   inbound review, a missing description on a non-trivial diff is a
+   finding. For diffs above roughly 400 changed lines, sweep by risk
    area and declare partial scope explicitly. This is a one-time gate,
    not a loop: run it once per review pass.
 3. Read the intent: what behavior, API, data shape, migration, UI, or
@@ -115,16 +107,11 @@ unless the user asks.
    `typescript.md`, `ruby.md`, `java.md`, `kotlin.md`, `bash.md`,
    `sql.md`). Defer recommendations incompatible with the repo's
    declared toolchain.
-5. Load triggered domain skills as mandatory lenses. Always include a
-   `security` pass for any auth, trust-boundary, input, dependency, secret,
-   crypto, logging-redaction, or user-controlled-sink concern. Add others
-   as triggered: `database`, `api`, `proof`, `domain-modeling`, `architecture`,
-   `error-handling`, `async-systems`, `observability`, `ui-design`,
-   `accessibility`, `documentation`, `performance`. Use `release` here only
-   when the concrete diff contains version/changelog/package/CI/publish
-   artifacts, feature flags, migrations with rollout implications, or the user
-   asked for release readiness; do not load it just because early planning
-   mentioned possible future release risk.
+5. Load triggered domain skills as lenses. Always include `security` for auth,
+   trust boundaries, input, dependencies, secrets, crypto, redaction, or
+   user-controlled sinks. Add other skills only when the diff touches their
+   domain. Load `release` only for concrete release artifacts, rollout
+   obligations, or explicit release-readiness review.
 6. Run the AI-Agent Failure Modes pass on every agent-generated diff.
    Name each blocking finding by its mode (speculative abstraction,
    compatibility shim, dead defensive code, test theater, fabricated
@@ -214,7 +201,7 @@ ambiguity that blocks a finding or fix.
 | New interface, factory, generic, wrapper, or config knob with fewer than two real callers | Block. Demand inlining or deletion until a second real caller exists. | Boundary required by an external contract, public API, or documented extension point. |
 | Guard, try/except, fallback, or default-return for a state no in-scope caller produces | Block. Remove or convert to a boundary assertion. | Documented invariant whose violation must surface as a tracked error. |
 | Diff labeled refactor or cleanup but observable return, effect, error, or ordering changes | Reclassify as feature change and route to `proof`. | Behavior delta is the documented intent of the refactor. |
-| By inspection, the test suite would still pass if one assertion or one branch were flipped | Mark as test theater. Recommend rewriting to assert user-visible behavior at the data-shape boundary. Do not run mutation tooling unless the project already uses it. | Mutated branch is defensive code already known to be unreachable. |
+| By inspection, the test suite would still pass if one assertion or one branch were flipped | Mark as test theater. Recommend rewriting to assert caller-visible behavior at the data-shape boundary. Do not run mutation tooling unless the project already uses it. | Mutated branch is defensive code already known to be unreachable. |
 | PR bundles requested change with reformatting, import reordering, or unrelated docstrings | Require a split before deep review. | Reorganization itself is the requested change. |
 
 ## Handoffs

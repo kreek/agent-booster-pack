@@ -61,30 +61,18 @@ and run the baseline without local knowledge.
 
 ## Workflow
 
-1. Detect language, framework, existing conventions, and whether the
-   working tree is already a git repository. For fresh scaffolds, run
-   `git init` before feature code unless the user forbids it or the
-   environment cannot support git; if skipped, say why and mark change
-   control as unproven. Select and state the package manager before
-   running any scaffold or install command (use the `AGENTS.md` default
-   if no existing choice). Read `references/language-defaults.md` for
-   the cross-cutting stance and the relevant template under
-   `references/stacks/<language>/` for stack picks.
-2. For web work, classify the request: local prototype/spike, new app
-   scaffold, or production-bound app. Static HTML/CSS/JS is acceptable
-   for a throwaway prototype — say so explicitly and name the likely
-   upgrade framework if work continues. For greenfield apps, match the
-   request to a stack preset in `references/stacks/index.yaml` and
-   confirm the preset and required choices (database, hosting adapter,
-   etc.) before creating runtime/deploy files.
-3. Choose minimal standard tooling for install, format, lint,
-   typecheck, test, and coverage. Add scripts/commands with consistent
-   names. For each requested script or config file, map requirement →
-   artifact → command before calling the scaffold done.
-4. Add one smoke test and ensure it can fail and pass.
-5. Add CI that runs the same checks. Document local setup and test
-   commands in README. Hand off documentation system choice (Material
-   for MkDocs by default for large projects) to `documentation`.
+1. Detect language, framework, existing conventions, and git state.
+2. For fresh scaffolds, initialize git and `.gitignore` before feature code,
+   unless the user or environment blocks it. If skipped, say why.
+3. Select one package manager before running scaffold or install commands.
+   Use the repo or ecosystem default.
+4. For web work, classify the target as prototype, new app scaffold, or
+   production-bound app. Match greenfield apps to a stack preset when one fits.
+5. Add standard commands for install, format, lint, typecheck, test, and
+   coverage where applicable. Map each requested artifact to its command.
+6. Add one smoke test that can fail and pass.
+7. Add CI that runs the same checks. Document local setup and test commands in
+   README.
 
 ## Verification
 
@@ -104,12 +92,10 @@ and run the baseline without local knowledge.
       it; typecheck is not only a syntax check.
 - [ ] **Requested artifacts**: named artifacts exist by their
       requested names, or a substitution was explicitly approved.
-- [ ] **Web classification**: prototype/scaffold/production-bound was
-      named before files were created; prototypes name an upgrade
-      path; greenfield apps matched a stack preset (or named the
-      fallback) with required choices confirmed; fresh web app
-      scaffolds use a mature framework, not a hand-rolled HTTP server
-      or inline JS in a backend entrypoint.
+- [ ] **Web classification**: prototype/scaffold/production-bound was named
+      before files were created; greenfield apps matched a stack preset or
+      named the fallback; fresh web app scaffolds use a mature framework unless
+      the user asked otherwise.
 - [ ] **Smoke test + CI**: one smoke test proves the runner and
       build/import path; CI runs the same checks on push/PR and gates
       merge.
@@ -133,7 +119,7 @@ to the full checklist.
 |---|---|---|
 | "A nearby config file is equivalent" | Use the requested file name, or ask before substituting. | The repo already uses the nearby config as its source of truth. |
 | "`node --check` proves typecheck" | Treat it as syntax/lint smoke; wire `typecheck` to the real type checker or established equivalent. | The ecosystem has no type checker and the limitation is stated. |
-| "The commands passed, so setup is done" | Verify requirement -> artifact -> command mapping for every named setup requirement. | Pure script rename with no requested artifact. |
+| "The commands passed, so setup is done" | Verify the requirement -> artifact -> command mapping for every named setup requirement. | Pure script rename with no requested artifact. |
 | "Git can be added later" | Initialize git and `.gitignore` before feature code so ABP can review diffs, preserve checkpoints, and avoid tracking generated artifacts. | User explicitly forbids git or the target is inside an existing parent repo/submodule policy. |
 
 ## Handoffs

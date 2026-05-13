@@ -11,10 +11,11 @@ description: Use for REST API contract design, evolution, versioning, status cod
 
 ## When to Use
 
-- Adding, removing, renaming, or reviewing endpoints, fields, status
-  codes, webhooks, auth, pagination, rate limits, or idempotency.
+- Adding, removing, renaming, or reviewing REST endpoints, fields,
+  status codes, webhooks, auth, pagination, rate limits, or
+  idempotency.
 - Writing or changing OpenAPI, JSON Schema, public SDK boundaries, or
-  module interfaces external callers depend on.
+  integration contracts external callers depend on.
 
 ## When NOT to Use
 
@@ -30,17 +31,17 @@ description: Use for REST API contract design, evolution, versioning, status cod
 
 ## Core Ideas
 
-1. **Contract first.** Sketch OpenAPI/equivalent before controller
-   code; implement *from* the contract, not toward it. Every response
-   shape is explicit, including errors, empty states, pagination, and
-   auth failures. Durable API interfaces route through `contract-first`
-   for sign-off; error shape is part of the contract.
+1. **Contract first.** Sketch OpenAPI or the repo's API contract source
+   before controller code; implement *from* the contract, not toward it.
+   Every response shape is explicit, including errors, empty states,
+   pagination, and auth failures. Durable API interfaces route through
+   `contract-first`; error shape is part of the contract.
 
 2. **Evolution: additive in place; breaking needs a path forward.**
    Optional fields, query params, headers, methods, and endpoints
    evolve in place. Renames, removals, required additions, status-code
    changes, and semantic changes need a successor contract or
-   deprecation path — never break in place. See
+   deprecation path. Never break in place. See
    `references/api-evolution.md`.
 
 3. **Versioning: one strategy per service.** Pick URL path, media
@@ -53,7 +54,7 @@ description: Use for REST API contract design, evolution, versioning, status cod
    consumer-request problems, `5xx` for upstream or your-service
    problems; never mix origins in one response. Use the chosen data
    model's native error shape (JSON:API `errors[]`, FHIR
-   `OperationOutcome`, or RFC 9457 Problem Details) — these are
+   `OperationOutcome`, or RFC 9457 Problem Details). These are
    structurally distinct conventions, not interchangeable. Never leak
    raw upstream or internal errors. See
    `references/rest-error-status-codes.md`.
@@ -62,35 +63,24 @@ description: Use for REST API contract design, evolution, versioning, status cod
    standard.** JSON:API is the default for REST resource APIs (envelope
    with `id`/`type`/`attributes`/`relationships`, sparse fieldsets,
    includes, pagination conventions, error array). Switch to a
-   domain-specific standard when one applies — FHIR for healthcare,
+   domain-specific standard when one applies: FHIR for healthcare,
    HAL for hypermedia-centric APIs, JSON-LD when semantic-web interop
    matters. Document deviations from the chosen standard explicitly.
    See `references/data-models.md`.
 
 ## Workflow
 
-1. Identify the caller and the contract surface they bind to. Define
-   paths, methods, request/response bodies, status codes, auth,
-   pagination, idempotency, and error shape.
-2. Durable API interfaces: route through `contract-first` before
-   controller, client, SDK, webhook, or integration implementation
-   continues. Add error shape to the contract artifacts.
-3. Errors: pick status by origin
-   (`references/rest-error-status-codes.md`); compatibility-check the
-   change (`references/api-evolution.md`).
-4. Mutations: define the idempotency contract
-   (`references/idempotency.md`).
-5. Lists and streams: define cursor and bounded-pagination semantics
-   (`references/pagination.md`).
-6. Webhooks: sign, version, and deduplicate
-   (`references/webhooks.md`).
-7. Pipeline: place transport-wide concerns in middleware; keep
-   route-specific logic in handlers
-   (`references/middleware-vs-handler.md`).
-8. For each public contract change, record a Proof Contract: contract
-   claim, data invariant, public boundary, check, evidence. Add
-   contract or behavior tests at the outermost boundary; update
-   generated/source-of-truth docs only.
+1. Identify the caller and the contract surface they bind to.
+2. Define the contract before implementation: path, method, request body,
+   response bodies, status codes, auth, pagination, idempotency, and error
+   shape.
+3. Route durable API interfaces through `contract-first` before controller,
+   client, SDK, webhook, or integration work continues.
+4. Apply the relevant reference only when the feature needs it:
+   `api-evolution`, `rest-error-status-codes`, `idempotency`, `pagination`,
+   `webhooks`, or `middleware-vs-handler`.
+5. Add outer-boundary contract or behavior tests. Update source-of-truth docs,
+   not generated output by hand.
 
 ## Verification
 
@@ -128,6 +118,18 @@ description: Use for REST API contract design, evolution, versioning, status cod
 - [ ] Tests exercise the public boundary, not only internal handlers;
       every public contract claim has proof evidence or is reported as
       unproven.
+
+## Tripwires
+
+| Trigger | Do this instead | False alarm |
+|---|---|---|
+| "Just rename/remove this field" | Treat it as breaking unless a successor contract or deprecation path exists. | Private endpoint with no external or cross-service caller. |
+| "A 500 is fine for this bad request" | Pick status by origin: consumer problems are `4xx`; service/upstream problems are `5xx`. | The request is valid and the service failed while processing it. |
+| "Return whatever the handler has" | Define the response and error shape in the contract first. | Internal handler test with no public API claim. |
+| "Pagination can be added later" | Define bounded pagination, stable ordering, and invalid-token behavior now. | The endpoint is provably bounded and cannot grow beyond a small fixed set. |
+| "Retry the mutation if it times out" | Define idempotency key scope, replay window, duplicate response, and conflict semantics. | The operation is explicitly unsafe to retry and documented that way. |
+| "Webhook delivery is just POST" | Sign, timestamp, replay-protect, version, and deduplicate webhook events. | Internal trusted event with no external delivery. |
+| "Put this endpoint rule in middleware" | Keep route-specific validation, ownership, and domain rules in handler/domain code. | The concern is transport-wide across all routes. |
 
 ## Handoffs
 

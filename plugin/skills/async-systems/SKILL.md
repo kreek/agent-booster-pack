@@ -10,7 +10,7 @@ description: Use for async systems, concurrency, queues, streams, pub/sub, order
 `EVERY ASYNC BOUNDARY NAMES OWNERSHIP, LIFETIME, BACKPRESSURE, AND FAILURE SEMANTICS.`
 
 Async work fails when ownership, cancellation, retry, ordering, and
-visibility are implicit.
+failure signals are implicit.
 
 ## When to Use
 
@@ -42,7 +42,8 @@ visibility are implicit.
    independent replay, long retention, audit history, offline
    catch-up, multi-service fanout, consumer-group scaling, partitioned
    throughput, or durable recovery.
-2. Values move across boundaries; mutable places stay owned.
+2. Send immutable data across async boundaries. Keep mutable state owned by
+   one scope.
 3. Every spawned task belongs to a scope that cancels, awaits, or
    supervises it.
 4. Every queue, channel, worker pool, semaphore, stream, and buffer has
@@ -60,20 +61,10 @@ visibility are implicit.
 10. Silent async failure is a bug: exhausted jobs, lag, dropped events,
     and dead work need visible signals.
 
-## Tripwires
-
-| Trigger | Do this instead | False alarm |
-|---|---|---|
-| Payload reads session, request, thread-local, or in-memory state. | Pass stable IDs and immutable parameters, then reload needed state in the job. | In-process async task that never leaves the request lifecycle. |
-| Retry settings are defaulted, unbounded, or copied. | Name retryable errors, budget, backoff, and terminal behavior. | Job is explicitly non-retryable and records terminal failure. |
-| Worker rescues and only logs. | Re-raise, mark terminal, or record failure visibly. | Best-effort cleanup job with documented discard semantics. |
-| Enqueue happens before transaction commit. | Enqueue after commit or use transactional outbox/enqueue. | Job reads no state written by the transaction. |
-| Bulk queue can starve user-facing work. | Set priority, concurrency, timeout, or separate queues. | Dedicated worker pool with isolation already proven. |
-
 ## Workflow
 
 1. Name producers, consumers, shared state, owners, transport, queue,
-   broker, lifecycle, and user-visible latency expectation.
+   broker, lifecycle, and user-facing latency expectation.
 2. Pick the simplest coordination/transport that preserves ownership.
    For live updates, try polling/SSE/WebSockets first; if a broker is
    chosen, record the requirement that forced it.
@@ -116,6 +107,16 @@ visibility are implicit.
       retention, replay, offset/ack, DLQ, and poison-message handling
       are explicit where streams are involved.
 - [ ] Async failure modes are observable and tested.
+
+## Tripwires
+
+| Trigger | Do this instead | False alarm |
+|---|---|---|
+| Payload reads session, request, thread-local, or in-memory state. | Pass stable IDs and immutable parameters, then reload needed state in the job. | In-process async task that never leaves the request lifecycle. |
+| Retry settings are defaulted, unbounded, or copied. | Name retryable errors, budget, backoff, and terminal behavior. | Job is explicitly non-retryable and records terminal failure. |
+| Worker rescues and only logs. | Re-raise, mark terminal, or record failure visibly. | Best-effort cleanup job with documented discard semantics. |
+| Enqueue happens before transaction commit. | Enqueue after commit or use transactional outbox/enqueue. | Job reads no state written by the transaction. |
+| Bulk queue can starve user-facing work. | Set priority, concurrency, timeout, or separate queues. | Dedicated worker pool with isolation already proven. |
 
 ## Handoffs
 

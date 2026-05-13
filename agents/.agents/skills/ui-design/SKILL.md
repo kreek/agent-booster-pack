@@ -12,8 +12,8 @@ description: Use for frontend UI, layouts, components, responsive behavior, visu
 ## When to Use
 
 - Building or materially changing UI layout, components, design systems,
-  typography, color, motion, responsive behavior, or frontend framework
-  choices.
+  typography, color, motion, responsive behavior, or frontend structure that
+  affects user interaction.
 
 ## When NOT to Use
 
@@ -28,8 +28,9 @@ description: Use for frontend UI, layouts, components, responsive behavior, visu
 1. One screen has one primary action and a clear information order.
 2. Use a small token system for spacing, type, color, radius, and motion.
    Apply tokens consistently; avoid stray one-off values.
-3. Accessibility is a design input — not a later review pass: keyboard,
-   focus, contrast, reduced motion, touch target, and screen-reader flow.
+3. Accessibility is a design input, not a later review pass. Design keyboard,
+   focus, contrast, reduced motion, touch targets, and screen-reader flow up
+   front.
 4. Component APIs express intent and state, not implementation convenience.
 5. Modern CSS should reduce JavaScript and layout hacks when browser support
    allows it.
@@ -40,8 +41,8 @@ description: Use for frontend UI, layouts, components, responsive behavior, visu
    existing framework/design-system patterns before inventing new ones.
 2. Define hierarchy, layout, states, empty/error/loading behavior, and
    responsive rules.
-3. Apply tokens consistently; remove elements that do not change
-   comprehension, trust, or actionability.
+3. Apply tokens consistently. Remove elements that do not improve
+   comprehension, trust, or action.
 4. Verify with real rendering, keyboard navigation, contrast, and
    reduced-motion behavior.
 
@@ -56,6 +57,16 @@ description: Use for frontend UI, layouts, components, responsive behavior, visu
       screen-reader flow.
 - [ ] UI states exist for loading, empty, error, disabled, and success where
       applicable.
+
+## Tripwires
+
+| Trigger | Do this instead | False alarm |
+|---|---|---|
+| "Add a card/section so it looks richer" | Start from the user task and hierarchy. Remove elements that do not improve comprehension, trust, or action. | The card groups repeated peer items or frames a real tool surface. |
+| "We'll add loading/error/empty states later" | Define the required states with the layout. | The component cannot load, fail, or be empty. |
+| "One-off spacing fixes this screen" | Use or extend the token system intentionally. | A browser or platform quirk needs a documented local fix. |
+| "Custom control first, semantics later" | Start with native controls and route accessibility-specific behavior to `accessibility`. | The existing design system control already proves semantics and keyboard behavior. |
+| "Pick the frontend framework before the interaction model" | Define the UI task, state, and flow first; use existing repo patterns where possible. | The user explicitly asked to compare frameworks. |
 
 ## Handoffs
 

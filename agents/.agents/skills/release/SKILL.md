@@ -54,7 +54,7 @@ description: Late gate for release prep, versions, changelogs, rollout, and roll
 3. Compatibility changes use the highest required bump for the release
    unit: breaking changes are major, compatible additions are minor,
    fixes/docs are patch.
-4. Bump only artifacts whose user-visible payload, manifest, dependency
+4. Bump only artifacts whose public payload, manifest, dependency
    range, bundled dependency set, or plugin metadata changes. Lockstep
    bumps require explicit repo policy or user approval.
 5. Registry state is release input. Check the latest published versions,
@@ -66,22 +66,18 @@ description: Late gate for release prep, versions, changelogs, rollout, and roll
    what `git log` already says.
 8. Manifest version, lockfile when committed, CHANGELOG release header,
    tag, and publish plan agree.
-9. Release preparation and release execution are separate. Agents
-   prepare classification, notes, checks, runbooks, and evidence;
-   humans approve, promote, deploy, roll back, change flags, and
-   mutate shared environments.
-10. Release is usually a late gate. At task start, `workflow` may name release
-    risk, but this skill should usually run after implementation when a diff,
-    migration, package manifest, or rollout plan exists to inspect.
-11. Release intent is separate from implementation intent. A request to
-    implement, rename, or approve an interface is not permission to bump
-    versions, edit changelogs, mutate package lockfiles for release, create
-    tags, publish packages, or check registries unless release prep was
-    explicitly requested or approved.
-12. Rollback must be faster and more reliable than emergency
-    fix-forward.
-13. Feature flags need owner, expiry, safe default, cleanup, and a
-    human-owned production change path.
+9. Release is a late gate. At task start, `workflow` may name release risk, but
+   this skill usually runs after a diff, migration, package manifest, or
+   rollout plan exists to inspect.
+10. Release intent is separate from implementation intent. Do not bump
+    versions, edit changelogs, mutate release lockfiles, create tags, publish,
+    or check registries unless release prep was requested or approved.
+11. Release preparation and release execution are separate. Agents prepare
+    classification, notes, checks, runbooks, and evidence. Humans approve,
+    promote, deploy, roll back, change flags, and mutate shared environments.
+12. Rollback must be faster and more reliable than emergency fix-forward.
+    Feature flags need owner, expiry, safe default, cleanup, and a human-owned
+    production change path.
 
 ## Classification
 
@@ -93,15 +89,12 @@ description: Late gate for release prep, versions, changelogs, rollout, and roll
 
 ## Workflow
 
-1. Confirm this skill should run now. If the work is still at startup and the
-   user did not ask for release prep or rollout planning, return to `workflow`
-   with release risk noted but deferred. If a concrete diff exists or the user
-   approved release prep, continue.
-2. Confirm release intent before release-prep mutations. Ask whether the
-   current task is code/docs only; version/changelog/lockfile updates;
-   release notes; or human-run tag/publish steps. If release prep was not
-   approved, do not edit release artifacts just because implementation or
-   validation surfaced them.
+1. Confirm this skill should run now. Continue only when the user asked for
+   release prep/rollout planning, approved release prep, or a concrete diff
+   surfaced release artifacts or rollout obligations.
+2. Confirm release-prep scope before editing release artifacts. Separate
+   code/docs only, version/changelog/lockfile updates, release notes, and
+   human-run tag/publish steps.
 3. Map release units and versioning policy. Read manifests, lockfiles,
    workspace config, release scripts, changelog, tags, and packaging
    docs. For package publishes, query the registry for current versions

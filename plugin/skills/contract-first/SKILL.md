@@ -15,40 +15,40 @@ description: Use when an Interface Design Gate must approve durable function, AP
   public type, module boundary, HTTP endpoint, CLI command or flag, config key,
   environment variable, event payload, file format, database schema, migration
   step, or cross-component contract.
-- The Pi Interface Design Gate blocks a mutating tool call and asks for the
-  current interface, proposed interface, boundary reason, and user decision.
+- An installed Interface Design Gate blocks a mutating tool call and asks for
+  the current interface, proposed interface, boundary reason, and user
+  decision.
 - Reviewing whether implementation started before contract approval.
 
 ## When NOT to Use
 
-- Purely internal helper changes with no caller-visible boundary.
+- Purely internal helper changes with no durable boundary outside the helper.
 - Typos, formatting, comment-only edits, or docs-only changes with no contract
   effect.
 - Broad routing and skill selection; use `workflow`.
 - Collaborative design exploration before a concrete interface proposal; use
   `specify`.
 
-## Runtime backstop
+## Optional Runtime Backstop
 
-The Interface Design Gate Pi runtime fires after you have opened a packet,
-blocking implementation until the user approves the proposed shape.
-
-If the Interface Design Gate blocks a tool call, open the packet (Current
-interface, Proposed interface, Why this boundary, User decision) and retry.
+Some ABP installations include an Interface Design Gate runtime. It may block
+mutating tool calls when interface intent appears without approval. If it
+blocks, open the packet and fill in: Current interface, Proposed interface, Why
+this boundary, User decision.
 
 ## Workflow
 
 1. Stop before implementation code lands. Do not write source, migration, or
    config that commits the new boundary until approval is recorded.
-2. Name the current interface with file/line evidence, or state "new
-   interface" for greenfield work.
+2. Name the current interface with file/line evidence. For greenfield work,
+   state "new interface."
 3. Propose the concrete interface shape: function signature, type, endpoint,
    CLI, config, event, schema, or file format. For public renames or removals,
    separate the desired new shape from the compatibility plan: breaking change,
    alias/shim, deprecation path, or old surface retained.
 4. Explain why this boundary belongs here and what owns each side of it.
-5. Ask the user to approve, revise, or rule it out. Treat silence as not
-   approved, and do not treat name/shape approval as compatibility approval.
+5. Ask the user to approve, revise, or rule it out. Silence is not approval.
+   Name/shape approval is not compatibility approval.
 6. After approval, implement only the approved shape. If the implementation
    discovers a materially different contract, return to the gate.
 

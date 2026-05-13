@@ -11,9 +11,9 @@ description: Use for refactoring, behavior-preserving change, tests, and safe re
 
 ## When to Use
 
-- Legacy refactors, large renames, extractions, migrations, branch by
-  abstraction, strangler fig, Mikado planning, characterization tests,
-  or big-bang rewrite avoidance.
+- Changing structure while preserving behavior: legacy refactors, large
+  renames, extractions, migrations, branch by abstraction, strangler fig,
+  Mikado planning, characterization tests, or big-bang rewrite avoidance.
 
 ## When NOT to Use
 
@@ -26,19 +26,17 @@ description: Use for refactoring, behavior-preserving change, tests, and safe re
 1. Preserve behavior first; add characterization tests where coverage
    is missing. Separate structural from behavior changes: every commit
    is one or the other, never both.
-2. Name the tangle before cutting it: data shape, side effect, module
-   boundary, ownership, time, transport, persistence, or compatibility.
+2. Name the coupling before changing structure: data shape, side effect,
+   module boundary, ownership, time, transport, persistence, or
+   compatibility.
 3. Make every step small, reversible, and shippable.
 4. Validate the target shape before moving large amounts of code.
-5. Use parallel change for public interfaces: expand, migrate callers,
-   contract. Prefer strangler or branch-by-abstraction over big-bang
-   rewrites.
+5. For public interfaces, use parallel change: expand, migrate callers, then
+   contract. Ask which callers, data, and releases must keep working before
+   adding shims, dual paths, or migration complexity.
 6. Delete old paths only when traffic/callers have moved and
    verification proves it.
-7. Do not assume backward compatibility is free or required. Ask which
-   callers, data, and releases must keep working before adding shims,
-   dual paths, or migration complexity.
-8. Simplification is refactoring: remove accidental complexity only after
+7. Simplification is refactoring: remove accidental complexity only after
    naming the behavior preserved and the coupling reduced. Load workflow's
    `references/simple-not-easy.md` when shorter code, new helpers, or
    removed paths might hide state, compatibility, ownership, or proof risk.
@@ -63,7 +61,7 @@ description: Use for refactoring, behavior-preserving change, tests, and safe re
 
 - [ ] Tests were green before the refactor; characterization coverage
       exists for legacy behavior touched.
-- [ ] The tangle being separated was named before code moved.
+- [ ] The coupling being separated was named before code moved.
 - [ ] Each commit is structural or behavioral, not both; the system is
       shippable at every commit.
 - [ ] Public interface changes use expand-contract or compatibility

@@ -23,26 +23,21 @@ description: Use for databases, schemas, migrations, indexes, transactions, quer
 
 ## Core Ideas
 
-1. Default to Postgres (server) or SQLite (embedded, local-first).
-   Postgres covers JSONB, full-text, geospatial, vectors, time-series,
-   constraints, and transactions natively or via extensions. Reach for
-   a document store only when its unique benefits (native document
-   API, global scale, offline sync, change streams) are required.
+1. Use the project's existing database unless the task is choosing a
+   store. For greenfield server work, default to Postgres; for
+   embedded or local-first work, default to SQLite. Reach for a
+   document store only when its native document API, global scale,
+   offline sync, or change streams are required.
 2. Expand, migrate, verify, switch, then contract in separate
    deployable steps.
 3. Review SQL and lock behavior, not just ORM code.
 4. Backfills are batched, resumable, observable, and rollback-aware.
-5. New indexes and constraints must be online or staged for the target
-   database.
-6. Indexes and unique constraints are part of design, not optimisation.
-   Before writing the migration, name:
-   - **Invariant → constraint**: every uniqueness invariant the domain
-     requires, enforced with a DB-level `UNIQUE`/`EXCLUDE` constraint,
-     never an application-layer check (which races under concurrency).
-   - **Known access path → index**: every column reached via foreign
-     key, `WHERE`, `JOIN`, or `ORDER BY`, with the supporting index
-     shipped in the same migration. Adding it later on a hot table
-     requires `CONCURRENTLY` and rollout coordination.
+5. Constraints enforce invariants. Every uniqueness invariant needs a DB-level
+   `UNIQUE`, `EXCLUDE`, composite, or partial equivalent. Application-layer
+   checks race under concurrency.
+6. Indexes support known access paths. New foreign keys and known predicates
+   reached by `WHERE`, `JOIN`, or `ORDER BY` need supporting indexes in the
+   same migration, or a stated reason they do not.
 7. Query changes need plans on production-shaped data.
 8. Isolation level is a design decision; retries are part of
    serializable correctness.
@@ -70,17 +65,16 @@ description: Use for databases, schemas, migrations, indexes, transactions, quer
       phases.
 - [ ] Backfills are batched and resumable; each batch holds locks
       briefly.
-- [ ] Every uniqueness invariant in the change is enforced by a DB
-      constraint (`UNIQUE`, `EXCLUDE`, or composite/partial
-      equivalent), not application-layer logic. New FK columns and
-      known query predicates (`WHERE`, `JOIN`, `ORDER BY`) have
-      supporting indexes shipped in the same migration, or the
-      omission is explicitly justified.
+- [ ] Every uniqueness invariant in the change is enforced by a DB constraint
+      or equivalent engine-specific mechanism, not application-layer logic.
+- [ ] New FK columns and known query predicates (`WHERE`, `JOIN`, `ORDER BY`)
+      have supporting indexes in the same migration, or the omission is
+      explicitly justified.
 - [ ] Index/constraint creation uses the online mechanism for the
       target database.
 - [ ] Engine-specific elaborations (partial unique, expression,
       deferrable, exclusion, GIN/GIST/BRIN indexes, `CONCURRENTLY`,
-      `USING INDEX` attachments — see `references/online-ddl.md`) are
+      `USING INDEX` attachments; see `references/online-ddl.md`) are
       verified against the target engine: the migration ran locally
       against the project's target before claiming done. SQLite
       passing is not proof of Postgres behavior. Plain index, column,
@@ -104,7 +98,7 @@ description: Use for databases, schemas, migrations, indexes, transactions, quer
 | "No one's using that index" | Observe across a full traffic cycle before dropping it. | Brand-new unused index in an unshipped migration. |
 | "We'll enforce uniqueness in the application layer" | Add a DB-level `UNIQUE` or `EXCLUDE` constraint. Application-layer checks race under concurrency and fail open under retries. | The field is genuinely advisory and a duplicate is a recoverable UX issue, not a correctness violation. |
 | "We can add the index later if queries get slow" | Add it in the same migration when the access pattern is known (FK columns, predicates in known queries). Later additions on hot tables need `CONCURRENTLY` and rollout coordination. | The column is genuinely write-only or the query pattern is unknown and will be measured first. |
-| "Partial unique index gives me uniqueness" | A partial index doesn't satisfy a unique *constraint*. Pick one: full unique constraint, partial unique *index* (accepting it doesn't enforce constraint semantics), or `EXCLUDE` constraint. See `references/online-ddl.md` for engine specifics. | The requirement explicitly asks for a partial unique *index* (not a constraint) and the migration was tested against that engine. |
+| "Partial unique index gives me uniqueness" | Check the target engine. Decide whether the invariant needs a constraint, a partial unique index, or an exclusion constraint, then test the migration there. | The requirement explicitly asks for a partial unique index and accepts its engine-specific semantics. |
 | "Adding a `password` column" | Load `security`. Store only an `argon2id`/`scrypt`/`bcrypt` hash in `password_hash`, never plaintext. The same applies to API keys, OAuth tokens, MFA secrets, and recovery codes. | Read-only mirror of an external auth source the app never writes to. |
 
 ## Handoffs

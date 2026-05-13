@@ -93,8 +93,10 @@ description: Use first to route ABP work, choose skills, hand off, and define ve
    | --- | --- |
    | `specify` | The design shape is not settled yet. |
    | `contract-first` | A durable interface needs approval before code locks it in. |
+   | `debugging` | A bug, failure, incident, flake, or regression needs root-cause evidence before a fix. |
    | `domain-modeling` | Data shape, states, invariants, transitions, or effects matter. |
    | `architecture` | Module boundaries, ownership, layering, or cross-component shape matter. |
+   | `refactoring` | Structure must change while preserving behavior. |
    | `api` | HTTP/API shape, status codes, pagination, idempotency, or webhooks matter. |
    | `database` | Persisted data, migrations, transactions, deletion, or query behavior matter. |
    | `security` | Auth, secrets, trust boundaries, or user-controlled input matter. |

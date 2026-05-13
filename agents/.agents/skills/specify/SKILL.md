@@ -23,8 +23,6 @@ description: Design-partner mode for discovery, tradeoffs, decisions, and agreed
 - `workflow` chooses the Design-partner mode because architecture, domain
   modeling, durable interfaces, cross-boundary contracts, or multi-component
   choices need human participation.
-- Before drafting an implementation plan or writing code for any non-trivial
-  change.
 
 ## When NOT to Use
 
@@ -42,8 +40,8 @@ description: Design-partner mode for discovery, tradeoffs, decisions, and agreed
 
 1. Specify is the Design-partner engine for ABP. It is a collaborative
    engineering conversation, not a document-filling exercise and not maximum
-   autonomous coding. The first output is shared understanding: current
-   system, possible target shape, tradeoffs, decisions, and open questions.
+   autonomous coding. The first output is shared understanding: the current
+   system, target shape, tradeoffs, decisions, and open questions.
 2. Read the code before proposing the shape. Cite `file:line` for existing
    contracts. For greenfield work, cite adjacent conventions, framework idioms,
    or sibling features the new work will live among.
@@ -59,12 +57,11 @@ description: Design-partner mode for discovery, tradeoffs, decisions, and agreed
    concrete options and a recommendation, then revise the shared shape from the
    user's answer. List secondary uncertainties as notes, not as a question
    barrage.
-6. `domain-modeling` is the always-on lens. Name new and changed states,
-   transitions, effects, and invariants. Make illegal states unrepresentable in
-   the proposed shape.
-7. Use specialist lenses when the design touches their domain: `api`,
-   `database`, `async-systems`, `security`, `error-handling`, `observability`,
-   `performance`, `ui-design`, `accessibility`, or `release`.
+6. Use `domain-modeling` when data, state, effects, or invariants shape the
+   design. Make illegal states unrepresentable in the proposed shape.
+7. Bring in specialist skills only for design risks they own: API,
+   persistence, async behavior, security, errors, observability, performance,
+   UI, accessibility, or release.
 8. Do not create a persistent artifact before the discussion converges unless
    the user explicitly asks to use the artifact as the discussion medium.
 9. Keep design above implementation sequencing. If you are writing file-by-file
@@ -77,9 +74,9 @@ description: Design-partner mode for discovery, tradeoffs, decisions, and agreed
 
 ## Workflow
 
-1. State the user-visible goal in one or two sentences and frame the turn as
-   Design-partner work: the agent will read, propose, ask, revise, and wait for
-   agreement before planning or coding.
+1. State what the finished change should do in one or two sentences. Explain
+   that the agent will read, propose, ask, revise, and wait for agreement
+   before planning or coding.
 2. Read the relevant code or conventions. Summarize current contracts, data
    shapes, states, constraints, and ownership with citations.
 3. Offer one or more feasible target shapes at the contract level. Name
@@ -150,7 +147,7 @@ Default locations when the repo has no convention:
 | "Design-partner means the user must design it" | Propose concrete options and a recommendation; ask the human to approve, revise, or rule it out. | The user asks to supply their own architecture. |
 | "API just means HTTP" | Re-read Core Idea 3; CLI flags, env vars, schemas, events, file formats, and types are contracts too. | The change is truly HTTP-only. |
 | "The user will catch open questions in review" | Ask the blocking design question now and revise the shared shape from the answer. | The user already stated the decision; record it as resolved. |
-| "Architecture first, then Specify" | Use Specify to map current and proposed terrain; bring `architecture` in when boundaries are the decision. | The user explicitly asked for an architecture decision before contract drafting. |
+| "Architecture first, then Specify" | Use Specify to map the current system and proposed shape; bring `architecture` in when module boundaries are the decision. | The user explicitly asked for an architecture decision before contract drafting. |
 
 ## Handoffs
 
@@ -171,6 +168,7 @@ Default locations when the repo has no convention:
 - ADR template: status, date, context, decision, consequences.
 - "Design It!" (Keeling) for architectural conversation patterns:
   <https://pragprog.com/titles/mkdsa/design-it/>
-- `agent-booster-pack-contract-first` Pi runtime companion: ships from this repo
-  at `agent-booster-pack-contract-first/` and soft-blocks mutating tool calls
-  when interface intent appears without an approved Interface Design Gate packet.
+- `agent-booster-pack-contract-first` optional runtime package: ships from this
+  repo at `agent-booster-pack-contract-first/` and can soft-block mutating tool
+  calls when interface intent appears without an approved Interface Design Gate
+  packet.

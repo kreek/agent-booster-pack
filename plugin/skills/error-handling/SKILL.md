@@ -12,12 +12,13 @@ description: Use for error handling, error types, propagation, retries, user mes
 ## When to Use
 
 - Designing or reviewing typed errors, exceptions, Result/Either flows,
-  domain error boundaries, wrapping, retries, remote dependency failures, panics,
+  domain error boundaries, wrapping, retries, remote-call failures, panics,
   user-facing errors, or swallowed failures.
 
 ## When NOT to Use
 
 - Security-specific failure shape; pair with `security`.
+- REST status-code taxonomy or public API error schema; use `api`.
 - Observability of errors in production; pair with `observability`.
 
 ## Core Ideas
@@ -38,13 +39,13 @@ description: Use for error handling, error types, propagation, retries, user mes
    `api` for the full status-code taxonomy.
 7. User-facing messages are safe and actionable; internal errors keep
    diagnostic detail under a correlation ID.
-8. Remote calls: set finite connect/read timeouts derived from
-   observed latency (not defaults); retry only idempotent transient
-   failures, in one layer, with cap, jitter/backoff, and budget; add
-   circuit breakers, bulkheads, or load shedding to protect callers
-   from critical dependency failure.
-9. Panics/assertions are for impossible states and process boundaries,
-   not routine control flow.
+8. Remote calls need finite connect/read timeouts based on observed latency,
+   not defaults. Critical dependencies need circuit breakers, bulkheads, load
+   shedding, or deliberate fail-fast behavior.
+9. Retries apply only to idempotent transient failures. Retry in one layer with
+   a cap, jitter/backoff, and budget.
+10. Panics/assertions are for impossible states and process boundaries, not
+    routine control flow.
 
 ## Workflow
 

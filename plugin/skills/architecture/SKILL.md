@@ -13,7 +13,7 @@ description: Use for architecture decisions, module boundaries, coupling, layeri
 
 - Choosing between domain/feature-oriented organization and horizontal
   controller/service/repository/DTO layers.
-- Drawing module boundaries, bounded contexts, and public surfaces.
+- Choosing module boundaries, bounded contexts, and public surfaces.
 - Defining internal boundary contracts: what shape crosses a
   module/component boundary, what assumptions are guaranteed, and what
   details stay hidden.
@@ -33,42 +33,23 @@ description: Use for architecture decisions, module boundaries, coupling, layeri
 
 ## Core Ideas
 
-1. Organize by what changes together. Behavior, data shapes, invariants, and
-   tests for one feature should live close enough to edit in one window.
-2. Prefer domain/feature locality over horizontal layering. Horizontal
-   controller/service/repository/DTO splits are useful at real technical
-   boundaries; they are harmful when they scatter one behavior across many
-   files by default.
-3. Use DDD tactically, not ceremonially:
-   - Load-bearing: domain language, states, invariants, workflow boundaries.
-   - Optional (must earn their keep): aggregates, repositories, factories,
-     domain services.
-4. Hide volatile design decisions behind small surfaces, not flowchart steps.
-   Module boundaries are about what callers don't need to know, not about
-   sequencing.
-5. Define contracts at internal boundaries. Each module/component boundary
-   should say what shape crosses it, what assumptions are guaranteed, and
-   what internal details must not leak. Public HTTP contracts belong to
-   `api`; exact parsed shapes and invariants belong to `domain-modeling`.
-6. If a proposed boundary is a durable interface, route to
-   `contract-first` before shaping code around it; use `specify` to
-   capture the design when the contract is non-trivial.
-7. Bounded contexts beat shared models. When two parts of the system mean
-   subtly different things by the same word, give each context its own type.
-8. Separate things that change for different reasons. A simple boundary
-   reduces coordination between independent changes; an easy layer that every
-   feature must cross usually increases it.
-9. Make component data flow explicit when a feature consumes external data.
-   Name where data enters, where it is parsed or normalized, which internal
-   shape owns domain meaning, and which output/view shape feeds presentation.
-   These are roles in the flow, not mandatory folders. Raw service payloads
-   should not leak past the trust boundary by accident.
-10. Add a layer only when it represents a real boundary (process, deploy,
-   trust, persistence, transport) or removes proven duplication.
-   Request middleware is a transport boundary; it should carry
-   pipeline-wide concerns, not feature-specific business behavior. Use
-   workflow's `references/simple-not-easy.md` when a proposed boundary feels
-   convenient but its change axis is unclear.
+1. Organize by what changes together. Feature behavior, data shapes,
+   invariants, and tests should live close enough to change together.
+2. Use layers only for real boundaries. Horizontal layers are useful for
+   process, deploy, trust, persistence, transport, or proven duplication. They
+   are harmful when they scatter one behavior by default.
+3. Expose contracts and hide internal shape. A module boundary should say what
+   crosses it, what assumptions hold, and what details callers must not depend
+   on.
+4. Keep domain meaning local. Use bounded contexts when the same word means
+   different things in different parts of the system. Do not force subtly
+   different meanings into one shared model.
+5. Use architecture patterns only when they carry behavior. DDD patterns like
+   aggregates, repositories, factories, and domain services must protect a real
+   invariant, workflow, or boundary.
+6. Make data flow explicit. Name where external data enters, where it becomes
+   trusted, where domain work happens, and what output shape leaves. These are
+   roles, not required folders.
 
 ## Workflow
 
@@ -83,7 +64,7 @@ description: Use for architecture decisions, module boundaries, coupling, layeri
 5. Group code by capability first; introduce horizontal layers only where a
    real technical boundary justifies them.
 6. For each cross-module call, ask whether the caller depends on a stable
-   contract or on internal shape. Stabilise the contract; hide the shape.
+   contract or on internal shape. Stabilize the contract; hide the shape.
 7. Record the decisions that future readers can't recover from the code:
    why this boundary, why this shape, what alternative was rejected.
 
@@ -109,10 +90,21 @@ description: Use for architecture decisions, module boundaries, coupling, layeri
 - [ ] Architectural decisions whose rationale isn't recoverable from the
       code are recorded (ADR, comment, or commit message).
 
+## Tripwires
+
+| Trigger | Do this instead | False alarm |
+|---|---|---|
+| "Every feature needs controller/service/repository/DTO files" | Group by capability first. Add horizontal layers only for real technical boundaries. | The framework requires the split and behavior remains local. |
+| "This belongs in shared because two places use it" | Check whether the two places mean the same thing. Prefer separate context types when meaning differs. | The value is a true cross-context primitive with identical rules. |
+| "Add a repository/factory/service because DDD" | Name the domain rule or boundary it protects before adding the pattern. | The pattern already exists locally and carries real behavior. |
+| "Middleware can handle this feature rule" | Keep feature-specific business behavior at the handler/domain boundary. | The concern is transport-wide, such as auth session parsing or request IDs. |
+| "Architecture review means move files now" | Decide the boundary first, then use `refactoring` to move code safely. | The requested task is only to sketch the target structure. |
+| "A new layer will make this simpler" | Name the independent change axis or proven duplication it separates. | The layer represents process, deploy, trust, persistence, or transport. |
+
 ## Handoffs
 
-- Use `specify` upstream to map the terrain — current and proposed
-  contracts — before deciding module boundaries.
+- Use `specify` upstream to map the current and proposed contracts before
+  deciding module boundaries.
 - Use `domain-modeling` to design data shapes, invariants, and effect isolation
   inside a module, including the exact parsed and output shapes.
 - Use `refactoring` to move existing code toward the chosen structure

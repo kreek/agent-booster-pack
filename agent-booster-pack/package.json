@@ -1,6 +1,6 @@
 {
   "name": "agent-booster-pack",
-  "version": "8.0.0",
+  "version": "8.1.0",
   "description": "Agent Booster Pack for Pi: collaborative skills + Interface Design Gate runtime + proof-first runtime + specify guard + code-review runtime + final value guard, in one install. Meta-package; depends on the four siblings.",
   "type": "module",
   "engines": {

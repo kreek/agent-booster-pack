@@ -7,7 +7,7 @@ description: Use for performance, profiling, latency, throughput, allocation, ca
 
 ## Iron Law
 
-`MEASURE BEFORE OPTIMISING. MEASURE AGAIN BEFORE KEEPING THE CHANGE.`
+`MEASURE BEFORE OPTIMIZING. MEASURE AGAIN BEFORE KEEPING THE CHANGE.`
 
 ## When to Use
 
@@ -30,14 +30,14 @@ description: Use for performance, profiling, latency, throughput, allocation, ca
 
 1. Name the target metric before changing code.
 2. Use a realistic workload and identical before/after conditions.
-3. Optimize the measured bottleneck, not the suspicious-looking code.
+3. Optimize the measured bottleneck, not the code that only looks suspicious.
 4. Tail latency matters; averages hide user pain.
 5. CPU, off-CPU, memory, allocation, I/O, lock contention, and
    network wait are different problems.
 6. Micro-benchmarks prove local mechanics, not end-to-end wins.
 7. Keep complexity only when the measured gain justifies it.
 
-For caches:
+Cache rules:
 
 8. No invalidation story, no cache.
 9. Keys encode freshness, tenant, permissions, locale, and version
@@ -82,6 +82,18 @@ For caches:
 - [ ] Cache metrics cover hit rate, miss latency, eviction, memory,
       and refresh errors; tests cover stale data and invalidation, not
       only the warm-cache happy path.
+
+## Tripwires
+
+| Trigger | Do this instead | False alarm |
+|---|---|---|
+| "This code looks slow" | Measure first and name the target metric. | The user asked only for a hypothesis, not a change. |
+| "Average latency improved" | Check p95/p99 and adjacent metrics before keeping the change. | The workload is batch-only and tail latency is not relevant. |
+| "Micro-benchmark is faster, so the app is faster" | Prove the end-to-end path or scope the claim to local mechanics. | The requested claim is only about the local primitive. |
+| "Add a cache" | Name source of truth, invalidation trigger, stale tolerance, and cache metrics first. | The cache is a bounded per-request memo with no cross-request staleness. |
+| "TTL handles invalidation" | Prefer event/key-based expiration; use TTL as a safety net. | Best-effort cache where stale data is explicitly acceptable. |
+| "The hot key is rare" | Add stampede protection or prove concurrency cannot pile up. | Single-process local cache with bounded callers. |
+| "No need to re-measure" | Re-measure under the same workload after the change. | The change was reverted or not kept. |
 
 ## Handoffs
 

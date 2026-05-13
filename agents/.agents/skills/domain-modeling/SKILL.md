@@ -14,12 +14,12 @@ will construct it.
 
 ## When to Use
 
-- Any data modeling: domain data, fields, states, statuses, allowed
-  combinations, state transitions, validation boundaries, value objects,
+- Data shape affects correctness: domain data, fields, states, statuses,
+  allowed combinations, transitions, validation boundaries, value objects,
   functional cores, or effect isolation.
-- Immediately after scaffolding when the specs are clear and the next
-  step is shaping feature/domain data before implementation.
-- Reviewing code where I/O, mutation, and business rules are tangled.
+- The next important step is shaping feature or domain data before
+  implementation.
+- Reviewing code where I/O, mutation, and business rules are coupled.
 
 ## When NOT to Use
 
@@ -32,9 +32,9 @@ will construct it.
 
 1. Decide data shapes and invariants before writing transformations.
 2. Distinguish identity, state, value, and time. Prefer immutable values
-   and plain data shapes (records, sums, maps) over inheritance or classes
-   that bundle behavior with mutable state; a class wrapping pure functions
-   is a module.
+   and plain data shapes: records, sums, and maps. Avoid inheritance or
+   classes that bundle behavior with mutable state. A class wrapping pure
+   functions is a module.
 3. Split code into data, calculations, and actions; maximize data/calculations
    and minimize actions.
 4. Parse at boundaries into trusted internal shapes; do not pass raw external
@@ -43,14 +43,12 @@ will construct it.
    flag/null combinations.
 6. Model workflows as `Input -> Result<Output, Error>` pipelines where errors
    are data.
-7. Effects (async, exceptions, I/O, ambient mutation, shared places) are
+7. Effects (async, exceptions, I/O, ambient mutation, shared state) are
    contagious; keep them at the imperative shell so the functional core stays
    pure and composable.
 8. Discover model abstractions from repeated domain meaning. Do not invent
-   generic wrappers, base classes, or helper layers before the data says they
-   pay for themselves. Use workflow's `references/simple-not-easy.md` when
-   the choice is between a direct data shape and ceremony that only makes the
-   next step feel easier.
+   generic wrappers, base classes, or helper layers before the data proves
+   they pay for themselves.
 
 ## Workflow
 
@@ -70,9 +68,9 @@ will construct it.
 Time and money cause more boundary bugs than any other domain. Load the
 matching reference whenever either appears in the diff.
 
-- `references/dates.md`: when storing, comparing, formatting, serialising, or
+- `references/dates.md`: when storing, comparing, formatting, serializing, or
   computing on dates / times.
-- `references/money.md`: when storing, comparing, formatting, serialising, or
+- `references/money.md`: when storing, comparing, formatting, serializing, or
   computing on monetary amounts.
 
 ## Verification
@@ -92,6 +90,17 @@ matching reference whenever either appears in the diff.
 - [ ] When dates or money appear in the change, the matching `references/`
       file was loaded and its boundary discipline was applied.
 
+## Tripwires
+
+| Trigger | Do this instead | False alarm |
+|---|---|---|
+| "Validate wherever the value is used" | Parse once at the boundary into a trusted shape. | A second boundary receives new external input. |
+| "A boolean flag can represent the state" | Model the allowed states as explicit variants. | The flag is truly independent and every combination is valid. |
+| "Null means not started, failed, or not applicable" | Split the states and name each meaning. | The field is optional data with one clear absence meaning. |
+| "Pass the request JSON through the service layer" | Convert external input to the internal domain shape first. | The layer is only transport glue and does no domain work. |
+| "Put database/network/time calls in the domain function" | Move effects to the shell and pass values into the core. | The function is explicitly an action at the system boundary. |
+| "A generic wrapper will clean this up" | Wait until repeated domain meaning proves the abstraction. | Two or more real call sites share the same invariant and behavior. |
+
 ## Handoffs
 
 - Use `specify` upstream to enumerate the contracts whose data shape
@@ -109,8 +118,7 @@ matching reference whenever either appears in the diff.
 - Use `async-systems` when mutable places or ownership cross task/thread
   boundaries.
 - Use workflow's `references/simple-not-easy.md` when a generic helper,
-  wrapper, or layer is being proposed as "simpler" before the data or effects
-  justify it.
+  wrapper, or layer is proposed before the data or effects justify it.
 
 ## References
 

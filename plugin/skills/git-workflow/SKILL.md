@@ -27,11 +27,8 @@ recoverable, scoped, and honest.
 
 ## Core Ideas
 
-1. **Inspect before mutation, lean by default**: read one compact preflight
-   covering status, branch/upstream, staged and unstaged diff stats, and
-   recent log. Expand into merge/rebase/conflict details only when the
-   compact status or requested operation shows risk. Stop on unexpected
-   state.
+1. **Inspect before mutation.** Start with status, branch/upstream, staged and
+   unstaged diff stats, and recent log. Expand only when risk appears.
 2. **Name files explicitly when staging**; never `git add .` or
    `git add -A` in a messy tree.
 3. **Prefer `--force-with-lease --force-if-includes`** over bare force when
@@ -93,6 +90,17 @@ recoverable, scoped, and honest.
       branch work.
 - [ ] No `gh` command was run without explicit user permission for that
       command or command class.
+
+## Tripwires
+
+| Trigger | Do this instead | False alarm |
+|---|---|---|
+| "`git add .` is faster" | Stage named files or approved pathspecs only. | Fresh scaffold with a clean tree and all files belong to one change. |
+| "Commit everything currently dirty" | Separate current reviewed work from unrelated dirty files first. | The user explicitly approved the full dirty tree. |
+| "Force push should fix it" | Verify the branch is local/solo or approved, then use lease/inclusion protection. | Disposable local-only branch with no remote. |
+| "Rewrite this shared branch" | Stop and ask for explicit approval plus a recovery point. | The branch is confirmed local and unpublished. |
+| "Resolve conflict by taking ours/theirs" | Preserve intent from both sides, then run relevant checks. | Generated file regenerated after source conflict is resolved. |
+| "Read-only `gh` is harmless" | Ask before any `gh` command because it uses network and auth. | The user already approved that exact command class. |
 
 ## Handoffs
 

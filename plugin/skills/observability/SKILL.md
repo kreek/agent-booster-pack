@@ -72,6 +72,17 @@ description: Use for observability, logs, metrics, traces, health checks, dashbo
 - [ ] For prototypes, deferred observability is recorded and the path
       is promoted to the full checklist before real users.
 
+## Tripwires
+
+| Trigger | Do this instead | False alarm |
+|---|---|---|
+| "We logged the error, so it is observable" | Add stable event names, outcome, severity, and trace/correlation ID. | Existing project logger adds those fields automatically and tests prove it. |
+| "Put user ID / request ID / path in a metric label" | Bound metric labels. Put high-cardinality values in logs or traces. | The label set is proven bounded and low-cardinality. |
+| "Alert on every error" | Alert on user impact, SLO burn, or actionable dependency failure. | Low-volume critical security or data-loss event. |
+| "Health check should test the database" | Keep liveness local. Put external dependencies in readiness or dependency health. | The endpoint is explicitly readiness, not liveness. |
+| "The collector will redact it" | Redact sensitive fields at the source; collector filtering is defense in depth. | Source redaction is impossible and the risk is documented. |
+| "Dashboard later" | Add the view needed to answer whether it is broken and where. | Local-only prototype with deferred observability recorded. |
+
 ## Handoffs
 
 - Use `documentation` for runbook shape.

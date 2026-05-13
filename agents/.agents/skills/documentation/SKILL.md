@@ -21,10 +21,9 @@ description: Use for docs, READMEs, guides, ADRs, runbooks, API docs, comments, 
 ## When NOT to Use
 
 - API contract design; use `api`.
-- Release coordination or changelog process; use `release`. Do not edit
-  `CHANGELOG.md`, release notes, version manifests, or migration notes
-  from this skill, even when behavior changes. Those are release-prep
-  artifacts and only land when a release is being cut, under `release`.
+- Release coordination, changelog process, release notes, version manifests,
+  or migration notes; use `release`. Those artifacts land only during
+  release prep.
 - Alert mechanics and dashboards; use `observability`.
 
 ## Core Ideas
@@ -38,19 +37,21 @@ description: Use for docs, READMEs, guides, ADRs, runbooks, API docs, comments, 
    catch drift.
 4. Write the why, context, and tradeoffs; let code/tests/schemas prove
    mechanics.
-5. Delete stale docs when you cannot fix them now.
-6. Comments explain why and how when names, types, schemas, tests, or
+5. Write in short, direct sentences. Prefer concrete nouns and verbs. Split
+   long sentences. Remove throat-clearing, ornate phrasing, and clever style.
+6. Delete stale docs when you cannot fix them now.
+7. Comments explain why and how when names, types, schemas, tests, or
    local structure cannot. Encode the rule in a name, type, function,
-   schema, or test first; add a comment only when the reason still
-   isn't locally obvious. Avoid comment-count targets and line-by-line
-   narration. (Verification names which subjects deserve a comment.)
-7. Runbooks are operational artifacts: symptom, diagnosis,
+   schema, or test first. Add a comment only when the reason still
+   is not locally obvious. Avoid comment-count targets and line-by-line
+   narration.
+8. Runbooks are operational artifacts: symptom, diagnosis,
    remediation, verification, escalation.
-8. Large project documentation uses Material for MkDocs by default,
+9. Large project documentation uses Material for MkDocs by default,
    regardless of language or framework. Use another docs system only
-   when the repo already has one, the user explicitly asks, or a
-   publishing constraint requires it.
-9. Requirements docs should make behavior, constraints, and acceptance
+   when the repo already has one, the user asks, or a publishing
+   constraint requires it.
+10. Requirements docs should make behavior, constraints, and acceptance
    explicit. Use user-story format only when it helps; do not let
    template wording replace concrete acceptance criteria.
 
@@ -92,6 +93,18 @@ description: Use for docs, READMEs, guides, ADRs, runbooks, API docs, comments, 
 - [ ] Requirements and acceptance criteria name caller-visible
       behavior, constraints, non-goals, and proof, not implementation
       guesses.
+
+## Tripwires
+
+| Trigger | Do this instead | False alarm |
+|---|---|---|
+| "Copy the generated API output into docs" | Link to the source of truth and write only missing context. | The generated output is not available to the reader and the copy has an owner. |
+| "README should explain everything" | Keep README to purpose, install/run, minimal usage, and links onward. | Tiny project where README is the only docs surface. |
+| "Add comments so the code is documented" | Encode the rule in names, types, schemas, or tests first. Comment only non-obvious why/how. | A safety invariant or protocol rule is not locally obvious. |
+| "Update CHANGELOG while editing docs" | Use `release`; changelog and release notes are release-prep artifacts. | The user explicitly asked for release prep. |
+| "Use the user-story template and move on" | Write concrete behavior, constraints, non-goals, and proof. | The team requires the template and concrete acceptance is still present. |
+| "Leave stale docs for later" | Delete stale prose or mark it with a tracked rewrite owner. | The stale section is outside scope and clearly labeled already. |
+| "This sounds more polished with a longer explanation" | Split the sentence. Keep the concrete decision, contract, workflow, or reader action. | A formal legal, compliance, or policy document requires exact wording. |
 
 ## Handoffs
 

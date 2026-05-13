@@ -1,6 +1,6 @@
 {
   "name": "agent-booster-pack-specify",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "ABP Pi Specify guard plus specify skill: Design-partner mode, one decision question at a time.",
   "type": "module",
   "engines": {

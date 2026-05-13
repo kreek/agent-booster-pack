@@ -11,8 +11,8 @@ description: Use to debug failures, reproduce symptoms, isolate causes, inspect 
 
 ## When to Use
 
-- Investigating defects, flakes, heisenbugs, regressions, production
-  incidents, unclear failures, or "stuck" debugging sessions.
+- Investigating defects, flakes, timing-sensitive bugs, regressions,
+  production incidents, unclear failures, or "stuck" debugging sessions.
 
 ## When NOT to Use
 
@@ -53,7 +53,8 @@ description: Use to debug failures, reproduce symptoms, isolate causes, inspect 
 - [ ] The fix is one atomic change aimed at that cause.
 - [ ] A regression test or equivalent guard fails before the fix and
       passes after.
-- [ ] Heisenbugs were verified with non-invasive observation or replay.
+- [ ] Timing-sensitive bugs were verified with non-invasive observation or
+      replay.
 - [ ] Incident follow-ups have owners and deadlines.
 - [ ] The root-cause and fix claims have proof evidence, or the fix is
       reported as unproven.
@@ -64,7 +65,7 @@ description: Use to debug failures, reproduce symptoms, isolate causes, inspect 
 |---|---|---|
 | "Probably X, let me try fixing" | Gather evidence that confirms X before editing. | The user asked for a speculative explanation, not a fix. |
 | "No time to reproduce" | Create the smallest reproduction or state why reproduction is blocked. | Production-only incident where logs/traces are the available reproduction. |
-| "One more guess and it'll work" | Stop editing and collect a new observation that changes the model. | A syntax or wiring typo found directly in the failing output. |
+| "One more guess and it'll work" | Stop editing. Collect a new observation that changes the model. | A syntax or wiring typo found directly in the failing output. |
 | "Fixed it locally, ship it" | Name the root cause and add or run the regression guard. | Local run is the requested diagnostic, not a completion claim. |
 | "Flake - just retry" | Treat the flake as a bug and identify whether test, code, or environment failed. | Infrastructure outage already confirmed outside the code under review. |
 | "Probably a race condition" | Show interleaving, shared state, or timing evidence before changing concurrency code. | The race is already demonstrated by a failing sanitizer or trace. |
