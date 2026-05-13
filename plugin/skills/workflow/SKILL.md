@@ -38,32 +38,43 @@ description: Use first to route ABP work, choose skills, hand off, and define ve
    simple designs that separate concerns, make state and effects explicit, and
    reduce what future maintainers must hold in their heads. Do not confuse
    easy-to-type, familiar, or quick-to-generate with simple.
-2. **Work with the human on the shape first.** For non-trivial application
+2. **AI should advance the developer's thinking.** For non-trivial work, leave
+   the human with a clearer mental model of the system, the change, and the
+   proof. If the agent cannot explain the shape, it should not expand the diff.
+3. **Work with the human on the shape first.** For non-trivial application
    work, collaborate before coding on the domain language, data model,
    interfaces, boundaries, and tradeoffs. The agent proposes; the human
    approves, revises, or rules out the shape.
-3. **Make acceptance clear before work starts.** If done is ambiguous, define
+4. **Make acceptance clear before work starts.** If done is ambiguous, define
    acceptance criteria with the user before implementation. The agent should
    propose concrete criteria; the human confirms, revises, or narrows them.
-4. **Choose the working mode.** Decide whether the task is Direct,
+5. **Choose the working mode.** Decide whether the task is Direct,
    Guided, Design-partner, or Review-only. Direct is the autopilot lane for
    trivial/mechanical work; Design-partner is for architecture, domain, and
    durable-interface decisions. Name the mode only when it explains why the
    agent is pausing, asking for approval, proceeding with minimal ceremony, or
    staying read-only.
-5. **State the next step clearly.** Say what the finished change is
+6. **Separate disposable code from durable code.** One-off scripts, local data
+   checks, and throwaway spikes can move faster. Production paths, contracts,
+   schemas, auth, persistence, domain rules, and shared libraries need slower
+   design, proof, review, and human understanding.
+7. **State the next step clearly.** Say what the finished change is
    supposed to do, who or what it affects, and how to tell whether it worked;
    then identify scope, risk, proof, and the next decision or action that needs
    support. Leave domain depth to the skill that owns it.
-6. **Get approval before locking in durable choices.** Durable interfaces,
+8. **Get approval before locking in durable choices.** Durable interfaces,
    architecture/domain boundaries, compatibility choices, release intent, and
    extra safeguards or behavior beyond the request each need the right approval
    path before implementation locks them in.
-7. **Load a skill when it is needed to do the task correctly.** Handoffs are
+9. **Keep durable diffs reviewable.** Do not generate more durable code than a
+   human can understand and review in one sitting. If the diff grows, stop,
+   summarize the shape, and split the work.
+10. **Load a skill when it is needed to do the task correctly.** Handoffs are
    graph edges, not a checklist. Pull in a specialist skill when its guidance
    is applicable to the task and needed for a mature engineering solution.
-8. **Close with a scoped proof claim.** Finish by naming what was proven, what
-   remains unproven, and what a human should review.
+11. **Close with a scoped proof claim.** Finish by naming what was proven, what
+   remains unproven, what a human should review, and the key system insight the
+   work revealed.
 
 ## Workflow
 
@@ -77,15 +88,17 @@ description: Use first to route ABP work, choose skills, hand off, and define ve
 3. **Clarify acceptance.** If done is unclear, propose acceptance criteria.
    Ask one decision question at a time. List other uncertainties as notes, not
    more questions.
-4. **Design before code when needed.** In Design-partner mode, use `specify`.
+4. **Classify durability.** If the work is disposable, keep it small and state
+   its limits. If it is durable, slow down and preserve human understanding.
+5. **Design before code when needed.** In Design-partner mode, use `specify`.
    Read the system, propose the shape, ask for the next decision, and wait for
    agreement before planning implementation.
-5. **Get approval for durable interfaces.** Use `contract-first` for
+6. **Get approval for durable interfaces.** Use `contract-first` for
    caller-facing APIs, exported types, event schemas, CLI/env/config formats,
    database migrations, service adapters, and other cross-boundary contracts.
-6. **Set the work location.** For feature and bug-fix work, inspect branch and
+7. **Set the work location.** For feature and bug-fix work, inspect branch and
    dirty state. Ask once whether to use a topic branch in the current checkout.
-7. **Load the skills needed for correctness.** Use this table to decide when a
+8. **Load the skills needed for correctness.** Use this table to decide when a
    skill is applicable. It is ordered by the normal development lifecycle, not
    by importance. Load safety skills as soon as their risk appears.
 
@@ -116,19 +129,26 @@ description: Use first to route ABP work, choose skills, hand off, and define ve
    Load `release` only after a concrete diff touches release artifacts. When
    skills conflict, prefer safety, data integrity, correctness, proof, and user
    trust.
-8. **Implement, review, and prove.** For non-trivial work, implement, review
-   the diff with `code-review`, fix findings, check docs, then use `proof`.
-9. **Close with scope and evidence.** Say what changed, what was proven, what
-   remains unproven, and what a human should review.
+9. **Keep durable changes reviewable.** If the diff grows beyond one sitting,
+   stop, summarize the current shape, and split the next slice before coding
+   more.
+10. **Implement, review, and prove.** For non-trivial work, implement, review
+    the diff with `code-review`, fix findings, check docs, then use `proof`.
+11. **Close with scope and evidence.** Say what changed, what was proven, what
+    remains unproven, what a human should review, and the key system insight.
 
 ## Verification
 
 - [ ] The working mode matched the task.
 - [ ] Acceptance criteria were clear before implementation.
 - [ ] Human decisions were surfaced before code depended on them.
+- [ ] Durable code stayed small enough for a human to review in one sitting, or
+      the work was split.
 - [ ] Durable interfaces were approved or ruled out before implementation.
 - [ ] Only applicable skills were loaded.
 - [ ] The work stayed in scope.
+- [ ] The final response improved the human's mental model instead of only
+      reporting activity.
 - [ ] Compatibility and release changes were approved or left out.
 - [ ] The diff was reviewed before the final proof claim.
 - [ ] Completion claims are backed by evidence or marked unproven.
@@ -142,6 +162,9 @@ description: Use first to route ABP work, choose skills, hand off, and define ve
 | "I'll infer behavior" | Propose acceptance criteria and ask the next needed question. | Mechanical implementation of settled behavior. |
 | "I'll design and implement this boundary now" | Use `contract-first` before code. | Private helper work. |
 | "I'll keep the user out of this design" | Use Design-partner for domain, data, interface, or architecture choices. | The user asked for autonomous work and no durable choice is present. |
+| "The agent understands it" | Explain the shape well enough for the human to keep owning the code. | Disposable local script with stated limits. |
+| "This diff is getting large" | Stop, summarize the shape, and split the next reviewable slice. | Generated/vendor/lockfile churn that is sampled, not hand-reviewed. |
+| "This is just a one-off" | Mark disposable code as disposable and keep it out of durable paths. | The script will become a shared tool or production path. |
 | "I'll announce the mode every time" | Name the mode only when it sets useful expectations. | The user asks how ABP is routing. |
 | "Review means edit" | Use Review-only unless the user asks for fixes. | The user asked to review and fix. |
 | "Use every skill" | Load only skills needed for the task. | Explicit full-pack audit. |

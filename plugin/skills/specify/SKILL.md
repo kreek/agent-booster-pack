@@ -45,30 +45,33 @@ description: Design-partner mode for discovery, tradeoffs, decisions, and agreed
 2. Read the code before proposing the shape. Cite `file:line` for existing
    contracts. For greenfield work, cite adjacent conventions, framework idioms,
    or sibling features the new work will live among.
-3. Contract means any durable boundary: function signature, module export,
+3. Use small spikes to learn, not to ship. When code is the fastest way to
+   understand the shape, mark it as disposable, keep it small, and discard or
+   rewrite it after the design converges.
+4. Contract means any durable boundary: function signature, module export,
    public type, error vocabulary, CLI command/flag, environment variable,
    database schema and migration step, event payload, file format, or config
    key. "API" does not mean only HTTP.
-4. `contract-first` owns approval for durable interfaces. Specify may discover,
+5. `contract-first` owns approval for durable interfaces. Specify may discover,
    compare, and record contracts, but implementation still waits for the
    Interface Design Gate packet: current interface, proposed interface, boundary
    reason, and human approval.
-5. Ask one meaningful decision question at a time. The agent should propose
+6. Ask one meaningful decision question at a time. The agent should propose
    concrete options and a recommendation, then revise the shared shape from the
    user's answer. List secondary uncertainties as notes, not as a question
    barrage.
-6. Use `domain-modeling` when data, state, effects, or invariants shape the
+7. Use `domain-modeling` when data, state, effects, or invariants shape the
    design. Make illegal states unrepresentable in the proposed shape.
-7. Bring in specialist skills only for design risks they own: API,
+8. Bring in specialist skills only for design risks they own: API,
    persistence, async behavior, security, errors, observability, performance,
    UI, accessibility, or release.
-8. Do not create a persistent artifact before the discussion converges unless
+9. Do not create a persistent artifact before the discussion converges unless
    the user explicitly asks to use the artifact as the discussion medium.
-9. Keep design above implementation sequencing. If you are writing file-by-file
+10. Keep design above implementation sequencing. If you are writing file-by-file
    edits, pseudocode, or task checklists, you have left Specify and entered
    planning. Hand off to `workflow` or the harness planning mode only after the
    design direction is agreed.
-10. Capture the agreed result where it will rot least: private `.pi/specify/`
+11. Capture the agreed result where it will rot least: private `.pi/specify/`
    for local agent memory or checked-in `docs/` when the team should review and
    keep it.
 
@@ -79,19 +82,21 @@ description: Design-partner mode for discovery, tradeoffs, decisions, and agreed
    before planning or coding.
 2. Read the relevant code or conventions. Summarize current contracts, data
    shapes, states, constraints, and ownership with citations.
-3. Offer one or more feasible target shapes at the contract level. Name
+3. If the shape is still hidden, propose a tiny disposable spike and ask before
+   writing it. Use the spike to learn; do not treat it as implementation.
+4. Offer one or more feasible target shapes at the contract level. Name
    tradeoffs, compatibility concerns, migration pressure, risks, and what each
    option makes easier or harder.
-4. Ask the smallest next decision question that changes the design, with a
+5. Ask the smallest next decision question that changes the design, with a
    concrete recommended option when one is defensible. List other uncertainties
    as notes, not a question list.
-5. When a durable interface appears, route through `contract-first`. Record the
+6. When a durable interface appears, route through `contract-first`. Record the
    approved shape in the Specify artifact, but do not treat the artifact itself
    as interface approval.
-6. Iterate until the human agrees on the design direction or rules it out.
-7. Ask where to save the result if no destination is already specified:
+7. Iterate until the human agrees on the design direction or rules it out.
+8. Ask where to save the result if no destination is already specified:
    private `.pi/specify/` or checked-in project docs.
-8. Capture the result as the smallest useful artifact, then hand it to planning,
+9. Capture the result as the smallest useful artifact, then hand it to planning,
    implementation, proof, or review.
 
 ## Artifact Types
@@ -130,6 +135,8 @@ Default locations when the repo has no convention:
       destination is user-approved or follows an existing repo convention.
 - [ ] **No premature planning**: file-by-file task sequencing and pseudocode
       wait until the design direction is agreed.
+- [ ] **Spike discipline**: any exploratory code was marked disposable and was
+      not treated as approved implementation.
 - [ ] **Proof obligations**: claims the implementation must satisfy are named
       so `proof` can turn them into checks.
 
@@ -140,6 +147,7 @@ Default locations when the repo has no convention:
 | "I'll just code it, no design needed" | Check the When to Use criteria. If more than one contract, state, or boundary changes, Specify first. | Trivial typo, formatting, or dependency bump covered by When NOT to Use. |
 | "This interface is obvious" | Use `contract-first`: show current interface, proposed interface, boundary reason, and ask for approval. | Private helper with no durable caller dependency. |
 | "I'll write the spec before reading code" | Read the code or adjacent convention first and cite it. | Pure greenfield with no relevant local convention. |
+| "The design is unclear, so I'll build the whole thing" | Ask for a tiny disposable spike or stay in discussion. | The human explicitly asked for implementation, and no durable choice is present. |
 | "I'll create a design file so the session feels formal" | Keep design in chat until it converges, then capture the agreed artifact. | The user explicitly asks to draft the artifact as the discussion medium. |
 | "The artifact approves the interface" | Record the approval, but route the actual interface gate through `contract-first`. | The artifact quotes an already-approved gate packet. |
 | "I'll produce the plan now" | Stay at the contract, state, tradeoff, and risk level; ask the next design question. | The human agreed on the design and asked to plan or implement. |
@@ -169,6 +177,5 @@ Default locations when the repo has no convention:
 - "Design It!" (Keeling) for architectural conversation patterns:
   <https://pragprog.com/titles/mkdsa/design-it/>
 - `agent-booster-pack-contract-first` optional runtime package: ships from this
-  repo at `agent-booster-pack-contract-first/` and can soft-block mutating tool
-  calls when interface intent appears without an approved Interface Design Gate
-  packet.
+  repo at `agent-booster-pack-contract-first/` and provides the manual
+  `/abp:contract` Interface Design Gate workflow.

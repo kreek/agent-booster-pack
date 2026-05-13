@@ -45,6 +45,9 @@ description: Use to review diffs and PRs for bugs, regressions, edge cases, proo
 6. Maintainability findings must name a concrete risk: hidden state, coupled
    effect, broad abstraction, dead compatibility shim, stale flag, duplicated
    rule with divergent meaning, or behavior split across unrelated lifecycles.
+7. Review protects the human's mental model. Generated code that works but is
+   too large, too vague, or too disconnected from the stated intent is
+   comprehension debt.
 
 ## AI-Agent Failure Modes
 
@@ -83,6 +86,9 @@ findings, and hand back. Do not re-review after fixing unless the user asks.
 7. **Refactor drift.** Diff labeled refactor or cleanup but observable
    return, effect, error shape, or ordering changes. Reclassify as a
    feature change and route to `proof`.
+8. **Comprehension debt.** Durable generated code is larger than the stated
+   intent, introduces unexplained ownership, or cannot be reviewed in one
+   sitting. Split, summarize, or simplify before approval.
 
 ## Workflow
 
@@ -97,9 +103,11 @@ findings, and hand back. Do not re-review after fixing unless the user asks.
    run, say so and continue. Confirm the diff's intent and impact are
    stated. In self-review, the task context is the intent. In PR or
    inbound review, a missing description on a non-trivial diff is a
-   finding. For diffs above roughly 400 changed lines, sweep by risk
-   area and declare partial scope explicitly. This is a one-time gate,
-   not a loop: run it once per review pass.
+   finding. For durable generated diffs above roughly 400 changed lines, ask
+   whether the human can review it in one sitting. If not, make split/scope a
+   finding. For any oversized diff, sweep by risk area and declare partial
+   scope explicitly. This is a one-time gate, not a loop: run it once per
+   review pass.
 3. Read the intent: what behavior, API, data shape, migration, UI, or
    workflow is supposed to change.
 4. Load the language reference under `references/` for every language in
@@ -115,7 +123,7 @@ findings, and hand back. Do not re-review after fixing unless the user asks.
 6. Run the AI-Agent Failure Modes pass on every agent-generated diff.
    Name each blocking finding by its mode (speculative abstraction,
    compatibility shim, dead defensive code, test theater, fabricated
-   API, scope creep, refactor drift).
+   API, scope creep, refactor drift, comprehension debt).
 7. Sweep for harmful duplication, orphaned code, unreachable branches, dead
    feature flags, unused public surface, and stale tests/docs/config. For
    maintainability, ask what independent concerns the diff couples or
@@ -163,12 +171,15 @@ ambiguity that blocks a finding or fix.
       exports, and tests.
 - [ ] AI-Agent Failure Modes were checked: speculative abstraction,
       unnecessary backwards compatibility, dead defensive code, test
-      theater, fabricated APIs, scope creep, and refactor drift.
+      theater, fabricated APIs, scope creep, refactor drift, and
+      comprehension debt.
 - [ ] Pre-flight was confirmed: CI green or scoped unproven, description
       states intent and impact, and oversized diffs were scoped as
       partial review.
 - [ ] Complexity risks were checked: deep nesting, oversized functions,
       hidden mutable state, clever code, and unnecessary indirection.
+- [ ] Durable generated code is small enough for a human to review in one
+      sitting, or the review is scoped as partial with a split recommended.
 - [ ] Coupling risks were checked: business logic mixed with I/O,
       transport, persistence, time, shared state, framework lifecycle,
       or unrelated feature behavior.
@@ -203,6 +214,8 @@ ambiguity that blocks a finding or fix.
 | Diff labeled refactor or cleanup but observable return, effect, error, or ordering changes | Reclassify as feature change and route to `proof`. | Behavior delta is the documented intent of the refactor. |
 | By inspection, the test suite would still pass if one assertion or one branch were flipped | Mark as test theater. Recommend rewriting to assert caller-visible behavior at the data-shape boundary. Do not run mutation tooling unless the project already uses it. | Mutated branch is defensive code already known to be unreachable. |
 | PR bundles requested change with reformatting, import reordering, or unrelated docstrings | Require a split before deep review. | Reorganization itself is the requested change. |
+| Durable generated diff is too large for the human to review in one sitting | Mark comprehension debt. Recommend a split, summary, or smaller next slice. | Disposable script, generated/vendor/lockfile churn, or user explicitly requested a broad audit. |
+| Code works, but no one can explain why this shape belongs here | Block the approval claim. Ask for ownership, boundary, and proof evidence. | Throwaway spike clearly marked disposable. |
 
 ## Handoffs
 

@@ -25,6 +25,7 @@ In practice, ABP guides agents to:
 * Fix root causes, not symptoms.
 * Keep humans in the architecture and design loop when choices shape contracts,
   data, boundaries, or long-lived behavior.
+* Use AI to improve the developer's mental model, not to replace it.
 * Organize work into clear, reviewable changes that humans can trust and maintain.
 
 ## Installation

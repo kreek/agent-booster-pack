@@ -1,6 +1,6 @@
 {
   "name": "agent-booster-pack-specify",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Manual ABP Pi Specify workflow plus specify skill: Design-partner mode, one decision question at a time.",
   "type": "module",
   "engines": {

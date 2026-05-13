@@ -56,33 +56,35 @@ implementation is fine; shipping without them is not.
    explicit `unproven` status, not silence that implies correctness.
 2. A completion claim is still an engineering claim. Passing checks count
    only when they prove the latest request was actually satisfied.
-3. Different claims need different evidence: data claims need invariants,
+3. Proof should teach the behavior, not only satisfy a checker. A good proof
+   makes the expected system behavior easier for the human to understand.
+4. Different claims need different evidence: data claims need invariants,
    behavior claims need boundary checks, bug-fix claims need root-cause
    evidence plus a regression guard, refactor claims need before/after
    behavior preservation.
-4. Test behavior, not implementation. Assertions describe what a caller,
+5. Test behavior, not implementation. Assertions describe what a caller,
    downstream stage, or consumer observes. A good test would survive an
    implementation swap that preserves the contract.
-5. Enter at the outermost practical boundary where data shape or values change
+6. Enter at the outermost practical boundary where data shape or values change
    observably. One proof at that boundary beats many helper-level checks. Use
    `references/data-shape-boundaries.md` when transformation chains or internal
    stages make the right boundary unclear.
-6. Errors are shape changes too. Assert the user-facing error envelope
+7. Errors are shape changes too. Assert the user-facing error envelope
    (message, code, structured fields the consumer relies on) at the
    boundary where the consumer observes it, not at every internal function
    that could raise.
-7. The framework or language is not under test. Trust the framework to
+8. The framework or language is not under test. Trust the framework to
    honor its own contract; cover your business logic on top of it and
    the boundary where your code binds to it.
-8. Mock only at true system boundaries: clock, network, third-party service,
+9. Mock only at true system boundaries: clock, network, third-party service,
    process, filesystem, or expensive infrastructure not under test. If a
    boundary test still needs many mocks or deep setup, simplify the design
    before adding more mocks.
-9. One test covers one behavior; if the name needs "and", split it.
+10. One test covers one behavior; if the name needs "and", split it.
    Prefer BDD-shaped runners (vitest, RSpec, Jest, pytest with
    descriptive names, ExUnit's `describe`, Go's table-driven subtests)
    so nested labels compose into a readable behavior sentence.
-10. Flaky tests are bugs in the test, code, or environment. Do not
+11. Flaky tests are bugs in the test, code, or environment. Do not
     hide them with sleeps or retries.
 
 ## Proof Contract
@@ -144,6 +146,8 @@ For every non-trivial engineering claim, record:
       boundary and would fail if the claim were false.
 - [ ] Test names read as behavior statements when nested labels are
       combined.
+- [ ] Proof evidence makes the claimed behavior understandable to the human,
+      not only green in a tool.
 - [ ] Assertions are about observable outcomes, not private methods or
       call choreography.
 - [ ] Mocks appear only at true system boundaries or have a documented
@@ -169,6 +173,7 @@ For every non-trivial engineering claim, record:
 | "The type system covers it" | Name the invariant or boundary behavior the types do not prove. | The claim is only about static shape and the type check just passed. |
 | "I ran it manually" | Capture the command, observed output, and claim it proves. | The manual inspection is the only possible check and is reported as such. |
 | "Should be fine" / "I think this works" | Convert the thought into a named Proof Contract. | Exploratory analysis that is not claiming correctness. |
+| "The check passed but I can't explain the behavior" | Rewrite the proof claim in caller language and add missing evidence. | The command was only a smoke check and is reported as partial. |
 | "Refactor only, no behavior change" | Provide before/after preservation evidence or mark unproven. | Mechanical rename verified by diff/tooling with no behavior surface. |
 | "Too simple to test" | Write the smallest behavior test that would fail if the code did nothing. | Pure formatting, copy, or generated metadata changes. |
 | "Already covered by another test" | Name the existing behavior test or add the missing assertion. | The named test enters through the same caller boundary and would fail for this bug. |

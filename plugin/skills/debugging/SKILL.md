@@ -27,8 +27,10 @@ description: Use to debug failures, reproduce symptoms, isolate causes, inspect 
    or killed; change one variable per experiment.
 2. Reduce the failing case until only the bug remains. Localize by
    boundary: data, service, integration, application, infrastructure.
-3. Fix the root cause and add a guard test.
-4. For incidents, produce blameless learning with owned follow-up
+3. Debugging should improve the human's failure model. Use the agent to form
+   and test hypotheses, not to patch until something passes.
+4. Fix the root cause and add a guard test.
+5. For incidents, produce blameless learning with owned follow-up
    actions, never "human error" as a root cause.
 
 ## Workflow
@@ -39,10 +41,12 @@ description: Use to debug failures, reproduce symptoms, isolate causes, inspect 
 2. After the third experiment, keep a short debug log. Form one
    hypothesis at a time, predict what else must be true, run the
    smallest experiment that confirms or refutes it.
-3. Record the fix as a Proof Contract: root-cause claim, relevant data
+3. Before editing, state the current failure model: likely cause, evidence for
+   it, and the observation that would disprove it.
+4. Record the fix as a Proof Contract: root-cause claim, relevant data
    invariant, reproduction boundary, regression check, evidence. Fix
    only after evidence identifies the cause.
-4. Add a regression test or operational guard before declaring fixed.
+5. Add a regression test or operational guard before declaring fixed.
 
 ## Verification
 
@@ -50,6 +54,8 @@ description: Use to debug failures, reproduce symptoms, isolate causes, inspect 
       documented.
 - [ ] The root cause is named in one sentence and explains all observed
       symptoms.
+- [ ] The final explanation says what evidence ruled out the main alternative
+      causes.
 - [ ] The fix is one atomic change aimed at that cause.
 - [ ] A regression test or equivalent guard fails before the fix and
       passes after.
@@ -66,6 +72,7 @@ description: Use to debug failures, reproduce symptoms, isolate causes, inspect 
 | "Probably X, let me try fixing" | Gather evidence that confirms X before editing. | The user asked for a speculative explanation, not a fix. |
 | "No time to reproduce" | Create the smallest reproduction or state why reproduction is blocked. | Production-only incident where logs/traces are the available reproduction. |
 | "One more guess and it'll work" | Stop editing. Collect a new observation that changes the model. | A syntax or wiring typo found directly in the failing output. |
+| "The agent found a fix but I can't explain the bug" | Stop and rebuild the failure model before editing further. | Disposable local experiment with no completion claim. |
 | "Fixed it locally, ship it" | Name the root cause and add or run the regression guard. | Local run is the requested diagnostic, not a completion claim. |
 | "Flake - just retry" | Treat the flake as a bug and identify whether test, code, or environment failed. | Infrastructure outage already confirmed outside the code under review. |
 | "Probably a race condition" | Show interleaving, shared state, or timing evidence before changing concurrency code. | The race is already demonstrated by a failing sanitizer or trace. |

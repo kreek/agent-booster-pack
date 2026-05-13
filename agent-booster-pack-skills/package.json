@@ -1,6 +1,6 @@
 {
   "name": "agent-booster-pack-skills",
-  "version": "8.1.0",
+  "version": "8.2.0",
   "description": "General Agent Booster Pack skills for Pi: collaborative routing, data, security, debugging, refactoring, and more. Runtime-owned skills ship with their matching extension packages. Renamed from pi-agent-booster-pack; old name deprecated.",
   "type": "module",
   "engines": {

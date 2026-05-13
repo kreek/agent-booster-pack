@@ -15,9 +15,9 @@ description: Use when an Interface Design Gate must approve durable function, AP
   public type, module boundary, HTTP endpoint, CLI command or flag, config key,
   environment variable, event payload, file format, database schema, migration
   step, or cross-component contract.
-- An installed Interface Design Gate blocks a mutating tool call and asks for
-  the current interface, proposed interface, boundary reason, and user
-  decision.
+- The user starts the manual Interface Design Gate workflow, or an installed
+  gate asks for the current interface, proposed interface, boundary reason, and
+  user decision.
 - Reviewing whether implementation started before contract approval.
 
 ## When NOT to Use
@@ -31,10 +31,10 @@ description: Use when an Interface Design Gate must approve durable function, AP
 
 ## Optional Runtime Backstop
 
-Some ABP installations include an Interface Design Gate runtime. It may block
-mutating tool calls when interface intent appears without approval. If it
-blocks, open the packet and fill in: Current interface, Proposed interface, Why
-this boundary, User decision.
+Some ABP installations include the manual Interface Design Gate runtime. Use
+`/abp:contract [intent]` to start it. While active, it enforces the explicit
+gate packet: Current interface, Proposed interface, Why this boundary, User
+decision.
 
 ## Workflow
 
