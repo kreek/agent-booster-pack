@@ -32,9 +32,10 @@ description: Use for observability, logs, metrics, traces, health checks, dashbo
 4. Metrics need bounded labels; cardinality is a production cost and
    reliability risk.
 5. Traces show cross-boundary causality; logs explain decisions.
-6. Critical dependencies need visible latency, error, timeout, retry,
-   circuit-breaker, and saturation signals.
-7. Alerts are SLO-backed and actionable, with runbooks and escalation.
+6. Critical dependencies expose latency, error, timeout, retry,
+   circuit-breaker state, and saturation signals.
+7. Dashboards answer current health and likely fault location. Alerts
+   are SLO-backed, actionable, and tied to runbooks.
 8. Health checks separate liveness from readiness.
 9. Sensitive data is redacted at source; collector filtering is
    defense in depth.
@@ -44,12 +45,12 @@ description: Use for observability, logs, metrics, traces, health checks, dashbo
 1. Identify the user-facing path, dependency, queue, or resource being
    observed. Choose RED for request paths, USE for resources.
 2. Add structured logs, metrics, and spans per project conventions;
-   for logging changes, load `references/logging.md` to set event
-   names, required fields, level policy, and payload rules.
-3. Bound labels and high-cardinality log fields; redact sensitive
-   fields at the source. Add dashboards that answer "is it broken?"
-   and "where?" quickly. Add alerts only when action is clear and a
-   runbook exists.
+   for logging changes, load `references/logging.md`.
+3. Bound metric labels and high-cardinality log fields. Redact
+   sensitive fields at the source.
+4. Add dashboards for health, latency, errors, saturation, and
+   dependency state. Add alerts only when action and escalation are
+   clear.
 
 ## Verification
 
@@ -63,12 +64,12 @@ description: Use for observability, logs, metrics, traces, health checks, dashbo
       saturation or circuit-state signals.
 - [ ] Metric labels are bounded; high-cardinality log attributes are
       intentional.
-- [ ] No secrets, tokens, raw PII, payment data, or unreviewed payload
-      bodies appear in logs, metrics, or spans.
+- [ ] Logs, metrics, and spans exclude secrets, tokens, raw PII,
+      payment data, and unreviewed payload bodies.
 - [ ] Liveness does not depend on external systems; readiness does.
-- [ ] Alerts link to runbooks with immediate action and escalation.
 - [ ] Dashboards answer health, latency, errors, saturation, and
-      dependency state.
+      dependency state; alerts link to runbooks with action and
+      escalation.
 - [ ] For prototypes, deferred observability is recorded and the path
       is promoted to the full checklist before real users.
 
@@ -81,7 +82,7 @@ description: Use for observability, logs, metrics, traces, health checks, dashbo
 | "Alert on every error" | Alert on user impact, SLO burn, or actionable dependency failure. | Low-volume critical security or data-loss event. |
 | "Health check should test the database" | Keep liveness local. Put external dependencies in readiness or dependency health. | The endpoint is explicitly readiness, not liveness. |
 | "The collector will redact it" | Redact sensitive fields at the source; collector filtering is defense in depth. | Source redaction is impossible and the risk is documented. |
-| "Dashboard later" | Add the view needed to answer whether it is broken and where. | Local-only prototype with deferred observability recorded. |
+| "Dashboard later" | Add the view needed to identify current health and likely fault location. | Local-only prototype with deferred observability recorded. |
 
 ## Handoffs
 
