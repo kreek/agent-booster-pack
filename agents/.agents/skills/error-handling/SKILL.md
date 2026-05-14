@@ -26,26 +26,21 @@ description: Use for error handling, error types, propagation, retries, user mes
 1. Failure is part of the function contract.
 2. Add context at each boundary; preserve the original cause. Catch
    only where you can decide: recover, translate, retry, or terminate.
-3. Errors do not escape their domain unchanged. Translate domain,
-   infrastructure, API, CLI, and UI failures at the boundary where the
-   caller's contract changes.
+3. Translate failures when the caller's contract changes. Domain,
+   infrastructure, API, CLI, and UI errors should not leak across
+   boundaries unchanged.
 4. Expected failures are typed: use named exception classes,
-   discriminated unions, enums, or structured `Result` variants. Do
-   not raise/throw bare strings or anonymous generic errors for
+   discriminated unions, enums, or structured `Result` variants for
    recoverable cases.
 5. Classify errors as user-correctable, transient, or programmer/system
    faults.
-6. For REST APIs, translate failures by origin at the boundary; use
-   `api` for the full status-code taxonomy.
-7. User-facing messages are safe and actionable; internal errors keep
+6. User-facing messages are safe and actionable; internal errors keep
    diagnostic detail under a correlation ID.
-8. Remote calls need finite connect/read timeouts based on observed latency,
-   not defaults. Critical dependencies need circuit breakers, bulkheads, load
-   shedding, or deliberate fail-fast behavior.
-9. Retries apply only to idempotent transient failures. Retry in one layer with
-   a cap, jitter/backoff, and budget.
-10. Panics/assertions are for impossible states and process boundaries, not
-    routine control flow.
+7. Remote calls declare timeout, retry, idempotency, and dependency-failure
+   behavior together. Retry transient failures in one layer with a capped
+   budget and jitter/backoff.
+8. Panics/assertions are for impossible states and process boundaries, not
+   routine control flow.
 
 ## Workflow
 
@@ -53,9 +48,7 @@ description: Use for error handling, error types, propagation, retries, user mes
    made. Choose return-value errors, exceptions, Result/Either, or
    process termination based on caller contract.
 2. Define the domain error vocabulary for expected failures. Translate
-   it when crossing into another domain or public interface; do not
-   leak storage, transport, vendor, or UI-specific errors inward or
-   outward.
+   it when crossing into another domain or public interface.
 3. Wrap with operation, resource, and correlation context. Translate to
    user/API/CLI shape at the boundary.
 4. For each remote dependency, define timeout, retry budget,
@@ -68,25 +61,21 @@ description: Use for error handling, error types, propagation, retries, user mes
 
 - [ ] Every catch/rescue/except either recovers, translates, retries
       safely, or re-raises with context.
-- [ ] Failure-capable public functions declare or document failure in
-      their contract; wrapped errors preserve underlying cause.
 - [ ] Expected failures use typed error classes, structured
       Result/Either variants, enums, or discriminated unions; no
       recoverable path raises/throws bare strings or anonymous generic
       errors.
 - [ ] Domain, infrastructure, API, CLI, and UI errors are translated at
       their boundaries instead of leaking across unchanged.
-- [ ] User-facing errors do not expose stack traces, SQL, file paths,
-      hostnames, or secrets; error responses include a correlation ID.
-- [ ] REST API errors are classified by origin before status-code
-      selection.
-- [ ] Auth failures avoid user enumeration through shape, content, and
-      timing.
+- [ ] Failure-capable public functions document failure in their
+      contract; wrapped errors preserve underlying cause.
+- [ ] User-facing errors are actionable without exposing stack traces,
+      SQL, file paths, hostnames, secrets, or auth-enumeration clues;
+      diagnostic detail is reachable by correlation ID.
 - [ ] Retries apply only to idempotent/transient failures with a
       capped budget, jitter/backoff, and one retrying layer.
-- [ ] Remote calls have finite connect/read or equivalent timeouts.
-- [ ] Critical dependencies define circuit breaker, bulkhead,
-      load-shedding, or deliberate fail-fast behavior.
+- [ ] Remote dependencies define finite timeouts and explicit circuit
+      breaker, bulkhead, load-shedding, or fail-fast behavior.
 - [ ] Tests cover representative failure paths.
 
 ## Tripwires
@@ -95,10 +84,8 @@ description: Use for error handling, error types, propagation, retries, user mes
 |---|---|---|
 | "Log and continue is fine" | Decide whether to recover, translate, retry, or terminate. | Best-effort telemetry failure with an explicit drop policy. |
 | "This can't fail in practice" | Declare the failure-capable contract and test a representative failure. | Compile-time impossible state enforced by type/value construction. |
-| "Naked retry will recover it" | Add timeout, retry budget, backoff/jitter, and idempotency guard. | User-triggered retry after a visible failed operation. |
 | "Swallow at the boundary" | Translate for the caller and preserve the cause for diagnostics. | Security boundary deliberately hides details while logging correlation. |
-| "Context isn't worth the noise" | Wrap with operation, resource, and correlation context. | The lower layer already provides equivalent structured context. |
-| "We'll add timeouts later" | Set finite connect/read or equivalent timeout before merging. | Local in-memory call with no blocking I/O. |
+| "We'll add remote-call protection later" | Define timeout, retry budget, idempotency guard, and dependency-failure behavior now. | Local in-memory call with no blocking I/O. |
 
 ## Handoffs
 
