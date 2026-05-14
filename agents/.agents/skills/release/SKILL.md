@@ -1,6 +1,6 @@
 ---
 name: release
-description: Late gate for release prep, versions, changelogs, rollout, and rollback. Load only on request or approval.
+description: Use only on request/approval for release prep, or when validation requires release artifact sync.
 ---
 
 # Release
@@ -12,29 +12,23 @@ description: Late gate for release prep, versions, changelogs, rollout, and roll
 ## When to Use
 
 - The user explicitly asks for release prep, versioning, changelog work,
-  deprecation/migration notes, release notes, tags, publish planning, rollout,
-  or rollback planning.
-- After implementation, during self-review or code review, the user approves
-  release prep because a concrete diff includes release artifacts or rollout
-  obligations: version manifests, `CHANGELOG.md`, package locks,
-  plugin/package manifests, CI/CD gates, feature flags, migrations, or publish
-  scripts.
-- Reducing release/deployment toil through CI/CD checks, approval
-  gates, rollout notes, rollback runbooks, feature-flag plans,
-  progressive-delivery guardrails, supply-chain gates, or migration
-  rollout coordination.
+  release notes, tags, publish planning, rollout, rollback, deprecation, or
+  migration notes.
+- The user approves release prep after a concrete diff exposes release
+  artifacts or rollout obligations: manifests, `CHANGELOG.md`, package locks,
+  plugin/package metadata, CI/CD gates, feature flags, migrations, publish
+  scripts, or rollout plans.
+- A repo validator requires release artifact sync for an already-approved
+  change.
 
 ## When NOT to Use
 
-- Starting ordinary implementation merely because a change might later need
-  versioning, changelog, packaging, rollout, or npm/registry work. Note the
-  release risk in `workflow`; invoke this skill after the diff exists, during
-  code review, or when the user approves release prep.
-- Actually triggering deploys, rollbacks, promotions, manual
-  approvals, production config changes, feature-flag flips, DNS
-  changes, infrastructure applies, or other shared-environment
-  mutations. Prepare the command/checklist and leave execution to a
-  human operator.
+- Starting implementation because a change might later need versioning,
+  changelog, packaging, registry, rollout, or deployment work. Note release risk
+  in `workflow` and ask only at the concrete release-prep decision point.
+- Triggering deploys, rollbacks, promotions, approvals, production config
+  changes, feature-flag flips, DNS changes, infrastructure applies, or other
+  shared-environment mutations. Prepare the command/checklist for a human.
 - Internal refactors with no caller-visible impact; use
   `refactoring`.
 - Local project bootstrap before release/deployment exists; use
@@ -44,41 +38,20 @@ description: Late gate for release prep, versions, changelogs, rollout, and roll
 
 ## Core Ideas
 
-1. Identify the release unit before classifying: one library, one CLI,
-   one plugin manifest, one container, one meta-package, or a lockstep
-   package set. Monorepos often contain several independent release
-   units.
-2. Identify the public surface before classifying: library symbols,
-   HTTP/RPC contracts, CLI flags, env/config keys, plugin manifests,
-   package manifests, dependency ranges, release artifacts, and
-   documented behavior.
-3. Compatibility changes use the highest required bump for the release
-   unit: breaking changes are major, compatible additions are minor,
-   fixes/docs are patch.
-4. Bump only artifacts whose public payload, manifest, dependency
-   range, bundled dependency set, or plugin metadata changes. Lockstep
-   bumps require explicit repo policy or user approval.
-5. Registry state is release input. Check the latest published versions,
-   existing tags, dependency ranges, lockfiles, and package manager
-   resolution before choosing target versions.
-6. Every deprecation ships in a minor with a removal version and a
-   migration path.
-7. CHANGELOG entries describe what users notice when they upgrade, not
-   what `git log` already says.
-8. Manifest version, lockfile when committed, CHANGELOG release header,
-   tag, and publish plan agree.
-9. Release is a late gate. At task start, `workflow` may name release risk, but
-   this skill runs only after the user requests or approves release prep, or
-   after a release validator requires a concrete sync.
-10. Release intent is separate from implementation intent. Do not bump
-    versions, edit changelogs, mutate release lockfiles, create tags, publish,
-    or check registries unless release prep was requested or approved.
-11. Release preparation and release execution are separate. Agents prepare
-    classification, notes, checks, runbooks, and evidence. Humans approve,
-    promote, deploy, roll back, change flags, and mutate shared environments.
-12. Rollback must be faster and more reliable than emergency fix-forward.
-    Feature flags need owner, expiry, safe default, cleanup, and a human-owned
-    production change path.
+1. Release is a late gate. Implementation approval is not release approval.
+   Load this skill only after user request, user approval, or a required
+   validator sync.
+2. Release classification starts with the release unit and public surface. In
+   monorepos, one library, CLI, plugin manifest, container, meta-package, or
+   lockstep package set may each have different release streams.
+3. Compatibility uses the highest required bump for the release unit: breaking
+   change is major, compatible addition is minor, fix/docs/internal is patch.
+4. Release artifacts must agree: manifest, committed lockfile, CHANGELOG
+   header, tag plan, dependency ranges, package metadata, and publish order.
+5. Agents prepare release evidence, notes, checks, runbooks, and command plans.
+   Humans mutate shared environments.
+6. Rollback must be faster than emergency fix-forward. Feature flags need owner,
+   expiry, cleanup, safe default, and human-owned production change path.
 
 ## Classification
 
@@ -90,114 +63,77 @@ description: Late gate for release prep, versions, changelogs, rollout, and roll
 
 ## Workflow
 
-1. Confirm this skill should run now. Continue only when the user asked for
-   release prep/rollout planning, approved release prep after a concrete diff
-   surfaced release artifacts or rollout obligations, or a release validator
-   requires a concrete sync.
-2. Confirm release-prep scope before editing release artifacts. Separate
-   code/docs only, version/changelog/lockfile updates, release notes, and
-   human-run tag/publish steps.
-3. Map release units and versioning policy. Read manifests, lockfiles,
-   workspace config, release scripts, changelog, tags, and packaging
-   docs. For package publishes, query the registry for current versions
-   and dependency metadata before proposing target versions.
-4. Identify touched public surfaces for each release unit and classify
-   the release impact. Default to the higher plausible bump when
-   compatibility is unclear.
-5. Decide the target version per release unit. In monorepos, do not
-   assume sibling packages share a version stream. Meta-packages usually
-   bump when their manifest, dependency ranges, bundled set, or plugin
-   resource paths change, even if the dependency packages do not.
-6. Check release automation before running it. If a script bumps more
-   artifacts than the chosen release units, do not run or patch it inside
-   the release unless the user explicitly approves that separate tooling
-   change.
-7. Update selected manifests, committed lockfiles, changelog entry,
-   and tag plan together only after release-prep scope is approved. Add
-   deprecation warning, removal version, and migration note where applicable;
-   for deprecation/migration/removal/sunset work, load
+1. **Confirm the gate.** Continue only for user-requested release work,
+   user-approved release prep after a concrete diff, or validator-required
+   artifact sync.
+2. **Confirm scope.** Separate docs-only release notes, version/changelog/
+   lockfile edits, packaging checks, rollout planning, and human-run
+   tag/publish/deploy steps before editing.
+3. **Map release units.** Read manifests, lockfiles, workspace config, release
+   scripts, changelog, tags, packaging docs, and registry state when publishing.
+4. **Classify impact.** Identify touched public surfaces per release unit and
+   choose the target version. Use the higher plausible bump when compatibility
+   is unclear; require repo policy or user approval for lockstep bumps.
+5. **Edit approved artifacts together.** Keep selected manifests, committed
+   lockfiles, CHANGELOG entry, tag plan, dependency ranges, package metadata,
+   and publish plan consistent. For deprecation/removal/sunset work, load
    `references/deprecation-and-migration.md`.
-8. Validate packaging before tagging: dry-run pack/build where
-   available, confirm dependency ranges resolve, name the human
-   publish order.
-9. Define artifact, environments, human operator, promotion path, and
-   merge gates. Lint/type/test/security run before merge where
-   possible.
-10. Design rollback and rehearsal. Split migrations and feature flags
-    into safe deploy phases.
-11. Report human-run release steps separately from agent-run
-    validation, naming risks, rollout gates, and rollback evidence.
+6. **Validate before tag or publish.** Check release automation scope, run
+   available dry-run pack/build checks, confirm dependency resolution, and name
+   the human publish order.
+7. **Plan rollout and rollback.** Name artifact, environment, human operator,
+   promotion path, merge gates, rollback path, and feature-flag/migration
+   phases.
+8. **Report execution boundaries.** Separate agent-run checks from human-run
+   commands and name remaining release risks.
 
 ## Verification
 
-- [ ] **Timing**: this skill ran because the user asked for release prep,
-      rollout planning, approved it after a concrete diff/review surfaced
-      release artifacts, or a release validator required sync; it was not
-      loaded for ordinary startup routing.
-- [ ] **Intent**: release prep scope was explicitly approved before
-      version, changelog, lockfile, tag, publish-plan, or registry-check work;
-      implementation approval was not treated as release approval.
-- [ ] **Classification**: release unit(s) and versioning policy
-      identified before any manifest edit, script edit, commit, or
-      tag; bump matches the classification table; ambiguous cases
-      erred higher; only artifacts in the chosen release unit(s) were
-      bumped (lockstep bumps backed by repo policy or user approval).
-- [ ] **Artifact consistency**: registry/latest versions, existing
-      tags, dependency metadata, and committed lockfiles checked or
-      explicitly marked unavailable; manifest versions, lockfiles,
-      CHANGELOG release header, tag plan, and publish plan all agree;
-      CHANGELOG entry is user-observable and in the right section.
-- [ ] **Packaging proof**: packaging dry-run/build/check ran where
-      available before tagging, or the blocker is named; dependency
-      ranges resolve to published artifacts or to a named human-owned
-      publish order; every breaking change has a migration note;
-      every deprecation names a removal version using the
-      language-native primitive where available.
-- [ ] **Human execution boundary**: no deploy, rollback, promotion,
-      approval, production config, feature flag, DNS, infrastructure
-      apply, or shared-environment mutation was executed by the agent;
-      human-run release steps are clearly separated from agent-run
-      checks.
-- [ ] **Gates / rollback / flags**: merge gates run the repo's
-      canonical lint, typecheck, test, and security checks; rollback
-      path is documented and migration rollout is split into
-      expand/backfill/switch/contract where needed; feature flags have
-      owner, expiry, cleanup issue, and safe default-on-failure.
+- [ ] Gate and scope were explicit: request, approval, or required validator
+      sync; implementation approval was not treated as release approval.
+- [ ] Release units, public surfaces, versioning policy, and target bump were
+      identified before artifact edits.
+- [ ] Manifests, committed lockfiles, CHANGELOG header, tag plan, dependency
+      ranges, package metadata, and publish order agree.
+- [ ] Registry/latest versions, tags, dependency metadata, package dry-run/build,
+      migration notes, and deprecation removal versions were checked or named as
+      unavailable.
+- [ ] Agent-run validation and human-run release/environment steps are separated.
+- [ ] Rollback, migration phases, feature-flag owner/expiry/cleanup/safe
+      default, and merge gates are named when relevant.
 
 ## Tripwires
 
-| Trigger | Do this instead | False alarm |
-|---|---|---|
-| "I'll run the deploy/rollback/approval now" | Stop. Prepare the command, checklist, evidence, and rollback path for a human operator. | None for production or shared environments. |
-| "Use the release script to bump everything" | First prove the script's scope matches the intended release units; otherwise propose a manual targeted bump or a separate tooling change. | Repo policy explicitly says all artifacts are lockstep and the user approved that release shape. |
-| "The implementation might touch a public package/command" | Stay in `workflow`; note release risk and defer this skill until the diff exists or release prep is approved. | The user explicitly asked for release prep or rollout planning. |
-| "The implementation touched a public package/command, so I'll bump versions now" | Ask whether release prep is in scope before editing manifests, changelogs, lockfiles, tags, or publish plans. | The user explicitly asked for release prep in the same task. |
-| "I'll load release just in case" | Stay in `workflow`; name release as deferred/unproven and ask only when there is a concrete release-prep decision. | The user explicitly requested release planning. |
-| "npm install changed the lockfile while I was validating" | Stop and ask whether to keep release/package-manager changes or revert them. | The approved task is package maintenance or lockfile repair. |
-| "It's a monorepo, so one version" | Map package/version streams from manifests, tags, registry, and docs before choosing versions. | The repo has an explicit single-version policy for this artifact set. |
-| "The package exists locally" | Check whether it is published, what version is latest, and whether dependency ranges can resolve. | Local-only package never intended for registry resolution. |
-| "Only package.json changed" | Also check committed lockfiles, bundled dependencies, plugin manifests, resource paths, tarball contents, and publish order. | The package manager has no committed lockfile and no generated package metadata. |
-| "Tag now and fix details later" | Validate manifests, dependency resolution, dry-run packaging, changelog, and publish order before creating the tag. | Disposable local rehearsal tag that will not be pushed and is clearly named as such. |
-| "This is just staging" | Treat shared staging as an environment mutation; ask a human to trigger it unless the user explicitly granted this exact non-production action. | Local-only disposable environment owned by this working tree. |
-| "I'll flip the flag to verify" | Document the flag state, safe default, rollout steps, and verification; leave the flip to a human. | Pure local test flag with no shared service. |
-| "Rollback is just `git revert`" | Name the rollback path for data, caches, config, and external side effects. | Code-only change with no persisted state or external side effect. |
-| "Low-traffic window, skip canary" | Keep the canary or name the equivalent progressive gate. | Non-production environment with no real users. |
-| "Feature flag default-on at launch" | Default off, ramp deliberately, and define fail-safe behavior. | Kill-switch flag guarding an already-on behavior. |
-| "Config change isn't a deploy" | Apply the same gates, observability, and rollback note. | Local development config excluded from release. |
-| "We can hotfix forward" | Document rollback or disable path before shipping. | User explicitly asks for emergency mitigation and risk is named. |
-| "Flag is temporary" | Add owner, expiry, and cleanup work now. | One-shot migration flag removed in the same change. |
+Use these when the shortcut thought appears:
+
+- Load `release` only for an explicit release-prep decision, not because a
+  future release might exist.
+- Prepare deploy, rollback, promotion, approval, flag, DNS, and infrastructure
+  actions for a human operator.
+- Prove a release script's scope matches the selected release units before
+  using it to bump artifacts.
+- Ask before keeping lockfile or package-manager changes produced by validation.
+- Map monorepo package/version streams before choosing versions.
+- Check registry state and dependency resolution before trusting local packages.
+- Check committed lockfiles, bundled dependencies, plugin metadata, resource
+  paths, tarball contents, and publish order, not only manifests.
+- Validate manifests, dependency resolution, dry-run packaging, changelog, and
+  publish order before any tag plan.
+- Treat shared staging, config, and feature-flag changes as environment
+  mutations unless they are local to this working tree.
+- Name rollback for data, caches, config, and external side effects.
+- Keep canary/progressive gates or name the equivalent.
+- Default feature flags off unless they are kill-switches for existing behavior.
+- Give temporary flags an owner, expiry, and cleanup work.
 
 ## Handoffs
 
-- Use `api` for HTTP API compatibility design, URL/header versioning,
-  `Sunset`, and `Deprecation` headers.
-- Use `database` for migration mechanics and lock/backfill risk.
-- Use `observability` for rollout metrics, dashboards, alerts, and
-  runbooks.
-- Use `security` for CI credentials, artifact signing, SBOMs, and
-  dependency trust.
-- Use `git-workflow` for splitting version/release commits cleanly.
-- Use `documentation` for migration guides and reference docs.
+- `api`: HTTP compatibility, URL/header versioning, `Sunset`, `Deprecation`.
+- `database`: migration mechanics, locks, backfills, production data safety.
+- `observability`: rollout metrics, dashboards, alerts, runbooks.
+- `security`: CI credentials, artifact signing, SBOMs, dependency trust.
+- `git-workflow`: clean version/release commits.
+- `documentation`: migration guides and reference docs.
 
 ## References
 

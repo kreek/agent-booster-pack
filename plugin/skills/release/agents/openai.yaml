@@ -1,4 +1,4 @@
 interface:
   display_name: "ABP: Release"
-  short_description: "Plan versions, changelogs, and rollout"
-  default_prompt: "Use $release to classify the version impact, update release notes, and prepare rollout and rollback checks without mutating shared environments."
+  short_description: "Late gate for approved release prep"
+  default_prompt: "Use $release only after release prep is requested or approved to classify version impact, sync release artifacts, and prepare rollout or rollback evidence without mutating shared environments."
