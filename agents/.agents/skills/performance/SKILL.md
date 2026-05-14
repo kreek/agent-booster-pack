@@ -36,19 +36,13 @@ description: Use for performance, profiling, latency, throughput, allocation, ca
    network wait are different problems.
 6. Micro-benchmarks prove local mechanics, not end-to-end wins.
 7. Keep complexity only when the measured gain justifies it.
-
-Cache rules:
-
-8. No invalidation story, no cache.
-9. Keys encode freshness, tenant, permissions, locale, and version
-   where those affect the value.
-10. Prefer event/key-based expiration for correctness; use TTL as a
-    safety net, not the primary truth.
-11. Every hot key needs stampede protection.
-12. Layered caches need explicit ownership so stale data cannot hide
-    in an outer layer.
-13. Never put secrets or raw PII in keys or values unless the cache is
-    treated as sensitive storage.
+8. Caches need a source of truth, invalidation trigger, stale
+   tolerance, key contract, stampede protection, and metrics before
+   they are kept.
+9. Cache keys encode every input that changes the value, including
+   freshness, tenant, permissions, locale, and version.
+10. Treat cache contents as sensitive storage when keys or values
+    contain secrets, raw PII, tenant data, or authorization context.
 
 ## Workflow
 
@@ -57,7 +51,8 @@ Cache rules:
    production-shaped data and concurrency.
 2. Profile to find the dominant bottleneck. If caching is considered,
    state the value being cached, source of truth, invalidation trigger,
-   TTL/jitter, stampede policy, stale tolerance, and cache metrics.
+   stale tolerance, key contract, stampede policy, TTL/jitter, and
+   cache metrics.
 3. Make one change.
 4. Re-measure under the same conditions. Check adjacent regressions:
    memory, error rate, tail latency, CPU, maintainability.
@@ -72,16 +67,13 @@ Cache rules:
 - [ ] Load generator avoids coordinated omission for latency work.
 - [ ] Adjacent metrics did not regress enough to erase the win.
 - [ ] Added complexity is justified by measured improvement.
-- [ ] Cache invalidation is specified: owner/trigger/stale tolerance
-      documented; TTL has jitter where many entries can expire
-      together; negative caching is intentional and bounded.
-- [ ] Cache keys include all inputs that change the value and exclude
-      secrets/raw PII unless the cache is treated as sensitive storage.
-- [ ] Hot keys are protected by singleflight, locking, probabilistic
-      early refresh, or equivalent.
-- [ ] Cache metrics cover hit rate, miss latency, eviction, memory,
-      and refresh errors; tests cover stale data and invalidation, not
-      only the warm-cache happy path.
+- [ ] Cache safety is specified: owner, source of truth, invalidation
+      trigger, stale tolerance, key contract, TTL/jitter, negative
+      caching, and sensitive-data handling.
+- [ ] Hot keys have stampede protection; cache metrics cover hit
+      rate, miss latency, eviction, memory, and refresh errors.
+- [ ] Cache tests cover stale data and invalidation, not only the
+      warm-cache happy path.
 
 ## Tripwires
 
