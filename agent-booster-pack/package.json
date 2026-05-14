@@ -1,6 +1,6 @@
 {
   "name": "agent-booster-pack",
-  "version": "9.1.0",
+  "version": "9.1.1",
   "description": "Agent Booster Pack for Pi: collaborative skills + proof-first runtime + manual ABP workflows, in one install. Meta-package; depends on the four siblings.",
   "type": "module",
   "engines": {

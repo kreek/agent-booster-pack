@@ -67,8 +67,9 @@ and run the baseline without local knowledge.
 ## Workflow
 
 1. Detect language, framework, existing conventions, and git state.
-2. If Pi offers `/abp:scaffold`, enable it for new scaffold work. It also
-   activates when the user invokes `/skill:scaffolding`.
+2. If Pi offers `/abp:scaffold`, run it for new scaffold work before
+   presenting the gate. It also activates when the user invokes
+   `/skill:scaffolding`.
 3. Before creating scaffold files, installing packages, or running generators,
    present a **Scaffold Decision Gate** and wait for explicit user approval.
    Include: project intent, project kind, language/runtime, deployment
@@ -141,7 +142,7 @@ to the full checklist.
 | "`node --check` proves typecheck" | Treat it as syntax/lint smoke; wire `typecheck` to the real type checker or established equivalent. | The ecosystem has no type checker and the limitation is stated. |
 | "The commands passed, so setup is done" | Verify the requirement -> artifact -> command mapping for every named setup requirement. | Pure script rename with no requested artifact. |
 | "Git can be added later" | Initialize git and `.gitignore` before feature code so ABP can review diffs, preserve checkpoints, and avoid tracking generated artifacts. | User explicitly forbids git or the target is inside an existing parent repo/submodule policy. |
-| "I'll pick the stack and start generating" | Present the Scaffold Decision Gate and get approval for setup choices first. | The user already specified every material setup choice and only the mechanical wiring remains. |
+| "I'll pick the stack and start generating" | In Pi, run `/abp:scaffold`; then present the Scaffold Decision Gate and get approval for setup choices first. | The user already specified every material setup choice and only the mechanical wiring remains. |
 
 ## Handoffs
 

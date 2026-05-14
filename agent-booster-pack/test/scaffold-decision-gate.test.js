@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import scaffoldDecisionGate, {
+  hasScaffoldDecisionGate,
   isScaffoldActivation,
   isScaffoldApproved,
   isScaffoldDeactivation,
@@ -75,6 +76,37 @@ describe("scaffold decision gate", () => {
     expect(isScaffoldApproved([gate])).toBe(false);
     expect(isScaffoldApproved([gate, userText("approved")])).toBe(true);
     expect(isScaffoldApproved([gate, userText("revise the framework")])).toBe(false);
+  });
+
+  it("rejects incomplete Scaffold Decision Gate packets", () => {
+    const missingDeployment = `Scaffold Decision Gate\n\nProject intent: make a tiny API\nProject kind: API\nLanguage/runtime: TypeScript on Node\nFramework/template: Fastify fallback\nQuality baseline: pnpm, vitest, eslint, prettier, tsc, CI\nFiles and commands: create package.json and tests\nUser decision: approve, revise, or choose another option`;
+
+    expect(hasScaffoldDecisionGate(missingDeployment)).toBe(false);
+    expect(isScaffoldApproved([assistantText(missingDeployment), userText("approved")])).toBe(false);
+  });
+
+  it("rejects vague Scaffold Decision Gate baselines unless a blocker is named", () => {
+    const vagueGate = `Scaffold Decision Gate\n\nProject intent: make a tiny API\nProject kind: API\nLanguage/runtime: TypeScript on Node\nDeployment assumption: container\nFramework/template: Fastify fallback\nQuality baseline: tests and scripts if feasible\nFiles and commands: create package.json and tests where practical\nUser decision: approve, revise, or choose another option`;
+
+    expect(hasScaffoldDecisionGate(vagueGate)).toBe(false);
+    expect(isScaffoldApproved([assistantText(vagueGate), userText("approved")])).toBe(false);
+  });
+
+  it("accepts a limited Scaffold Decision Gate baseline when it names the blocker", () => {
+    const blockedGate = `Scaffold Decision Gate\n\nProject intent: make a tiny API\nProject kind: API\nLanguage/runtime: TypeScript on Node\nDeployment assumption: container\nFramework/template: Fastify fallback\nQuality baseline: test and typecheck; blocker: network unavailable, so lockfile install is deferred\nFiles and commands: create package.json and tests; blocked by network for install\nUser decision: approve, revise, or choose another option`;
+
+    expect(hasScaffoldDecisionGate(blockedGate)).toBe(true);
+    expect(isScaffoldApproved([assistantText(blockedGate), userText("approved")])).toBe(true);
+  });
+
+  it("blocks scaffold mutation after approval of an incomplete gate", () => {
+    const entries = [
+      customEntry("abp-scaffold-state", { active: true }),
+      assistantText(`Scaffold Decision Gate\nProject intent: app\nProject kind: web app\nLanguage/runtime: TypeScript\nFramework/template: Svelte\nQuality baseline: tests if feasible\nFiles and commands: create scaffold\nUser decision: approve, revise, or choose another option`),
+      userText("approve"),
+    ];
+
+    expect(shouldBlockScaffoldMutation("write", { path: "package.json" }, entries)).toBeTruthy();
   });
 
   it("blocks scaffold file writes while active and unapproved", () => {

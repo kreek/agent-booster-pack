@@ -58,6 +58,53 @@ describe("final value guard", () => {
     expect(result.message.content[0].text).toMatch(/Previous final response:\nDone\./);
   });
 
+  it("does not replace intermediate tool-call turns", async () => {
+    const handlers = new Map();
+    const sessionEntries = [entry("user", "scaffold the app")];
+    const fakePi = {
+      registerCommand() {},
+      on: (eventName, handler) => handlers.set(eventName, handler),
+    };
+
+    finalValueGuard(fakePi);
+    const result = await handlers.get("message_end")(
+      {
+        message: {
+          role: "assistant",
+          content: [{ type: "toolCall", name: "bash", arguments: { command: "git init && touch package.json" } }],
+        },
+      },
+      { sessionManager: { getBranch: () => sessionEntries } }
+    );
+
+    expect(result).toBeUndefined();
+  });
+
+  it("does not replace assistant turns that are still using tools", async () => {
+    const handlers = new Map();
+    const sessionEntries = [entry("user", "scaffold the app")];
+    const fakePi = {
+      registerCommand() {},
+      on: (eventName, handler) => handlers.set(eventName, handler),
+    };
+
+    finalValueGuard(fakePi);
+    const result = await handlers.get("message_end")(
+      {
+        message: {
+          role: "assistant",
+          content: [
+            { type: "text", text: "I’ll initialize the scaffold now." },
+            { type: "toolCall", name: "bash", arguments: { command: "git init && touch package.json" } },
+          ],
+        },
+      },
+      { sessionManager: { getBranch: () => sessionEntries } }
+    );
+
+    expect(result).toBeUndefined();
+  });
+
   it("does not replace strong final responses", async () => {
     const handlers = new Map();
     const strong = assistantText(

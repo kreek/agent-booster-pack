@@ -30,13 +30,21 @@ function latestUserScopedMessages(entries) {
   return messages;
 }
 
+function isToolCall(item) {
+  return item?.type === "toolCall";
+}
+
 function isChangeToolCall(item) {
-  if (item?.type !== "toolCall") return false;
+  if (!isToolCall(item)) return false;
   if (CHANGE_TOOL_NAMES.has(item.name)) return true;
   if (item.name !== "bash") return false;
 
   const command = typeof item?.arguments?.command === "string" ? item.arguments.command : "";
   return MUTATING_BASH_PATTERN.test(command);
+}
+
+function hasToolCall(message) {
+  return Array.isArray(message?.content) && message.content.some(isToolCall);
 }
 
 function changeToolCalls(messages) {
@@ -196,6 +204,7 @@ export default function finalValueGuard(pi) {
 
   pi.on("message_end", async (event, ctx) => {
     if (event.message.role !== "assistant") return;
+    if (hasToolCall(event.message)) return;
 
     const branchEntries = ctx.sessionManager?.getBranch?.() ?? [];
     const prompt = finalValuePromptForSessionEntries([...branchEntries, entryFromMessage(event.message)]);

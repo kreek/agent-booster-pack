@@ -16,6 +16,8 @@ const REQUIRED_GATE_LABELS = [
 ];
 const APPROVAL_PATTERN = /\b(approve|approved|yes|proceed|go ahead|looks good|sounds good|do it)\b/i;
 const REVISION_PATTERN = /\b(revise|change|instead|no|not yet|different|choose another)\b/i;
+const VAGUE_BASELINE_PATTERN = /\b(if feasible|where practical|as needed|where applicable|if possible|try to)\b/i;
+const BLOCKER_PATTERN = /\b(blocker|blocked by|because|cannot|unavailable|not available|defer|deferred)\b/i;
 
 function messageText(value) {
   if (typeof value === "string") return value;
@@ -66,9 +68,28 @@ export function isScaffoldDeactivation(text) {
   return DEACTIVATION_PATTERN.test(String(text ?? ""));
 }
 
+function escapedLabel(label) {
+  return label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function labelValue(text, label) {
+  const labels = REQUIRED_GATE_LABELS.map(escapedLabel).join("|");
+  const pattern = new RegExp(`(^|\\n)\\s*${escapedLabel(label)}:\\s*([\\s\\S]*?)(?=\\n\\s*(${labels}):|$)`, "i");
+  return text.match(pattern)?.[2]?.trim() ?? "";
+}
+
+function hasVagueBaseline(text) {
+  const baseline = labelValue(text, "Quality baseline");
+  const files = labelValue(text, "Files and commands");
+  return VAGUE_BASELINE_PATTERN.test(`${baseline}\n${files}`);
+}
+
 export function hasScaffoldDecisionGate(text) {
   const value = String(text ?? "");
-  return value.includes("Scaffold Decision Gate") && REQUIRED_GATE_LABELS.every((label) => new RegExp(`(^|\\n)\\s*${label}:`, "i").test(value));
+  if (!value.includes("Scaffold Decision Gate")) return false;
+  if (!REQUIRED_GATE_LABELS.every((label) => labelValue(value, label).length > 0)) return false;
+  if (hasVagueBaseline(value) && !BLOCKER_PATTERN.test(value)) return false;
+  return true;
 }
 
 export function isScaffoldApproved(entries) {
