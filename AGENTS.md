@@ -77,6 +77,30 @@ validator, and `refcheck` are maintenance checks. Treat clean Vitest,
 `validate-skill-anatomy.mjs`, and `refcheck` commands as the bar for script
 changes.
 
+## Validation scope and token discipline
+
+Run the narrowest check that proves the touched surface first. Broaden only
+when the changed files require it or the narrow check exposes cross-package
+risk.
+
+- Pi runtime extension changes under `agent-booster-pack/extensions/` or
+  `agent-booster-pack/test/`: run `cd agent-booster-pack && npm test`.
+- Canonical skill prose changes: run `node scripts/validate-skill-anatomy.mjs`
+  and targeted `cmp` checks for the changed skill mirrors. Use root `npm test`
+  only when sibling package mirrors, packaging scripts, or repo tests changed.
+- Markdown link/doc-wide changes: run `uv run refcheck . --no-color` only when
+  links or broad docs moved. Do not run it for ordinary runtime or narrow skill
+  edits.
+- Release/package metadata changes: run the release/package checks that match
+  the edited manifests, locks, or plugin metadata. Do not treat implementation
+  approval as approval to add release-prep edits.
+- After compaction, read only the files needed for the current slice. Avoid
+  replaying long session history, broad diffs, or full validators to rebuild
+  context unless the next action depends on them.
+
+If a command prints hundreds of lines, stop repeating it. Summarize the failed
+check and switch to a narrower command or exact file inspection.
+
 ## Skill anatomy (enforced by the validator)
 
 Every `SKILL.md` must have:
