@@ -1,6 +1,6 @@
 ---
 name: documentation
-description: Use when docs are requested or approved: READMEs, guides, ADRs, runbooks, API docs, comments.
+description: Use for requested/approved docs, READMEs, ADRs, runbooks, API docs, comments.
 ---
 
 # Documentation
