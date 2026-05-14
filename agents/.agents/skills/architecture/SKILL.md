@@ -17,6 +17,8 @@ description: Use for architecture decisions, module boundaries, coupling, layeri
 - Defining internal boundary contracts: what shape crosses a
   module/component boundary, what assumptions are guaranteed, and what
   details stay hidden.
+- Choosing API style or data store family before a specialist skill owns the
+  detailed shape.
 - Mapping data flow inside a component from external/service payloads through
   parsed internal shapes to output/render shapes.
 - Deciding whether DDD tactical patterns (aggregates, repositories,
@@ -92,28 +94,28 @@ description: Use for architecture decisions, module boundaries, coupling, layeri
 
 ## Tripwires
 
-| Trigger | Do this instead | False alarm |
-|---|---|---|
-| "Every feature needs controller/service/repository/DTO files" | Group by capability first. Add horizontal layers only for real technical boundaries. | The framework requires the split and behavior remains local. |
-| "This belongs in shared because two places use it" | Check whether the two places mean the same thing. Prefer separate context types when meaning differs. | The value is a true cross-context primitive with identical rules. |
-| "Add a repository/factory/service because DDD" | Name the domain rule or boundary it protects before adding the pattern. | The pattern already exists locally and carries real behavior. |
-| "Middleware can handle this feature rule" | Keep feature-specific business behavior at the handler/domain boundary. | The concern is transport-wide, such as auth session parsing or request IDs. |
-| "Architecture review means move files now" | Decide the boundary first, then use `refactoring` to move code safely. | The requested task is only to sketch the target structure. |
-| "A new layer will make this simpler" | Name the independent change axis or proven duplication it separates. | The layer represents process, deploy, trust, persistence, or transport. |
+Use these when the shortcut thought appears:
+
+- Group by capability before adding controller/service/repository/DTO layers.
+- Share code only when the reused value has the same meaning and rules in both
+  contexts.
+- Add repositories, factories, services, or aggregates only when they protect a
+  real domain rule or boundary.
+- Keep feature-specific business rules at the handler/domain boundary; use
+  middleware for transport-wide concerns.
+- Decide the boundary before using `refactoring` to move files.
+- Add a layer only when it separates an independent change axis, process,
+  deploy, trust, persistence, transport, or proven duplication.
 
 ## Handoffs
 
-- Use `specify` upstream to map the current and proposed contracts before
-  deciding module boundaries.
-- Use `domain-modeling` to design data shapes, invariants, and effect isolation
-  inside a module, including the exact parsed and output shapes.
-- Use `refactoring` to move existing code toward the chosen structure
-  without changing behavior.
-- Use `api` when the boundary in question is a public HTTP contract.
-- Use `documentation` for ADRs that capture the rationale.
-- Use workflow's `references/simple-not-easy.md` when deciding whether a
-  boundary, layer, or tactical pattern is simplifying the system or only
-  making the next edit easier.
+- `specify`: compare current and proposed contracts before boundary decisions.
+- `domain-modeling`: module data shapes, invariants, effects, parsed/output
+  shapes.
+- `refactoring`: move existing code toward the chosen structure.
+- `api`: public HTTP contract details.
+- `database`: physical schema, migrations, indexes, query behavior.
+- `documentation`: ADRs that capture rationale.
 
 ## References
 
