@@ -28,130 +28,74 @@ description: Use to review diffs and PRs for bugs, regressions, edge cases, proo
 
 ## Core Ideas
 
-1. Every review includes a security pass, even when the diff doesn't look
-   security-focused.
-2. Every non-trivial "looks fine" claim needs proof evidence or must be
-   scoped as unproven.
-3. Identify declared runtime and toolchain constraints (manifests, lockfiles,
-   CI, framework versions, support policy) before applying language advice.
-   Repository compatibility wins over language-reference defaults.
-4. Duplication and dead code are review risks: they hide divergent behavior,
-   stale invariants, unreachable branches, and untested paths. For removals
-   and refactors, verify old paths were fully removed or intentionally
-   preserved, and that callers reach the intended path.
-5. AI-generated code is untrusted until behavior, tests, and
-   security-sensitive paths are verified. The patterned failures are
-   enumerated under AI-Agent Failure Modes.
-6. Maintainability findings must name a concrete risk: hidden state, coupled
-   effect, broad abstraction, dead compatibility shim, stale flag, duplicated
-   rule with divergent meaning, or behavior split across unrelated lifecycles.
-7. Review protects the human's mental model. Generated code that works but is
-   too large, too vague, or too disconnected from the stated intent is
-   comprehension debt.
+1. Review owns defect discovery, not proof execution. It should find behavioral
+   bugs, regressions, unsafe edge cases, missing evidence, and merge blockers;
+   `proof` owns turning claims into checks.
+2. Findings first. Summaries, compliments, and change descriptions come after
+   concrete issues ordered by severity.
+3. Every review includes a security pass and a proof-evidence pass. If the
+   review cannot verify a claim, report it as unproven.
+4. Repository constraints beat generic advice. Check declared runtime,
+   framework, dependency, CI, and support-policy constraints before using a
+   language reference.
+5. Maintainability findings need a concrete risk: hidden state, coupled
+   effects, stale flags, duplicated rules, dead compatibility, unreachable
+   paths, or behavior split across unrelated lifecycles.
+6. Review protects the human's mental model. Generated code that is too large,
+   vague, or disconnected from the stated intent is comprehension debt even when
+   it appears to work.
 
-## AI-Agent Failure Modes
+## Review Lenses
 
-Agent-generated diffs fail in patterned ways. Treat each as a blocking finding
-unless the diff names a real caller, requirement, or removal condition.
-Blocking means the done or merge claim is blocked and the finding is surfaced
-to the user. It does not mean the review loops internally. Make one pass, list
-findings, and hand back. Do not re-review after fixing unless the user asks.
-
-1. **Speculative abstraction.** New interface, factory, generic, strategy,
-   wrapper, or config knob with fewer than two real callers in this or a
-   queued diff. Inline or delete.
-2. **Unnecessary backwards compatibility.** Deprecated alias, old-name
-   shim, or compatibility branch lacking (a) a named caller that needs
-   it, (b) a removal trigger, and (c) an owner. Concentrate at a single
-   translation boundary or remove. Approval of a new name or shape is
-   not approval to keep the old one.
-3. **Dead defensive code.** Guard, sentinel, try/except, fallback, or
-   default-return covering a state no in-scope caller produces. Convert
-   to a boundary assertion or remove. Swallowed exceptions and silent
-   fallbacks are data-loss risk, not robustness.
-4. **Test theater.** Assertions of `mock.was_called` without an
-   observable side effect, return value, or persisted state; assertions
-   against the implementation's own constants, regex, or string literals
-   imported from the module under test; snapshot updates without a
-   behavior-change reason; suites that survive a one-assertion or
-   one-branch mutation. Rewrite to assert caller-visible behavior at the
-   data-shape boundary (see `proof`).
-5. **Fabricated API.** Imported symbol, method, parameter, framework
-   feature, or CLI flag the type checker, language server, or installed
-   package cannot resolve. Block until resolved against the declared
-   toolchain.
-6. **Scope creep.** Requested change bundled with reformatting, import
-   reordering, unrelated docstrings, or speculative refactors. Require a
-   split before deep review.
-7. **Refactor drift.** Diff labeled refactor or cleanup but observable
-   return, effect, error shape, or ordering changes. Reclassify as a
-   feature change and route to `proof`.
-8. **Comprehension debt.** Durable generated code is larger than the stated
-   intent, introduces unexplained ownership, or cannot be reviewed in one
-   sitting. Split, summarize, or simplify before approval.
+- Security: auth/authz, secrets, trust boundaries, input handling, dependencies,
+  crypto, unsafe sinks, redaction, and error/log disclosure.
+- Behavior: changed return values, effects, ordering, error shape, concurrency,
+  persistence, migrations, UI states, and compatibility.
+- Evidence: tests, CI, build output, root-cause evidence, proof contracts, and
+  claims marked unproven.
+- Dead surface: unused exports, old routes, stale flags, orphaned jobs, removed
+  files still referenced, and duplicated rules with divergent meaning.
+- AI-generated risk: speculative abstraction, unnecessary compatibility shims,
+  dead defensive code, test theater, fabricated APIs, scope creep, refactor
+  drift, and comprehension debt.
 
 ## Workflow
 
-1. Resolve the review target. Local: `git diff`, `git diff --cached`, or
-   `git diff <base>...HEAD`. GitHub: ask before running any `gh`
-   command. With permission, use `gh pr view` for metadata,
-   `gh pr diff --patch` for code, and `gh api graphql` for
-   `reviewThreads` when thread state (resolved/outdated, path, line)
-   matters.
-2. Pre-flight before deep review. Note CI status. If CI is red, scope
-   the review as unproven and surface the failing check. If CI has not
-   run, say so and continue. Confirm the diff's intent and impact are
-   stated. In self-review, the task context is the intent. In PR or
-   inbound review, a missing description on a non-trivial diff is a
-   finding. For durable generated diffs above roughly 400 changed lines, ask
-   whether the human can review it in one sitting. If not, make split/scope a
-   finding. For any oversized diff, sweep by risk area and declare partial
-   scope explicitly. This is a one-time gate, not a loop: run it once per
-   review pass.
-3. Read the intent: what behavior, API, data shape, migration, UI, or
-   workflow is supposed to change.
-4. Load the language reference under `references/` for every language in
-   the diff (`rust.md`, `fsharp.md`, `csharp.md`, `python.md`,
-   `typescript.md`, `ruby.md`, `java.md`, `kotlin.md`, `bash.md`,
-   `sql.md`). Defer recommendations incompatible with the repo's
-   declared toolchain.
-5. Load triggered domain skills as lenses. Always include `security` for auth,
-   trust boundaries, input, dependencies, secrets, crypto, redaction, or
-   user-controlled sinks. Add other skills only when the diff touches their
-   domain. Load `release` only for concrete release artifacts, rollout
-   obligations, or explicit release-readiness review.
-6. Run the AI-Agent Failure Modes pass on every agent-generated diff.
-   Name each blocking finding by its mode (speculative abstraction,
-   compatibility shim, dead defensive code, test theater, fabricated
-   API, scope creep, refactor drift, comprehension debt).
-7. Sweep for harmful duplication, orphaned code, unreachable branches, dead
-   feature flags, unused public surface, and stale tests/docs/config. For
-   maintainability, ask what independent concerns the diff couples or
-   separates, and whether simplification preserves behavior with evidence.
-8. Don't review generated, vendored, or lockfile churn as if it were
-   hand-written; sample only enough to detect obvious risk.
+1. **Resolve the target.** Use local diffs or approved GitHub reads. For PR
+   review threads, fetch thread state only when resolution or line context
+   matters. Never run `gh` without explicit permission.
+2. **Pre-flight the review.** Identify intent, impact, CI status, and changed
+   surface. Missing PR intent on a non-trivial diff is a finding. Red or absent
+   CI scopes the review as unproven, not blocked from inspection.
+3. **Bound the scope.** For oversized generated or durable diffs, declare the
+   partial review scope and make split/scope a finding when the human cannot
+   review it in one sitting.
+4. **Load only needed references.** Load language guides for languages in the
+   diff and domain skills for touched risks. Use `release` only for concrete
+   release artifacts, rollout obligations, or explicit release-readiness review.
+5. **Sweep by risk.** Apply the Review Lenses, including the AI-generated risk
+   pass for agent-written code. Sample generated, vendored, and lockfile churn
+   only enough to detect obvious risk.
+6. **Write findings first.** Report concrete issues in severity order with
+   file/line or thread anchors. If no issues are found, name residual risk and
+   unreviewed scope.
 
 ## Addressing Review Feedback
 
-- Only modify a PR when it's the user's own or the user explicitly asks.
-- Separate actionable requested changes from discussion, approvals,
-  duplicates, resolved threads, and outdated threads.
-- Cluster comments by behavior or file; fix the smallest coherent set.
-- If a comment asks for explanation rather than code, draft a reply
-  instead of forcing a code change.
-- Do not run `gh` commands unless the user explicitly permits that command;
-  read-only GitHub CLI commands still use the network and the user's
-  authenticated account.
-- Do not post comments, submit reviews, resolve threads, or push fixes
-  unless the user explicitly asks for that GitHub write.
-- If comments conflict or imply a behavior regression, stop and surface
-  the tradeoff.
+- Modify a PR only when it belongs to the user or the user explicitly asks.
+- Separate actionable requested changes from discussion, approvals, duplicates,
+  resolved threads, and outdated threads.
+- Cluster comments by behavior or file and fix the smallest coherent set.
+- Draft a reply when the reviewer asks for explanation rather than code.
+- Ask before GitHub writes: comments, reviews, thread resolution, pushes, and
+  similar externally visible actions.
+- Surface conflicting comments or behavior regressions before editing.
 
 ## Finding Format
 
 Each finding includes: file/line or PR thread anchor, issue, impact, concrete
-fix direction, and evidence or missing proof. Use questions only for
-ambiguity that blocks a finding or fix.
+fix direction, and evidence or missing proof. Use questions only when ambiguity
+blocks the finding or fix.
 
 | Severity | When to use |
 |---|---|
@@ -162,77 +106,45 @@ ambiguity that blocks a finding or fix.
 
 ## Verification
 
-- [ ] Declared runtime, dependency, framework, and tooling constraints
-      were checked before applying language-reference guidance.
-- [ ] A security pass checked secrets, auth/authz, input handling,
-      unsafe sinks, dependencies, and logging/error disclosure.
-- [ ] Duplication and dead-code risks were checked, especially for
-      removals, refactors, renames, feature flags, routes, jobs,
-      exports, and tests.
-- [ ] AI-Agent Failure Modes were checked: speculative abstraction,
-      unnecessary backwards compatibility, dead defensive code, test
-      theater, fabricated APIs, scope creep, refactor drift, and
-      comprehension debt.
-- [ ] Pre-flight was confirmed: CI green or scoped unproven, description
-      states intent and impact, and oversized diffs were scoped as
-      partial review.
-- [ ] Complexity risks were checked: deep nesting, oversized functions,
-      hidden mutable state, clever code, and unnecessary indirection.
-- [ ] Durable generated code is small enough for a human to review in one
-      sitting, or the review is scoped as partial with a split recommended.
-- [ ] Coupling risks were checked: business logic mixed with I/O,
-      transport, persistence, time, shared state, framework lifecycle,
-      or unrelated feature behavior.
-- [ ] Simplification claims were checked for preserved behavior, not only
-      fewer files or fewer lines.
-- [ ] Triggered domain skills and language reference(s) were loaded and
-      named; `release` was loaded only for concrete release artifacts,
-      rollout obligations, or explicit release-readiness review.
-- [ ] Findings are ordered by severity and grounded in file/line or PR
-      thread anchors; each blocking finding explains impact and fix.
-- [ ] Test, build, CI, or proof evidence was checked, or missing
-      evidence was reported as unproven.
-- [ ] No `gh` command was run without explicit user permission.
-- [ ] GitHub writes were not performed without explicit user request.
-- [ ] If no issues, residual risk and unreviewed scope were named.
+- [ ] The review target, intent, CI/proof status, and scoped review surface are
+      explicit.
+- [ ] Runtime/toolchain constraints and relevant language references shaped the
+      advice.
+- [ ] Security, behavior, evidence, dead-surface, maintainability, and
+      AI-generated risk lenses were applied where relevant.
+- [ ] Findings are severity ordered, anchored, concrete, and focused on impact.
+- [ ] Missing evidence, residual risk, and unreviewed scope are named.
+- [ ] GitHub commands and writes had explicit permission.
 
 ## Tripwires
 
-| Trigger | Do this instead | False alarm |
-|---|---|---|
-| "Small PR, skim is enough" | Sweep lifecycle, security, data, tests, and dead-code risk anyway. | Documentation-only typo with no executable surface. |
-| "Tests pass, ship it" | Check what the tests prove and still review safety/data lenses. | The task is only to report current CI status. |
-| "This might need a release later" | Note the risk without loading `release`; load `release` only when the diff has release artifacts/rollout obligations or the user asked for release readiness. | The review target is explicitly a release PR or includes version/changelog/package/publish/migration rollout files. |
-| "Style nits are blocking" | Separate style notes from correctness, security, and maintainability findings. | Style issue hides a real ambiguity or risky control flow. |
-| "This is simpler because it has fewer files" | Check whether the diff couples independent behavior, data, effects, or lifecycles. | Generated or framework-required layout with no hand-written behavior. |
-| "This compatibility shim is harmless" | Require owner, removal condition, and proof that callers still need it, or remove it in a proven refactor. | Public contract or migration policy explicitly requires it. |
-| "I trust this author" | Review the diff with the same lenses; trust changes tone, not coverage. | Pair review where the same evidence was already inspected in this turn. |
-| "Skip the security pass this once" | Run the security lens and name why it is or is not relevant. | Files are provably outside executable, config, dependency, and data surfaces. |
-| Test re-encodes implementation: asserts substring in config/Makefile/manifest, deleted-file absence, trivial constants, or only that a mock was called | Flag as test theater. Recommend deletion or rewrite to assert behavior caused by the change. Load `proof` for the detailed test-theater taxonomy. | Asserted string is a public contract a downstream consumer parses, or the call itself is the contract (e.g. outbox writer). |
-| New interface, factory, generic, wrapper, or config knob with fewer than two real callers | Block. Demand inlining or deletion until a second real caller exists. | Boundary required by an external contract, public API, or documented extension point. |
-| Guard, try/except, fallback, or default-return for a state no in-scope caller produces | Block. Remove or convert to a boundary assertion. | Documented invariant whose violation must surface as a tracked error. |
-| Diff labeled refactor or cleanup but observable return, effect, error, or ordering changes | Reclassify as feature change and route to `proof`. | Behavior delta is the documented intent of the refactor. |
-| By inspection, the test suite would still pass if one assertion or one branch were flipped | Mark as test theater. Recommend rewriting to assert caller-visible behavior at the data-shape boundary. Do not run mutation tooling unless the project already uses it. | Mutated branch is defensive code already known to be unreachable. |
-| PR bundles requested change with reformatting, import reordering, or unrelated docstrings | Require a split before deep review. | Reorganization itself is the requested change. |
-| Durable generated diff is too large for the human to review in one sitting | Mark comprehension debt. Recommend a split, summary, or smaller next slice. | Disposable script, generated/vendor/lockfile churn, or user explicitly requested a broad audit. |
-| Code works, but no one can explain why this shape belongs here | Block the approval claim. Ask for ownership, boundary, and proof evidence. | Throwaway spike clearly marked disposable. |
+Use these when the shortcut thought appears:
+
+- Passing tests prove only what they assert; still review safety, data, and
+  dead-surface risk.
+- Style is not blocking unless it hides ambiguity, behavior risk, or unsafe
+  control flow.
+- Fewer files is simpler only when behavior, data, effects, and lifecycles stay
+  uncoupled.
+- Compatibility shims need owner, caller, removal condition, and proof.
+- Trust changes tone, not coverage.
+- Test theater is a finding; load `proof` for the detailed taxonomy.
+- Speculative abstraction waits for a real caller or requirement.
+- Dead defensive code should become a boundary assertion or leave.
+- A refactor with observable behavior change is a feature change.
+- Bundled reformatting or unrelated edits should be split before deep review.
+- Oversized durable generated code is comprehension debt.
 
 ## Handoffs
 
-- Use `specify` to compare the diff against the agreed ADR, RFC, tech spec,
-  or note and catch plan-to-code divergence; missing or contradicted contracts
-  are blocking findings.
-- Use `security` for auth, trust boundaries, secrets, crypto,
-  dependencies, or injection risks.
-- Use `database` for migrations, locking, transactions, schema, indexes,
-  or production data access.
-- Use `release` after the diff exists when version/changelog/package/publish
-  artifacts, feature flags, rollout plans, or migration rollout obligations
-  need release-readiness review.
-- Use `proof` for review-claim proof obligations, test quality, missing
-  behavior coverage, mocks, and flakes.
-- Use `git-workflow` for branch mechanics and packaging accepted
-  fixes.
+- `specify`: plan-to-code divergence from an agreed design artifact.
+- `security`: auth, trust boundaries, secrets, crypto, dependencies, injection.
+- `database`: migrations, locking, transactions, schema, indexes, data access.
+- `release`: version, changelog, package, publish, rollout, or migration
+  release-readiness review.
+- `proof`: missing behavior coverage, test quality, mocks, flakes, and proof
+  obligations.
+- `git-workflow`: branch mechanics and packaging accepted fixes.
 
 ## References
 
