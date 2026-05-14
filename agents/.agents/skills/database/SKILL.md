@@ -23,11 +23,8 @@ description: Use for databases, schemas, migrations, indexes, transactions, quer
 
 ## Core Ideas
 
-1. Use the project's existing database unless the task is choosing a
-   store. For greenfield server work, default to Postgres; for
-   embedded or local-first work, default to SQLite. Reach for a
-   document store only when its native document API, global scale,
-   offline sync, or change streams are required.
+1. Use the project's existing database unless the task is choosing a store.
+   For greenfield defaults and store-selection caveats, use `architecture`.
 2. Expand, migrate, verify, switch, then contract in separate
    deployable steps.
 3. Review SQL and lock behavior, not just ORM code.
@@ -35,9 +32,9 @@ description: Use for databases, schemas, migrations, indexes, transactions, quer
 5. Constraints enforce invariants. Every uniqueness invariant needs a DB-level
    `UNIQUE`, `EXCLUDE`, composite, or partial equivalent. Application-layer
    checks race under concurrency.
-6. Indexes support known access paths. New foreign keys and known predicates
-   reached by `WHERE`, `JOIN`, or `ORDER BY` need supporting indexes in the
-   same migration, or a stated reason they do not.
+6. Indexes support known access paths. New foreign keys and known `WHERE`,
+   `JOIN`, or `ORDER BY` predicates need supporting indexes in the same
+   migration, or a stated reason they do not.
 7. Query changes need plans on production-shaped data.
 8. Isolation level is a design decision; retries are part of
    serializable correctness.
@@ -72,13 +69,9 @@ description: Use for databases, schemas, migrations, indexes, transactions, quer
       explicitly justified.
 - [ ] Index/constraint creation uses the online mechanism for the
       target database.
-- [ ] Engine-specific elaborations (partial unique, expression,
-      deferrable, exclusion, GIN/GIST/BRIN indexes, `CONCURRENTLY`,
-      `USING INDEX` attachments; see `references/online-ddl.md`) are
-      verified against the target engine: the migration ran locally
-      against the project's target before claiming done. SQLite
-      passing is not proof of Postgres behavior. Plain index, column,
-      and FK migrations do not require this.
+- [ ] Engine-specific DDL uses `references/online-ddl.md` and was verified
+      against the target engine before claiming done. SQLite passing is not
+      proof of Postgres behavior.
 - [ ] Important query changes include representative EXPLAIN/ANALYZE
       evidence.
 - [ ] Isolation level and retry behavior are explicit for transactional
@@ -89,31 +82,29 @@ description: Use for databases, schemas, migrations, indexes, transactions, quer
 
 ## Tripwires
 
-| Trigger | Do this instead | False alarm |
-|---|---|---|
-| "Small table, online migration is fine" | Use the online mechanism or document why production size/write rate cannot matter. | Test fixture or local-only schema. |
-| "The lock is brief" | Measure on representative load or assume the worst-case lock behavior. | Database engine guarantees metadata-only behavior for this exact operation. |
-| "We'll backfill async later" | Ship the backfill plan now or leave the schema expand-only. | Follow-up migration already exists in the same rollout plan. |
-| "Soft delete is good enough" | Decide the lifecycle rule once and enforce reads/indexes/schema around it. | Explicit audit-retention requirement with tested filters. |
-| "No one's using that index" | Observe across a full traffic cycle before dropping it. | Brand-new unused index in an unshipped migration. |
-| "We'll enforce uniqueness in the application layer" | Add a DB-level `UNIQUE` or `EXCLUDE` constraint. Application-layer checks race under concurrency and fail open under retries. | The field is genuinely advisory and a duplicate is a recoverable UX issue, not a correctness violation. |
-| "We can add the index later if queries get slow" | Add it in the same migration when the access pattern is known (FK columns, predicates in known queries). Later additions on hot tables need `CONCURRENTLY` and rollout coordination. | The column is genuinely write-only or the query pattern is unknown and will be measured first. |
-| "Partial unique index gives me uniqueness" | Check the target engine. Decide whether the invariant needs a constraint, a partial unique index, or an exclusion constraint, then test the migration there. | The requirement explicitly asks for a partial unique index and accepts its engine-specific semantics. |
-| "Adding a `password` column" | Load `security`. Store only an `argon2id`/`scrypt`/`bcrypt` hash in `password_hash`, never plaintext. The same applies to API keys, OAuth tokens, MFA secrets, and recovery codes. | Read-only mirror of an external auth source the app never writes to. |
+Use these when the shortcut thought appears:
+
+- Use the target engine's online mechanism or document why production size and
+  write rate cannot matter.
+- Measure lock behavior on representative load or assume the worst case.
+- Ship the backfill plan now or leave the schema expand-only.
+- Decide soft-delete lifecycle once and enforce reads, indexes, and schema
+  around it.
+- Observe a full traffic cycle before dropping an index.
+- Enforce correctness invariants with DB constraints, not application checks.
+- Add supporting indexes in the same migration when access paths are known.
+- Check target-engine semantics for partial, expression, deferrable, exclusion,
+  and specialized indexes before relying on them.
+- Load `security` before adding password, token, API key, MFA, recovery-code, or
+  sensitive-PII storage.
 
 ## Handoffs
 
-- Use `release` for deploy ordering, rollback rehearsal, and feature
-  flags.
-- Use `performance` when query work is part of a measured
-  latency/throughput change.
-- Use `observability` for migration and query dashboards/alerts.
-- Use `async-systems` for stream or worker consumer
-  semantics after the durable handoff exists.
-- Use `security` when the schema touches credentials, secrets, tokens,
-  MFA factors, or sensitive PII. Password hashing parameters and
-  storage rules live in `security/references/secrets.md`; do not
-  invent your own.
+- `release`: deploy ordering, rollback rehearsal, feature flags.
+- `performance`: measured query latency or throughput change.
+- `observability`: migration and query dashboards/alerts.
+- `async-systems`: stream or worker consumers after durable handoff.
+- `security`: credentials, secrets, tokens, MFA factors, sensitive PII.
 
 ## References
 
