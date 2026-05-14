@@ -31,10 +31,9 @@ will construct it.
 ## Core Ideas
 
 1. Decide data shapes and invariants before writing transformations.
-2. Distinguish identity, state, value, and time. Prefer immutable values
-   and plain data shapes: records, sums, and maps. Avoid inheritance or
-   classes that bundle behavior with mutable state. A class wrapping pure
-   functions is a module.
+2. Distinguish identity, state, value, and time. Prefer immutable records,
+   sums, and maps. Treat classes that wrap pure functions as modules; avoid
+   classes that bundle behavior with mutable state.
 3. Split code into data, calculations, and actions; maximize data/calculations
    and minimize actions.
 4. Parse at boundaries into trusted internal shapes; do not pass raw external
@@ -65,8 +64,7 @@ will construct it.
 
 ## Crosscutting Hazards
 
-Time and money cause more boundary bugs than any other domain. Load the
-matching reference whenever either appears in the diff.
+Load the matching reference whenever time or money appears in the diff.
 
 - `references/dates.md`: when storing, comparing, formatting, serializing, or
   computing on dates / times.
@@ -92,33 +90,27 @@ matching reference whenever either appears in the diff.
 
 ## Tripwires
 
-| Trigger | Do this instead | False alarm |
-|---|---|---|
-| "Validate wherever the value is used" | Parse once at the boundary into a trusted shape. | A second boundary receives new external input. |
-| "A boolean flag can represent the state" | Model the allowed states as explicit variants. | The flag is truly independent and every combination is valid. |
-| "Null means not started, failed, or not applicable" | Split the states and name each meaning. | The field is optional data with one clear absence meaning. |
-| "Pass the request JSON through the service layer" | Convert external input to the internal domain shape first. | The layer is only transport glue and does no domain work. |
-| "Put database/network/time calls in the domain function" | Move effects to the shell and pass values into the core. | The function is explicitly an action at the system boundary. |
-| "A generic wrapper will clean this up" | Wait until repeated domain meaning proves the abstraction. | Two or more real call sites share the same invariant and behavior. |
+Use these when the shortcut thought appears:
+
+- Parse once at each external boundary into a trusted shape.
+- Model allowed states as explicit variants instead of boolean flag
+  combinations.
+- Split nullable meanings into named states unless absence has one clear
+  meaning.
+- Convert request JSON to an internal domain shape before domain work.
+- Move database, network, clock, randomness, logging, and mutation effects to
+  the shell.
+- Add generic wrappers only after repeated domain meaning proves the
+  abstraction.
 
 ## Handoffs
 
-- Use `specify` upstream to enumerate the contracts whose data shape
-  you are modeling, before formalizing invariants here.
-- Use `architecture` when module boundaries, domain/feature locality, or
-  layering decisions are in scope, especially when the question is what
-  changes together rather than what data shape is valid.
-- Use `database` when an invariant identified here must be enforced at the
-  schema layer (uniqueness, referential integrity, exclusion). Domain-level
-  invariants without DB-level enforcement race under concurrency.
-- Use `proof` for data-claim proof obligations and for proving domain
-  behavior through public boundaries.
-- Use `error-handling` for parse failures, Result/Either shape, and error
-  context.
-- Use `async-systems` when mutable places or ownership cross task/thread
-  boundaries.
-- Use workflow's `references/simple-not-easy.md` when a generic helper,
-  wrapper, or layer is proposed before the data or effects justify it.
+- `specify`: contracts whose data shape is being modeled.
+- `architecture`: module boundaries, locality, layering, what changes together.
+- `database`: schema enforcement for invariants that race under concurrency.
+- `proof`: data-claim and public-boundary behavior evidence.
+- `error-handling`: parse failures, Result/Either shape, error context.
+- `async-systems`: mutable places or ownership crossing task/thread boundaries.
 
 ## References
 
