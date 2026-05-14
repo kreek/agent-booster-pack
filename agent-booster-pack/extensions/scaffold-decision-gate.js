@@ -1,6 +1,7 @@
 export const SCAFFOLD_STATE_ENTRY = "abp-scaffold-state";
 
-const ACTIVATION_PATTERN = /^\s*(\/abp:scaffold(?:\s|$)|\/skill:scaffolding(?:\s|$))/i;
+const EXPLICIT_ACTIVATION_PATTERN = /^\s*(\/abp:scaffold(?:\s|$)|\/skill:scaffolding(?:\s|$))/i;
+const FRESH_SCAFFOLD_PATTERN = /\b(create|make|build|scaffold|set\s+up|setup|initialize|init)\b[\s\S]*\b(app|project|site|website|web\s+app|api|cli|tool|library|worker|react|svelte|vue|next|vite)\b/i;
 const DEACTIVATION_PATTERN = /^\s*\/abp:scaffold-off\s*$/i;
 const CHANGE_TOOL_NAMES = new Set(["edit", "write"]);
 const SCAFFOLD_BASH_PATTERN = /(\bnpm\s+(create|init|install|i|add)\b|\bpnpm\s+(create|init|install|i|add|dlx)\b|\byarn\s+(create|init|add|install|dlx)\b|\bbun\s+(create|init|install|add|x)\b|\bnpx\b|\buv\s+(init|add|sync|pip\s+install)\b|\bpip\s+install\b|\bpoetry\s+(init|add|install)\b|\bcargo\s+(init|new|add)\b|\bgo\s+mod\s+init\b|\bdotnet\s+new\b|\bcomposer\s+(init|require|install|create-project)\b|\bmix\s+new\b|\bswift\s+package\s+init\b|\bmkdir\b|\btouch\b|\btee\b|(^|[^0-9])>|\bcat\s+<<|\bcp\b|\bmv\b|\bgit\s+init\b)/i;
@@ -61,7 +62,9 @@ function latestGateIndex(messages) {
 }
 
 export function isScaffoldActivation(text) {
-  return ACTIVATION_PATTERN.test(String(text ?? "")) && !isScaffoldDeactivation(text);
+  const value = String(text ?? "");
+  if (isScaffoldDeactivation(value)) return false;
+  return EXPLICIT_ACTIVATION_PATTERN.test(value) || FRESH_SCAFFOLD_PATTERN.test(value);
 }
 
 export function isScaffoldDeactivation(text) {
@@ -78,10 +81,19 @@ function labelValue(text, label) {
   return text.match(pattern)?.[2]?.trim() ?? "";
 }
 
-function hasVagueBaseline(text) {
+function baselineAndFilesText(text) {
   const baseline = labelValue(text, "Quality baseline");
   const files = labelValue(text, "Files and commands");
-  return VAGUE_BASELINE_PATTERN.test(`${baseline}\n${files}`);
+  return `${baseline}\n${files}`;
+}
+
+function hasVagueBaseline(text) {
+  return VAGUE_BASELINE_PATTERN.test(baselineAndFilesText(text));
+}
+
+function hasQualityGateBaseline(text) {
+  const value = baselineAndFilesText(text);
+  return /\b(ci|continuous integration)\b/i.test(value) && /\bcoverage\b/i.test(value);
 }
 
 export function hasScaffoldDecisionGate(text) {
@@ -89,6 +101,7 @@ export function hasScaffoldDecisionGate(text) {
   if (!value.includes("Scaffold Decision Gate")) return false;
   if (!REQUIRED_GATE_LABELS.every((label) => labelValue(value, label).length > 0)) return false;
   if (hasVagueBaseline(value) && !BLOCKER_PATTERN.test(value)) return false;
+  if (!hasQualityGateBaseline(value) && !BLOCKER_PATTERN.test(value)) return false;
   return true;
 }
 

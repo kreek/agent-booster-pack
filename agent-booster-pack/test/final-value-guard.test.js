@@ -36,14 +36,16 @@ describe("final value guard", () => {
     expect(handlers.get("message_end")).toBeTruthy();
   });
 
-  it("automatically replaces weak final responses after changed turns", async () => {
+  it("automatically asks for a hidden follow-up reflection without replacing the final response", async () => {
     const handlers = new Map();
+    const sent = [];
     const sessionEntries = [
       entry("user", "implement the cache"),
       entry("assistant", [{ type: "toolCall", name: "write", arguments: { path: "src/cache.js" } }]),
     ];
     const fakePi = {
       registerCommand() {},
+      sendMessage: (message, options) => sent.push({ message, options }),
       on: (eventName, handler) => handlers.set(eventName, handler),
     };
 
@@ -53,9 +55,13 @@ describe("final value guard", () => {
       { sessionManager: { getBranch: () => sessionEntries } }
     );
 
-    expect(result.message.content[0].text).toMatch(/ABP Final Value Guard/);
-    expect(result.message.content[0].text).toMatch(/one concise sentence/i);
-    expect(result.message.content[0].text).toMatch(/Previous final response:\nDone\./);
+    expect(result).toBeUndefined();
+    expect(sent).toHaveLength(1);
+    expect(sent[0].message).toMatchObject({ customType: "abp-final-value-guard", display: false });
+    expect(sent[0].options).toEqual({ triggerTurn: true, deliverAs: "followUp" });
+    expect(sent[0].message.content).toMatch(/ABP Final Value Guard/);
+    expect(sent[0].message.content).toMatch(/one concise sentence/i);
+    expect(sent[0].message.content).toMatch(/Previous final response:\nDone\./);
   });
 
   it("does not replace intermediate tool-call turns", async () => {

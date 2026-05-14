@@ -59,10 +59,12 @@ function makeCtx(entries = []) {
 }
 
 describe("scaffold decision gate", () => {
-  it("activates from the manual command and skill invocation", () => {
+  it("activates from the manual command, skill invocation, and explicit fresh app requests", () => {
     expect(isScaffoldActivation("/abp:scaffold build a web app")).toBe(true);
     expect(isScaffoldActivation("/skill:scaffolding create a CLI")).toBe(true);
-    expect(isScaffoldActivation("create a scaffold")).toBe(false);
+    expect(isScaffoldActivation("let's make a simple temperature converter in React")).toBe(true);
+    expect(isScaffoldActivation("create a Svelte app for recipes")).toBe(true);
+    expect(isScaffoldActivation("update the React button copy")).toBe(false);
   });
 
   it("deactivates only from the explicit off command", () => {
@@ -71,7 +73,7 @@ describe("scaffold decision gate", () => {
   });
 
   it("requires a Scaffold Decision Gate packet followed by user approval", () => {
-    const gate = assistantText(`Scaffold Decision Gate\n\nProject intent: make a tiny API\nProject kind: API\nLanguage/runtime: TypeScript on Node\nDeployment assumption: container\nFramework/template: Fastify fallback\nQuality baseline: pnpm, vitest, eslint, prettier, tsc, CI\nFiles and commands: create package.json and tests\nUser decision: approve, revise, or choose another option`);
+    const gate = assistantText(`Scaffold Decision Gate\n\nProject intent: make a tiny API\nProject kind: API\nLanguage/runtime: TypeScript on Node\nDeployment assumption: container\nFramework/template: Fastify fallback\nQuality baseline: pnpm, vitest, eslint, prettier, tsc, coverage, CI\nFiles and commands: create package.json and tests\nUser decision: approve, revise, or choose another option`);
 
     expect(isScaffoldApproved([gate])).toBe(false);
     expect(isScaffoldApproved([gate, userText("approved")])).toBe(true);
@@ -90,6 +92,13 @@ describe("scaffold decision gate", () => {
 
     expect(hasScaffoldDecisionGate(vagueGate)).toBe(false);
     expect(isScaffoldApproved([assistantText(vagueGate), userText("approved")])).toBe(false);
+  });
+
+  it("rejects gates that omit CI or coverage unless the omission is explicit", () => {
+    const weakGate = `Scaffold Decision Gate\n\nProject intent: make a tiny API\nProject kind: API\nLanguage/runtime: TypeScript on Node\nDeployment assumption: container\nFramework/template: Fastify fallback\nQuality baseline: pnpm, vitest, eslint, prettier, tsc\nFiles and commands: create package.json and tests\nUser decision: approve, revise, or choose another option`;
+
+    expect(hasScaffoldDecisionGate(weakGate)).toBe(false);
+    expect(isScaffoldApproved([assistantText(weakGate), userText("approved")])).toBe(false);
   });
 
   it("accepts a limited Scaffold Decision Gate baseline when it names the blocker", () => {
@@ -130,7 +139,7 @@ describe("scaffold decision gate", () => {
   it("allows scaffold mutation after the user approves the gate packet", () => {
     const entries = [
       customEntry("abp-scaffold-state", { active: true }),
-      assistantText(`Scaffold Decision Gate\nProject intent: app\nProject kind: web app\nLanguage/runtime: TypeScript\nDeployment assumption: Cloudflare\nFramework/template: Hono\nQuality baseline: pnpm, vitest, eslint, prettier, tsc, CI\nFiles and commands: create scaffold\nUser decision: approve, revise, or choose another option`),
+      assistantText(`Scaffold Decision Gate\nProject intent: app\nProject kind: web app\nLanguage/runtime: TypeScript\nDeployment assumption: Cloudflare\nFramework/template: Hono\nQuality baseline: pnpm, vitest, eslint, prettier, tsc, coverage, CI\nFiles and commands: create scaffold\nUser decision: approve, revise, or choose another option`),
       userText("approve"),
     ];
 

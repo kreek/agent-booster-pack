@@ -1,5 +1,6 @@
 const CHANGE_TOOL_NAMES = new Set(["edit", "write"]);
 const FINAL_VALUE_GUARD_MARKER = "ABP Final Value Guard";
+const FINAL_VALUE_GUARD_MESSAGE = "abp-final-value-guard";
 const MUTATING_BASH_PATTERN = /(\btee\b|\bpython\b[\s\S]*\bopen\([^)]*['"]w|\bnode\b[\s\S]*writeFile|\bperl\s+-pi\b|\bsed\s+-i\b|\bmv\b|\bcp\b|\btouch\b|\bchmod\b|\bgit\s+apply\b|\bpatch\b)/i;
 
 function messageText(value) {
@@ -165,13 +166,6 @@ Previous final response:
 ${finalText}`;
 }
 
-function replacementMessage(message, replacementText) {
-  return {
-    ...message,
-    content: [{ type: "text", text: replacementText }],
-  };
-}
-
 function entryFromMessage(message) {
   return { type: "message", message };
 }
@@ -210,6 +204,13 @@ export default function finalValueGuard(pi) {
     const prompt = finalValuePromptForSessionEntries([...branchEntries, entryFromMessage(event.message)]);
     if (!prompt) return;
 
-    return { message: replacementMessage(event.message, prompt) };
+    await pi.sendMessage(
+      {
+        customType: FINAL_VALUE_GUARD_MESSAGE,
+        content: prompt,
+        display: false,
+      },
+      { triggerTurn: true, deliverAs: "followUp" }
+    );
   });
 }

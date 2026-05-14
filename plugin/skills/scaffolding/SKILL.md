@@ -69,7 +69,7 @@ and run the baseline without local knowledge.
 1. Detect language, framework, existing conventions, and git state.
 2. If Pi offers `/abp:scaffold`, run it for new scaffold work before
    presenting the gate. It also activates when the user invokes
-   `/skill:scaffolding`.
+   `/skill:scaffolding` or makes an explicit fresh app/project request.
 3. Before creating scaffold files, installing packages, or running generators,
    present a **Scaffold Decision Gate** and wait for explicit user approval.
    Include: project intent, project kind, language/runtime, deployment
