@@ -83,27 +83,28 @@ description: Use for accessible UI, WCAG, ARIA, keyboard, focus, contrast, and i
 
 ## Tripwires
 
-| Trigger | Do this instead | False alarm |
-|---|---|---|
-| "Just put `onClick` on the `<div>`" | Use `<button type="button">` for in-page actions or `<a href>` for navigation. Native gives keyboard, focus, and AT semantics for free. | A genuinely non-interactive element used only for layout or visual grouping. |
-| "`role="button"` on the span will do" | Replace with `<button>`. ARIA role does not add keyboard handling, focusability, or default activation. | A presentational element that intentionally carries `role="img"` or `role="presentation"` for screen-reader semantics only. |
-| "`autocomplete="off"` on the password field" | Remove it. Use `current-password`, `new-password`, or `one-time-code`, and never block paste. WCAG 3.3.8 forbids cognitive-test authentication. | A documented kiosk or shared-terminal field where the user explicitly opted out of autofill. |
-| "Custom focus trap inside our modal" | Use native `<dialog>` + `.showModal()` where supported. Do not trap focus by hand inside native dialog. | A pre-`<dialog>` legacy code path documented with a migration plan. |
-| "`aria-label` on a button that already has visible text" | Remove the `aria-label`, or ensure 2.5.3 Label-in-Name compliance: the accessible name must contain the visible text verbatim. | An icon-only control with no visible text label. |
-| "`role="menu"` on the site nav" | Use `<nav>` + a list of `<a>` + an optional disclosure pattern for submenus. `role="menu"` is for application menus. | A genuine application menubar (toolbar, contextual command surface) with the full APG keyboard model. |
-| "`outline: none` on focus" | Replace with a 2px solid outline at 3:1 contrast against both surfaces, plus `outline: 2px solid transparent` so Forced Colors mode renders a visible focus ring. | The replacement focus ring has been measured against both adjacent surfaces and meets 2.4.13. |
-| "`aria-live` to announce that the toggle is now pressed" | Remove it. Screen readers announce `aria-pressed`, `aria-expanded`, `aria-selected`, `aria-current`, and `aria-busy` natively. | Status text genuinely outside any control's role/state surface (e.g. a toast unrelated to the activated control). |
-| "Carousel auto-advances every 5s" | Add a pause control reachable by keyboard, respect `prefers-reduced-motion`, and never wrap the slides in a live region. | A static hero or single-slide promo that does not rotate. |
-| "Positive `tabindex` to fix the tab order" | Reorder the DOM. Positive `tabindex` is a hazard with no safe use. | Never. |
+Use these when the shortcut thought appears:
+
+- Use native controls: `<button type="button">` for actions, `<a href>` for
+  navigation, not clickable divs/spans or `role="button"` substitutes.
+- Use native `<dialog>` + `.showModal()` where supported; do not hand-roll a
+  focus trap inside native dialog.
+- Keep visible button text in the accessible name; avoid conflicting
+  `aria-label` values unless the control is icon-only.
+- Use `<nav>` with links for site navigation; reserve `role="menu"` for
+  application command menus.
+- Replace `outline: none` with a measured 2px focus outline and Forced Colors
+  fallback.
+- Let native ARIA states announce controls; reserve `aria-live` for separate
+  status text.
+- Fix tab order by DOM order; positive `tabindex` has no safe use.
 
 ## Handoffs
 
-- Use `ui-design` for visual hierarchy, layout, design systems, and
-  component composition.
-- Use `proof` for browser automation around accessibility-critical
-  flows.
-- Use `documentation` when writing accessibility statements,
-  design-system guidance, or remediation notes.
+- `ui-design`: visual hierarchy, layout, design systems, component composition.
+- `proof`: browser automation around accessibility-critical flows.
+- `documentation`: accessibility statements, design-system guidance,
+  remediation notes.
 
 ## References
 
