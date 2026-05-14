@@ -7,7 +7,7 @@ description: Use only on request/approval for release prep, or when validation r
 
 ## Iron Law
 
-`BREAKING CHANGES BUMP MAJOR. HUMANS MUTATE SHARED ENVIRONMENTS.`
+`BREAKING CHANGES BUMP MAJOR. AGENTS PREPARE RELEASES; HUMANS MUTATE SHARED ENVIRONMENTS.`
 
 ## When to Use
 
