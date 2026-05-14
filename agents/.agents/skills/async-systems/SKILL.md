@@ -14,14 +14,11 @@ failure signals are implicit.
 
 ## When to Use
 
-- Designing or reviewing async execution, coordination primitives
-  (locks, channels, actors, cancellation), background work (worker
-  pools, jobs, schedulers, delayed jobs), live updates, streams, and
-  brokers (SSE, WebSocket, Kafka, Kinesis, Redis Streams).
-- Failure investigation: races, deadlocks, stuck tasks, event-loop
-  blocking, thread starvation, unbounded memory growth, retry
-  exhaustion, dead jobs, lag, poison messages, replay, ordering, or
-  delivery issues.
+- Designing or reviewing async execution, coordination primitives, background
+  work, live updates, streams, brokers, ordering, and backpressure.
+- Investigating races, deadlocks, stuck tasks, event-loop blocking, starvation,
+  memory growth, retry exhaustion, dead jobs, lag, poison messages, replay,
+  ordering, or delivery issues.
 
 ## When NOT to Use
 
@@ -71,11 +68,10 @@ failure signals are implicit.
 3. Define task scope, cancellation path, shutdown behavior, queue
    bounds, overflow behavior, lock ordering, worker concurrency,
    timeout, retry budget, backoff, and terminal failure behavior.
-4. For jobs, decide: payload, idempotency, uniqueness, atomic enqueue,
-   priority, deploy compatibility.
-5. For streams, decide: schema, versioning, partition/order key,
-   delivery, retention, replay, offset/ack, poison-message policy,
-   DLQ, backpressure.
+4. For jobs, decide payload, idempotency, uniqueness, atomic enqueue, priority,
+   and deploy compatibility.
+5. For streams, decide schema, version, order key, delivery, retention, replay,
+   ack/offset, DLQ, poison-message policy, and backpressure.
 6. Add observability for enqueue/start/success/retry/exhaustion,
    latency, queue depth, dead jobs, lag, throughput, errors,
    reconnects, dropped events, and consumer health.
@@ -110,29 +106,27 @@ failure signals are implicit.
 
 ## Tripwires
 
-| Trigger | Do this instead | False alarm |
-|---|---|---|
-| Payload reads session, request, thread-local, or in-memory state. | Pass stable IDs and immutable parameters, then reload needed state in the job. | In-process async task that never leaves the request lifecycle. |
-| Retry settings are defaulted, unbounded, or copied. | Name retryable errors, budget, backoff, and terminal behavior. | Job is explicitly non-retryable and records terminal failure. |
-| Worker rescues and only logs. | Re-raise, mark terminal, or record failure visibly. | Best-effort cleanup job with documented discard semantics. |
-| Enqueue happens before transaction commit. | Enqueue after commit or use transactional outbox/enqueue. | Job reads no state written by the transaction. |
-| Bulk queue can starve user-facing work. | Set priority, concurrency, timeout, or separate queues. | Dedicated worker pool with isolation already proven. |
+Use these when the shortcut thought appears:
+
+- Pass stable IDs and immutable parameters across async boundaries; reload
+  request/session/thread-local state inside the job only when needed.
+- Name retryable errors, retry budget, backoff, and terminal behavior.
+- Make exhausted or rescued work visible by re-raising, marking terminal, or
+  recording failure.
+- Enqueue after transaction commit or use transactional outbox/enqueue when the
+  job reads transaction-written state.
+- Isolate user-facing work from bulk queues with priority, concurrency,
+  timeout, or separate workers.
 
 ## Handoffs
 
-- Use `domain-modeling` to remove shared mutable state from the core
-  design.
-- Use `api` for public subscription, webhook, SSE, or event-contract
-  surface.
-- Use `error-handling` for retry budgets and dependency failure
-  behavior outside async mechanics.
-- Use `database` for transactional enqueue, outbox/CDC atomicity,
-  locking, isolation, and schema changes async work depends on.
-- Use `observability` for dashboards, alerts, traces, and runbooks.
-- Use `release` for worker draining, deploy compatibility, migration
-  coordination, and rollout gates.
-- Use `debugging` for existing races, deadlocks, stuck jobs, or lag
-  before changing code.
+- `domain-modeling`: remove shared mutable state from core design.
+- `api`: public subscription, webhook, SSE, or event-contract surface.
+- `error-handling`: retry budgets and dependency failure policy.
+- `database`: transactional enqueue, outbox/CDC, locking, isolation, schema.
+- `observability`: dashboards, alerts, traces, runbooks.
+- `release`: worker draining, deploy compatibility, migrations, rollout gates.
+- `debugging`: existing races, deadlocks, stuck jobs, or lag.
 
 ## References
 
