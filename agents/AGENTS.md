@@ -149,15 +149,15 @@ failures.
 - `database`: use when changing schemas, migrations, indexes, queries,
   transactions, transactional outbox, connection pools, deletion semantics, or
   production data access.
-- `release`: late gate, not a startup skill. Load after a diff exists, during
-  code review when a concrete change touches release artifacts (version
-  manifests, CHANGELOG, lockfiles, tags, publish scripts, migrations,
-  feature flags), or when the user explicitly asks for release prep,
-  deprecation/migration notes, rollout, or rollback planning. Do not load
-  it just because future work might eventually need versioning or
-  packaging. It must not execute release actions or mutate shared
-  environments: deploys, rollbacks, promotions, approvals, production
-  config changes, or feature-flag flips.
+- `release`: late gate, not a startup skill. Load when the user explicitly
+  asks for release prep, deprecation/migration notes, rollout, or rollback
+  planning; when the user approves release prep after a concrete diff touches
+  release artifacts (version manifests, CHANGELOG, lockfiles, tags, publish
+  scripts, migrations, feature flags); or when a validator requires release
+  metadata sync. Do not load it just because future work might eventually need
+  versioning or packaging. It must not execute release actions or mutate shared
+  environments: deploys, rollbacks, promotions, approvals, production config
+  changes, or feature-flag flips.
 
 ### Correctness And Change Control
 
@@ -207,8 +207,10 @@ They should not override correctness or safety. They may override weak project
 conventions when the existing surface is inaccessible, confusing, misleading, or
 hard to maintain.
 
-- `documentation`: use when writing or reviewing READMEs, ADRs, runbooks, API
-  docs, reference docs, tutorials, or explanatory comments.
+- `documentation`: use when docs are requested, approved after a concrete docs
+  gap is found, or required by validation: READMEs, ADRs, runbooks, API docs,
+  reference docs, tutorials, or explanatory comments. Do not load it during
+  implementation only because docs might later be useful.
 - `ui-design`: use when building or materially changing frontend pages,
   components, interaction flows, responsive layout, or visual design.
 - `accessibility`: use when UI work touches WCAG 2.2, ARIA, semantic HTML,

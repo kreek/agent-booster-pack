@@ -329,9 +329,10 @@ they apply:
 - [`database`][skill-database]: schemas, migrations, indexes, queries,
   transactions, transactional outbox, deletion semantics, and production data
   access.
-- [`release`][skill-release]: version bumps, CHANGELOG hygiene, deprecations,
-  release notes, CI/CD gates, rollout plans, rollback notes, and feature flags;
-  agents prepare, humans mutate shared environments.
+- [`release`][skill-release]: late gate for approved release prep: version
+  bumps, CHANGELOG hygiene, deprecations, release notes, CI/CD gates, rollout
+  plans, rollback notes, and feature flags; agents prepare, humans mutate
+  shared environments.
 
 ### Production quality
 
@@ -348,8 +349,8 @@ they apply:
 
 - [`api`][skill-api]: HTTP APIs, OpenAPI, status codes, pagination, idempotency,
   rate limits, versioning, and webhooks.
-- [`documentation`][skill-documentation]: READMEs, ADRs, runbooks, reference
-  docs, tutorials, and explanatory comments.
+- [`documentation`][skill-documentation]: approved docs work such as READMEs,
+  ADRs, runbooks, reference docs, tutorials, and explanatory comments.
 - [`ui-design`][skill-ui-design]: pages, components, interaction flows, responsive
   layout, visual design, and component states.
 - [`accessibility`][skill-accessibility]: WCAG, semantic HTML, ARIA, keyboard

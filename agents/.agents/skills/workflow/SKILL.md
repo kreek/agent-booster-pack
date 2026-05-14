@@ -63,16 +63,21 @@ description: Use first to route ABP work, choose skills, hand off, and define ve
    then identify scope, risk, proof, and the next decision or action that needs
    support. Leave domain depth to the skill that owns it.
 8. **Get approval before locking in durable choices.** Durable interfaces,
-   architecture/domain boundaries, compatibility choices, release intent, and
-   extra safeguards or behavior beyond the request each need the right approval
-   path before implementation locks them in.
+   architecture/domain boundaries, compatibility choices, release intent, docs
+   expansion, and extra safeguards or behavior beyond the request each need the
+   right approval path before implementation locks them in.
 9. **Keep durable diffs reviewable.** Do not generate more durable code than a
    human can understand and review in one sitting. If the diff grows, stop,
    summarize the shape, and split the work.
 10. **Load a skill when it is needed to do the task correctly.** Handoffs are
    graph edges, not a checklist. Pull in a specialist skill when its guidance
    is applicable to the task and needed for a mature engineering solution.
-11. **Close with a scoped proof claim.** Finish by naming what was proven, what
+11. **Keep documentation and release as late gates.** Do not load or act on
+   `documentation` or `release` during implementation only because the change
+   might later need docs, versions, or changelog work. Ask at the concrete
+   decision point, then proceed only when the user requested it, approved it, or
+   a repo validator requires it.
+12. **Close with a scoped proof claim.** Finish by naming what was proven, what
    remains unproven, what a human should review, and the key system insight the
    work revealed.
 
@@ -119,21 +124,26 @@ description: Use first to route ABP work, choose skills, hand off, and define ve
    | `accessibility` | Keyboard, focus, semantics, ARIA, contrast, or inclusive UI matter. |
    | `observability` | Logs, metrics, traces, health, SLOs, or alerts matter. |
    | `performance` | Latency, throughput, memory, CPU, caching, or resource use matter. |
-   | `documentation` | Requirements, ADRs, READMEs, runbooks, API docs, or maintainer docs matter. |
+   | `documentation` | Docs are the requested deliverable, or a completed diff has a concrete docs obligation that the user approved or a validator requires. |
    | `scaffolding` | New project setup or baseline tooling is part of the task. |
    | `official-source-check` | External framework, library, runtime, or platform behavior must be checked against official sources. |
    | `proof` | Claims need tests, checks, contracts, root-cause evidence, or completion evidence. |
    | `code-review` | Reviewing a diff, PR, branch, or non-trivial implementation before the final claim. |
    | `git-workflow` | Branches, staging, commits, conflicts, bisects, or history matter. |
 
-   Load `release` only after a concrete diff touches release artifacts. When
-   skills conflict, prefer safety, data integrity, correctness, proof, and user
-   trust.
+   Do not load `documentation` or `release` only because they might be useful
+   later. If implementation reveals a docs or release-prep obligation, ask the
+   user whether to run that late gate before editing docs, changelogs, versions,
+   package locks, plugin manifests, or release notes, unless the current request
+   already included that work or a validator requires the sync. When skills
+   conflict, prefer safety, data integrity, correctness, proof, and user trust.
 9. **Keep durable changes reviewable.** If the diff grows beyond one sitting,
    stop, summarize the current shape, and split the next slice before coding
    more.
 10. **Implement, review, and prove.** For non-trivial work, implement, review
-    the diff with `code-review`, fix findings, check docs, then use `proof`.
+    the diff with `code-review`, fix findings, run only the doc/release late
+    gates that were requested, approved, or required by validation, then use
+    `proof`.
 11. **Close with scope and evidence.** Say what changed, what was proven, what
     remains unproven, what a human should review, and the key system insight.
 
@@ -149,7 +159,8 @@ description: Use first to route ABP work, choose skills, hand off, and define ve
 - [ ] The work stayed in scope.
 - [ ] The final response improved the human's mental model instead of only
       reporting activity.
-- [ ] Compatibility and release changes were approved or left out.
+- [ ] Compatibility, documentation, and release changes were approved,
+      validator-required, or left out.
 - [ ] The diff was reviewed before the final proof claim.
 - [ ] Completion claims are backed by evidence or marked unproven.
 - [ ] The final response says what changed, why it matters, and what to review.
@@ -168,6 +179,7 @@ description: Use first to route ABP work, choose skills, hand off, and define ve
 | "I'll announce the mode every time" | Name the mode only when it sets useful expectations. | The user asks how ABP is routing. |
 | "Review means edit" | Use Review-only unless the user asks for fixes. | The user asked to review and fix. |
 | "Use every skill" | Load only skills needed for the task. | Explicit full-pack audit. |
+| "Docs or versions might be needed" | Finish the implementation slice, then ask whether to run the docs/release late gate before editing those artifacts. | The user explicitly requested docs or release prep, or a validator requires sync. |
 | "This layer makes it easy" | Name what it couples before adding it. | Required framework adapter. |
 | "I'll add flexibility just in case" | Build the requested behavior first. | Extension points are a requirement. |
 | "I'll preserve compatibility just in case" | Ask before adding shims or dual paths. | Existing public policy requires it. |

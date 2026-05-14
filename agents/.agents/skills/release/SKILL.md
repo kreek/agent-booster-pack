@@ -1,6 +1,6 @@
 ---
 name: release
-description: Late gate for release prep, versions, changelogs, rollout, and rollback. Load on diff or request.
+description: Late gate for release prep, versions, changelogs, rollout, and rollback. Load only on request or approval.
 ---
 
 # Release
@@ -14,10 +14,11 @@ description: Late gate for release prep, versions, changelogs, rollout, and roll
 - The user explicitly asks for release prep, versioning, changelog work,
   deprecation/migration notes, release notes, tags, publish planning, rollout,
   or rollback planning.
-- After implementation, during self-review or code review, a concrete diff
-  includes release artifacts or rollout obligations: version manifests,
-  `CHANGELOG.md`, package locks, plugin/package manifests, CI/CD gates,
-  feature flags, migrations, or publish scripts.
+- After implementation, during self-review or code review, the user approves
+  release prep because a concrete diff includes release artifacts or rollout
+  obligations: version manifests, `CHANGELOG.md`, package locks,
+  plugin/package manifests, CI/CD gates, feature flags, migrations, or publish
+  scripts.
 - Reducing release/deployment toil through CI/CD checks, approval
   gates, rollout notes, rollback runbooks, feature-flag plans,
   progressive-delivery guardrails, supply-chain gates, or migration
@@ -67,8 +68,8 @@ description: Late gate for release prep, versions, changelogs, rollout, and roll
 8. Manifest version, lockfile when committed, CHANGELOG release header,
    tag, and publish plan agree.
 9. Release is a late gate. At task start, `workflow` may name release risk, but
-   this skill usually runs after a diff, migration, package manifest, or
-   rollout plan exists to inspect.
+   this skill runs only after the user requests or approves release prep, or
+   after a release validator requires a concrete sync.
 10. Release intent is separate from implementation intent. Do not bump
     versions, edit changelogs, mutate release lockfiles, create tags, publish,
     or check registries unless release prep was requested or approved.
@@ -90,8 +91,9 @@ description: Late gate for release prep, versions, changelogs, rollout, and roll
 ## Workflow
 
 1. Confirm this skill should run now. Continue only when the user asked for
-   release prep/rollout planning, approved release prep, or a concrete diff
-   surfaced release artifacts or rollout obligations.
+   release prep/rollout planning, approved release prep after a concrete diff
+   surfaced release artifacts or rollout obligations, or a release validator
+   requires a concrete sync.
 2. Confirm release-prep scope before editing release artifacts. Separate
    code/docs only, version/changelog/lockfile updates, release notes, and
    human-run tag/publish steps.
@@ -129,8 +131,9 @@ description: Late gate for release prep, versions, changelogs, rollout, and roll
 ## Verification
 
 - [ ] **Timing**: this skill ran because the user asked for release prep,
-      rollout planning, or a concrete diff/review surfaced release artifacts;
-      it was not loaded for ordinary startup routing.
+      rollout planning, approved it after a concrete diff/review surfaced
+      release artifacts, or a release validator required sync; it was not
+      loaded for ordinary startup routing.
 - [ ] **Intent**: release prep scope was explicitly approved before
       version, changelog, lockfile, tag, publish-plan, or registry-check work;
       implementation approval was not treated as release approval.
@@ -169,6 +172,7 @@ description: Late gate for release prep, versions, changelogs, rollout, and roll
 | "Use the release script to bump everything" | First prove the script's scope matches the intended release units; otherwise propose a manual targeted bump or a separate tooling change. | Repo policy explicitly says all artifacts are lockstep and the user approved that release shape. |
 | "The implementation might touch a public package/command" | Stay in `workflow`; note release risk and defer this skill until the diff exists or release prep is approved. | The user explicitly asked for release prep or rollout planning. |
 | "The implementation touched a public package/command, so I'll bump versions now" | Ask whether release prep is in scope before editing manifests, changelogs, lockfiles, tags, or publish plans. | The user explicitly asked for release prep in the same task. |
+| "I'll load release just in case" | Stay in `workflow`; name release as deferred/unproven and ask only when there is a concrete release-prep decision. | The user explicitly requested release planning. |
 | "npm install changed the lockfile while I was validating" | Stop and ask whether to keep release/package-manager changes or revert them. | The approved task is package maintenance or lockfile repair. |
 | "It's a monorepo, so one version" | Map package/version streams from manifests, tags, registry, and docs before choosing versions. | The repo has an explicit single-version policy for this artifact set. |
 | "The package exists locally" | Check whether it is published, what version is latest, and whether dependency ranges can resolve. | Local-only package never intended for registry resolution. |
