@@ -1,6 +1,6 @@
 ---
 name: api
-description: Use for REST API contract design, evolution, versioning, status codes, and error shape.
+description: Use for REST API contracts: endpoints, fields, evolution, status codes, errors, pagination, idempotency.
 ---
 
 # API
@@ -36,20 +36,17 @@ description: Use for REST API contract design, evolution, versioning, status cod
    Every response shape is explicit, including errors, empty states,
    pagination, and auth failures. Durable API interfaces route through
    `contract-first`; error shape is part of the contract.
-
 2. **Evolution: additive in place; breaking needs a path forward.**
    Optional fields, query params, headers, methods, and endpoints
    evolve in place. Renames, removals, required additions, status-code
    changes, and semantic changes need a successor contract or
    deprecation path. Never break in place. See
    `references/api-evolution.md`.
-
 3. **Versioning: one strategy per service.** Pick URL path, media
    type, header, or date and apply it consistently. Major bumps for
    breaking changes only; compatible additions never re-version.
    Retire versions with an overlap window; route deprecation
    primitives through `release`. See `references/api-evolution.md`.
-
 4. **Errors: status by origin, shape by contract.** `4xx` for
    consumer-request problems, `5xx` for upstream or your-service
    problems; never mix origins in one response. Use the chosen data
@@ -58,7 +55,6 @@ description: Use for REST API contract design, evolution, versioning, status cod
    structurally distinct conventions, not interchangeable. Never leak
    raw upstream or internal errors. See
    `references/rest-error-status-codes.md`.
-
 5. **Default to JSON:API; switch only when the domain has its own
    standard.** JSON:API is the default for REST resource APIs (envelope
    with `id`/`type`/`attributes`/`relationships`, sparse fieldsets,
@@ -87,27 +83,18 @@ description: Use for REST API contract design, evolution, versioning, status cod
 - [ ] Contract exists or is updated before implementation lands.
 - [ ] Durable API interfaces have explicit user approval before
       implementation continues.
-- [ ] Every endpoint documents request, responses by status, auth, and
-      errors.
-- [ ] Errors use one consistent shape across the API matching the
-      chosen data model (JSON:API errors by default; FHIR
-      `OperationOutcome` for healthcare; Problem Details for plain
-      JSON); status codes are selected by origin and don't leak
-      implementation detail.
-- [ ] Request and response bodies use JSON:API by default, or a
-      domain-specific standard (FHIR, HAL, JSON-LD) when the domain
-      has one. Custom shapes are documented with equivalent rigor;
-      deviations from the chosen standard are explicit.
-- [ ] Non-idempotent mutations either accept an idempotency key (with
-      scope, replay window, duplicate response, conflict semantics) or
-      are documented as unsafe to retry.
-- [ ] Lists and streams have bounded pagination, stable ordering, and
-      explicit invalid-token behavior; bad continuation tokens do not
-      silently restart, rewind, or skip position.
-- [ ] Additive changes are optional; old calls and consumers that
-      ignore new fields, parameters, headers, or endpoints still work.
-- [ ] No existing contract is broken in place; incompatible changes
-      have a successor contract or deprecation path with overlap and
+- [ ] Every endpoint documents request, auth, responses by status, and errors.
+- [ ] Request, response, and error shapes follow the chosen data model
+      consistently; status codes are selected by origin and do not leak internal
+      or upstream details.
+- [ ] Non-idempotent mutations define idempotency key scope, replay window,
+      duplicate response, and conflict semantics, or are documented as unsafe to
+      retry.
+- [ ] Lists and streams have bounded pagination, stable ordering, and explicit
+      invalid-token behavior; bad tokens do not silently restart, rewind, or
+      skip position.
+- [ ] Additive changes are optional and old callers still work; incompatible
+      changes have a successor contract or deprecation path with overlap and
       migration guidance.
 - [ ] Webhooks are signed, timestamped, replay-protected, and
       deduplicable.
@@ -115,41 +102,39 @@ description: Use for REST API contract design, evolution, versioning, status cod
       concerns; endpoint-specific validation, ownership checks,
       privileged authorisation, and domain invariants stay at the
       route/domain boundary.
-- [ ] Tests exercise the public boundary, not only internal handlers;
-      every public contract claim has proof evidence or is reported as
-      unproven.
+- [ ] Tests exercise the public boundary; unproven public contract claims are
+      reported.
 
 ## Tripwires
 
-| Trigger | Do this instead | False alarm |
-|---|---|---|
-| "Just rename/remove this field" | Treat it as breaking unless a successor contract or deprecation path exists. | Private endpoint with no external or cross-service caller. |
-| "A 500 is fine for this bad request" | Pick status by origin: consumer problems are `4xx`; service/upstream problems are `5xx`. | The request is valid and the service failed while processing it. |
-| "Return whatever the handler has" | Define the response and error shape in the contract first. | Internal handler test with no public API claim. |
-| "Pagination can be added later" | Define bounded pagination, stable ordering, and invalid-token behavior now. | The endpoint is provably bounded and cannot grow beyond a small fixed set. |
-| "Retry the mutation if it times out" | Define idempotency key scope, replay window, duplicate response, and conflict semantics. | The operation is explicitly unsafe to retry and documented that way. |
-| "Webhook delivery is just POST" | Sign, timestamp, replay-protect, version, and deduplicate webhook events. | Internal trusted event with no external delivery. |
-| "Put this endpoint rule in middleware" | Keep route-specific validation, ownership, and domain rules in handler/domain code. | The concern is transport-wide across all routes. |
+Use these when the shortcut thought appears:
+
+- Treat field renames and removals as breaking unless a successor contract or
+  deprecation path exists.
+- Pick status by origin: consumer problems are `4xx`; service/upstream problems
+  are `5xx`.
+- Define response and error shape in the contract before returning handler
+  internals.
+- Define bounded pagination, stable ordering, and invalid-token behavior before
+  the endpoint can grow.
+- Define idempotency key scope, replay window, duplicate response, and conflict
+  semantics before retrying mutations.
+- Sign, timestamp, replay-protect, version, and deduplicate external webhooks.
+- Keep route-specific validation, ownership, and domain rules in handler/domain
+  code; use middleware for transport-wide concerns.
 
 ## Handoffs
 
-- Use `proof` when API claims need explicit proof obligations.
-- Use `error-handling` when mapping internal failures to the public API
-  error contract, or when designing remote-call timeouts, retry
+- `contract-first`: durable API approval.
+- `proof`: public-boundary checks and unproven API claims.
+- `error-handling`: internal failure mapping, remote-call timeouts, retries,
   budgets, and circuit breakers behind the API.
-- Use `security` for authn/authz, input trust, SSRF, secrets, and data
-  exposure; prefer the framework's middleware for global browser and
-  transport controls, but keep resource-specific authorisation in the
-  handler/domain path.
-- Use `architecture` when deciding whether request middleware is a real
-  transport boundary or just a horizontal layer that scatters feature
-  behavior.
-- Use `async-systems` for SSE/subscription transport, event-stream
-  semantics, idempotent async consumers, and delivery guarantees.
-- Use `release` for the actual bump, CHANGELOG, and deprecation
-  primitives.
-- Use `documentation` when deciding where API docs live; generated
-  contract reference is the source of truth.
+- `security`: authn/authz, input trust, SSRF, secrets, and data exposure.
+- `architecture`: middleware placement and API style decisions.
+- `async-systems`: SSE, subscriptions, event streams, async consumers, delivery.
+- `release`: version bumps, changelog, `Sunset`, and `Deprecation` primitives.
+- `documentation`: API docs location; generated contract reference stays source
+  of truth.
 
 ## References
 
