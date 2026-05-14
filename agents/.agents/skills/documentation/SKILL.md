@@ -7,7 +7,7 @@ description: Use for requested/approved docs, READMEs, ADRs, runbooks, API docs,
 
 ## Iron Law
 
-`DOCUMENT THE DECISION, CONTRACT, OR WORKFLOW WHERE IT WILL ROT LEAST.`
+`DOCUMENT ONLY WHAT NEEDS PROSE. KEEP DOCS NEAR THE CODE, CONTRACT, OR TEAM THAT MAINTAINS THEM.`
 
 ## When to Use
 
