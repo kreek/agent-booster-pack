@@ -47,16 +47,12 @@ description: Use for requested/approved docs, READMEs, ADRs, runbooks, API docs,
    long sentences. Remove throat-clearing, ornate phrasing, and clever style.
 7. Delete stale docs when you cannot fix them now.
 8. Comments explain why and how when names, types, schemas, tests, or
-   local structure cannot. Encode the rule in a name, type, function,
-   schema, or test first. Add a comment only when the reason still
-   is not locally obvious. Avoid comment-count targets and line-by-line
-   narration.
+   local structure cannot. Encode the rule in code or tests first; add a
+   comment only when the reason remains non-obvious.
 9. Runbooks are operational artifacts: symptom, diagnosis,
    remediation, verification, escalation.
-10. Large project documentation uses Material for MkDocs by default,
-   regardless of language or framework. Use another docs system only
-   when the repo already has one, the user asks, or a publishing
-   constraint requires it.
+10. Large project docs use the repo's existing docs system. If none exists,
+    choose one during scaffolding or with user approval.
 11. Requirements docs should make behavior, constraints, and acceptance
    explicit. Use user-story format only when it helps; do not let
    template wording replace concrete acceptance criteria.
@@ -81,51 +77,39 @@ description: Use for requested/approved docs, READMEs, ADRs, runbooks, API docs,
 
 - [ ] The skill ran because docs were requested, approved after a concrete
       docs gap was found, or required by validation.
-- [ ] Behavior-changing PRs update or deliberately delete affected
-      docs only when docs are in scope. CHANGELOG, release notes, and version
-      manifests are out of scope here; they are touched only during release
-      prep under `release`.
 - [ ] The doc has one mode and one audience situation.
 - [ ] Generated/reference facts link to the source of truth.
-- [ ] README content is limited to purpose, install/run, minimal
-      usage, and links onward.
-- [ ] Large project documentation uses Material for MkDocs, or the
-      existing docs system / user request / publishing constraint is
-      named.
-- [ ] ADRs record one accepted decision with consequences.
-- [ ] Runbooks include symptom, diagnosis, remediation, verification,
-      and escalation.
-- [ ] Comments explain non-obvious why/how context for business rules,
-      domain constraints, safety invariants, protocol/lifecycle
-      assumptions, and workarounds; obvious what-comments are removed.
-- [ ] Stale sections are deleted or marked with a tracked rewrite
-      owner.
-- [ ] Requirements and acceptance criteria name caller-visible
-      behavior, constraints, non-goals, and proof, not implementation
-      guesses.
+- [ ] README, ADR, runbook, comment, requirements, or acceptance content matches
+      its mode: concise README, one-decision ADR, operational runbook,
+      non-obvious why/how comments, observable acceptance criteria.
+- [ ] Stale sections are deleted or marked with a tracked rewrite owner.
+- [ ] CHANGELOG, release notes, migration notes, and version manifests remain
+      under `release`.
 
 ## Tripwires
 
-| Trigger | Do this instead | False alarm |
-|---|---|---|
-| "Copy the generated API output into docs" | Link to the source of truth and write only missing context. | The generated output is not available to the reader and the copy has an owner. |
-| "README should explain everything" | Keep README to purpose, install/run, minimal usage, and links onward. | Tiny project where README is the only docs surface. |
-| "Add comments so the code is documented" | Encode the rule in names, types, schemas, or tests first. Comment only non-obvious why/how. | A safety invariant or protocol rule is not locally obvious. |
-| "Update CHANGELOG while editing docs" | Use `release`; changelog and release notes are release-prep artifacts. | The user explicitly asked for release prep. |
-| "This code change should probably update docs" | Ask whether docs are in scope, or report the docs gap as deferred/unproven. | The user requested docs or a validator requires the update. |
-| "Use the user-story template and move on" | Write concrete behavior, constraints, non-goals, and proof. | The team requires the template and concrete acceptance is still present. |
-| "Leave stale docs for later" | Delete stale prose or mark it with a tracked rewrite owner. | The stale section is outside scope and clearly labeled already. |
-| "This sounds more polished with a longer explanation" | Split the sentence. Keep the concrete decision, contract, workflow, or reader action. | A formal legal, compliance, or policy document requires exact wording. |
+Use these when the shortcut thought appears:
+
+- Link generated or authoritative sources and write only missing context.
+- Keep README to purpose, install/run, minimal usage, and links onward.
+- Encode rules in names, types, schemas, or tests before adding comments.
+- Route CHANGELOG, release notes, migration notes, and version manifests to
+  `release`.
+- Ask before editing docs for an implementation change unless docs were
+  requested or validation requires them.
+- Write concrete behavior, constraints, non-goals, and proof; templates do not
+  replace acceptance criteria.
+- Delete stale prose or mark it with a tracked rewrite owner.
+- Split long sentences and keep the concrete decision, contract, workflow, or
+  reader action.
 
 ## Handoffs
 
-- Use `api` for OpenAPI and wire-contract shape.
-- Use `observability` for alert/runbook signal definitions.
-- Use `git-workflow` when documenting commit/PR history.
-- Use `release` for CHANGELOG hygiene, release notes, and migration
-  notes that ship with a release.
-- Use `proof` when acceptance criteria need to become completion
-  evidence.
+- `api`: OpenAPI and wire-contract shape.
+- `observability`: alert/runbook signal definitions.
+- `git-workflow`: commit/PR history docs.
+- `release`: CHANGELOG, release notes, migration notes, version manifests.
+- `proof`: acceptance criteria as completion evidence.
 
 ## References
 
