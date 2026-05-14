@@ -22,7 +22,7 @@ const assistantText = (text) => ({
 const entry = (role, content) => ({ type: "message", message: { role, content } });
 
 describe("final value guard", () => {
-  it("registers a manual command and no passive agent_end hook", () => {
+  it("registers the manual command and passive message_end hook", () => {
     const commands = new Map();
     const handlers = new Map();
     const fakePi = {
@@ -33,7 +33,49 @@ describe("final value guard", () => {
     finalValueGuard(fakePi);
 
     expect(commands.get("abp:final-value")).toBeTruthy();
-    expect(handlers.get("agent_end")).toBeUndefined();
+    expect(handlers.get("message_end")).toBeTruthy();
+  });
+
+  it("automatically replaces weak final responses after changed turns", async () => {
+    const handlers = new Map();
+    const sessionEntries = [
+      entry("user", "implement the cache"),
+      entry("assistant", [{ type: "toolCall", name: "write", arguments: { path: "src/cache.js" } }]),
+    ];
+    const fakePi = {
+      registerCommand() {},
+      on: (eventName, handler) => handlers.set(eventName, handler),
+    };
+
+    finalValueGuard(fakePi);
+    const result = await handlers.get("message_end")(
+      { message: assistantText("Done.") },
+      { sessionManager: { getBranch: () => sessionEntries } }
+    );
+
+    expect(result.message.content[0].text).toMatch(/ABP Final Value Guard/);
+    expect(result.message.content[0].text).toMatch(/one concise sentence/i);
+    expect(result.message.content[0].text).toMatch(/Previous final response:\nDone\./);
+  });
+
+  it("does not replace strong final responses", async () => {
+    const handlers = new Map();
+    const strong = assistantText(
+      "Changed the cache guard to reject stale writes before updating state. This makes cache updates safer because invalid input no longer mutates durable state."
+    );
+    const sessionEntries = [
+      entry("user", "implement the cache"),
+      entry("assistant", [{ type: "toolCall", name: "write", arguments: { path: "src/cache.js" } }]),
+    ];
+    const fakePi = {
+      registerCommand() {},
+      on: (eventName, handler) => handlers.set(eventName, handler),
+    };
+
+    finalValueGuard(fakePi);
+    const result = await handlers.get("message_end")({ message: strong }, { sessionManager: { getBranch: () => sessionEntries } });
+
+    expect(result).toBeUndefined();
   });
 
   it("manual command asks for final value reflection from current session changes", async () => {
@@ -47,6 +89,7 @@ describe("final value guard", () => {
     const fakePi = {
       registerCommand: (name, definition) => commands.set(name, definition),
       sendUserMessage: (message) => sent.push(message),
+      on() {},
     };
 
     finalValueGuard(fakePi);
@@ -65,6 +108,7 @@ describe("final value guard", () => {
     const fakePi = {
       registerCommand: (name, definition) => commands.set(name, definition),
       sendUserMessage: (message) => sent.push(message),
+      on() {},
     };
 
     finalValueGuard(fakePi);

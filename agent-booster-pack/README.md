@@ -34,8 +34,9 @@ The meta-package also includes manual commands:
   range. It starts an active review session, asks the agent to use the
   `code-review` skill, and exposes `review_complete`. The legacy
   `review_check` tool still works for step-by-step progress.
-- **`/abp:final-value [intent]`** asks for a stronger close-out only when the
-  user requests it.
+- **Final Value Guard** automatically asks for a stronger close-out after
+  changed turns, scaled to the size of the change. `/abp:final-value [intent]`
+  can request the same reflection manually.
 
 If you want only some of the four, install them individually instead
 of this meta-package. See each package's README for details.

@@ -157,6 +157,17 @@ Previous final response:
 ${finalText}`;
 }
 
+function replacementMessage(message, replacementText) {
+  return {
+    ...message,
+    content: [{ type: "text", text: replacementText }],
+  };
+}
+
+function entryFromMessage(message) {
+  return { type: "message", message };
+}
+
 function genericFinalValuePrompt(args) {
   const intent = String(args ?? "").trim();
   return [
@@ -181,5 +192,15 @@ export default function finalValueGuard(pi) {
       const prompt = finalValuePromptForSessionEntries(branchEntries) ?? genericFinalValuePrompt(args);
       await pi.sendUserMessage(prompt);
     },
+  });
+
+  pi.on("message_end", async (event, ctx) => {
+    if (event.message.role !== "assistant") return;
+
+    const branchEntries = ctx.sessionManager?.getBranch?.() ?? [];
+    const prompt = finalValuePromptForSessionEntries([...branchEntries, entryFromMessage(event.message)]);
+    if (!prompt) return;
+
+    return { message: replacementMessage(event.message, prompt) };
   });
 }
