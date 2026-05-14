@@ -15,8 +15,9 @@ const REQUIRED_GATE_LABELS = [
   "Files and commands",
   "User decision",
 ];
-const APPROVAL_PATTERN = /\b(approve|approved|yes|proceed|go ahead|looks good|sounds good|do it)\b/i;
-const REVISION_PATTERN = /\b(revise|change|instead|no|not yet|different|choose another)\b/i;
+const APPROVAL_PATTERN = /^\s*(1\b|approve\b|approved\b|go ahead\b|proceed\b|yes\b|do it\b)/i;
+const NON_APPROVAL_PATTERN = /^\s*(2\b|3\b|refine\b|change\b|cancel\b|revise\b|instead\b|no\b|not yet\b|different\b|choose another\b)/i;
+const DECISION_MENU_PATTERN = /1\.\s*Approve\b[\s\S]*create files\s*\/\s*install packages\s*\/\s*run generators[\s\S]*2\.\s*Refine\b[\s\S]*change the scaffold plan[\s\S]*3\.\s*Cancel\b[\s\S]*stop scaffolding/i;
 const VAGUE_BASELINE_PATTERN = /\b(if feasible|where practical|as needed|where applicable|if possible|try to)\b/i;
 const BLOCKER_PATTERN = /\b(blocker|blocked by|because|cannot|unavailable|not available|defer|deferred)\b/i;
 
@@ -96,10 +97,15 @@ function hasQualityGateBaseline(text) {
   return /\b(ci|continuous integration)\b/i.test(value) && /\bcoverage\b/i.test(value);
 }
 
+function hasDecisionMenu(text) {
+  return DECISION_MENU_PATTERN.test(labelValue(text, "User decision"));
+}
+
 export function hasScaffoldDecisionGate(text) {
   const value = String(text ?? "");
   if (!value.includes("Scaffold Decision Gate")) return false;
   if (!REQUIRED_GATE_LABELS.every((label) => labelValue(value, label).length > 0)) return false;
+  if (!hasDecisionMenu(value)) return false;
   if (hasVagueBaseline(value) && !BLOCKER_PATTERN.test(value)) return false;
   if (!hasQualityGateBaseline(value) && !BLOCKER_PATTERN.test(value)) return false;
   return true;
@@ -114,7 +120,7 @@ export function isScaffoldApproved(entries) {
 
   for (const message of messages.slice(gateIndex + 1)) {
     if (message.role !== "user") continue;
-    if (REVISION_PATTERN.test(message.text)) return false;
+    if (NON_APPROVAL_PATTERN.test(message.text)) return false;
     if (APPROVAL_PATTERN.test(message.text)) return true;
   }
 
@@ -135,12 +141,12 @@ export function shouldBlockScaffoldMutation(toolName, input, entries) {
   if (isScaffoldApproved(entries)) return null;
 
   return {
-    reason: "ABP Scaffold Decision Gate: before scaffold files, installs, or generators, present a Scaffold Decision Gate and wait for explicit user approval.",
+    reason: "ABP Scaffold Decision Gate: before scaffold files, installs, or generators, present a Scaffold Decision Gate with the 1 Approve / 2 Refine / 3 Cancel menu and wait for user approval.",
   };
 }
 
 export function scaffoldReminder() {
-  return `\n\nABP Scaffold Decision Gate is active. Before creating scaffold files, installing packages, or running generators, present a Scaffold Decision Gate with Project intent, Project kind, Language/runtime, Deployment assumption, Framework/template, Quality baseline, Files and commands, and User decision. The user decides setup choices; you wire the chosen tests, linting, formatting, typecheck, coverage, CI, and README. Wait for explicit user approval before mutating scaffold files.`;
+  return `\n\nABP Scaffold Decision Gate is active. Before creating scaffold files, installing packages, or running generators, present a Scaffold Decision Gate with Project intent, Project kind, Language/runtime, Deployment assumption, Framework/template, Quality baseline, Files and commands, and User decision. User decision must offer: 1. Approve — create files / install packages / run generators; 2. Refine — change the scaffold plan; 3. Cancel — stop scaffolding. The user decides setup choices; you wire the chosen tests, linting, formatting, typecheck, coverage, CI, and README. Wait for option 1 or clear approval before mutating scaffold files.`;
 }
 
 function scaffoldPrompt(intent) {
@@ -156,9 +162,12 @@ function scaffoldPrompt(intent) {
     "- Framework/template: Backstage template when one fits, otherwise fallback stack and tradeoff",
     "- Quality baseline: package manager, test, lint, format, typecheck, coverage, CI",
     "- Files and commands: what will be created or run",
-    "- User decision: approve, revise, or choose another option",
+    "- User decision:",
+    "  1. Approve — create files / install packages / run generators",
+    "  2. Refine — change the scaffold plan",
+    "  3. Cancel — stop scaffolding",
     "",
-    subject ? `Intent: ${subject}` : "Then wait for the user's approval before creating files or running scaffold commands.",
+    subject ? `Intent: ${subject}` : "Then wait for option 1 or a clear approval before creating files or running scaffold commands.",
   ].join("\n");
 }
 

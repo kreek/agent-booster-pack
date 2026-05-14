@@ -74,7 +74,10 @@ and run the baseline without local knowledge.
    present a **Scaffold Decision Gate** and wait for explicit user approval.
    Include: project intent, project kind, language/runtime, deployment
    assumption, framework/template, quality baseline, files and commands, and
-   user decision.
+   this user decision menu:
+   1. Approve — create files / install packages / run generators
+   2. Refine — change the scaffold plan
+   3. Cancel — stop scaffolding
 4. Offer choices in order of importance: language/runtime first, then
    deployment assumption, then framework/template, then framework-local
    choices. Recommend one option and name the tradeoff. Use a Backstage
@@ -93,10 +96,11 @@ and run the baseline without local knowledge.
 
 ## Verification
 
-- [ ] **Decision gate**: before scaffold mutation, the user approved project
-      kind, language/runtime, deployment assumption, and framework/template;
-      the gate named the quality baseline, files, and commands, or the request
-      already specified every material setup choice.
+- [ ] **Decision gate**: before scaffold mutation, the gate offered Approve,
+      Refine, and Cancel choices, and the user approved project kind,
+      language/runtime, deployment assumption, and framework/template; the gate
+      named the quality baseline, files, and commands, or the request already
+      specified every material setup choice.
 - [ ] **Change control**: git repository exists for fresh scaffolds;
       `.gitignore` is present before generated artifacts are created;
       the initial scaffold can be reviewed with `git diff` / committed
@@ -143,6 +147,7 @@ to the full checklist.
 | "The commands passed, so setup is done" | Verify the requirement -> artifact -> command mapping for every named setup requirement. | Pure script rename with no requested artifact. |
 | "Git can be added later" | Initialize git and `.gitignore` before feature code so ABP can review diffs, preserve checkpoints, and avoid tracking generated artifacts. | User explicitly forbids git or the target is inside an existing parent repo/submodule policy. |
 | "I'll pick the stack and start generating" | In Pi, run `/abp:scaffold`; then present the Scaffold Decision Gate and get approval for setup choices first. | The user already specified every material setup choice and only the mechanical wiring remains. |
+| "If this looks good, I can scaffold" | Offer Approve, Refine, and Cancel choices before mutating scaffold files or running scaffold commands. | The user already gave clear approval after seeing the gate. |
 
 ## Handoffs
 
