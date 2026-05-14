@@ -12,12 +12,10 @@ description: Use when an Interface Design Gate must approve durable function, AP
 ## When to Use
 
 - A task defines or materially changes a durable interface: exported function,
-  public type, module boundary, HTTP endpoint, CLI command or flag, config key,
-  environment variable, event payload, file format, database schema, migration
-  step, or cross-component contract.
-- The user starts the manual Interface Design Gate workflow, or an installed
-  gate asks for the current interface, proposed interface, boundary reason, and
-  user decision.
+  public type, HTTP endpoint, CLI/env/config surface, event payload, file
+  format, database schema, migration step, or cross-component contract.
+- A manual or installed Interface Design Gate asks for current interface,
+  proposed interface, boundary reason, and user decision.
 - Reviewing whether implementation started before contract approval.
 
 ## When NOT to Use
@@ -29,46 +27,49 @@ description: Use when an Interface Design Gate must approve durable function, AP
 - Collaborative design exploration before a concrete interface proposal; use
   `specify`.
 
-## Optional Runtime Backstop
+## Core Ideas
 
-Some ABP installations include the manual Interface Design Gate runtime. Use
-`/abp:contract [intent]` to start it. While active, it enforces the explicit
-gate packet: Current interface, Proposed interface, Why this boundary, User
-decision.
+1. Contract-first is an approval gate, not a design conversation. If the shape
+   is still being explored, use `specify` first.
+2. A contract is concrete enough for another caller, process, service, user, or
+   migration step to depend on it.
+3. Approval covers the named shape only. Compatibility, rollout, renames,
+   removals, and shims need their own explicit decision.
 
 ## Workflow
 
-1. Stop before implementation code lands. Do not write source, migration, or
-   config that commits the new boundary until approval is recorded.
-2. Name the current interface with file/line evidence. For greenfield work,
-   state "new interface."
-3. Propose the concrete interface shape: function signature, type, endpoint,
-   CLI, config, event, schema, or file format. For public renames or removals,
-   separate the desired new shape from the compatibility plan: breaking change,
-   alias/shim, deprecation path, or old surface retained.
-4. Explain why this boundary belongs here and what owns each side of it.
-5. Ask the user to approve, revise, or rule it out. Silence is not approval.
-   Name/shape approval is not compatibility approval.
-6. After approval, implement only the approved shape. If the implementation
-   discovers a materially different contract, return to the gate.
+1. **Stop before implementation lands.** Do not write source, migrations, or
+   config that commit the boundary until approval is recorded.
+2. **Name the current interface.** Cite file/line evidence, or state "new
+   interface" for greenfield work.
+3. **Propose the new shape.** Show the concrete signature, type, endpoint,
+   CLI/env/config surface, event payload, schema, migration step, or file
+   format callers will bind to.
+4. **Explain the boundary.** State why it belongs here and what owns each side.
+5. **Separate compatibility.** For public renames or removals, ask for a
+   breaking change, alias/shim, deprecation path, or old surface retained.
+6. **Record the decision.** Ask the user to approve, revise, or rule it out.
+   Silence is not approval.
+7. **Implement only the approved shape.** If implementation discovers a
+   materially different contract, reopen the gate.
 
 ## Verification
 
 - [ ] The current interface is named with evidence, or marked as new.
 - [ ] The proposed interface is concrete enough for callers to bind to.
-- [ ] Ownership and boundary placement are explained.
-- [ ] Public renames/removals have an explicit compatibility decision, or
-      compatibility was left out of scope.
-- [ ] The user approved, revised, or rejected the interface before
-      implementation landed.
-- [ ] The implemented contract matches the approved shape, or the gate was
-      reopened for approval.
+- [ ] Boundary ownership and compatibility decisions are explicit.
+- [ ] The user approved, revised, or rejected the interface before implementation
+      landed.
+- [ ] Implementation matches the approved shape, or the gate was reopened.
+
+## Optional Runtime Backstop
+
+Some ABP installations include the manual Interface Design Gate runtime. Use
+`/abp:contract [intent]` to start it when available.
 
 ## Handoffs
 
-- Use `workflow` to choose all relevant skills and keep the broad ABP routing
-  context.
-- Use `specify` when the contract shape is still being explored.
-- Use `api`, `database`, `async-systems`, or `security` when the interface
-  crosses those domain boundaries.
-- Use `proof` to turn the approved contract into executable acceptance checks.
+- `workflow`: broad routing.
+- `specify`: unsettled contract shape.
+- `api`, `database`, `async-systems`, `security`: domain boundary risks.
+- `proof`: executable checks for the approved contract.
