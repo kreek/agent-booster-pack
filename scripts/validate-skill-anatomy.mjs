@@ -22,8 +22,6 @@ const MAX_TOTAL_DESCRIPTION_LENGTH = 2000;
 
 const NAME_RE = /^name:\s+[a-z][a-z0-9-]*\s*$/m;
 const ATTRIBUTION_RE = /\b[Pp]er\s+(?:[A-Z][a-z]+\s+)?[A-Z][a-z]+\b/;
-const TRIPWIRE_HEADER_RE = /^\|\s*Trigger\s*\|\s*Do this instead\s*\|\s*False alarm\s*\|\s*$/m;
-
 function scriptDir() {
   return dirname(fileURLToPath(import.meta.url));
 }
@@ -34,6 +32,27 @@ function defaultSkillsDir() {
 
 function sectionRe(name) {
   return new RegExp(`^##+\\s+${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*$`, "m");
+}
+
+function skillSections(body) {
+  const lines = body.split(/\r?\n/);
+  const headings = lines
+    .map((line, index) => ({ line, index }))
+    .filter(({ line }) => /^##\s+/.test(line));
+
+  return headings.map(({ line, index }, headingIndex) => {
+    const next = headings[headingIndex + 1]?.index ?? lines.length;
+    return { name: line.replace(/^##\s+/, "").trim(), lineCount: next - index - 1 };
+  });
+}
+
+function tripwiresTooLong(body) {
+  const sections = skillSections(body);
+  const tripwires = sections.find((section) => section.name === "Tripwires");
+  if (!tripwires) return false;
+
+  const otherMax = Math.max(...sections.filter((section) => section.name !== "Tripwires").map((section) => section.lineCount));
+  return tripwires.lineCount >= otherMax;
 }
 
 function bodyWithoutReferenceSections(body) {
@@ -100,10 +119,10 @@ export function validateSkillFile(path) {
     problems.push("obsolete section: ## Red Flags -- fold into ## Tripwires");
   }
   if (/^\|\s*Excuse\s*\|\s*Reality\s*\|/m.test(body)) {
-    problems.push("obsolete table header: use Trigger | Do this instead | False alarm");
+    problems.push("obsolete table header: use positive Tripwires bullets");
   }
-  if (sectionRe("Tripwires").test(body) && !TRIPWIRE_HEADER_RE.test(body)) {
-    problems.push("Tripwires table must use: Trigger | Do this instead | False alarm");
+  if (tripwiresTooLong(body)) {
+    problems.push("Tripwires must not be the longest section -- keep only high-probability skip/avoidance failures");
   }
 
   const attributionLines = bodyWithoutReferenceSections(body)
@@ -420,7 +439,7 @@ description: ${longDescription}
       "per <expert>",
       "Common Rationalizations",
       "Red Flags",
-      "Trigger | Do this instead | False alarm",
+      "positive Tripwires bullets",
       "description total too long",
     ]) {
       if (!rendered.includes(expected)) {

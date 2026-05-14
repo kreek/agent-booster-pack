@@ -112,16 +112,42 @@ Every `SKILL.md` must have:
 - Required sections: `## When to Use`, `## When NOT to Use`,
   `## Verification`.
 - Optional section: `## Tripwires` when a skill has known agent failure modes.
-  Use a table with `Trigger`, `Do this instead`, and `False alarm` columns.
-  Phrase rows as implementation intentions, not scolding: when this shortcut
-  thought appears, take this concrete next action. Do not add tripwires as
-  anatomy filler; omit the section when no row pays for its tokens.
+  Prefer short bullets that start with the corrective action. Name the trap
+  only when the action would otherwise be unclear. Keep Tripwires shorter than
+  the main guidance sections. Use them only for high-probability moments where
+  agents weaken, skip, or misapply the skill. Put rare exceptions and detailed
+  taxonomies in references. Do not add tripwires as anatomy filler; omit the
+  section when no row pays for its tokens.
 - No inline `per <Expert Name>` attribution outside a `## References` or
   `## Canon` section: move citations there.
 - Put references to people, books, talks, papers, videos, and YouTube links in
   `## References`, `## Canon`, or a `references/` file, not in frontmatter or
   the steering body. Skill bodies should spend tokens on agent behavior, not
   provenance.
+
+Sections must build on each other instead of restating the same rule:
+
+- `## When to Use`: routing triggers only. Say when to load the skill.
+- `## When NOT to Use`: routing exclusions and handoffs only. Say which
+  neighboring skill owns the work instead.
+- `## Iron Law`: one non-negotiable rule, only when the skill has one.
+- `## Core Ideas`: stable judgment rules and mental models. No ordered steps,
+  command lists, completion checks, or examples that belong in references.
+- `## Workflow`: ordered actions. Apply the Core Ideas without re-explaining
+  them.
+- Skill-specific contract or template sections: define reusable fields or
+  output shape. Do not repeat the workflow around the template.
+- `## Before Saying Done`: final completion gate only. Keep it short: latest
+  request, final diff or artifact check, freshest proof, and honest status.
+- `## Verification`: audit checklist for the skill's output. Check compliance;
+  do not introduce new doctrine or workflow.
+- `## Tripwires`: short positive corrective actions for high-probability
+  failure moments where agents skip, weaken, or misapply the skill. Do not use
+  it as a reference manual.
+- `## Handoffs`: route unresolved neighboring concerns. Do not summarize the
+  neighbor skill's body.
+- `## References` / `## Canon`: citations, deeper examples, recipes, and
+  ecosystem detail loaded only when needed.
 
 Plus the README's authoring rules: keep skills short and directive. A
 `SKILL.md` is steering context, not a book: every paragraph competes with the

@@ -26,11 +26,17 @@ description: Good test skill
 
 - [ ] check
 
+## Workflow
+
+1. Do the first relevant action.
+2. Run the smallest check that proves the claim.
+3. Report the evidence and any blocker.
+4. Keep changes scoped to the request.
+
 ## Tripwires
 
-| Trigger | Do this instead | False alarm |
-|---|---|---|
-| "Should work" | Run the check. | Research notes that do not claim completion. |
+- Run the check before making a completion claim.
+- Mark research notes as non-completion claims.
 `;
 
 const BAD_SKILL = `---
@@ -57,12 +63,12 @@ Stuff.
 - "Probably fine"
 `;
 
-const BAD_TRIPWIRES_SKILL = `---
-name: bad-tripwires
-description: Bad tripwire table
+const LONG_TRIPWIRES_SKILL = `---
+name: long-tripwires
+description: Long tripwire table
 ---
 
-# Bad Tripwires
+# Long Tripwires
 
 ## When to Use
 
@@ -78,9 +84,11 @@ description: Bad tripwire table
 
 ## Tripwires
 
-| Trigger | Action |
-|---|---|
-| "Should work" | Run the check. |
+- Use the skill when the shortcut appears.
+- Keep the corrective action positive.
+- Move rare exceptions to references.
+- Keep this list shorter than the main guidance.
+- Omit this section when no row pays for its tokens.
 `;
 
 let tmp;
@@ -199,16 +207,16 @@ describe("validate-skill-anatomy CLI", () => {
     expect(result.stdout).toContain("1 skill(s) failed anatomy validation");
   });
 
-  it("requires tripwire tables to use the standard columns", () => {
+  it("rejects tripwires as the longest section", () => {
     tmp = makeTempDir();
     const skillsDir = join(tmp, "agents/.agents/skills");
-    makeSkill(skillsDir, "bad-tripwires", BAD_TRIPWIRES_SKILL);
+    makeSkill(skillsDir, "long-tripwires", LONG_TRIPWIRES_SKILL);
 
     const result = runScript(skillsDir);
 
     expect(result.status).toBe(1);
-    expect(result.stdout).toContain("bad-tripwires/SKILL.md");
-    expect(result.stdout).toContain("Tripwires table must use");
+    expect(result.stdout).toContain("long-tripwires/SKILL.md");
+    expect(result.stdout).toContain("Tripwires must not be the longest section");
   });
 
   it("reports plugin drift when a skill mirror is missing", () => {

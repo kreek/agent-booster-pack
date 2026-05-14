@@ -13,13 +13,76 @@ need to know before opening a PR.
   copy only.
 - Each skill must conform to the anatomy enforced by
   `scripts/validate-skill-anatomy.mjs`: frontmatter (name + description),
-  `# Title`, `## When to Use`, optional `## When NOT to Use`,
-  `## Workflow`, `## Verification`, optional `## Tripwires`, `## Handoffs`,
-  and a final `## References` if any names, books, or papers are cited.
-- Keep skill descriptions concise (under ~100 words) and trigger-rich.
+  `# Title`, `## When to Use`, `## When NOT to Use`, `## Verification`,
+  optional `## Tripwires`, and any other sections the skill needs.
+  Use the section ownership rules in `AGENTS.md` when choosing where content
+  belongs.
+- Keep skill descriptions concise (120 characters or fewer) and trigger-rich.
   Lead with verbs and named scenarios; avoid marketing language.
 - Names of authors, books, papers, or external products belong in the
   `## References` section only, not in skill bodies or frontmatter.
+
+## Skill body template
+
+Use this order unless the skill has a clear reason to omit an optional section.
+Insert skill-specific contract or template sections after `## Core Ideas` and
+before `## Workflow`.
+
+```md
+---
+name: kebab-case-name
+description: Use when <trigger-focused scenarios>.
+---
+
+# Skill Title
+
+## Iron Law
+
+One non-negotiable rule, if the skill has one.
+
+## When to Use
+
+- Routing triggers only.
+
+## When NOT to Use
+
+- Routing exclusions and neighboring-skill handoffs only.
+
+## Core Ideas
+
+1. Durable judgment rules and mental models.
+2. No ordered workflow steps, commands, examples, or completion checks.
+
+## Workflow
+
+1. Ordered actions the agent should take.
+2. Apply Core Ideas without re-explaining them.
+
+## Before Saying Done
+
+1. Final completion gate, only when the skill needs one.
+2. Latest request, final artifact/diff check, freshest proof, honest status.
+
+## Verification
+
+- [ ] Checks that audit the skill's output.
+- [ ] No new doctrine appears here.
+
+## Tripwires
+
+- Take the concrete corrective action when the high-probability shortcut
+  appears.
+- Prefer positive instructions over negated warnings; move rare exceptions to
+  references.
+
+## Handoffs
+
+- Use `neighbor-skill` when that skill owns the unresolved concern.
+
+## References
+
+- Deeper examples, recipes, citations, and ecosystem detail.
+```
 
 ## Branching and commits
 

@@ -1,6 +1,6 @@
 # Data-shape boundaries — worked examples
 
-This reference expands `proof`'s Core Ideas 6–9. The shared rule across all
+This reference expands `proof`'s boundary-testing Core Ideas. The shared rule across all
 examples: **a boundary worth testing is a point where data shape or values
 change observably**. HTTP, CLI, UI, and module facades are special cases of
 this — the shape change is "internal value -> external representation".
