@@ -65,8 +65,9 @@ description: Use first to route ABP work, choose skills, hand off, and define ve
    For production paths, shared libraries, contracts, schemas, auth,
    persistence, and domain rules, preserve human understanding before coding.
    Route data shape and effects to `domain-modeling`, code organization to
-   `architecture`, trust boundaries to `security`, proof to `proof`, and git
-   history to `git-workflow` instead of duplicating their rules here.
+   `architecture`, trust boundaries to `security`, proof to `proof`, routine
+   commits to `commit`, and heavier git history to `git-workflow` instead of
+   duplicating their rules here.
 4. **Set required gates before implementation.** Use `specify` before planning
    unsettled architecture, domain, data, or interface shape. Use
    `contract-first` before implementing caller-facing APIs, exported types,
@@ -100,7 +101,8 @@ description: Use first to route ABP work, choose skills, hand off, and define ve
    | `official-source-check` | External framework, library, runtime, or platform behavior must be checked against official sources. |
    | `proof` | Claims need tests, checks, contracts, root-cause evidence, or completion evidence. |
    | `code-review` | Reviewing a diff, PR, branch, or non-trivial implementation before the final claim. |
-   | `git-workflow` | Branches, staging, commits, conflicts, bisects, or history matter. |
+   | `commit` | Staging reviewed files, splitting commit groups, writing a commit message, or committing approved work. |
+   | `git-workflow` | Branches, conflicts, rebases, bisects, recovery, force-push, or GitHub CLI matter. |
 
    Do not load `documentation` or `release` only because they might be useful
    later. If implementation reveals a docs or release-prep obligation, ask the

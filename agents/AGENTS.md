@@ -226,10 +226,11 @@ organized, not what the code should do.
   framework/runtime defaults, adding baseline tooling (linter, formatter, type
   check, test runner, coverage) to a project that lacks it, or setting up
   initial CI config.
+- `commit`: use when staging reviewed work, grouping dirty files, proposing
+  commit splits, writing commit messages, or committing approved changes.
 - `git-workflow`: use when rebasing, bisecting, resolving conflicts,
-  splitting/squashing commits, recovering history, cleaning branch history,
-  grouping a messy working tree, proposing commit splits, writing commit
-  messages, or committing approved changes.
+  recovering history, cleaning branch history, deleting branches, force-pushing,
+  or using GitHub CLI.
 
 Proof obligations override style, aesthetics, and weak local conventions. If a
 behavior, invariant, contract, root-cause, or refactor-safety claim cannot be
@@ -348,6 +349,8 @@ ABP adds:
   continued work on the same branch. See `git-workflow` for details.
 - Review your own staged diff before every commit: catch debug prints, dead
   code, stale paths, and stray changes before anyone else sees them.
+- Use `commit` for routine commit packaging. Load `git-workflow` only when
+  branches, conflicts, rebases, history edits, recovery, or GitHub CLI matter.
 - Commit only after the narrowest relevant proof or acceptance check is
   current. If a broader suite is noisy or unrelated, report that separately
   instead of blocking the proven slice on unrelated drift.

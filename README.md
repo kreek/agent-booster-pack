@@ -358,9 +358,10 @@ they apply:
 
 ### Project and repo workflow
 
-- [`git-workflow`][skill-git-workflow]: branch hygiene, working-tree grouping,
-  commit splits, right-sized commit messages, rebases, conflicts, bisects,
-  history recovery, and PR history.
+- [`commit`][skill-commit]: routine commit packaging, named-file staging,
+  logical commit splits, right-sized commit messages, and hook-safe commits.
+- [`git-workflow`][skill-git-workflow]: branch hygiene, rebases, conflicts,
+  bisects, history recovery, force-push decisions, GitHub CLI, and PR history.
 - [`scaffolding`][skill-scaffolding]: new projects, baseline tooling,
   package-manager defaults, test runners, linting, and CI. Greenfield stack
   picks come from the typed template catalog described below.
@@ -387,6 +388,7 @@ Shared language defaults live in
 [skill-documentation]: agents/.agents/skills/documentation/SKILL.md
 [skill-error-handling]: agents/.agents/skills/error-handling/SKILL.md
 [skill-ui-design]: agents/.agents/skills/ui-design/SKILL.md
+[skill-commit]: agents/.agents/skills/commit/SKILL.md
 [skill-git-workflow]: agents/.agents/skills/git-workflow/SKILL.md
 [skill-observability]: agents/.agents/skills/observability/SKILL.md
 [skill-performance]: agents/.agents/skills/performance/SKILL.md

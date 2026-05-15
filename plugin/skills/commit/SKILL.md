@@ -1,0 +1,74 @@
+---
+name: commit
+description: Use for staging reviewed work, commit splits, and messages.
+---
+
+# Commit
+
+## Iron Law
+
+`COMMIT ONLY THE REVIEWED SLICE. STAGE FILES BY NAME.`
+
+Commit packaging is common and should stay lightweight. Load `git-workflow`
+only when branches, conflicts, rebases, history edits, recovery, or GitHub CLI
+use are part of the task.
+
+## When to Use
+
+- The user asks to commit, stage, split, or package current changes.
+- You need to group dirty files into one or more logical commits.
+- You need a right-sized commit subject or body for approved work.
+
+## When NOT to Use
+
+- Creating or switching branches, resolving conflicts, rebasing, bisecting,
+  recovering history, deleting branches, or force-pushing. Use `git-workflow`.
+- Reviewing correctness of the diff. Use `code-review` before packaging
+  non-trivial implementation work.
+- Preparing release versions, changelogs, tags, or publishing. Use `release`
+  only when requested or approved.
+
+## Workflow
+
+1. Inspect one compact preflight: `git status --short`, current branch, staged
+   diff stat, unstaged diff stat, and recent log. Stop on unexpected state.
+2. Separate unrelated work. Stage only named files or approved pathspecs for
+   the reviewed slice; never use `git add .` in a messy tree.
+3. Verify staged membership with `git diff --cached --stat` and, when risk
+   appears, inspect the staged diff before committing.
+4. Confirm relevant proof is current. If a broad suite is noisy for unrelated
+   reasons, name the targeted proof and report the broader drift separately.
+5. Write a commit message that completes "When applied, this commit will ...".
+   Use a concise subject. Add a body only when the change needs context, up to
+   2-3 short paragraphs.
+6. Commit without skipping hooks. Afterward, check status and recent log.
+
+## Verification
+
+- [ ] Only reviewed files are staged; unrelated dirty or untracked files are
+      left unstaged and named as deferred.
+- [ ] The staged diff matches one logical change.
+- [ ] The relevant proof or acceptance check is current, or the blocker is
+      reported as unproven.
+- [ ] The subject completes "When applied, this commit will ...".
+- [ ] The message is right-sized: concise subject, optional body, no generated
+      attribution trailers.
+- [ ] Hooks were not skipped, and post-commit status/log were inspected.
+
+## Tripwires
+
+| Trigger | Do this instead | False alarm |
+|---|---|---|
+| "Commit everything dirty" | Separate current reviewed work from unrelated files first. | The user explicitly approved the full dirty tree. |
+| "git add . is faster" | Stage named files or approved pathspecs only. | Fresh scaffold with a clean tree where every file belongs. |
+| "This needs a long message" | Use a concise subject plus at most 2-3 short body paragraphs. | Release or migration commits with approved notes. |
+| "Skip hooks to save time" | Run the hook or fix/report its blocker. | None. |
+
+## Handoffs
+
+- Use `git-workflow` for branch hygiene, conflicts, rebases, bisects, history
+  recovery, branch deletion, force-push decisions, or GitHub CLI use.
+- Use `code-review` before committing non-trivial implementation changes.
+- Use `proof` when the evidence for the staged behavior is unclear.
+- Use `release` for approved version, changelog, tag, publish, rollout, or
+  rollback work.
