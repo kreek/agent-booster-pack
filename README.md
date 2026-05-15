@@ -30,8 +30,45 @@ In practice, ABP guides agents to:
 
 ## Installation
 
-Prefer packaged installs for Pi, Codex, and Claude Code. Use the manual install
+Prefer packaged installs for Codex, Claude Code, and Pi. Use the manual install
 for agents that can read `~/.agents/skills/` or do not support plugins.
+
+### Codex Plugin Install
+
+Add the marketplace.
+
+```sh
+codex plugin marketplace add kreek/agent-booster-pack
+```
+
+Then open Codex's plugin directory and install **Agent Booster Pack**.
+
+```text
+/plugins
+Arrow down to Agent Booster Pack
+Enter
+Select Install
+```
+
+To update an existing ABP marketplace install, refresh the marketplace before
+opening the plugin directory:
+
+```sh
+codex plugin marketplace upgrade abp
+```
+
+Then open `/plugins`, select **Agent Booster Pack**, and update or reinstall it
+if Codex shows an available update.
+
+### Claude Code Plugin Install
+
+Run `claude` from your terminal to open it, then add the marketplace and install. 
+
+```sh
+# Inside Claude Code:
+/plugin marketplace add kreek/agent-booster-pack
+/plugin install abp@abp
+```
 
 ### Pi Package Install
 
@@ -78,43 +115,6 @@ Once you've run one of the install commands, you may need to reload things, from
 ```text
 /reload
 ```
-
-### Claude Code Plugin Install
-
-Run `claude` from your terminal to open it, then add the marketplace and install. 
-
-```sh
-# Inside Claude Code:
-/plugin marketplace add kreek/agent-booster-pack
-/plugin install abp@abp
-```
-
-### Codex Plugin Install
-
-Add the marketplace.
-
-```sh
-codex plugin marketplace add kreek/agent-booster-pack
-```
-
-Then open Codex's plugin directory and install **Agent Booster Pack**.
-
-```text
-/plugins
-Arrow down to Agent Booster Pack
-Enter
-Select Install
-```
-
-To update an existing ABP marketplace install, refresh the marketplace before
-opening the plugin directory:
-
-```sh
-codex plugin marketplace upgrade abp
-```
-
-Then open `/plugins`, select **Agent Booster Pack**, and update or reinstall it
-if Codex shows an available update.
 
 ### Manual Skills Installation
 
