@@ -1,0 +1,4 @@
+interface:
+  display_name: "ABP: Commit"
+  short_description: "Stage reviewed work and write commits"
+  default_prompt: "Use ABP commit to package reviewed changes into a clean commit with current proof."

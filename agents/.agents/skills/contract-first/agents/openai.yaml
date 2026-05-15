@@ -1,0 +1,4 @@
+interface:
+  display_name: "ABP: Contract First"
+  short_description: "Approve durable interfaces before implementation"
+  default_prompt: "Use ABP contract-first to define and approve this durable interface before implementation."

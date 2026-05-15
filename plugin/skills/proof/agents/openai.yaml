@@ -1,4 +1,4 @@
 interface:
   display_name: "ABP: Proof"
   short_description: "Prove claims with checks and tests"
-  default_prompt: "Use $proof to turn these claims into proof contracts and behavior-focused tests."
+  default_prompt: "Use ABP proof to turn these claims into proof contracts and behavior-focused tests."

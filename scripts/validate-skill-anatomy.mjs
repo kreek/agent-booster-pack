@@ -19,6 +19,11 @@ import { fileURLToPath } from "node:url";
 const REQUIRED_SECTIONS = ["When to Use", "When NOT to Use", "Verification"];
 const MAX_DESCRIPTION_LENGTH = 120;
 const MAX_TOTAL_DESCRIPTION_LENGTH = 2000;
+const REQUIRED_COMMAND_SKILLS = new Map([
+  ["proof.md", "proof"],
+  ["review.md", "code-review"],
+  ["workflow.md", "workflow"],
+]);
 
 const NAME_RE = /^name:\s+[a-z][a-z0-9-]*\s*$/m;
 const ATTRIBUTION_RE = /\b[Pp]er\s+(?:[A-Z][a-z]+\s+)?[A-Z][a-z]+\b/;
@@ -185,6 +190,14 @@ function repoRootForSkillsDir(skillsDir) {
   return resolve(skillsDir, "../../..");
 }
 
+function canonicalCommandsDir(skillsDir) {
+  return resolve(skillsDir, "../commands");
+}
+
+function pluginCommandsDir(skillsDir) {
+  return resolve(skillsDir, "../../..", "plugin/commands");
+}
+
 function walkFiles(root) {
   const files = [];
   if (!existsSync(root)) return files;
@@ -257,6 +270,64 @@ export function validatePluginDrift(skillsDir) {
     console.log(`${drift} plugin mirror difference(s) found`);
   }
   return drift;
+}
+
+export function validatePluginCommands(skillsDir) {
+  const commandsDir = canonicalCommandsDir(skillsDir);
+  const pluginDir = pluginCommandsDir(skillsDir);
+  if (!existsSync(commandsDir) && !existsSync(pluginDir)) return 0;
+
+  const problems = [];
+  if (!existsSync(commandsDir) || !statSync(commandsDir).isDirectory()) {
+    problems.push(`${commandsDir} missing`);
+  }
+  if (!existsSync(pluginDir) || !statSync(pluginDir).isDirectory()) {
+    problems.push(`${pluginDir} missing`);
+  }
+
+  for (const [fileName, skillName] of REQUIRED_COMMAND_SKILLS) {
+    const sourceFile = join(commandsDir, fileName);
+    const pluginFile = join(pluginDir, fileName);
+    const skillFile = join(skillsDir, skillName, "SKILL.md");
+
+    if (!existsSync(skillFile) || !statSync(skillFile).isFile()) {
+      problems.push(`${fileName} references missing skill '${skillName}'`);
+      continue;
+    }
+    if (!existsSync(sourceFile) || !statSync(sourceFile).isFile()) {
+      problems.push(`${sourceFile} missing`);
+      continue;
+    }
+
+    const body = readFileSync(sourceFile, "utf8");
+    if (body.trim().length === 0) problems.push(`${sourceFile} is empty`);
+    if (!body.includes(`\`${skillName}\``)) problems.push(`${sourceFile} must reference the '${skillName}' skill`);
+
+    if (!existsSync(pluginFile) || !statSync(pluginFile).isFile()) {
+      problems.push(`${pluginFile} missing`);
+    } else if (!sameBytes(sourceFile, pluginFile)) {
+      problems.push(`${pluginFile} differs from ${sourceFile}`);
+    }
+  }
+
+  if (existsSync(pluginDir) && statSync(pluginDir).isDirectory()) {
+    for (const pluginFile of walkFiles(pluginDir)) {
+      const rel = relative(pluginDir, pluginFile);
+      const sourceFile = join(commandsDir, rel);
+      if (!existsSync(sourceFile) || !statSync(sourceFile).isFile()) {
+        problems.push(`${pluginFile} has no canonical source`);
+      }
+    }
+  }
+
+  if (problems.length > 0) {
+    for (const problem of problems) console.log(`codex plugin command: ${problem}`);
+    console.log("");
+    console.log(`${problems.length} codex plugin command problem(s)`);
+  } else {
+    console.log("codex plugin commands valid");
+  }
+  return problems.length;
 }
 
 function readJsonObject(path) {
@@ -466,7 +537,7 @@ export function main(argv = process.argv.slice(2)) {
   if (argv.includes("-h") || argv.includes("--help")) {
     console.log(`Usage: node scripts/validate-skill-anatomy.mjs [skills_dir] [--self-test]
 
-Validate SKILL.md frontmatter, required sections, and plugin drift.`);
+Validate SKILL.md frontmatter, required sections, plugin commands, and plugin drift.`);
     return 0;
   }
   if (argv.includes("--self-test")) return runSelfTest();
@@ -480,8 +551,9 @@ Validate SKILL.md frontmatter, required sections, and plugin drift.`);
   const findings = validateSkills(skillsDir);
   printSkillFindings(skillsDir, findings);
   const drift = validatePluginDrift(skillsDir);
+  const commandProblems = validatePluginCommands(skillsDir);
   const codexPluginProblems = validateCodexPluginPackage(skillsDir);
-  return findings.length || drift || codexPluginProblems ? 1 : 0;
+  return findings.length || drift || commandProblems || codexPluginProblems ? 1 : 0;
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
