@@ -103,5 +103,3 @@ description: Use for error handling, error types, propagation, retries, user mes
 
 - `../api/references/rest-error-status-codes.md`: local REST error
   status-code decision tree.
-- AWS Builders' Library, timeouts/retries/backoff:
-  <https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/>

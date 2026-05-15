@@ -79,11 +79,3 @@ description: Use to debug failures, reproduce symptoms, isolate causes, inspect 
   metrics, traces, or incident timelines.
 - Use `error-handling` when the root cause is an error boundary,
   retry, timeout, or recovery contract.
-
-## References
-
-- "A debugging manifesto":
-  <https://jvns.ca/blog/2022/12/08/a-debugging-manifesto/>
-- `rr`: <https://rr-project.org/>
-- Google SRE Workbook, postmortem culture:
-  <https://sre.google/workbook/postmortem-culture/>

@@ -96,14 +96,3 @@ description: Use for performance, profiling, latency, throughput, allocation, ca
   secrets, authorization context, or personal data.
 - Use `error-handling` when cached data participates in remote-call
   retry or fallback behavior.
-
-## References
-
-- Flame graphs: <https://www.brendangregg.com/flamegraphs.html>
-- USE method: <https://www.brendangregg.com/usemethod.html>
-- Coordinated omission:
-  <https://groups.google.com/g/mechanical-sympathy/c/icNZJejUHfE/m/BfDekfBEs_sJ>
-- RFC 5861 stale-while-revalidate:
-  <https://datatracker.ietf.org/doc/html/rfc5861>
-- Cache stampede prevention:
-  <https://cseweb.ucsd.edu/~avattani/papers/cache_stampede.pdf>

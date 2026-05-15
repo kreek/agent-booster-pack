@@ -123,10 +123,7 @@ Use these when the shortcut thought appears:
 
 ## References
 
-- Mermaid syntax: <https://mermaid.js.org/intro/>
 - ADR template: status, date, context, decision, consequences.
-- "Design It!" (Keeling) for architectural conversation patterns:
-  <https://pragprog.com/titles/mkdsa/design-it/>
 - `agent-booster-pack-contract-first` optional runtime package: ships from this
   repo at `agent-booster-pack-contract-first/` and provides the manual
   `/abp:contract` Interface Design Gate workflow.

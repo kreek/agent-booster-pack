@@ -138,6 +138,3 @@ Use these when the shortcut thought appears:
   numbers, retention, consumers.
 - `references/redis-streams.md`: Redis Streams, consumer groups,
   pending entries, acknowledgements, claiming.
-- "The Value of Values": <https://www.infoq.com/presentations/Value-Values/>
-- Structured concurrency overview:
-  <https://en.wikipedia.org/wiki/Structured_concurrency>

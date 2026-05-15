@@ -101,10 +101,3 @@ recoverable, scoped, and honest.
 - Use `debugging` before bisecting if the failure is not reproducible.
 - Respect Codex/user sandbox approval requirements; this skill does not
   bypass permission gates.
-
-## References
-
-- `git rebase`: <https://git-scm.com/docs/git-rebase>
-- `git bisect`: <https://git-scm.com/docs/git-bisect>
-- `git range-diff`: <https://git-scm.com/docs/git-range-diff>
-- Pro Git: <https://git-scm.com/book/en/v2>

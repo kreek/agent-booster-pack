@@ -96,7 +96,3 @@ description: Use for observability, logs, metrics, traces, health checks, dashbo
 ## References
 
 - `references/logging.md`: structured and semantic logging rules.
-- OpenTelemetry: <https://opentelemetry.io/>
-- Google SRE Workbook, alerting on SLOs:
-  <https://sre.google/workbook/alerting-on-slos/>
-- RED/USE overview: <https://www.brendangregg.com/usemethod.html>

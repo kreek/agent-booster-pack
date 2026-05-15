@@ -152,17 +152,3 @@ Use these when the shortcut thought appears:
   `references/fsharp.md`, `references/csharp.md`, `references/python.md`,
   `references/typescript.md`, `references/ruby.md`, `references/java.md`,
   `references/kotlin.md`, `references/bash.md`, `references/sql.md`.
-- Google Engineering Practices, Code Review:
-  <https://google.github.io/eng-practices/review/>
-- Google Engineering Practices, What to Look For:
-  <https://google.github.io/eng-practices/review/reviewer/looking-for.html>
-- GitHub Docs, Helping Others Review Your Changes:
-  <https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/getting-started/helping-others-review-your-changes>
-- GitHub Copilot Code Review Responsible Use:
-  <https://docs.github.com/en/copilot/responsible-use/code-review>
-- NIST DevSecOps, AI Validation Guidance:
-  <https://pages.nist.gov/nccoe-devsecops/introduction.html>
-- Sentry, Reviewing AI-Generated Code:
-  <https://develop.sentry.dev/sdk/getting-started/playbooks/development/reviewing-ai-generated-code/>
-- Conventional Comments:
-  <https://conventionalcomments.org/>

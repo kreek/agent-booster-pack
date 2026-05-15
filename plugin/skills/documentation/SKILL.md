@@ -123,9 +123,7 @@ Use these when the shortcut thought appears:
 
 ## References
 
-- Diataxis: <https://diataxis.fr/>
 - Hemingway-style prose: short sentences, concrete words, lean rhythm.
-- Material for MkDocs: <https://squidfunk.github.io/mkdocs-material/>
 - ADR template: status, date, context, decision, consequences.
 - Requirements and acceptance criteria:
   `references/requirements-and-acceptance.md`.

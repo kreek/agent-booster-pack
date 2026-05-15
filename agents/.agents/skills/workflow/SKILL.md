@@ -149,7 +149,3 @@ Use these when the shortcut thought appears:
 ## References
 
 - Simple, not easy doctrine: `references/simple-not-easy.md`.
-- "Simple Made Easy": <https://www.youtube.com/watch?v=SxdOUGdseq4>
-- "Out of the Tar Pit":
-  <https://curtclifton.net/papers/MoseleyMarks06a.pdf>
-- _Grokking Simplicity_: <https://www.manning.com/books/grokking-simplicity>

@@ -152,9 +152,3 @@ Use these when the shortcut thought appears:
   headers, and CORS.
 - `../security/references/api-and-auth.md`: handler-level
   authorisation caveats for privileged endpoints.
-- RFC 9457 Problem Details: <https://www.rfc-editor.org/rfc/rfc9457>
-- Idempotency-Key draft:
-  <https://datatracker.ietf.org/doc/draft-ietf-httpapi-idempotency-key-header/>
-- RateLimit headers draft:
-  <https://datatracker.ietf.org/doc/draft-ietf-httpapi-ratelimit-headers/>
-- OpenAPI 3.1: <https://spec.openapis.org/oas/latest.html>

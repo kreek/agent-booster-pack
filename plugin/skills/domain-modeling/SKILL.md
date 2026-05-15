@@ -116,7 +116,3 @@ Use these when the shortcut thought appears:
 
 - `references/dates.md`: timezone-aware always; UTC storage; ISO 8601 / RFC 3339 wire format; instant vs wall-clock-only distinction.
 - `references/money.md`: never `float`; amount + currency travel together; ISO 4217 codes; per-currency decimal places.
-- "Parse, Don't Validate":
-  <https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/>
-- "Effective ML / Make Illegal States Unrepresentable":
-  <https://blog.janestreet.com/effective-ml-revisited/>

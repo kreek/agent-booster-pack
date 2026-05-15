@@ -138,13 +138,3 @@ Use these when the shortcut thought appears:
 ## References
 
 - Deprecation and migration: `references/deprecation-and-migration.md`.
-- Semantic Versioning 2.0.0: <https://semver.org>
-- Keep a Changelog: <https://keepachangelog.com>
-- Conventional Commits: <https://www.conventionalcommits.org>
-- DORA metrics: <https://dora.dev/guides/dora-metrics/>
-- Trunk-based development:
-  <https://trunkbaseddevelopment.com/continuous-delivery/>
-- OpenFeature: <https://openfeature.dev/>
-- RFC 8594 / 9745 (HTTP `Sunset` and `Deprecation`):
-  <https://datatracker.ietf.org/doc/html/rfc8594> ·
-  <https://datatracker.ietf.org/doc/html/rfc9745>
