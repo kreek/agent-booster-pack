@@ -17,8 +17,7 @@ test:
 	cd eval && npm run typecheck
 
 pi-install-local:
-	npm --prefix agent-booster-pack run prepack
-	pi install "$(ABP_PI_LOCAL_PACKAGE)"
+	scripts/pi-install-local.sh
 
 pi-uninstall-local:
 	pi remove "$(ABP_PI_LOCAL_PACKAGE)"

@@ -1,7 +1,7 @@
 node_modules/
 dist/
 .pi/
-.pi-tdd/
+.pi-proof/
 .claude/
 docs/
 CLAUDE.md

@@ -4,7 +4,7 @@ type ActivePhase = Exclude<Phase, "off">;
 
 const PROOF_OFF_PROMPT = [
   "[PROOF MODE — OFF]",
-  "This extension is proof-first, not TDD-for-everything. " +
+  "This extension is proof-first, not tests-first-for-everything. " +
     "Use proof mode when the next change should be made explicit in tests before changing " +
     "implementation. This usually fits new features, bug fixes, and changes to business " +
     "logic with clear expected outcomes. " +

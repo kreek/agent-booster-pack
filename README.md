@@ -56,7 +56,7 @@ pi install npm:agent-booster-pack-contract-first
 ```
 
 #### Proof Extension
-[`agent-booster-pack-proof`](agent-booster-pack-proof/) Proof runtime plus the `proof` skill. Make agents prove their work! Not strictly TDD in that tests/specs/proof can land any time during the dev cycle. But it does require proof that the agent has implemented what was asked for.
+[`agent-booster-pack-proof`](agent-booster-pack-proof/) Proof runtime plus the `proof` skill. Make agents prove their work! Proof can land any time during the dev cycle; tests/specs do not have to come first. But it does require proof that the agent has implemented what was asked for.
 ```sh
 pi install npm:agent-booster-pack-proof
 ```
@@ -204,7 +204,7 @@ or whichever agent runtime is doing the work. ABP names the engineering risk
 and proof obligation, then expects the harness to use its own native tools to
 satisfy that obligation.
 
-ABP requires proof, not TDD. During exploratory iteration, agents can discover
+ABP requires proof, not a mandatory tests-first cycle. During exploratory iteration, agents can discover
 the shape first, then attach tests, contracts, command output, or other
 evidence before claiming the work is done.
 

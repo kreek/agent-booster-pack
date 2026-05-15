@@ -1,10 +1,10 @@
 import { type ExtensionAPI, type ExtensionContext, isToolCallEventType } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 
-import { createTddController } from "./tdd-controller.js";
+import { createProofController } from "./proof-controller.js";
 
 export default function proofExtension(pi: ExtensionAPI) {
-  const controller = createTddController();
+  const controller = createProofController();
   const toggleProof = async (_args: unknown, ctx: ExtensionContext) => {
     if (controller.getPhase() === "off") await controller.enable(ctx);
     else controller.disable(ctx);
