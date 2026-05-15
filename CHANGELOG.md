@@ -6,6 +6,8 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [9.9.0] (2026-05-15)
+
 ### Changed
 
 - BREAKING: Renamed the `technical-design` skill, `/skill:technical-design`

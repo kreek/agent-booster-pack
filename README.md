@@ -172,6 +172,35 @@ It also adds tool-specific links for agents that do not rely only on
 Pi, Cursor, Gemini CLI, OpenCode, GitHub Copilot CLI, and other tools can
 auto-discover `~/.agents/skills/`. End-user installs do not need Python or uv.
 
+## Skills
+
+| Skill | Group | Use when |
+|---|---|---|
+| [`workflow`][skill-workflow] | Always-on routing and proof | Choosing the working mode, scoped skill set, and proof plan. |
+| [`contract-first`][skill-contract-first] | Always-on routing and proof | Durable interfaces need approval before implementation lands. |
+| [`proof`][skill-proof] | Always-on routing and proof | Behavior, contracts, invariants, root causes, or completion claims need evidence. |
+| [`specify`][skill-specify] | Foundational design | Architecture or design decisions need human collaboration before code changes. |
+| [`domain-modeling`][skill-domain-modeling] | Foundational design | Data, states, invariants, allowed combinations, transitions, or effects need shaping. |
+| [`architecture`][skill-architecture] | Foundational design | Module boundaries, bounded contexts, or independently changing concerns need design. |
+| [`code-review`][skill-code-review] | Correctness and change | Diffs, branches, PRs, requested changes, or generated code need review. |
+| [`debugging`][skill-debugging] | Correctness and change | Bugs, flakes, regressions, or symptoms need root-cause investigation. |
+| [`refactoring`][skill-refactoring] | Correctness and change | Structure changes must preserve behavior while improving clarity. |
+| [`error-handling`][skill-error-handling] | Correctness and change | Error types, propagation, retries, timeouts, crash boundaries, or recovery need design. |
+| [`official-source-check`][skill-official-source-check] | Correctness and change | Current external framework, runtime, SDK, browser, cloud, or platform behavior matters. |
+| [`security`][skill-security] | Safety gates | Auth, secrets, crypto, input validation, dependency trust, or trust boundaries are in scope. |
+| [`database`][skill-database] | Safety gates | Schemas, migrations, indexes, queries, transactions, or production data access are in scope. |
+| [`release`][skill-release] | Safety gates | Approved release prep, versioning, changelogs, rollout, or rollback work is in scope. |
+| [`observability`][skill-observability] | Production quality | Logs, metrics, traces, health checks, dashboards, alerts, or telemetry need work. |
+| [`async-systems`][skill-async-systems] | Production quality | Async tasks, workers, queues, streams, ordering, delivery, or backpressure are in scope. |
+| [`performance`][skill-performance] | Production quality | Latency, throughput, p99s, CPU, memory, I/O, caching, or resource saturation matters. |
+| [`api`][skill-api] | Public/user surfaces | HTTP APIs, OpenAPI, status codes, pagination, idempotency, versioning, or webhooks are in scope. |
+| [`documentation`][skill-documentation] | Public/user surfaces | READMEs, ADRs, runbooks, tutorials, reference docs, or comments are requested or approved. |
+| [`ui-design`][skill-ui-design] | Public/user surfaces | Pages, components, interaction flows, responsive layout, or visual design need work. |
+| [`accessibility`][skill-accessibility] | Public/user surfaces | WCAG, semantic HTML, ARIA, keyboard, focus, contrast, forms, or inclusive UI are in scope. |
+| [`commit`][skill-commit] | Project and repo workflow | Reviewed work needs staging, logical commit grouping, or a right-sized commit message. |
+| [`git-workflow`][skill-git-workflow] | Project and repo workflow | Branch hygiene, rebases, conflicts, bisects, history recovery, force-push decisions, or GitHub CLI are in scope. |
+| [`scaffolding`][skill-scaffolding] | Project and repo workflow | New projects, baseline tooling, package-manager defaults, test runners, linting, or CI need setup. |
+
 ## What Makes ABP Unique
 
 ABP is designed to improve engineering quality by routing agents toward the
