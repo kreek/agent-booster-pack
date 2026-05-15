@@ -1,0 +1,4 @@
+interface:
+  display_name: "ABP: Specify"
+  short_description: "Shape ambiguous work through design decisions"
+  default_prompt: "Use ABP specify to turn this fuzzy intent into an agreed design direction before coding."

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Sync plugin skill copies from canonical agent skills.
+// Sync plugin copies from canonical agent assets.
 
 import { cpSync, existsSync, lstatSync, mkdirSync, readdirSync, rmSync } from "node:fs";
 import { dirname, relative, resolve } from "node:path";
@@ -23,7 +23,7 @@ function display(path, root) {
   return rel && !rel.startsWith("..") ? rel : path;
 }
 
-function pruneDest(dest, src, root) {
+function pruneDest(dest, src, root, { removeFiles = false } = {}) {
   if (!existsSync(dest)) return;
 
   for (const name of readdirSync(dest).sort()) {
@@ -32,7 +32,7 @@ function pruneDest(dest, src, root) {
     if (existsSync(resolve(src, name))) continue;
 
     const stat = lstatSync(entry);
-    if (stat.isSymbolicLink() || stat.isDirectory()) {
+    if (stat.isSymbolicLink() || stat.isDirectory() || (removeFiles && stat.isFile())) {
       rmSync(entry, { recursive: true, force: true });
       console.log(`removed stale plugin entry: ${display(entry, root)}`);
       continue;
@@ -68,8 +68,8 @@ export function syncPluginSymlinks(repoRoot = repoRootFromScript()) {
   const root = resolve(repoRoot);
   const skillsSrc = resolve(root, "agents/.agents/skills");
   const skillsDest = resolve(root, "plugin/skills");
-  const legacyCommandsSrc = resolve(root, "agents/.agents/commands");
-  const legacyCommandsDest = resolve(root, "plugin/commands");
+  const commandsSrc = resolve(root, "agents/.agents/commands");
+  const commandsDest = resolve(root, "plugin/commands");
 
   if (!existsSync(skillsSrc) || !lstatSync(skillsSrc).isDirectory()) {
     console.error(`not a repo root (no agents/.agents/skills): ${root}`);
@@ -78,10 +78,17 @@ export function syncPluginSymlinks(repoRoot = repoRootFromScript()) {
 
   mkdirSync(skillsDest, { recursive: true });
   pruneDest(skillsDest, skillsSrc, root);
-  pruneDest(legacyCommandsDest, legacyCommandsSrc, root);
 
   const result = syncEach(skillsSrc, skillsDest, root);
   if (result !== 0) return result;
+
+  if (existsSync(commandsSrc) && lstatSync(commandsSrc).isDirectory()) {
+    mkdirSync(commandsDest, { recursive: true });
+    pruneDest(commandsDest, commandsSrc, root, { removeFiles: true });
+    const commandResult = syncEach(commandsSrc, commandsDest, root);
+    if (commandResult !== 0) return commandResult;
+    console.log("plugin command mirror in sync");
+  }
 
   console.log("plugin skill mirror in sync");
   return 0;
@@ -91,7 +98,7 @@ export function main(argv = process.argv.slice(2)) {
   if (argv.includes("-h") || argv.includes("--help")) {
     console.log(`Usage: node scripts/generate-plugin-symlinks.mjs [repo_root]
 
-Sync plugin/skills copies.`);
+Sync plugin/skills and plugin/commands copies.`);
     return 0;
   }
   const repoRoot = argv[0] ?? repoRootFromScript();

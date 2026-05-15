@@ -60,7 +60,11 @@ function commandExists(command) {
 export function selectChecks(paths) {
   const checks = [new Check("staged diff has no whitespace errors", ["git", "diff", "--cached", "--check"])];
 
-  if (hasAny(paths, (path) => pathMatches(path, "agents/.agents/skills", "agents/AGENTS.md", "plugin/skills"))) {
+  if (
+    hasAny(paths, (path) =>
+      pathMatches(path, "agents/.agents/skills", "agents/.agents/commands", "agents/AGENTS.md", "plugin/skills", "plugin/commands"),
+    )
+  ) {
     checks.push(
       new Check("skill anatomy and plugin links stay in sync", ["node", "scripts/validate-skill-anatomy.mjs"], ["node"]),
     );

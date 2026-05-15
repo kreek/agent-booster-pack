@@ -104,6 +104,15 @@ function makeSkill(skillsDir, name, body = GOOD_SKILL) {
   return skill;
 }
 
+function makeCommandMirror(root, name, body) {
+  const sourceDir = join(root, "agents/.agents/commands");
+  const pluginDir = join(root, "plugin/commands");
+  mkdirSync(sourceDir, { recursive: true });
+  mkdirSync(pluginDir, { recursive: true });
+  writeFileSync(join(sourceDir, name), body, "utf8");
+  writeFileSync(join(pluginDir, name), body, "utf8");
+}
+
 function makeCodexPluginPackage(
   root,
   {
@@ -233,6 +242,45 @@ describe("validate-skill-anatomy CLI", () => {
     expect(result.stdout).toContain("plugin drift:");
     expect(result.stdout).toContain("plugin/skills/good missing");
     expect(result.stdout).toContain("1 plugin mirror difference(s) found");
+  });
+
+  it("validates Codex plugin command mirrors", () => {
+    tmp = makeTempDir();
+    const skillsDir = join(tmp, "agents/.agents/skills");
+    for (const name of ["proof", "code-review", "workflow"]) {
+      makeSkill(skillsDir, name);
+      mkdirSync(join(tmp, "plugin/skills"), { recursive: true });
+      cpSync(join(skillsDir, name), join(tmp, "plugin/skills", name), { recursive: true });
+    }
+    makeCommandMirror(tmp, "proof.md", "Use the bundled ABP `proof` skill for this request.\n");
+    makeCommandMirror(tmp, "review.md", "Use the bundled ABP `code-review` skill for this request.\n");
+    makeCommandMirror(tmp, "workflow.md", "Use the bundled ABP `workflow` skill for this request.\n");
+    makeCodexPluginPackage(tmp);
+
+    const result = runScript(skillsDir);
+
+    expect(result.status).toBe(0);
+    expect(result.stdout).toContain("codex plugin commands valid");
+  });
+
+  it("reports invalid Codex plugin command mirrors", () => {
+    tmp = makeTempDir();
+    const skillsDir = join(tmp, "agents/.agents/skills");
+    for (const name of ["proof", "code-review", "workflow"]) {
+      makeSkill(skillsDir, name);
+      mkdirSync(join(tmp, "plugin/skills"), { recursive: true });
+      cpSync(join(skillsDir, name), join(tmp, "plugin/skills", name), { recursive: true });
+    }
+    makeCommandMirror(tmp, "proof.md", "This wrapper forgot its skill reference.\n");
+    makeCommandMirror(tmp, "review.md", "Use the bundled ABP `code-review` skill for this request.\n");
+    makeCommandMirror(tmp, "workflow.md", "Use the bundled ABP `workflow` skill for this request.\n");
+    makeCodexPluginPackage(tmp);
+
+    const result = runScript(skillsDir);
+
+    expect(result.status).toBe(1);
+    expect(result.stdout).toContain("codex plugin command:");
+    expect(result.stdout).toContain("proof.md must reference the 'proof' skill");
   });
 
   it("reports missing Codex marketplace when plugin exists", () => {
