@@ -175,15 +175,14 @@ auto-discover `~/.agents/skills/`. End-user installs do not need Python or uv.
 ## What Makes ABP Unique
 
 ABP is designed to improve engineering quality by routing agents toward the
-software risks and human decisions that matter for the task in front of them.
-ABP treats the agent as a coding partner, not a replacement for people. Humans
-bring judgment, review, decision-making, and context to the process, so these
+software risks and human decisions that matter for the task at hand.
+Humans bring judgment, review, decision-making, and context to the process, so these
 skills guide agents to make clear, reviewable changes, ask at meaningful
 decision points, and provide evidence instead of trying to take you out of the
 loop.
 
 ABP's high-level engineering lens is the idea behind Rich Hickey's "Simple Made
-Easy": complexity is the enemy. Complexity creates bugs, misunderstanding, and
+Easy": complexity is the enemy. Complexity creates bugs, misunderstandings, and
 inefficiency in larger software projects, so ABP pushes agents toward designs
 that separate concerns, make state and effects explicit, and remain simple
 enough to understand, change, and prove.
