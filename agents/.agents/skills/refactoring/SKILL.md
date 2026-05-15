@@ -45,7 +45,9 @@ description: Use for refactoring, behavior-preserving change, tests, and safe re
    tests that catch regressions at the public boundary.
 2. Name the concern being separated and its current coupling point.
 3. Pick the smallest safe pattern: rename, extract, move, parallel
-   change, branch by abstraction, or strangler.
+   change, branch by abstraction, or strangler. For broad renames,
+   write a rename map first: separate private symbols, file paths,
+   runtime/public keys, persisted names, docs, and compatibility cleanup.
 4. Record a preservation Proof Contract: unchanged behavior claim,
    relevant invariant, public boundary, before/after check, evidence.
 5. For simplification, remove only complexity that has a named cost:
