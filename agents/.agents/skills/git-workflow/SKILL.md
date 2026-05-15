@@ -37,7 +37,8 @@ recoverable, scoped, and honest.
    before any risky operation.
 5. **Group by meaning.** Keep code, tests, and docs together when they
    prove one behavior; split refactors, generated output, formatting, and
-   behavior changes.
+   behavior changes. Do not commit generated artifacts, lockfile churn, IDE
+   settings, or OS files unless they belong to the approved change.
 6. **Resolve conflicts by preserving intent from both sides**, then run the
    relevant checks.
 7. **Test hook policy, not hook wrappers.** Tiny hooks that only `exec` a
@@ -62,9 +63,11 @@ recoverable, scoped, and honest.
 3. Detect hazards: conflicts, secrets, generated churn, mixed changes in
    one file, unrelated staged work, shared history rewrites, or in-flight
    work that needs isolation.
-4. For commits, propose logical groups with subject, files, and why. A
-   direct "commit this" / `$git-workflow` request is approval to package
-   the current reviewed work, not unrelated files.
+4. For commits, propose logical groups with subject, files, and why. Use a
+   concise subject plus a body sized to the change: small commits may need no
+   body, while larger commits should document what changed and why in up to
+   2-3 short paragraphs. A direct "commit this" / `$git-workflow` request is
+   approval to package the current reviewed work, not unrelated files.
 5. For history operations, name the recovery point and whether the branch
    is local/solo/shared before rewriting, deleting, or force-pushing.
 6. Before GitHub CLI use, ask for permission for the exact `gh` command or
@@ -78,6 +81,8 @@ recoverable, scoped, and honest.
       no files staged outside the approved group, no unresolved merge/rebase
       state or conflict markers.
 - [ ] Every commit subject completes "When applied, this commit will \_\_\_".
+- [ ] The commit message is right-sized: concise subject, optional body, and
+      no more than 2-3 short paragraphs for larger commits.
 - [ ] Rewritten history was local/solo or explicitly approved; force pushes
       used lease/inclusion protection.
 - [ ] `range-diff` or log inspection confirms intended commits remain; a

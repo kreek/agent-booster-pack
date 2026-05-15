@@ -76,7 +76,7 @@ export function createTddController() {
   }
 
   function updateWidget(ctx: ExtensionContext) {
-    if (!ctx.hasUI) return;
+    if (ctx.hasUI === false) return;
     lastWidgetCtx = ctx;
 
     if (phase === "off") {
@@ -122,7 +122,7 @@ export function createTddController() {
       spinnerFrame: TEST_RUN_SPINNER_FRAMES[0],
     };
 
-    if (ctx.hasUI) {
+    if (ctx.hasUI !== false) {
       activeTestRunSpinnerTimer = setInterval(() => {
         if (!activeTestRun?.running || !lastWidgetCtx) return;
         const currentIndex = TEST_RUN_SPINNER_FRAMES.indexOf(activeTestRun.spinnerFrame);
@@ -181,8 +181,10 @@ export function createTddController() {
     }
 
     phase = next;
-    ctx.ui.setStatus("tdd", "");
-    ctx.ui.setStatus("proof", phase === "off" ? "" : `PROOF: ${phase.toUpperCase()}`);
+    if (ctx.hasUI !== false) {
+      ctx.ui.setStatus("tdd", "");
+      ctx.ui.setStatus("proof", phase === "off" ? "" : `PROOF: ${phase.toUpperCase()}`);
+    }
     updateWidget(ctx);
   }
 
@@ -209,9 +211,9 @@ export function createTddController() {
     async enable(ctx: ExtensionContext): Promise<string> {
       if (phase !== "off") return "Proof mode is already active";
 
-      const config = await resolveTestConfig(ctx.cwd, ctx.hasUI ? ctx.ui : undefined);
+      const config = await resolveTestConfig(ctx.cwd, ctx.hasUI === false ? undefined : ctx.ui);
       if (!config) {
-        ctx.ui.notify("Proof mode requires a test command", "warning");
+        if (ctx.hasUI !== false) ctx.ui.notify("Proof mode requires a test command", "warning");
         return (
           "Could not determine test command. " +
           "Scaffold the project first: create a config file (package.json, pyproject.toml, " +
@@ -226,7 +228,7 @@ export function createTddController() {
       setPhase("specifying", ctx);
 
       const label = testCwd !== ctx.cwd ? ` in ${path.basename(testCwd)}` : "";
-      ctx.ui.notify(`Proof on${label} \u2014 specify behavior in a test`);
+      if (ctx.hasUI !== false) ctx.ui.notify(`Proof on${label} \u2014 specify behavior in a test`);
 
       let message =
         `Proof enabled \u2014 SPECIFYING phase. ` +
@@ -245,14 +247,14 @@ export function createTddController() {
 
       testCwd = undefined;
       setPhase("off", ctx);
-      ctx.ui.notify("Proof off");
+      if (ctx.hasUI !== false) ctx.ui.notify("Proof off");
       return "Proof disabled";
     },
 
     handleProductionWrite(filePath: string, ctx: ExtensionContext): ToolCallMutation | undefined {
       if (phase !== "specifying" || !isProductionFile(filePath) || stubAllowed) return undefined;
 
-      if (ctx.hasUI) ctx.ui.notify("SPECIFYING: specify behavior in a test before editing production code", "warning");
+      if (ctx.hasUI !== false) ctx.ui.notify("SPECIFYING: specify behavior in a test before editing production code", "warning");
       return {
         block: true,
         reason: "PROOF SPECIFYING phase: specify the next behavior in a test before changing production code",
@@ -286,7 +288,7 @@ export function createTddController() {
       const targets = extractRedirectTargets(command);
       if (targets.length > 0 && !targets.some((target) => isProductionFile(target))) return undefined;
 
-      if (ctx.hasUI) ctx.ui.notify("SPECIFYING: possible production write via shell", "warning");
+      if (ctx.hasUI !== false) ctx.ui.notify("SPECIFYING: possible production write via shell", "warning");
 
       const warning =
         "\n\n[PROOF WARNING] This command appears to write to a production file during SPECIFYING." +

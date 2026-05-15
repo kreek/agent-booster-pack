@@ -1,7 +1,11 @@
 export const SCAFFOLD_STATE_ENTRY = "abp-scaffold-state";
+export const SCAFFOLD_DECISION_ENTRY = "abp-scaffold-decision";
+
+export const APPROVE_CHOICE = "Approve — create files / install packages / run generators";
+export const REFINE_CHOICE = "Refine — change the scaffold plan";
+export const CANCEL_CHOICE = "Cancel — stop scaffolding";
 
 const EXPLICIT_ACTIVATION_PATTERN = /^\s*(\/abp:scaffold(?:\s|$)|\/skill:scaffolding(?:\s|$))/i;
-const FRESH_SCAFFOLD_PATTERN = /\b(create|make|build|scaffold|set\s+up|setup|initialize|init)\b[\s\S]*\b(app|project|site|website|web\s+app|api|cli|tool|library|worker|react|svelte|vue|next|vite)\b/i;
 const DEACTIVATION_PATTERN = /^\s*\/abp:scaffold-off\s*$/i;
 const CHANGE_TOOL_NAMES = new Set(["edit", "write"]);
 const SCAFFOLD_BASH_PATTERN = /(\bnpm\s+(create|init|install|i|add)\b|\bpnpm\s+(create|init|install|i|add|dlx)\b|\byarn\s+(create|init|add|install|dlx)\b|\bbun\s+(create|init|install|add|x)\b|\bnpx\b|\buv\s+(init|add|sync|pip\s+install)\b|\bpip\s+install\b|\bpoetry\s+(init|add|install)\b|\bcargo\s+(init|new|add)\b|\bgo\s+mod\s+init\b|\bdotnet\s+new\b|\bcomposer\s+(init|require|install|create-project)\b|\bmix\s+new\b|\bswift\s+package\s+init\b|\bmkdir\b|\btouch\b|\btee\b|(^|[^0-9])>|\bcat\s+<<|\bcp\b|\bmv\b|\bgit\s+init\b)/i;
@@ -15,11 +19,15 @@ const REQUIRED_GATE_LABELS = [
   "Files and commands",
   "User decision",
 ];
-const APPROVAL_PATTERN = /^\s*(1\b|approve\b|approved\b|go ahead\b|proceed\b|yes\b|do it\b)/i;
-const NON_APPROVAL_PATTERN = /^\s*(2\b|3\b|refine\b|change\b|cancel\b|revise\b|instead\b|no\b|not yet\b|different\b|choose another\b)/i;
 const DECISION_MENU_PATTERN = /1\.\s*Approve\b[\s\S]*create files\s*\/\s*install packages\s*\/\s*run generators[\s\S]*2\.\s*Refine\b[\s\S]*change the scaffold plan[\s\S]*3\.\s*Cancel\b[\s\S]*stop scaffolding/i;
 const VAGUE_BASELINE_PATTERN = /\b(if feasible|where practical|as needed|where applicable|if possible|try to)\b/i;
 const BLOCKER_PATTERN = /\b(blocker|blocked by|because|cannot|unavailable|not available|defer|deferred)\b/i;
+
+const NO_GATE_REASON =
+  "ABP Scaffold Decision Gate: before scaffold files, installs, or generators, write a Scaffold Decision Gate message with Project intent, Project kind, Language/runtime, Deployment assumption, Framework/template, Quality baseline, Files and commands, and User decision (with the 1 Approve / 2 Refine / 3 Cancel menu). A UI picker will then appear for the user to choose.";
+const REFINE_REASON = "ABP Scaffold Decision Gate: user chose Refine — revise the scaffold plan and present an updated Scaffold Decision Gate before retrying.";
+const CANCEL_REASON = "ABP Scaffold Decision Gate: user cancelled scaffolding — do not mutate scaffold files.";
+const NO_UI_REASON = "ABP Scaffold Decision Gate requires an interactive UI decision before scaffold mutation; run in interactive/RPC mode or ask the user to approve there.";
 
 function messageText(value) {
   if (typeof value === "string") return value;
@@ -62,10 +70,27 @@ function latestGateIndex(messages) {
   return -1;
 }
 
+function latestScaffoldDecision(entries) {
+  for (let index = entries.length - 1; index >= 0; index -= 1) {
+    const entry = entries[index];
+    if (entry?.type !== "custom" || entry.customType !== SCAFFOLD_DECISION_ENTRY) continue;
+    return entry.data ?? null;
+  }
+  return null;
+}
+
+function hashGateText(text) {
+  let hash = 5381;
+  for (let i = 0; i < text.length; i += 1) {
+    hash = ((hash << 5) + hash + text.charCodeAt(i)) | 0;
+  }
+  return (hash >>> 0).toString(36);
+}
+
 export function isScaffoldActivation(text) {
   const value = String(text ?? "");
   if (isScaffoldDeactivation(value)) return false;
-  return EXPLICIT_ACTIVATION_PATTERN.test(value) || FRESH_SCAFFOLD_PATTERN.test(value);
+  return EXPLICIT_ACTIVATION_PATTERN.test(value);
 }
 
 export function isScaffoldDeactivation(text) {
@@ -111,42 +136,40 @@ export function hasScaffoldDecisionGate(text) {
   return true;
 }
 
-export function isScaffoldApproved(entries) {
-  const activationIndex = latestActiveStateIndex(entries);
-  const scopedEntries = activationIndex >= 0 ? entries.slice(activationIndex + 1) : entries;
-  const messages = chatMessages(scopedEntries);
-  const gateIndex = latestGateIndex(messages);
-  if (gateIndex < 0) return false;
-
-  for (const message of messages.slice(gateIndex + 1)) {
-    if (message.role !== "user") continue;
-    if (NON_APPROVAL_PATTERN.test(message.text)) return false;
-    if (APPROVAL_PATTERN.test(message.text)) return true;
-  }
-
-  return false;
-}
+const SCAFFOLD_FILE_PATTERN = /(^|\/)(package\.json|pnpm-lock\.yaml|package-lock\.json|yarn\.lock|bun\.lockb?|deno\.json|tsconfig\.json|vite\.config\.[cm]?[jt]s|vitest\.config\.[cm]?[jt]s|eslint\.config\.[cm]?[jt]s|README\.md|src|app|test|tests|\.github\/workflows)(\/|$)/i;
 
 export function isScaffoldMutation(toolName, input) {
-  if (CHANGE_TOOL_NAMES.has(toolName)) return true;
+  if (CHANGE_TOOL_NAMES.has(toolName)) {
+    const path = typeof input?.path === "string" ? input.path : "";
+    return SCAFFOLD_FILE_PATTERN.test(path);
+  }
   if (toolName !== "bash") return false;
 
   const command = typeof input?.command === "string" ? input.command : "";
   return SCAFFOLD_BASH_PATTERN.test(command);
 }
 
-export function shouldBlockScaffoldMutation(toolName, input, entries) {
+export function scaffoldGateStatus(toolName, input, entries) {
   if (!latestScaffoldState(entries)) return null;
   if (!isScaffoldMutation(toolName, input)) return null;
-  if (isScaffoldApproved(entries)) return null;
 
-  return {
-    reason: "ABP Scaffold Decision Gate: before scaffold files, installs, or generators, present a Scaffold Decision Gate with the 1 Approve / 2 Refine / 3 Cancel menu and wait for user approval.",
-  };
+  const activationIndex = latestActiveStateIndex(entries);
+  const scopedEntries = activationIndex >= 0 ? entries.slice(activationIndex + 1) : entries;
+  const messages = chatMessages(scopedEntries);
+  const gateIndex = latestGateIndex(messages);
+  if (gateIndex < 0) return { kind: "no-gate" };
+
+  const gateHash = hashGateText(messages[gateIndex].text);
+  const decision = latestScaffoldDecision(scopedEntries);
+  if (decision?.gateHash === gateHash && decision.choice === "approve") {
+    return { kind: "approved", gateHash };
+  }
+
+  return { kind: "needs-decision", gateHash };
 }
 
 export function scaffoldReminder() {
-  return `\n\nABP Scaffold Decision Gate is active. Before creating scaffold files, installing packages, or running generators, present a Scaffold Decision Gate with Project intent, Project kind, Language/runtime, Deployment assumption, Framework/template, Quality baseline, Files and commands, and User decision. User decision must offer: 1. Approve — create files / install packages / run generators; 2. Refine — change the scaffold plan; 3. Cancel — stop scaffolding. The user decides setup choices; you wire the chosen tests, linting, formatting, typecheck, coverage, CI, and README. Wait for option 1 or clear approval before mutating scaffold files.`;
+  return `\n\nABP Scaffold Decision Gate is active. Before creating scaffold files, installing packages, or running generators, write a Scaffold Decision Gate message with Project intent, Project kind, Language/runtime, Deployment assumption, Framework/template, Quality baseline, Files and commands, and User decision (with the 1 Approve / 2 Refine / 3 Cancel menu). When you then attempt a scaffold mutation, a UI picker will appear so the user can choose. The user decides setup choices; you wire the chosen tests, linting, formatting, typecheck, coverage, CI, and README.`;
 }
 
 function scaffoldPrompt(intent) {
@@ -154,7 +177,7 @@ function scaffoldPrompt(intent) {
   return [
     "Use ABP Scaffold Decision Gate before scaffold mutation.",
     "",
-    "Present setup options in order of importance, recommend one, and wait for approval:",
+    "Present setup options in order of importance, recommend one, and wait for the UI approval picker:",
     "- Project intent: what the app/tool/library should do",
     "- Project kind: app, library, CLI, API, worker, frontend, fullstack, or other",
     "- Language/runtime: selected option and why",
@@ -167,8 +190,20 @@ function scaffoldPrompt(intent) {
     "  2. Refine — change the scaffold plan",
     "  3. Cancel — stop scaffolding",
     "",
-    subject ? `Intent: ${subject}` : "Then wait for option 1 or a clear approval before creating files or running scaffold commands.",
-  ].join("\n");
+    "When you attempt a scaffold mutation, a UI picker will appear for the user to choose 1/2/3.",
+    subject ? `Intent: ${subject}` : "",
+  ].filter((line) => line !== "").join("\n");
+}
+
+function decisionKeyFor(choice) {
+  if (choice === APPROVE_CHOICE) return "approve";
+  if (choice === REFINE_CHOICE) return "refine";
+  return "cancel";
+}
+
+function reasonForDecision(decisionKey) {
+  if (decisionKey === "refine") return REFINE_REASON;
+  return CANCEL_REASON;
 }
 
 export default function scaffoldDecisionGate(pi) {
@@ -176,7 +211,7 @@ export default function scaffoldDecisionGate(pi) {
     description: "Start ABP scaffold decision gate",
     handler: async (args, ctx) => {
       pi.appendEntry(SCAFFOLD_STATE_ENTRY, { active: true, source: "command" });
-      ctx.ui.notify("ABP scaffold decision gate enabled", "info");
+      if (ctx.hasUI !== false) ctx.ui.notify("ABP scaffold decision gate enabled", "info");
       await pi.sendUserMessage(scaffoldPrompt(args));
     },
   });
@@ -185,20 +220,20 @@ export default function scaffoldDecisionGate(pi) {
     description: "Stop ABP scaffold decision gate",
     handler: async (_args, ctx) => {
       pi.appendEntry(SCAFFOLD_STATE_ENTRY, { active: false, source: "command" });
-      ctx.ui.notify("ABP scaffold decision gate disabled", "info");
+      if (ctx.hasUI !== false) ctx.ui.notify("ABP scaffold decision gate disabled", "info");
     },
   });
 
   pi.on("input", async (event, ctx) => {
     if (isScaffoldDeactivation(event.text)) {
       pi.appendEntry(SCAFFOLD_STATE_ENTRY, { active: false, source: "input" });
-      ctx.ui.notify("ABP scaffold decision gate disabled", "info");
+      if (ctx.hasUI !== false) ctx.ui.notify("ABP scaffold decision gate disabled", "info");
       return { action: "handled" };
     }
 
     if (isScaffoldActivation(event.text)) {
       pi.appendEntry(SCAFFOLD_STATE_ENTRY, { active: true, source: "input" });
-      ctx.ui.notify("ABP scaffold decision gate enabled", "info");
+      if (ctx.hasUI !== false) ctx.ui.notify("ABP scaffold decision gate enabled", "info");
     }
 
     return { action: "continue" };
@@ -210,8 +245,25 @@ export default function scaffoldDecisionGate(pi) {
   });
 
   pi.on("tool_call", async (event, ctx) => {
-    const verdict = shouldBlockScaffoldMutation(event.toolName, event.input, ctx.sessionManager.getEntries());
-    if (!verdict) return;
-    return { block: true, reason: verdict.reason };
+    const entries = ctx.sessionManager.getEntries();
+    const status = scaffoldGateStatus(event.toolName, event.input, entries);
+    if (!status) return;
+    if (status.kind === "no-gate") return { block: true, reason: NO_GATE_REASON };
+    if (status.kind === "approved") return;
+    if (ctx.hasUI === false) return { block: true, reason: NO_UI_REASON };
+
+    const choice = await ctx.ui.select(
+      "Scaffold Decision Gate",
+      [APPROVE_CHOICE, REFINE_CHOICE, CANCEL_CHOICE],
+    );
+    const decisionKey = decisionKeyFor(choice);
+    pi.appendEntry(SCAFFOLD_DECISION_ENTRY, {
+      choice: decisionKey,
+      gateHash: status.gateHash,
+      at: Date.now(),
+    });
+
+    if (decisionKey === "approve") return;
+    return { block: true, reason: reasonForDecision(decisionKey) };
   });
 }

@@ -359,8 +359,8 @@ they apply:
 ### Project and repo workflow
 
 - [`git-workflow`][skill-git-workflow]: branch hygiene, working-tree grouping,
-  commit splits, concise commit messages, rebases, conflicts, bisects, history
-  recovery, and PR history.
+  commit splits, right-sized commit messages, rebases, conflicts, bisects,
+  history recovery, and PR history.
 - [`scaffolding`][skill-scaffolding]: new projects, baseline tooling,
   package-manager defaults, test runners, linting, and CI. Greenfield stack
   picks come from the typed template catalog described below.

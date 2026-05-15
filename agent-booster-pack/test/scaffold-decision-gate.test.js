@@ -1,12 +1,15 @@
 import { describe, expect, it } from "vitest";
 
 import scaffoldDecisionGate, {
+  APPROVE_CHOICE,
+  CANCEL_CHOICE,
+  REFINE_CHOICE,
   hasScaffoldDecisionGate,
   isScaffoldActivation,
-  isScaffoldApproved,
   isScaffoldDeactivation,
+  isScaffoldMutation,
+  scaffoldGateStatus,
   scaffoldReminder,
-  shouldBlockScaffoldMutation,
 } from "../extensions/scaffold-decision-gate.js";
 
 const userText = (text) => ({
@@ -25,7 +28,19 @@ const decisionMenu = `1. Approve — create files / install packages / run gener
 2. Refine — change the scaffold plan
 3. Cancel — stop scaffolding`;
 
-function makePi() {
+const validGateText = `Scaffold Decision Gate
+
+Project intent: make a tiny API
+Project kind: API
+Language/runtime: TypeScript on Node
+Deployment assumption: Cloudflare
+Framework/template: Hono
+Quality baseline: pnpm, vitest, eslint, prettier, tsc, coverage, CI
+Files and commands: create package.json and tests
+User decision:
+${decisionMenu}`;
+
+function makePi({ entries } = {}) {
   const handlers = new Map();
   const commands = new Map();
   const appended = [];
@@ -42,6 +57,7 @@ function makePi() {
     },
     appendEntry(type, data) {
       appended.push([type, data]);
+      if (entries) entries.push({ type: "custom", customType: type, data });
     },
     async sendUserMessage(text) {
       sent.push(text);
@@ -55,19 +71,28 @@ function makePi() {
   };
 }
 
-function makeCtx(entries = []) {
+function makeCtx(entries = [], { selectChoice, hasUI = true } = {}) {
+  const selectCalls = [];
   return {
+    hasUI,
     sessionManager: { getEntries: () => entries },
-    ui: { notify() {} },
+    ui: {
+      notify() {},
+      async select(title, choices) {
+        selectCalls.push({ title, choices });
+        return selectChoice ?? choices[0];
+      },
+    },
+    selectCalls,
   };
 }
 
 describe("scaffold decision gate", () => {
-  it("activates from the manual command, skill invocation, and explicit fresh app requests", () => {
+  it("activates only from explicit scaffold commands", () => {
     expect(isScaffoldActivation("/abp:scaffold build a web app")).toBe(true);
     expect(isScaffoldActivation("/skill:scaffolding create a CLI")).toBe(true);
-    expect(isScaffoldActivation("let's make a simple temperature converter in React")).toBe(true);
-    expect(isScaffoldActivation("create a Svelte app for recipes")).toBe(true);
+    expect(isScaffoldActivation("let's make a simple temperature converter in React")).toBe(false);
+    expect(isScaffoldActivation("create a Svelte app for recipes")).toBe(false);
     expect(isScaffoldActivation("update the React button copy")).toBe(false);
   });
 
@@ -76,103 +101,209 @@ describe("scaffold decision gate", () => {
     expect(isScaffoldDeactivation("/abp:scaffold-off now")).toBe(false);
   });
 
-  it("requires a Scaffold Decision Gate packet followed by a menu approval", () => {
-    const gate = assistantText(`Scaffold Decision Gate\n\nProject intent: make a tiny API\nProject kind: API\nLanguage/runtime: TypeScript on Node\nDeployment assumption: container\nFramework/template: Fastify fallback\nQuality baseline: pnpm, vitest, eslint, prettier, tsc, coverage, CI\nFiles and commands: create package.json and tests\nUser decision:\n${decisionMenu}`);
-
-    expect(isScaffoldApproved([gate])).toBe(false);
-    expect(isScaffoldApproved([gate, userText("1")])).toBe(true);
-    expect(isScaffoldApproved([gate, userText("approve")])).toBe(true);
-    expect(isScaffoldApproved([gate, userText("approved")])).toBe(true);
-    expect(isScaffoldApproved([gate, userText("go ahead")])).toBe(true);
-    expect(isScaffoldApproved([gate, userText("2")])).toBe(false);
-    expect(isScaffoldApproved([gate, userText("refine the framework")])).toBe(false);
-    expect(isScaffoldApproved([gate, userText("change the framework")])).toBe(false);
-    expect(isScaffoldApproved([gate, userText("3")])).toBe(false);
-    expect(isScaffoldApproved([gate, userText("cancel")])).toBe(false);
+  it("recognizes scaffold mutations", () => {
+    expect(isScaffoldMutation("write", { path: "package.json" })).toBe(true);
+    expect(isScaffoldMutation("edit", { path: "package.json" })).toBe(true);
+    expect(isScaffoldMutation("edit", { path: "agents/.agents/skills/workflow/SKILL.md" })).toBe(false);
+    expect(isScaffoldMutation("bash", { command: "pnpm create vite my-app" })).toBe(true);
+    expect(isScaffoldMutation("bash", { command: "npm install vitest -D" })).toBe(true);
+    expect(isScaffoldMutation("bash", { command: "echo '{}' > package.json" })).toBe(true);
+    expect(isScaffoldMutation("bash", { command: "rg TODO 2>/dev/null" })).toBe(false);
   });
 
-  it("rejects incomplete Scaffold Decision Gate packets", () => {
+  it("validates Scaffold Decision Gate content with hasScaffoldDecisionGate", () => {
+    expect(hasScaffoldDecisionGate(validGateText)).toBe(true);
+
     const missingDeployment = `Scaffold Decision Gate\n\nProject intent: make a tiny API\nProject kind: API\nLanguage/runtime: TypeScript on Node\nFramework/template: Fastify fallback\nQuality baseline: pnpm, vitest, eslint, prettier, tsc, CI\nFiles and commands: create package.json and tests\nUser decision:\n${decisionMenu}`;
-
     expect(hasScaffoldDecisionGate(missingDeployment)).toBe(false);
-    expect(isScaffoldApproved([assistantText(missingDeployment), userText("approved")])).toBe(false);
-  });
 
-  it("rejects vague Scaffold Decision Gate baselines unless a blocker is named", () => {
     const vagueGate = `Scaffold Decision Gate\n\nProject intent: make a tiny API\nProject kind: API\nLanguage/runtime: TypeScript on Node\nDeployment assumption: container\nFramework/template: Fastify fallback\nQuality baseline: tests and scripts if feasible\nFiles and commands: create package.json and tests where practical\nUser decision:\n${decisionMenu}`;
-
     expect(hasScaffoldDecisionGate(vagueGate)).toBe(false);
-    expect(isScaffoldApproved([assistantText(vagueGate), userText("approved")])).toBe(false);
-  });
 
-  it("rejects gates that omit CI or coverage unless the omission is explicit", () => {
     const weakGate = `Scaffold Decision Gate\n\nProject intent: make a tiny API\nProject kind: API\nLanguage/runtime: TypeScript on Node\nDeployment assumption: container\nFramework/template: Fastify fallback\nQuality baseline: pnpm, vitest, eslint, prettier, tsc\nFiles and commands: create package.json and tests\nUser decision:\n${decisionMenu}`;
-
     expect(hasScaffoldDecisionGate(weakGate)).toBe(false);
-    expect(isScaffoldApproved([assistantText(weakGate), userText("approved")])).toBe(false);
-  });
 
-  it("accepts a limited Scaffold Decision Gate baseline when it names the blocker", () => {
     const blockedGate = `Scaffold Decision Gate\n\nProject intent: make a tiny API\nProject kind: API\nLanguage/runtime: TypeScript on Node\nDeployment assumption: container\nFramework/template: Fastify fallback\nQuality baseline: test and typecheck; blocker: network unavailable, so lockfile install is deferred\nFiles and commands: create package.json and tests; blocked by network for install\nUser decision:\n${decisionMenu}`;
-
     expect(hasScaffoldDecisionGate(blockedGate)).toBe(true);
-    expect(isScaffoldApproved([assistantText(blockedGate), userText("approved")])).toBe(true);
   });
 
-  it("blocks scaffold mutation after approval of an incomplete gate", () => {
+  it("scaffoldGateStatus returns null when inactive or not a mutation", () => {
+    expect(scaffoldGateStatus("write", { path: "package.json" }, [])).toBeNull();
+    expect(scaffoldGateStatus("bash", { command: "rg TODO" }, [
+      customEntry("abp-scaffold-state", { active: true }),
+    ])).toBeNull();
+  });
+
+  it("scaffoldGateStatus reports no-gate when active without a valid gate message", () => {
+    const entries = [customEntry("abp-scaffold-state", { active: true })];
+    expect(scaffoldGateStatus("write", { path: "package.json" }, entries)).toEqual({ kind: "no-gate" });
+  });
+
+  it("scaffoldGateStatus reports needs-decision when a valid gate exists and no matching approval is recorded", () => {
     const entries = [
       customEntry("abp-scaffold-state", { active: true }),
-      assistantText(`Scaffold Decision Gate\nProject intent: app\nProject kind: web app\nLanguage/runtime: TypeScript\nFramework/template: Svelte\nQuality baseline: tests if feasible\nFiles and commands: create scaffold\nUser decision:\n${decisionMenu}`),
-      userText("approve"),
+      assistantText(validGateText),
     ];
-
-    expect(shouldBlockScaffoldMutation("write", { path: "package.json" }, entries)).toBeTruthy();
+    const status = scaffoldGateStatus("write", { path: "package.json" }, entries);
+    expect(status?.kind).toBe("needs-decision");
+    expect(typeof status?.gateHash).toBe("string");
   });
 
-  it("blocks scaffold file writes while active and unapproved", () => {
+  it("scaffoldGateStatus reports approved when a matching-hash approval is recorded", () => {
+    const entries = [
+      customEntry("abp-scaffold-state", { active: true }),
+      assistantText(validGateText),
+    ];
+    const { gateHash } = scaffoldGateStatus("write", { path: "package.json" }, entries);
+    entries.push(customEntry("abp-scaffold-decision", { choice: "approve", gateHash }));
+    expect(scaffoldGateStatus("write", { path: "package.json" }, entries)).toEqual({ kind: "approved", gateHash });
+  });
+
+  it("scaffoldGateStatus invalidates a stale approval when a new gate is written", () => {
+    const oldGateText = validGateText.replace("tiny API", "old tiny API");
+    const entries = [
+      customEntry("abp-scaffold-state", { active: true }),
+      assistantText(oldGateText),
+    ];
+    const { gateHash: oldHash } = scaffoldGateStatus("write", { path: "package.json" }, entries);
+    entries.push(customEntry("abp-scaffold-decision", { choice: "approve", gateHash: oldHash }));
+    entries.push(assistantText(validGateText));
+
+    const status = scaffoldGateStatus("write", { path: "package.json" }, entries);
+    expect(status?.kind).toBe("needs-decision");
+    expect(status?.gateHash).not.toBe(oldHash);
+  });
+
+  it("scaffoldGateStatus ignores approvals from earlier activations", () => {
+    const entries = [
+      customEntry("abp-scaffold-state", { active: true }),
+      assistantText(validGateText),
+    ];
+    const { gateHash } = scaffoldGateStatus("write", { path: "package.json" }, entries);
+    entries.push(customEntry("abp-scaffold-decision", { choice: "approve", gateHash }));
+    entries.push(customEntry("abp-scaffold-state", { active: true }));
+    entries.push(userText("now scaffold another app"));
+
+    expect(scaffoldGateStatus("write", { path: "package.json" }, entries)).toEqual({ kind: "no-gate" });
+  });
+
+  it("tool_call hook blocks without prompting when no valid gate exists yet", async () => {
     const entries = [customEntry("abp-scaffold-state", { active: true })];
+    const pi = makePi({ entries });
+    scaffoldDecisionGate(pi);
+    const ctx = makeCtx(entries);
 
-    const verdict = shouldBlockScaffoldMutation("write", { path: "package.json" }, entries);
+    const verdict = await pi.emit("tool_call", { toolName: "write", input: { path: "package.json" } }, ctx);
 
-    expect(verdict).toBeTruthy();
+    expect(verdict).toMatchObject({ block: true });
     expect(verdict.reason).toMatch(/Scaffold Decision Gate/);
+    expect(ctx.selectCalls).toHaveLength(0);
   });
 
-  it("blocks package installs and generator commands while active and unapproved", () => {
-    const entries = [customEntry("abp-scaffold-state", { active: true })];
-
-    expect(shouldBlockScaffoldMutation("bash", { command: "pnpm create vite my-app" }, entries)).toBeTruthy();
-    expect(shouldBlockScaffoldMutation("bash", { command: "npm install vitest -D" }, entries)).toBeTruthy();
-    expect(shouldBlockScaffoldMutation("bash", { command: "echo '{}' > package.json" }, entries)).toBeTruthy();
-    expect(shouldBlockScaffoldMutation("bash", { command: "rg TODO 2>/dev/null" }, entries)).toBeNull();
-  });
-
-  it("allows scaffold mutation after the user approves the gate packet", () => {
+  it("tool_call hook prompts the UI picker and allows when user picks Approve", async () => {
     const entries = [
       customEntry("abp-scaffold-state", { active: true }),
-      assistantText(`Scaffold Decision Gate\nProject intent: app\nProject kind: web app\nLanguage/runtime: TypeScript\nDeployment assumption: Cloudflare\nFramework/template: Hono\nQuality baseline: pnpm, vitest, eslint, prettier, tsc, coverage, CI\nFiles and commands: create scaffold\nUser decision:\n${decisionMenu}`),
-      userText("approve"),
+      assistantText(validGateText),
     ];
+    const pi = makePi({ entries });
+    scaffoldDecisionGate(pi);
+    const ctx = makeCtx(entries, { selectChoice: APPROVE_CHOICE });
 
-    expect(shouldBlockScaffoldMutation("write", { path: "package.json" }, entries)).toBeNull();
+    const verdict = await pi.emit("tool_call", { toolName: "write", input: { path: "package.json" } }, ctx);
+
+    expect(verdict).toBeUndefined();
+    expect(ctx.selectCalls).toHaveLength(1);
+    expect(ctx.selectCalls[0].choices).toEqual([APPROVE_CHOICE, REFINE_CHOICE, CANCEL_CHOICE]);
+    const decision = pi.appended.find(([type]) => type === "abp-scaffold-decision");
+    expect(decision?.[1]).toMatchObject({ choice: "approve" });
   });
 
-  it("does not reuse approval from an earlier scaffold activation", () => {
+  it("tool_call hook fails closed without UI instead of relying on dialog defaults", async () => {
     const entries = [
       customEntry("abp-scaffold-state", { active: true }),
-      assistantText(`Scaffold Decision Gate\nProject intent: old app\nProject kind: web app\nLanguage/runtime: TypeScript\nDeployment assumption: Cloudflare\nFramework/template: Hono\nQuality baseline: pnpm, vitest, eslint, prettier, tsc, coverage, CI\nFiles and commands: create scaffold\nUser decision:\n${decisionMenu}`),
-      userText("approve"),
-      customEntry("abp-scaffold-state", { active: true }),
-      userText("now scaffold another app"),
+      assistantText(validGateText),
     ];
+    const pi = makePi({ entries });
+    scaffoldDecisionGate(pi);
+    const ctx = makeCtx(entries, { hasUI: false });
 
-    expect(shouldBlockScaffoldMutation("write", { path: "package.json" }, entries)).toBeTruthy();
+    const verdict = await pi.emit("tool_call", { toolName: "write", input: { path: "package.json" } }, ctx);
+
+    expect(verdict).toMatchObject({ block: true });
+    expect(verdict.reason).toMatch(/requires an interactive UI/i);
+    expect(ctx.selectCalls).toHaveLength(0);
+    expect(pi.appended.find(([type]) => type === "abp-scaffold-decision")).toBeUndefined();
+  });
+
+  it("tool_call hook blocks with Refine reason when user picks Refine", async () => {
+    const entries = [
+      customEntry("abp-scaffold-state", { active: true }),
+      assistantText(validGateText),
+    ];
+    const pi = makePi({ entries });
+    scaffoldDecisionGate(pi);
+    const ctx = makeCtx(entries, { selectChoice: REFINE_CHOICE });
+
+    const verdict = await pi.emit("tool_call", { toolName: "write", input: { path: "package.json" } }, ctx);
+
+    expect(verdict).toMatchObject({ block: true });
+    expect(verdict.reason).toMatch(/Refine/);
+  });
+
+  it("tool_call hook blocks with Cancel reason when user picks Cancel", async () => {
+    const entries = [
+      customEntry("abp-scaffold-state", { active: true }),
+      assistantText(validGateText),
+    ];
+    const pi = makePi({ entries });
+    scaffoldDecisionGate(pi);
+    const ctx = makeCtx(entries, { selectChoice: CANCEL_CHOICE });
+
+    const verdict = await pi.emit("tool_call", { toolName: "write", input: { path: "package.json" } }, ctx);
+
+    expect(verdict).toMatchObject({ block: true });
+    expect(verdict.reason).toMatch(/cancel/i);
+  });
+
+  it("tool_call hook does not re-prompt when an approval matches the current gate hash", async () => {
+    const entries = [
+      customEntry("abp-scaffold-state", { active: true }),
+      assistantText(validGateText),
+    ];
+    const pi = makePi({ entries });
+    scaffoldDecisionGate(pi);
+    const ctx = makeCtx(entries, { selectChoice: APPROVE_CHOICE });
+
+    await pi.emit("tool_call", { toolName: "write", input: { path: "package.json" } }, ctx);
+    const callsAfterFirst = ctx.selectCalls.length;
+
+    const verdict = await pi.emit("tool_call", { toolName: "write", input: { path: "vite.config.ts" } }, ctx);
+
+    expect(verdict).toBeUndefined();
+    expect(ctx.selectCalls.length).toBe(callsAfterFirst);
+  });
+
+  it("tool_call hook re-prompts when a new gate message appears after an approval", async () => {
+    const entries = [
+      customEntry("abp-scaffold-state", { active: true }),
+      assistantText(validGateText),
+    ];
+    const pi = makePi({ entries });
+    scaffoldDecisionGate(pi);
+    const ctx = makeCtx(entries, { selectChoice: APPROVE_CHOICE });
+
+    await pi.emit("tool_call", { toolName: "write", input: { path: "package.json" } }, ctx);
+    entries.push(assistantText(validGateText.replace("tiny API", "different API")));
+
+    await pi.emit("tool_call", { toolName: "write", input: { path: "package.json" } }, ctx);
+
+    expect(ctx.selectCalls.length).toBe(2);
   });
 
   it("injects an active reminder into the agent prompt", async () => {
-    const pi = makePi();
-    scaffoldDecisionGate(pi);
     const entries = [customEntry("abp-scaffold-state", { active: true })];
+    const pi = makePi({ entries });
+    scaffoldDecisionGate(pi);
 
     const result = await pi.emit("before_agent_start", { systemPrompt: "base" }, makeCtx(entries));
 

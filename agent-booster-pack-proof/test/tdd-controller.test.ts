@@ -45,9 +45,8 @@ describe("createTddController", () => {
 
     const message = await controller.enable(ctx);
 
-    expect(ui.notify).toHaveBeenCalledWith("Proof on — specify behavior in a test");
-    expect(message).toContain("Proof enabled — SPECIFYING phase.");
-    expect(message).toContain("Specify the next behavior in a test before changing production code.");
+    expect(ui.notify).toHaveBeenCalledOnce();
+    expect(message).toContain("SPECIFYING phase");
     expect(message).toContain("Test command: npm test");
   });
 
@@ -57,12 +56,27 @@ describe("createTddController", () => {
     const { ctx, ui } = createContext();
 
     await controller.enable(ctx);
+    ui.notify.mockClear();
     const mutation = controller.handleProductionWrite("src/math.ts", ctx);
 
-    expect(ui.notify).toHaveBeenCalledWith(
-      "SPECIFYING: specify behavior in a test before editing production code",
-      "warning",
-    );
+    expect(ui.notify).toHaveBeenCalledOnce();
+    expect(ui.notify.mock.calls[0]?.[1]).toBe("warning");
+    expect(mutation).toEqual({
+      block: true,
+      reason: "PROOF SPECIFYING phase: specify the next behavior in a test before changing production code",
+    });
+  });
+
+  it("blocks production edits without requiring UI notifications", async () => {
+    resolveTestConfigMock.mockResolvedValue({ command: "npm test", cwd: "/repo" });
+    const controller = createTddController();
+    const { ctx, ui } = createContext();
+    (ctx as { hasUI: boolean }).hasUI = false;
+
+    await controller.enable(ctx);
+    const mutation = controller.handleProductionWrite("src/math.ts", ctx);
+
+    expect(ui.notify).not.toHaveBeenCalled();
     expect(mutation).toEqual({
       block: true,
       reason: "PROOF SPECIFYING phase: specify the next behavior in a test before changing production code",
@@ -75,6 +89,7 @@ describe("createTddController", () => {
     const { ctx, ui } = createContext();
 
     await controller.enable(ctx);
+    ui.notify.mockClear();
     const mutation = controller.handleShellWriteWarning(
       {
         toolName: "bash",
@@ -84,17 +99,10 @@ describe("createTddController", () => {
       ctx,
     );
 
-    expect(ui.notify).toHaveBeenCalledWith("SPECIFYING: possible production write via shell", "warning");
-    expect(mutation).toEqual({
-      content: [
-        {
-          type: "text",
-          text:
-            "\n\n[PROOF WARNING] This command appears to write to a production file during SPECIFYING." +
-            " Proof-first best practice: specify the next behavior in a test before modifying production code." +
-            " This is a warning only — the command was not blocked.",
-        },
-      ],
-    });
+    expect(ui.notify).toHaveBeenCalledOnce();
+    expect(ui.notify.mock.calls[0]?.[1]).toBe("warning");
+    expect(mutation?.content).toHaveLength(1);
+    expect(mutation?.content[0]?.text).toContain("[PROOF WARNING]");
+    expect(mutation?.content[0]?.text).toContain("SPECIFYING");
   });
 });

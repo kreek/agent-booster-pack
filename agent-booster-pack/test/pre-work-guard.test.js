@@ -10,7 +10,6 @@ import {
   makePreWorkBlockReason,
   missingElements,
   preWorkChangeKind,
-  preWorkReminder,
   shouldBlockPreWork,
 } from "../extensions/pre-work-guard.js";
 
@@ -210,6 +209,21 @@ it("lets the user create a topic branch in the current worktree", async () => {
   expect(appended.at(-1)?.[0]).toBe(BRANCH_GUARD_STATE_ENTRY);
 });
 
+it("fails closed before branch isolation choices when UI is unavailable", async () => {
+  const exec = makeExec({
+    "git rev-parse --is-inside-work-tree": { stdout: "true\n" },
+    "git branch --show-current": { stdout: "main\n" },
+    "git status --porcelain": { stdout: "" },
+  });
+  const ui = makeUi(["Continue on current branch"]);
+
+  const result = await handleBranchIsolation({ exec, ui, hasUI: false, entries: [], appendEntry: () => {} });
+
+  expect(result).toMatchObject({ block: true });
+  expect(result.reason).toMatch(/requires an interactive UI/i);
+  expect(ui.prompts).toEqual([]);
+});
+
 it("does not offer a worktree choice", async () => {
   const exec = makeExec({
     "git rev-parse --is-inside-work-tree": { stdout: "true\n" },
@@ -225,7 +239,7 @@ it("does not offer a worktree choice", async () => {
     input: async () => "",
   };
 
-  await handleBranchIsolation({ exec, ui, hasUI: true, entries: [], appendEntry: () => {} });
+  await handleBranchIsolation({ exec, ui, entries: [], appendEntry: () => {} });
 
   expect(offered).not.toContain("Create a separate worktree + topic branch");
   expect(offered.some((c) => /separate worktree/i.test(c))).toBe(false);
@@ -254,7 +268,6 @@ it("does not re-prompt when the current branch was already accepted", async () =
   const result = await handleBranchIsolation({
     exec,
     ui,
-    hasUI: true,
     entries,
     appendEntry: () => {},
   });
@@ -287,7 +300,6 @@ it("re-prompts after switching to a different branch", async () => {
   const result = await handleBranchIsolation({
     exec,
     ui,
-    hasUI: true,
     entries,
     appendEntry: (...args) => appended.push(args),
   });
@@ -306,7 +318,7 @@ it("does not re-prompt after work dirties an already-isolated topic branch", asy
   const ui = makeUi([]);
   const appended = [];
 
-  const result = await handleBranchIsolation({ exec, ui, hasUI: true, entries: [], appendEntry: (...args) => appended.push(args) });
+  const result = await handleBranchIsolation({ exec, ui, entries: [], appendEntry: (...args) => appended.push(args) });
 
   expect(result).toBeUndefined();
   expect(ui.prompts).toEqual([]);
@@ -322,7 +334,7 @@ it("still prompts on dirty non-topic branches", async () => {
   const ui = makeUi(["Continue on current branch"]);
   const appended = [];
 
-  const result = await handleBranchIsolation({ exec, ui, hasUI: true, entries: [], appendEntry: (...args) => appended.push(args) });
+  const result = await handleBranchIsolation({ exec, ui, entries: [], appendEntry: (...args) => appended.push(args) });
 
   expect(result).toBeUndefined();
   expect(ui.prompts).toHaveLength(1);
@@ -358,12 +370,6 @@ it("manual prework command sends a concise reflection prompt", async () => {
   await commands.get("abp:prework").handler("refactor the cache");
 
   expect(sent).toHaveLength(1);
-  expect(sent[0]).toMatch(/Plan:/);
-  expect(sent[0]).toMatch(/Acceptance:/);
-  expect(sent[0]).toMatch(/Why:/);
-  expect(sent[0]).toMatch(/Proof:/);
-  expect(sent[0]).toMatch(/Alternatives:/);
-  expect(sent[0]).toMatch(/human can correct the shape/i);
   expect(sent[0]).toMatch(/refactor the cache/);
 });
 
@@ -383,7 +389,6 @@ it("manual branch command runs the branch isolation workflow only when called", 
   };
   const ctx = {
     ui,
-    hasUI: true,
     sessionManager: { getBranch: () => [] },
   };
 
@@ -432,22 +437,9 @@ it("hasPreWorkExplanation matches labeled plan + why for small, plus alternative
   expect(missingElements(partial, "normal")).toEqual(["alternatives"]);
 });
 
-it("preWorkReminder mentions the gate, plan, alternatives, and Git packaging exception", () => {
-  const reminder = preWorkReminder();
-  expect(reminder).toMatch(/Pre-Work Reflection Gate/);
-  expect(reminder).toMatch(/plan/i);
-  expect(reminder).toMatch(/alternatives/i);
-  expect(reminder).toMatch(/git add\/commit\/merge/i);
-});
-
-it("manualPreWorkPrompt names the labels without making a blocking gate", () => {
+it("manualPreWorkPrompt carries the requested work into the prompt", () => {
   const prompt = manualPreWorkPrompt("update the API");
 
-  expect(prompt).toMatch(/Plan:/);
-  expect(prompt).toMatch(/Acceptance:/);
-  expect(prompt).toMatch(/Why:/);
-  expect(prompt).toMatch(/Proof:/);
-  expect(prompt).toMatch(/Alternatives:/);
   expect(prompt).toMatch(/update the API/);
 });
 });

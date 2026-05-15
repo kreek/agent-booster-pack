@@ -310,21 +310,25 @@ floor. The rules below extend it with ABP doctrine; they do not restate it.
 ## Validation and proof
 
 A change is not complete until the relevant check has run or the exact
-blocker is reported. A feature is not complete until its user-observable
-behaviors are exercised by tests; test-first is optional, test-at-all is not.
-A non-trivial change is not complete until a `code-review` pass has run
+blocker is reported. Behavior-changing claims need executable proof, but new
+or broad tests are not automatic. A non-trivial change is not complete until a `code-review` pass has run
 against the diff: self-review on agent-generated code reliably surfaces
 bugs, dead code, coupling, and missed edge cases that the implementation
 pass overlooks, and is part of the completion gate, not an optional add-on.
 
-- Tests enter at the outermost boundary the user reaches: HTTP endpoint, UI
-  interaction, CLI invocation, public API.
-- At least one `when X, Y happens` test per user-visible behavior. A feature
-  with three endpoints and five distinct behaviors across them needs five
-  tests, not one.
+- Prove behavior at the outermost practical boundary the user reaches: HTTP
+  endpoint, UI interaction, CLI invocation, public API, or the narrowest
+  equivalent boundary when a full outer test would add more ceremony than
+  signal.
+- One focused proof per user-visible behavior is enough. For isolated work,
+  run one test case, line-filter, or test file before any broader suite.
+  Prefer an existing behavior test or targeted check that would fail for the
+  changed behavior; add a new test only when the behavior is otherwise
+  unproven.
 - Internal helpers and persistence modules do not need their own tests when
-  outer-boundary tests exercise them; they do need tests when the logic is
-  non-trivial in isolation (parsers, state machines, pure algorithms).
+  outer-boundary or equivalent targeted checks exercise them; they do need
+  focused tests when the logic is non-trivial in isolation (parsers, state
+  machines, pure algorithms).
 - Load the `proof` skill before authoring tests.
 - If the working directory has no test/lint/typecheck baseline, load
   `scaffolding` before creating feature code.
@@ -344,8 +348,9 @@ ABP adds:
   continued work on the same branch. See `git-workflow` for details.
 - Review your own staged diff before every commit: catch debug prints, dead
   code, stale paths, and stray changes before anyone else sees them.
-- Commit only after the relevant proof or acceptance check is current. If a
-  check cannot run, leave the claim unproven and say why.
+- Commit only after the narrowest relevant proof or acceptance check is
+  current. If a broader suite is noisy or unrelated, report that separately
+  instead of blocking the proven slice on unrelated drift.
 - Rebase onto the latest base branch before opening a PR so conflicts surface
   early.
 - Delete merged branches locally and remotely; stale branches obscure active

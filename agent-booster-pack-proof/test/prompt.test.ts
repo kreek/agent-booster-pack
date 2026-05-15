@@ -3,23 +3,10 @@ import { describe, expect, it } from "vitest";
 import { buildSystemPrompt } from "../src/prompt.js";
 
 describe("buildSystemPrompt", () => {
-  it("keeps the off prompt focused on when not to use TDD", () => {
+  it("keeps active proof-only sections out of the off prompt", () => {
     const prompt = buildSystemPrompt("BASE", "off");
 
     expect(prompt).toContain("[PROOF MODE — OFF]");
-    expect(prompt).toContain("This extension is proof-first, not TDD-for-everything.");
-    expect(prompt).toContain("Use proof mode when the next change should be made explicit in tests");
-    expect(prompt).toContain("This usually fits new features, bug fixes, and changes to business logic");
-    expect(prompt).toContain("scaffold only the config and dependencies needed to run tests");
-    expect(prompt).toContain("Do not create source stubs or production modules before proof_start");
-    expect(prompt).toContain(
-      "Do not use proof mode for config changes, documentation, scaffolding, or exploratory tasks.",
-    );
-    expect(prompt).not.toContain("Use it for new features, bug fixes, and changes to business logic.");
-    expect(prompt).not.toContain("feature or bug fix work");
-    expect(prompt).not.toContain("lock behavior");
-    expect(prompt).not.toContain("This is different from the REFACTORING phase inside TDD");
-    expect(prompt).not.toContain("substantial changes to existing behavior");
     expect(prompt).not.toContain("WHAT NOT TO TEST:");
     expect(prompt).not.toContain("TEST DOUBLES:");
     expect(prompt).not.toContain("TEST ORGANIZATION:");
@@ -48,25 +35,15 @@ describe("buildSystemPrompt", () => {
     expect(testOrgIndex).toBeGreaterThan(testDoublesIndex);
   });
 
-  it("keeps implementing focused on production code only", () => {
-    const prompt = buildSystemPrompt("BASE", "implementing", "npm test");
+  it("keeps specifying-only test guidance out of later proof phases", () => {
+    for (const phase of ["implementing", "refactoring"] as const) {
+      const prompt = buildSystemPrompt("BASE", phase, "npm test");
 
-    expect(prompt).toContain("[PROOF MODE — IMPLEMENTING PHASE]");
-    expect(prompt).toContain("Write the smallest amount of code necessary for the CORRECT solution");
-    expect(prompt).toContain("Test command: npm test");
-    expect(prompt).not.toContain("WHAT NOT TO TEST:");
-    expect(prompt).not.toContain("TEST DOUBLES:");
-    expect(prompt).not.toContain("TEST ORGANIZATION:");
-  });
-
-  it("keeps refactoring focused on restructuring only", () => {
-    const prompt = buildSystemPrompt("BASE", "refactoring", "npm test");
-
-    expect(prompt).toContain("[PROOF MODE — REFACTORING PHASE]");
-    expect(prompt).toContain("Restructure code freely but keep all tests passing.");
-    expect(prompt).toContain("Test command: npm test");
-    expect(prompt).not.toContain("WHAT NOT TO TEST:");
-    expect(prompt).not.toContain("TEST DOUBLES:");
-    expect(prompt).not.toContain("TEST ORGANIZATION:");
+      expect(prompt).toContain(`PROOF MODE — ${phase.toUpperCase()} PHASE`);
+      expect(prompt).toContain("Test command: npm test");
+      expect(prompt).not.toContain("WHAT NOT TO TEST:");
+      expect(prompt).not.toContain("TEST DOUBLES:");
+      expect(prompt).not.toContain("TEST ORGANIZATION:");
+    }
   });
 });

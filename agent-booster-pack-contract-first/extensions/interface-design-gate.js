@@ -233,7 +233,7 @@ export default function interfaceDesignGate(pi) {
     description: "Start ABP Interface Design Gate workflow",
     handler: async (args, ctx) => {
       pi.appendEntry(INTERFACE_GATE_STATE_ENTRY, { active: true, source: "command", at: Date.now() });
-      ctx.ui.notify("ABP Interface Design Gate enabled", "info");
+      if (ctx.hasUI !== false) ctx.ui.notify("ABP Interface Design Gate enabled", "info");
 
       const intent = String(args ?? "").trim();
       await pi.sendUserMessage(intent ? `${gateReminder()}\n\nIntent: ${intent}` : gateReminder());
@@ -244,7 +244,7 @@ export default function interfaceDesignGate(pi) {
     description: "Stop ABP Interface Design Gate workflow",
     handler: async (_args, ctx) => {
       pi.appendEntry(INTERFACE_GATE_STATE_ENTRY, { active: false, source: "command", at: Date.now() });
-      ctx.ui.notify("ABP Interface Design Gate disabled", "info");
+      if (ctx.hasUI !== false) ctx.ui.notify("ABP Interface Design Gate disabled", "info");
     },
   });
 
@@ -257,7 +257,9 @@ export default function interfaceDesignGate(pi) {
     const refreshed = ctx.sessionManager.getBranch();
     if (!isPotentialInterfaceImplementation(event.toolName, event.input, refreshed)) return;
 
-    if (!ctx.hasUI) return { block: true, reason: blockReason() };
+    if (ctx.hasUI === false) {
+      return { block: true, reason: `Interface Design Gate requires an interactive UI decision before implementation. ${blockReason()}` };
+    }
 
     const allowed = await ctx.ui.confirm("Interface Design Gate", blockReason());
     if (!allowed) return { block: true, reason: blockReason() };

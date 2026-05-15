@@ -46,6 +46,10 @@ description: Use first to route ABP work, choose skills, hand off, and define ve
    Architecture, domain, data, interface, security, persistence, release, and
    compatibility choices need more explicit collaboration because they shape
    later work.
+4. **Default to the smallest honest solution.** Implement only what was asked,
+   prefer established tools, start with the happy path unless safety or data
+   loss demands edge cases now, and add abstractions only after real semantic
+   duplication appears.
 
 ## Workflow
 
@@ -54,10 +58,15 @@ description: Use first to route ABP work, choose skills, hand off, and define ve
    critique without edits. Name the mode only when it sets useful expectations.
 2. **Define the target.** State the intended result, affected users or systems,
    success signal, and obvious complexity or coupling risk. If done is unclear,
-   propose acceptance criteria and ask one decision question at a time.
+   propose acceptance criteria and ask one decision question at a time. For
+   complex work, explain the approach before editing; for compatibility
+   uncertainty, ask before adding shims.
 3. **Classify the work surface.** Mark disposable work as local and temporary.
    For production paths, shared libraries, contracts, schemas, auth,
    persistence, and domain rules, preserve human understanding before coding.
+   Route data shape and effects to `domain-modeling`, code organization to
+   `architecture`, trust boundaries to `security`, proof to `proof`, and git
+   history to `git-workflow` instead of duplicating their rules here.
 4. **Set required gates before implementation.** Use `specify` before planning
    unsettled architecture, domain, data, or interface shape. Use
    `contract-first` before implementing caller-facing APIs, exported types,

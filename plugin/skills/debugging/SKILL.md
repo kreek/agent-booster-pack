@@ -23,13 +23,11 @@ description: Use to debug failures, reproduce symptoms, isolate causes, inspect 
 
 ## Core Ideas
 
-1. Reproduce before fixing. State hypotheses so they can be confirmed
-   or killed; change one variable per experiment.
+1. Reproduce before fixing. Change one variable per experiment.
 2. Reduce the failing case until only the bug remains. Localize by
    boundary: data, service, integration, application, infrastructure.
-3. Debugging should improve the human's failure model. Use the agent to form
-   and test hypotheses, not to patch until something passes.
-4. Fix the root cause and add a guard test.
+3. Debugging should improve the human's failure model with evidence.
+4. Fix causes, not symptoms.
 5. For incidents, produce blameless learning with owned follow-up
    actions, never "human error" as a root cause.
 
@@ -41,29 +39,24 @@ description: Use to debug failures, reproduce symptoms, isolate causes, inspect 
 2. After the third experiment, keep a short debug log. Form one
    hypothesis at a time, predict what else must be true, run the
    smallest experiment that confirms or refutes it.
-3. Before editing, state the current failure model: likely cause, evidence for
-   it, and the observation that would disprove it.
-4. Record the fix as a Proof Contract: root-cause claim, relevant data
-   invariant, reproduction boundary, regression check, evidence. Fix
-   only after evidence identifies the cause.
-5. Add a regression test or operational guard before declaring fixed.
+3. Before editing, state the current failure model: likely cause,
+   evidence for it, and the observation that would disprove it.
+4. Fix the identified cause. Add a regression test or operational
+   guard before declaring fixed.
 
 ## Verification
 
 - [ ] The bug reproduces on pre-fix code or non-reproducibility is
       documented.
-- [ ] The root cause is named in one sentence and explains all observed
-      symptoms.
-- [ ] The final explanation says what evidence ruled out the main alternative
-      causes.
-- [ ] The fix is one atomic change aimed at that cause.
-- [ ] A regression test or equivalent guard fails before the fix and
-      passes after.
+- [ ] The root cause is named in one sentence, explains all observed
+      symptoms, and identifies evidence that ruled out main alternatives.
+- [ ] The fix is one atomic change aimed at that cause, with a
+      regression test or equivalent guard that fails before and passes
+      after.
 - [ ] Timing-sensitive bugs were verified with non-invasive observation or
       replay.
 - [ ] Incident follow-ups have owners and deadlines.
-- [ ] The root-cause and fix claims have proof evidence, or the fix is
-      reported as unproven.
+- [ ] Unproven root-cause or fix claims are reported as unproven.
 
 ## Tripwires
 
@@ -84,6 +77,8 @@ description: Use to debug failures, reproduce symptoms, isolate causes, inspect 
   debugging.
 - Use `observability` when the right evidence must come from logs,
   metrics, traces, or incident timelines.
+- Use `error-handling` when the root cause is an error boundary,
+  retry, timeout, or recovery contract.
 
 ## References
 

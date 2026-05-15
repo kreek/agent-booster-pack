@@ -36,20 +36,25 @@ description: Use for architecture decisions, module boundaries, coupling, layeri
 ## Core Ideas
 
 1. Organize by what changes together. Feature behavior, data shapes,
-   invariants, and tests should live close enough to change together.
-2. Use layers only for real boundaries. Horizontal layers are useful for
+   invariants, and tests should live close enough to change together. Keep
+   production files and their matching test files small enough that one focused
+   behavior can be run without invoking the whole suite.
+2. Functions should do one thing well. Keep them around 25-30 lines, and keep
+   conditionals and loops under three nesting levels. Use guard clauses,
+   extraction, or composition before adding another nested branch.
+3. Use layers only for real boundaries. Horizontal layers are useful for
    process, deploy, trust, persistence, transport, or proven duplication. They
    are harmful when they scatter one behavior by default.
-3. Expose contracts and hide internal shape. A module boundary should say what
+4. Expose contracts and hide internal shape. A module boundary should say what
    crosses it, what assumptions hold, and what details callers must not depend
    on.
-4. Keep domain meaning local. Use bounded contexts when the same word means
+5. Keep domain meaning local. Use bounded contexts when the same word means
    different things in different parts of the system. Do not force subtly
    different meanings into one shared model.
-5. Use architecture patterns only when they carry behavior. DDD patterns like
+6. Use architecture patterns only when they carry behavior. DDD patterns like
    aggregates, repositories, factories, and domain services must protect a real
    invariant, workflow, or boundary.
-6. Make data flow explicit. Name where external data enters, where it becomes
+7. Make data flow explicit. Name where external data enters, where it becomes
    trusted, where domain work happens, and what output shape leaves. These are
    roles, not required folders.
 
@@ -72,8 +77,10 @@ description: Use for architecture decisions, module boundaries, coupling, layeri
 
 ## Verification
 
-- [ ] One feature can be edited without traversing more directories than the
-      change deserves.
+- [ ] One feature can be edited and its matching proof run without traversing
+      more directories or test files than the change deserves.
+- [ ] Functions do one thing well, stay roughly 25-30 lines, and avoid a fourth
+      nesting level.
 - [ ] Horizontal controller/service/repository/DTO layers, where present,
       correspond to real technical boundaries, not default ceremony.
 - [ ] DDD tactical patterns are applied where they earn their keep, not as

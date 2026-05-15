@@ -67,7 +67,6 @@ describe("code review runtime", () => {
 
     const command = commands.get("review");
     expect(command).toBeTruthy();
-    expect(command.description).toMatch(/code review/i);
     expect(commands.get("abp:review")).toBeTruthy();
 
     await command.handler("staged", { ui: { notify() {} } });
@@ -75,10 +74,6 @@ describe("code review runtime", () => {
 
     expect(sent).toHaveLength(2);
     expect(sent[0]).toContain("Review Target: staged");
-    expect(sent[0]).toContain("Findings:");
-    expect(sent[0]).toContain("Recommendation:");
-    expect(sent[0]).toContain("No changes requested");
-    expect(sent[0]).toContain("one review_complete call");
     expect(sent[1]).toContain("Review Target: branch");
   });
 

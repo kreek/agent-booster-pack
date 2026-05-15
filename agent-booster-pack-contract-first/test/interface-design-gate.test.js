@@ -46,7 +46,6 @@ function makePiHarness(entries = []) {
   };
 
   const ctx = {
-    hasUI: true,
     sessionManager: { getBranch: () => entries },
     ui: {
       notify: (message, level) => notifications.push({ message, level }),
@@ -71,30 +70,27 @@ it("starts inactive and only registers manual commands plus scoped tool enforcem
   expect(handlers.get("tool_call")).toBeTruthy();
 });
 
-it("manual command activates the gate and sends the contract prompt", async () => {
-  const { commands, sent, appended, notifications } = makePiHarness();
+it("manual command activates the gate and carries the requested intent into the prompt", async () => {
+  const { commands, sent, appended } = makePiHarness();
 
   await commands.get("abp:contract").handler("design the cache adapter", {
-    ui: { notify: (message, level) => notifications.push({ message, level }) },
+    ui: { notify() {} },
   });
 
   expect(appended.at(-1)).toMatchObject({ customType: INTERFACE_GATE_STATE_ENTRY, data: { active: true } });
-  expect(sent[0]).toContain("Interface Design Gate");
-  expect(sent[0]).toContain("Acceptance and proof:");
-  expect(sent[0]).toContain("Intent: design the cache adapter");
-  expect(notifications.at(-1).message).toMatch(/enabled/i);
+  expect(sent).toHaveLength(1);
+  expect(sent[0]).toContain("design the cache adapter");
 });
 
 it("manual off command deactivates the gate", async () => {
-  const { commands, appended, notifications } = makePiHarness([stateEntry(true)]);
+  const { commands, appended } = makePiHarness([stateEntry(true)]);
 
   await commands.get("abp:contract-off").handler("", {
-    ui: { notify: (message, level) => notifications.push({ message, level }) },
+    ui: { notify() {} },
   });
 
   expect(appended.at(-1)).toMatchObject({ customType: INTERFACE_GATE_STATE_ENTRY, data: { active: false } });
   expect(latestInterfaceGateState([stateEntry(true), stateEntry(false)])).toBe(false);
-  expect(notifications.at(-1).message).toMatch(/disabled/i);
 });
 
 it("does not block tool calls before the manual workflow is active", async () => {
@@ -136,8 +132,30 @@ User decision: approve or revise`,
 
   expect(result).toBeUndefined();
   expect(confirms).toHaveLength(1);
-  expect(confirms[0].title).toBe("Interface Design Gate");
-  expect(confirms[0].message).toMatch(/acceptance\/proof/i);
+});
+
+it("fails closed on an open interface gate when UI is unavailable", async () => {
+  const history = [
+    stateEntry(true),
+    ...messages([
+      "assistant",
+      `Interface Design Gate
+
+Current interface: new adapter
+Proposed interface: export function createClient(options)
+Why this boundary: callers should not know transport details
+Acceptance and proof: caller behavior is covered by tests
+User decision: approve or revise`,
+    ]),
+  ];
+  const { handlers, ctx, confirms } = makePiHarness(history);
+  ctx.hasUI = false;
+
+  const result = await handlers.get("tool_call")({ toolName: "edit", input: { path: "src/client.js" } }, ctx);
+
+  expect(result).toMatchObject({ block: true });
+  expect(result.reason).toMatch(/requires an interactive UI/i);
+  expect(confirms).toEqual([]);
 });
 
 it("detects an interface gate prompt with the required lean fields", () => {

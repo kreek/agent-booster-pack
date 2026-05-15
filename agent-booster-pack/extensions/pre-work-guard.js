@@ -162,8 +162,8 @@ export async function handleBranchIsolation({ exec, ui, hasUI, entries, appendEn
   if (!status) return;
   if (branchIsolationAcceptedFor(entries, status.branch)) return;
 
-  if (!hasUI) {
-    return { block: true, reason: "ABP Branch Isolation Guard: create or switch to a topic branch before mutating files." };
+  if (hasUI === false) {
+    return { block: true, reason: "ABP Branch Isolation Guard requires an interactive UI decision before mutating files; run in interactive/RPC mode or create/switch to a topic branch first." };
   }
 
   const choices = [BRANCH_CHOICE, CONTINUE_CHOICE, STOP_CHOICE];
@@ -253,7 +253,7 @@ export default function preWorkGuard(pi) {
       });
 
       if (branchResult) return branchResult;
-      ctx.ui.notify("ABP branch check complete", "info");
+      if (ctx.hasUI !== false) ctx.ui.notify("ABP branch check complete", "info");
     },
   });
 

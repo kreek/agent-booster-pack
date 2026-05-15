@@ -48,13 +48,13 @@ Main skill when the requested work is proof itself:
 
 1. A proof is a named obligation tied to a claim. Missing evidence is an
    explicit `unproven` status, not silence that implies correctness.
-2. Test-first is optional. Test-at-all is not. Tests for this skill's
-   claims must exist before the change is committed, before a PR is opened,
-   or before a personal project is merged straight to main.
+2. Test-first is optional. Behavior-changing claims need executable proof, but
+   new tests are not automatic. Do not add tests for mechanical, prose-only,
+   or tooling-guaranteed facts.
 3. A completion claim is still an engineering claim. Passing checks count
    only when they prove the latest request was actually satisfied.
 4. Proof should teach the behavior, not only satisfy a checker. A good proof
-   makes the expected system behavior easier for the human to understand.
+   reads like a specification of the system contract for the next developer.
 5. Different claims need different evidence: data claims need invariants,
    behavior claims need boundary checks, bug-fix claims need root-cause
    evidence plus a regression guard, refactor claims need before/after
@@ -65,6 +65,10 @@ Main skill when the requested work is proof itself:
 7. Keep tests focused on one behavior and use real collaborators inside the
    boundary. Mock only true system boundaries such as clock, network,
    third-party service, process, filesystem, or expensive infrastructure.
+   Do not test framework, language, runtime behavior, or static copy unless
+   your code adds a contract on top of it. User-facing text deserves direct
+   assertions only when it is parsed later, documented as contract, varies by
+   branch, or carries a safety/fail-closed instruction.
 8. Flaky tests are bugs in the test, code, or environment. Do not hide them
    with sleeps or retries.
 
@@ -107,6 +111,9 @@ For every non-trivial engineering claim, record:
      instead of behavior.
 6. When a claim needs a test, name the behavior in caller language and assert
    the observable result.
+7. Choose the narrowest runnable check that can prove the claim: single test by
+   name or line when supported, then one test file, then package or suite only
+   when the narrow check is clean or exposes wider risk.
 
 ## Before Saying Done
 
@@ -114,7 +121,7 @@ For every non-trivial engineering claim, record:
    caller language.
 2. Inspect any named artifact after the last edit and confirm the proof reads
    or exercises it.
-3. Run or inspect the freshest proof that would catch the failure.
+3. Run or inspect the fresh proof chosen in the workflow.
 4. Report the actual state: proven, partially proven, blocked, or unproven.
 
 ## Verification
@@ -124,7 +131,8 @@ For every non-trivial engineering claim, record:
 - [ ] At least one proof check enters through the outermost practical boundary
       and would fail if the claim were false.
 - [ ] Test names and assertions describe observable behavior, not private
-      methods, call choreography, or framework behavior.
+      methods, call choreography, framework behavior, or static copy that would
+      be identical under every condition.
 - [ ] Mocks appear only at true system boundaries or have a documented reason.
 - [ ] Tests are order-independent and do not rely on arbitrary sleeps.
 - [ ] Named files, scripts, configs, commands, or documents from the request
@@ -134,8 +142,10 @@ For every non-trivial engineering claim, record:
 
 ## Tripwires
 
-- Run the local proof available now when CI feels like enough; report the local
-  blocker when the environment cannot run it.
+- About to run the full suite for an isolated edit: run the single relevant
+  test, line filter, or test file first.
+- If a broad suite fails for unrelated drift, switch to the targeted proof and
+  report the broad failure separately.
 - Name the invariant or boundary behavior when static types seem to cover the
   claim.
 - Capture the command, observed output, and proven claim when manual proof is
