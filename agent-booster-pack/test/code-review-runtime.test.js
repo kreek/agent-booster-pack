@@ -77,6 +77,7 @@ describe("code review runtime", () => {
     expect(sent[0]).toContain("Review Target: staged");
     expect(sent[0]).toContain("Findings:");
     expect(sent[0]).toContain("Recommendation:");
+    expect(sent[0]).toContain("No changes requested");
     expect(sent[0]).toContain("one review_complete call");
     expect(sent[1]).toContain("Review Target: branch");
   });
@@ -145,11 +146,11 @@ describe("code review runtime", () => {
       findings: "No findings.",
       proof: "npm test passed.",
       residualRisk: "No CI status checked.",
-      recommendation: "Approve with residual risk",
+      recommendation: "No changes requested",
     });
 
     expect(result.ok).toBe(true);
-    expect(result.summary).toContain("Recommendation: Approve with residual risk");
+    expect(result.summary).toContain("Recommendation: No changes requested");
     expect(result.summary).toContain("Residual Risk: No CI status checked.");
   });
 
@@ -261,6 +262,20 @@ describe("code review runtime", () => {
     expect(text).toContain("Findings: 0");
     expect(text).toContain("requested behavior.");
     expect(text).toContain("human review.");
+  });
+
+  it("renders review completion errors without fabricated unknown proof fields", () => {
+    const result = {
+      isError: true,
+      content: [{ type: "text", text: "No active ABP review session. Run /review [target] first." }],
+    };
+
+    const text = renderReviewCompleteResult(result).render(58).join("\n");
+
+    expect(text).toContain("ABP CODE REVIEW ERROR");
+    expect(text).toContain("No active ABP review session");
+    expect(text).not.toContain("Target: unknown");
+    expect(text).not.toContain("Proof: Unproven");
   });
 
   it("records review_check progress only after /review starts a session", async () => {

@@ -26,6 +26,7 @@ export const REVIEW_STATUSES = ["Checked", "Not applicable", "Unproven"];
 export const REVIEW_RECOMMENDATIONS = [
   "Block",
   "Request changes",
+  "No changes requested",
   "Approve with residual risk",
   "No recommendation because review is unproven",
 ];
@@ -158,7 +159,7 @@ Residual Risk:
 Name unreviewed scope, assumptions, generated/vendor/lockfile limits, missing CI, or why remaining risk is low.
 
 Recommendation:
-Choose one: Block, Request changes, Approve with residual risk, or No recommendation because review is unproven.`;
+Choose one: Block, Request changes, No changes requested, Approve with residual risk, or No recommendation because review is unproven.`;
 }
 
 const reviewCheckParameters = {
@@ -301,6 +302,15 @@ function countFindingLines(findings) {
   return value.split("\n").map((line) => line.trim()).filter(Boolean).length;
 }
 
+function compactErrorPanel(message, width, theme) {
+  const innerWidth = Math.max(1, width - 4);
+  const topBorder = borderText(theme, `┌${"─".repeat(innerWidth + 2)}┐`);
+  const bottomBorder = borderText(theme, `└${"─".repeat(innerWidth + 2)}┘`);
+  const content = ["ABP CODE REVIEW ERROR", ...wrapPlainLine(message, innerWidth)];
+
+  return [topBorder, ...content.map((line) => frameLine(line, innerWidth, theme)), bottomBorder];
+}
+
 function compactReviewPanel(summary, width, theme) {
   const target = summarySection(summary, "Review Target", "Checklist") || "unknown";
   const findings = summarySection(summary, "Findings", "Proof");
@@ -323,9 +333,11 @@ function compactReviewPanel(summary, width, theme) {
 }
 
 export function renderReviewCompleteResult(result, _options, theme) {
-  const summary = String(result?.details?.summary ?? result?.summary ?? result?.content?.[0]?.text ?? "");
+  const summary = String(result?.details?.summary ?? result?.summary ?? "");
+  const error = result?.isError ? String(result?.content?.[0]?.text ?? "Review completion failed.") : "";
   return {
     render(width) {
+      if (error) return compactErrorPanel(error, width, theme);
       return compactReviewPanel(summary, width, theme);
     },
     invalidate() {},
