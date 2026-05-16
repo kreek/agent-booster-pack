@@ -1,11 +1,50 @@
 {
-  "name": "agent-booster-pack-repo",
+  "name": "agent-booster-pack-github",
   "version": "0.0.0",
   "private": true,
+  "description": "GitHub-installable Agent Booster Pack facade for Pi while ABP changes frequently.",
   "type": "module",
-  "scripts": {
-    "test": "vitest run tests"
+  "pi": {
+    "extensions": [
+      "./agent-booster-pack-contract-first/extensions",
+      "./agent-booster-pack-proof/src/index.ts",
+      "./agent-booster-pack-specify/extensions",
+      "./agent-booster-pack/extensions"
+    ],
+    "skills": [
+      "./agent-booster-pack-skills/skills",
+      "./agent-booster-pack-contract-first/skills/contract-first",
+      "./agent-booster-pack-proof/skills/proof",
+      "./agent-booster-pack-specify/skills/specify"
+    ]
   },
+  "scripts": {
+    "test": "vitest run tests",
+    "build:pi-github": "npm --prefix agent-booster-pack-skills run build && npm --prefix agent-booster-pack-contract-first run build && npm --prefix agent-booster-pack-proof run build && npm --prefix agent-booster-pack-specify run build",
+    "prepare": "npm run build:pi-github"
+  },
+  "files": [
+    "agent-booster-pack/extensions",
+    "agent-booster-pack/README.md",
+    "agent-booster-pack/LICENSE",
+    "agent-booster-pack-skills/skills",
+    "agent-booster-pack-skills/README.md",
+    "agent-booster-pack-skills/LICENSE",
+    "agent-booster-pack-contract-first/extensions",
+    "agent-booster-pack-contract-first/skills",
+    "agent-booster-pack-contract-first/README.md",
+    "agent-booster-pack-contract-first/LICENSE",
+    "agent-booster-pack-proof/src",
+    "agent-booster-pack-proof/skills",
+    "agent-booster-pack-proof/README.md",
+    "agent-booster-pack-proof/LICENSE",
+    "agent-booster-pack-specify/extensions",
+    "agent-booster-pack-specify/skills",
+    "agent-booster-pack-specify/README.md",
+    "agent-booster-pack-specify/LICENSE",
+    "README.md",
+    "LICENSE"
+  ],
   "devDependencies": {
     "vitest": "^3.2.1"
   }

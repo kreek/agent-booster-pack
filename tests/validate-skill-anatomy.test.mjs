@@ -109,10 +109,17 @@ function makeCodexPluginPackage(
   {
     includeMarketplace = true,
     includeManifest = true,
+    includeHooks = true,
     marketplaceSourcePath = "./plugin",
     includePolicy = true,
     includeCategory = true,
     manifestSkillsPath = "./skills/",
+    manifestHooksPath = "./hooks.json",
+    hookCommand = "node ${PLUGIN_ROOT}/scripts/self-review.mjs",
+    codexVersion = "2.0.0",
+    claudeMarketplaceVersion = "2.0.0",
+    claudeEntryVersion = "2.0.0",
+    claudeManifestVersion = "2.0.0",
   } = {},
 ) {
   if (includeMarketplace) {
@@ -135,8 +142,9 @@ function makeCodexPluginPackage(
   if (includeManifest) {
     const manifest = {
       name: "abp",
-      version: "2.0.0",
+      version: codexVersion,
       skills: manifestSkillsPath,
+      hooks: manifestHooksPath,
       interface: {
         displayName: "Agent Booster Pack",
         category: "Coding",
@@ -146,14 +154,47 @@ function makeCodexPluginPackage(
     };
     mkdirSync(join(root, "plugin/.codex-plugin"), { recursive: true });
     writeFileSync(join(root, "plugin/.codex-plugin/plugin.json"), JSON.stringify(manifest), "utf8");
+    if (includeHooks) {
+      const hooks = {
+        hooks: {
+          Stop: [
+            {
+              hooks: [{ type: "command", command: hookCommand, timeout: 5 }],
+            },
+          ],
+        },
+      };
+      writeFileSync(join(root, "plugin/.codex-plugin/hooks.json"), JSON.stringify(hooks), "utf8");
+    }
 
     const claudeMarketplace = {
       name: "abp",
-      metadata: { version: "2.0.0" },
-      plugins: [{ name: "abp", version: "2.0.0", source: "./plugin" }],
+      metadata: { version: claudeMarketplaceVersion },
+      plugins: [{ name: "abp", version: claudeEntryVersion, source: "./plugin" }],
     };
     mkdirSync(join(root, ".claude-plugin"), { recursive: true });
     writeFileSync(join(root, ".claude-plugin/marketplace.json"), JSON.stringify(claudeMarketplace), "utf8");
+
+    const claudeManifest = {
+      name: "abp",
+      version: claudeManifestVersion,
+      hooks: {
+        Stop: [
+          {
+            matcher: "*",
+            hooks: [
+              {
+                type: "command",
+                command: "node ${CLAUDE_PLUGIN_ROOT}/scripts/self-review.mjs",
+                timeout: 5,
+              },
+            ],
+          },
+        ],
+      },
+    };
+    mkdirSync(join(root, "plugin/.claude-plugin"), { recursive: true });
+    writeFileSync(join(root, "plugin/.claude-plugin/plugin.json"), JSON.stringify(claudeManifest), "utf8");
   }
 }
 
@@ -262,6 +303,7 @@ describe("validate-skill-anatomy CLI", () => {
       includePolicy: false,
       includeCategory: false,
       manifestSkillsPath: "./wrong/",
+      manifestHooksPath: "./wrong-hooks.json",
     });
 
     const result = runScript(skillsDir);
@@ -271,5 +313,43 @@ describe("validate-skill-anatomy CLI", () => {
     expect(result.stdout).toContain("abp.policy must be an object");
     expect(result.stdout).toContain("abp.category must be 'Coding'");
     expect(result.stdout).toContain("skills must be './skills/'");
+    expect(result.stdout).toContain("hooks must be './hooks.json'");
+  });
+
+  it("reports missing Codex self-review Stop hook", () => {
+    tmp = makeTempDir();
+    const skillsDir = join(tmp, "agents/.agents/skills");
+    makeSkill(skillsDir, "good");
+    mkdirSync(join(tmp, "plugin/skills"), { recursive: true });
+    cpSync(join(skillsDir, "good"), join(tmp, "plugin/skills/good"), { recursive: true });
+    makeCodexPluginPackage(tmp, { hookCommand: "node ./scripts/other.mjs" });
+
+    const result = runScript(skillsDir);
+
+    expect(result.status).toBe(1);
+    expect(result.stdout).toContain("plugin/.codex-plugin/hooks.json");
+    expect(result.stdout).toContain("must register the ABP self-review Stop hook");
+  });
+
+  it("reports plugin version drift across Claude and Codex manifests", () => {
+    tmp = makeTempDir();
+    const skillsDir = join(tmp, "agents/.agents/skills");
+    makeSkill(skillsDir, "good");
+    mkdirSync(join(tmp, "plugin/skills"), { recursive: true });
+    cpSync(join(skillsDir, "good"), join(tmp, "plugin/skills/good"), { recursive: true });
+    makeCodexPluginPackage(tmp, {
+      codexVersion: "2.0.0",
+      claudeMarketplaceVersion: "2.1.0",
+      claudeEntryVersion: "2.2.0",
+      claudeManifestVersion: "2.3.0",
+    });
+
+    const result = runScript(skillsDir);
+
+    expect(result.status).toBe(1);
+    expect(result.stdout).toContain("version must match");
+    expect(result.stdout).toContain("abp.version must match metadata.version");
+    expect(result.stdout).toContain("plugin/.codex-plugin/plugin.json");
+    expect(result.stdout).toContain("plugin/.claude-plugin/plugin.json");
   });
 });
