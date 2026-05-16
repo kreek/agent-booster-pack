@@ -6,6 +6,21 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [9.10.1] (2026-05-15)
+
+### Fixed
+
+- Stop hook crash under Claude Code (`Cannot find module
+  '/scripts/proof-reminder.mjs'`). The Codex hooks file
+  (`plugin/hooks/hooks.json`, which uses the Codex-only
+  `${CODEX_PLUGIN_ROOT}` placeholder) sat on the path Claude Code
+  auto-discovers, so Claude Code loaded it alongside the correct inline
+  hook from `.claude-plugin/plugin.json` and the unsubstituted
+  placeholder collapsed to an absolute `/scripts/...` path. Moved the
+  Codex hooks file to `plugin/.codex-plugin/hooks.json` and updated the
+  Codex plugin manifest reference, leaving Claude Code with only the
+  working `${CLAUDE_PLUGIN_ROOT}`-based hook.
+
 ## [9.10.0] (2026-05-15)
 
 ### Added
