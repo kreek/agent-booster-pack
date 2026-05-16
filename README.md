@@ -39,6 +39,15 @@ Pick the install for your agent. Most users want the packaged install for
 their primary tool; use the manual install only if you switch between several
 agents or use one without plugin support.
 
+### Claude Code
+
+Inside Claude Code:
+
+```text
+/plugin marketplace add kreek/agent-booster-pack
+/plugin install abp@abp
+```
+
 ### Codex
 
 ```sh
@@ -48,15 +57,6 @@ codex plugin marketplace add kreek/agent-booster-pack
 Then open `/plugins` in Codex, select **Agent Booster Pack**, and install. To
 update later, run `codex plugin marketplace upgrade abp` and reinstall from
 `/plugins`.
-
-### Claude Code
-
-Inside Claude Code:
-
-```text
-/plugin marketplace add kreek/agent-booster-pack
-/plugin install abp@abp
-```
 
 ### Pi
 
