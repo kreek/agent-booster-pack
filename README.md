@@ -10,10 +10,10 @@
 
 Drawn from 25 years of software engineering across startups and large
 organizations, Agent Booster Pack (ABP) is a portable skill library for
-coding agents. ABP is not a skill library for automating humans out of the
-loop or reshaping how the underlying harness works. Humans are good at
-mapping real-world issues to technical solutions, and Anthropic and OpenAI
-have poured billions into models and harnesses. The skill library your
+raising the engineering maturity of coding agents. ABP is not a skill library for 
+automating humans out of the loop or reshaping how the underlying harness works. 
+Humans are good at mapping real-world issues to technical solutions, and Anthropic 
+and OpenAI have poured billions into models and harnesses. The skill library your
 angel investor or PM created is not going to replace either of those (no offense).
 
 ## What ABP guides agents to do
