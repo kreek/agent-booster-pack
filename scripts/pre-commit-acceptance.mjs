@@ -62,7 +62,7 @@ export function selectChecks(paths) {
 
   if (
     hasAny(paths, (path) =>
-      pathMatches(path, "agents/.agents/skills", "agents/.agents/commands", "agents/AGENTS.md", "plugin/skills", "plugin/commands"),
+      pathMatches(path, "agents/.agents/skills", "agents/AGENTS.md", "plugin/skills"),
     )
   ) {
     checks.push(

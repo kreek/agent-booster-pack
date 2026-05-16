@@ -6,6 +6,18 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [9.10.2] (2026-05-15)
+
+### Removed
+
+- The `proof`, `review`, and `workflow` slash-command wrappers (in
+  `plugin/commands/` and the canonical `agents/.agents/commands/`).
+  Claude Code already exposes each skill as its own slash command, so
+  the wrappers showed up as duplicate `/proof`, `/review`, and
+  `/workflow` entries. Trigger the skills directly instead.
+- Symlink generator and skill-anatomy validator branches that mirrored
+  and checked the deleted command files, plus their tests.
+
 ## [9.10.1] (2026-05-15)
 
 ### Fixed

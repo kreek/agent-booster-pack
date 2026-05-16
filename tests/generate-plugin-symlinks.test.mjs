@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 
@@ -12,12 +12,6 @@ function makeSkill(root, name) {
   mkdirSync(skill, { recursive: true });
   writeFileSync(join(skill, "SKILL.md"), `# ${name}\n`, "utf8");
   return skill;
-}
-
-function makeCommand(root, name, body = "Use the bundled ABP command.\n") {
-  const commands = join(root, "agents/.agents/commands");
-  mkdirSync(commands, { recursive: true });
-  writeFileSync(join(commands, name), body, "utf8");
 }
 
 function runScript(...args) {
@@ -73,35 +67,6 @@ describe("generate-plugin-symlinks CLI", () => {
     expect(result.status).toBe(1);
     expect(readFileSync(conflict, "utf8")).toBe("not a symlink\n");
     expect(result.stderr).toContain("plugin/skills/code-review exists as a real file/dir");
-  });
-
-  it("creates real plugin copies for commands", () => {
-    tmp = makeTempDir();
-    makeSkill(tmp, "code-review");
-    makeCommand(tmp, "proof.md", "Use the `proof` skill.\n");
-
-    const result = runScript(tmp);
-
-    expect(result.status).toBe(0);
-    expect(result.stdout).toContain("plugin command mirror in sync");
-    expect(readFileSync(join(tmp, "plugin/commands/proof.md"), "utf8")).toBe(
-      readFileSync(join(tmp, "agents/.agents/commands/proof.md"), "utf8"),
-    );
-  });
-
-  it("removes stale generated command files", () => {
-    tmp = makeTempDir();
-    makeSkill(tmp, "code-review");
-    makeCommand(tmp, "proof.md", "Use the `proof` skill.\n");
-    const pluginCommands = join(tmp, "plugin/commands");
-    mkdirSync(pluginCommands, { recursive: true });
-    writeFileSync(join(pluginCommands, "old.md"), "remove me\n", "utf8");
-
-    const result = runScript(tmp);
-
-    expect(result.status).toBe(0);
-    expect(result.stdout).toContain("removed stale plugin entry: plugin/commands/old.md");
-    expect(existsSync(join(pluginCommands, "old.md"))).toBe(false);
   });
 
   it("rejects paths that are not repo roots", () => {
