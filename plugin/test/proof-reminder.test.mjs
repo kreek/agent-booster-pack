@@ -96,7 +96,7 @@ test("decide: production diff, fresh hash → block", () => {
   assert.equal(out.action, "block");
   assert.equal(out.decision.decision, "block");
   assert.match(out.decision.reason, /ABP proof reminder/);
-  assert.equal(out.decision.hookSpecificOutput.hookEventName, "Stop");
+  assert.ok(!("hookSpecificOutput" in out.decision));
   assert.ok(out.hash);
   assert.equal(out.sessionId, "session-abc");
 });
@@ -151,7 +151,10 @@ test("buildDecision: shape matches Claude Code Stop hook contract", () => {
   const d = buildDecision();
   assert.equal(d.decision, "block");
   assert.ok(typeof d.reason === "string" && d.reason.length > 0);
-  assert.deepEqual(d.hookSpecificOutput, { hookEventName: "Stop" });
+  // Stop has no entry in Claude Code's hookSpecificOutput schema, so the
+  // field must be omitted — emitting it fails JSON validation and drops
+  // the reminder entirely.
+  assert.ok(!("hookSpecificOutput" in d));
 });
 
 // End-to-end test against a real git repo.
@@ -215,7 +218,7 @@ test("e2e: production change emits block JSON and writes state", () => {
     const parsed = JSON.parse(r.stdout);
     assert.equal(parsed.decision, "block");
     assert.match(parsed.reason, /ABP proof reminder/);
-    assert.equal(parsed.hookSpecificOutput.hookEventName, "Stop");
+    assert.ok(!("hookSpecificOutput" in parsed));
 
     const stored = JSON.parse(readFileSync(state.path, "utf8"));
     assert.ok(stored["e2e-2"], "state file should record the session hash");

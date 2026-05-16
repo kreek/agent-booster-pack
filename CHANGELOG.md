@@ -6,6 +6,18 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [9.10.3] (2026-05-15)
+
+### Fixed
+
+- Proof-reminder Stop hook was emitting
+  `hookSpecificOutput: { hookEventName: "Stop" }`, which Claude Code's
+  hook-output schema does not allow (`hookSpecificOutput` is only
+  defined for `PreToolUse`, `UserPromptSubmit`, `PostToolUse`, and
+  `PostToolBatch`). Validation rejected the whole JSON, so the
+  reminder never reached the model. Drop the field and rely on the
+  top-level `decision` and `reason` only.
+
 ## [9.10.2] (2026-05-15)
 
 ### Removed

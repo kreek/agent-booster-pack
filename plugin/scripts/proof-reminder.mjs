@@ -113,7 +113,6 @@ export function buildDecision() {
   return {
     decision: "block",
     reason: REMINDER,
-    hookSpecificOutput: { hookEventName: "Stop" },
   };
 }
 
