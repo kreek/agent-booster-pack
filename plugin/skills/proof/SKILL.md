@@ -59,18 +59,34 @@ Main skill when the requested work is proof itself:
    behavior claims need boundary checks, bug-fix claims need root-cause
    evidence plus a regression guard, refactor claims need before/after
    behavior preservation.
-6. Test the caller-visible behavior at the outermost practical boundary where
-   data shape, value, state, or error shape changes observably. Assertions
-   should survive an implementation swap that preserves the contract.
-7. Keep tests focused on one behavior and use real collaborators inside the
+6. Component handoffs are the primary proof target. A handoff is anywhere
+   one module, layer, or process passes data to another and the receiver
+   assumes a contract: parser → validator, validator → domain, domain →
+   persistence, service → service, producer → queue → consumer,
+   functional core → imperative shell. These seams concentrate production
+   defects; prove behavior at each handoff where data shape, value, state,
+   or error shape changes observably. Assertions should survive an
+   implementation swap that preserves the contract.
+7. The outermost caller-visible boundary (HTTP endpoint, CLI, UI, public
+   API) is the outermost handoff and always counts as one: it is the seam
+   between the system and its caller, and its contract is what the user
+   actually depends on.
+8. When data, logic, and I/O are properly separated and units stay pure,
+   unit tests stay slim by design. ABP departs from test-everything TDD
+   here: internal helpers are already exercised by handoff tests above
+   them. Reserve dedicated unit tests for non-trivial pure algorithms in
+   isolation — parsers, state machines, sort/dedup/pathfinding,
+   property-checkable invariants — not for every function the handoff
+   test already drives.
+9. Keep tests focused on one behavior and use real collaborators inside the
    boundary. Mock only true system boundaries such as clock, network,
    third-party service, process, filesystem, or expensive infrastructure.
    Do not test framework, language, runtime behavior, or static copy unless
    your code adds a contract on top of it. User-facing text deserves direct
    assertions only when it is parsed later, documented as contract, varies by
    branch, or carries a safety/fail-closed instruction.
-8. Flaky tests are bugs in the test, code, or environment. Do not hide them
-   with sleeps or retries.
+10. Flaky tests are bugs in the test, code, or environment. Do not hide them
+    with sleeps or retries.
 
 ## Proof Contract
 
@@ -99,12 +115,14 @@ For every non-trivial engineering claim, record:
    check. A passing command is incomplete proof if it does not exercise
    the artifact the requirement asked for.
 4. For removals or replacements, prove the behavior that remains or replaces
-   the old surface. Do not write tests for ghosts. Use targeted search for
-   cleanup proof unless rejection is the surviving public
-   behavior.
+   the old surface. Do not write tests for ghosts. Verify cleanup with
+   targeted search rather than tests. The exception: if the removal returns
+   an explicit rejection (404, 410, deprecation error), test the rejection —
+   it is new behavior.
 5. Load only the narrow reference needed:
-   - `references/data-shape-boundaries.md` when transformation chains,
-     internal stages, or error envelopes make the right boundary unclear.
+   - `references/data-shape-boundaries.md` for worked handoff examples —
+     pipeline seams, parser/validator edges, middleware chains, sans-IO
+     protocols, and functional-core/imperative-shell crossings.
    - `references/recipes.md` when the proof shape is domain-specific.
    - `references/removals.md` for removals and replacements.
    - `references/test-theater.md` when tests assert implementation shape
@@ -128,8 +146,9 @@ For every non-trivial engineering claim, record:
 
 - [ ] Every non-trivial behavior, invariant, contract, root-cause, or
       refactor claim has a Proof Contract.
-- [ ] At least one proof check enters through the outermost practical boundary
-      and would fail if the claim were false.
+- [ ] At least one proof check enters at each component handoff where data
+      shape, value, state, or error shape changes observably, plus the
+      outermost caller boundary, and would fail if the claim were false.
 - [ ] Test names and assertions describe observable behavior, not private
       methods, call choreography, framework behavior, or static copy that would
       be identical under every condition.

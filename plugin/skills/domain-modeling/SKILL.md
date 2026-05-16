@@ -108,7 +108,9 @@ Use these when the shortcut thought appears:
 - `specify`: contracts whose data shape is being modeled.
 - `architecture`: module boundaries, locality, layering, what changes together.
 - `database`: schema enforcement for invariants that race under concurrency.
-- `proof`: data-claim and public-boundary behavior evidence.
+- `proof`: prove at the parse/validate handoff where raw input becomes the
+  typed domain shape; the invariant the model promises is provable exactly
+  there.
 - `error-handling`: parse failures, Result/Either shape, error context.
 - `async-systems`: mutable places or ownership crossing task/thread boundaries.
 

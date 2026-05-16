@@ -126,7 +126,9 @@ Use these when the shortcut thought appears:
 ## Handoffs
 
 - `contract-first`: durable API approval.
-- `proof`: public-boundary checks and unproven API claims.
+- `proof`: prove at the request → handler and handler → response handoffs;
+  status codes, error envelopes, and pagination contracts are asserted at
+  those seams.
 - `error-handling`: internal failure mapping, remote-call timeouts, retries,
   budgets, and circuit breakers behind the API.
 - `security`: authn/authz, input trust, SSRF, secrets, and data exposure.

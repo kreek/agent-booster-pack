@@ -12,6 +12,7 @@ import {
   computeHash,
   decide,
   parseChangedPaths,
+  readEntry,
 } from "../scripts/self-review.mjs";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
@@ -34,7 +35,7 @@ function baseArgs(overrides = {}) {
     root: "/tmp/repo",
     status: " M src/feature.ts\n",
     head: "deadbeef",
-    prevHash: undefined,
+    prevEntry: undefined,
     ...overrides,
   };
 }
@@ -115,24 +116,78 @@ test("decide: production diff, fresh hash → block", () => {
   assert.ok(!("hookSpecificOutput" in out.decision));
   assert.ok(out.hash);
   assert.equal(out.sessionId, "session-abc");
+  assert.equal(out.nextCount, 1);
 });
 
 test("decide: duplicate hash is silent (idempotency)", () => {
   const first = decide(baseArgs());
   assert.equal(first.action, "block");
-  const second = decide(baseArgs({ prevHash: first.hash }));
+  const second = decide(baseArgs({ prevEntry: { hash: first.hash, count: first.nextCount } }));
   assert.equal(second.action, "silent");
   assert.equal(second.reason, "duplicate_hash");
+  assert.equal(second.nextCount, undefined);
 });
 
-test("decide: different status with same prevHash → fires again", () => {
+test("decide: different status with same prevEntry → fires again, count increments", () => {
   const first = decide(baseArgs());
   const second = decide(baseArgs({
     status: " M src/other.ts\n",
-    prevHash: first.hash,
+    prevEntry: { hash: first.hash, count: first.nextCount },
   }));
   assert.equal(second.action, "block");
   assert.notEqual(second.hash, first.hash);
+  assert.equal(second.nextCount, 2);
+});
+
+test("decide: prevCount at maxRuns → silent with max_runs_reached", () => {
+  const out = decide(baseArgs({
+    prevEntry: { hash: "stale-hash", count: 3 },
+    // status hash differs, so the duplicate_hash short-circuit doesn't fire
+  }));
+  assert.equal(out.action, "silent");
+  assert.equal(out.reason, "max_runs_reached");
+});
+
+test("decide: explicit maxRuns override caps earlier", () => {
+  const out = decide(baseArgs({
+    prevEntry: { hash: "stale-hash", count: 1 },
+    maxRuns: 1,
+  }));
+  assert.equal(out.action, "silent");
+  assert.equal(out.reason, "max_runs_reached");
+});
+
+test("decide: count below maxRuns increments to prevCount + 1", () => {
+  const out = decide(baseArgs({ prevEntry: { hash: "stale-hash", count: 2 } }));
+  assert.equal(out.action, "block");
+  assert.equal(out.nextCount, 3);
+});
+
+test("readEntry: legacy string shape is treated as count=1", () => {
+  assert.deepEqual(readEntry({ s1: "old-hash" }, "s1"), { hash: "old-hash", count: 1 });
+});
+
+test("readEntry: object shape returns hash and count", () => {
+  assert.deepEqual(
+    readEntry({ s1: { hash: "h", count: 2 } }, "s1"),
+    { hash: "h", count: 2 },
+  );
+});
+
+test("readEntry: missing session → null", () => {
+  assert.equal(readEntry({}, "s1"), null);
+});
+
+test("readEntry: object missing count defaults to 1", () => {
+  assert.deepEqual(readEntry({ s1: { hash: "h" } }, "s1"), { hash: "h", count: 1 });
+});
+
+test("decide: legacy string state via readEntry → first block sets nextCount=2", () => {
+  // Legacy entry is treated as count=1, so the next block bumps to 2.
+  const entry = readEntry({ "session-abc": "old-hash" }, "session-abc");
+  const out = decide(baseArgs({ prevEntry: entry }));
+  assert.equal(out.action, "block");
+  assert.equal(out.nextCount, 2);
 });
 
 test("parseChangedPaths: handles modified, added, untracked, renamed", () => {
@@ -239,7 +294,10 @@ test("e2e: production change emits block JSON and writes state", () => {
     assert.ok(!("hookSpecificOutput" in parsed));
 
     const stored = JSON.parse(readFileSync(state.path, "utf8"));
-    assert.ok(stored["e2e-2"], "state file should record the session hash");
+    assert.ok(stored["e2e-2"], "state file should record the session entry");
+    assert.equal(typeof stored["e2e-2"], "object");
+    assert.ok(stored["e2e-2"].hash);
+    assert.equal(stored["e2e-2"].count, 1);
   } finally {
     rmSync(repo, { recursive: true, force: true });
     state.cleanup();
@@ -286,6 +344,64 @@ test("e2e: stop_hook_active=true is silent even with dirty production tree", () 
     );
     assert.equal(r.status, 0);
     assert.equal(r.stdout, "");
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+    state.cleanup();
+  }
+});
+
+test("e2e: cap at MAX_RUNS — 4 mutating runs yield 3 blocks then silent", () => {
+  const repo = makeTempRepo();
+  const state = makeStateFile();
+  try {
+    const results = [];
+    for (let i = 1; i <= 4; i++) {
+      // Distinct filenames so `git status --porcelain` (which is hashed) differs
+      // each run — mirrors the real doom-loop scenario where the model keeps
+      // editing/adding production files in response to the reminder.
+      writeFileSync(join(repo, `feature-${i}.ts`), `export const x = ${i};\n`);
+      const r = runScript(
+        {
+          session_id: "e2e-cap",
+          cwd: repo,
+          hook_event_name: "Stop",
+          last_assistant_message: `iteration ${i}`,
+        },
+        { ABP_SELF_REVIEW_STATE_FILE: state.path, ABP_SELF_REVIEW_MAX_RUNS: "3" },
+      );
+      assert.equal(r.status, 0, `run ${i} exit code`);
+      results.push(r.stdout);
+    }
+    assert.ok(results[0].length > 0, "run 1 should block");
+    assert.ok(results[1].length > 0, "run 2 should block");
+    assert.ok(results[2].length > 0, "run 3 should block");
+    assert.equal(results[3], "", "run 4 should be silent (cap reached)");
+
+    const stored = JSON.parse(readFileSync(state.path, "utf8"));
+    assert.equal(stored["e2e-cap"].count, 3, "count should land at 3");
+    assert.ok(stored["e2e-cap"].hash);
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+    state.cleanup();
+  }
+});
+
+test("e2e: legacy string state shape migrates on next write", () => {
+  const repo = makeTempRepo();
+  const state = makeStateFile();
+  writeFileSync(state.path, JSON.stringify({ "e2e-legacy": "old-hash-value" }));
+  writeFileSync(join(repo, "feature.ts"), "export const x = 1;\n");
+  try {
+    const r = runScript(
+      { session_id: "e2e-legacy", cwd: repo, hook_event_name: "Stop" },
+      { ABP_SELF_REVIEW_STATE_FILE: state.path },
+    );
+    assert.equal(r.status, 0);
+    assert.ok(r.stdout.length > 0, "should block — new hash differs from legacy");
+    const stored = JSON.parse(readFileSync(state.path, "utf8"));
+    assert.equal(typeof stored["e2e-legacy"], "object");
+    // Legacy count was 1; this run bumps to 2.
+    assert.equal(stored["e2e-legacy"].count, 2);
   } finally {
     rmSync(repo, { recursive: true, force: true });
     state.cleanup();

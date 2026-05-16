@@ -123,3 +123,5 @@ Use these when the shortcut thought appears:
 - `api`: public HTTP contract details.
 - `database`: physical schema, migrations, indexes, query behavior.
 - `documentation`: ADRs that capture rationale.
+- `proof`: handoff tests at each module boundary the architecture defines;
+  a clean module boundary is a clean place to assert.

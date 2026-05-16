@@ -8,6 +8,8 @@ import { join } from "node:path";
 
 import { isProductionFile } from "../src/classify.mjs";
 
+export const MAX_RUNS = Number(process.env.ABP_SELF_REVIEW_MAX_RUNS) || 3;
+
 export const REMINDER = `ABP self-review — before declaring this turn done, run a final-pass self-review of your diff against ABP engineering maturity.
 
 Apply the abp:code-review skill (already installed) to your own changes.
@@ -123,6 +125,16 @@ export function computeHash(sessionId, head, status) {
   return createHash("sha256").update(`${sessionId}\0${head}\0${status}`).digest("hex");
 }
 
+// Accepts the legacy string shape ({ sessionId: "hash" }) or the new
+// object shape ({ sessionId: { hash, count } }). Returns the normalized
+// { hash, count } form, or null if unseen.
+export function readEntry(state, sessionId) {
+  const raw = state[sessionId];
+  if (!raw) return null;
+  if (typeof raw === "string") return { hash: raw, count: 1 };
+  return { hash: raw.hash, count: raw.count ?? 1 };
+}
+
 export function buildDecision() {
   return {
     decision: "block",
@@ -130,9 +142,9 @@ export function buildDecision() {
   };
 }
 
-// Pure decision function — takes resolved inputs, returns either null (silent)
-// or the decision JSON to emit. Side-effect-free for testing.
-export function decide({ input, root, status, head, prevHash }) {
+// Pure decision function — takes resolved inputs, returns either a silent
+// outcome or the decision JSON to emit. Side-effect-free for testing.
+export function decide({ input, root, status, head, prevEntry, maxRuns = MAX_RUNS }) {
   if (input.stop_hook_active === true) return { action: "silent", reason: "stop_hook_active" };
   if (!root) return { action: "silent", reason: "not_a_repo" };
   if (!status.trim()) return { action: "silent", reason: "clean_tree" };
@@ -147,9 +159,18 @@ export function decide({ input, root, status, head, prevHash }) {
 
   const sessionId = input.session_id || "no-session";
   const hash = computeHash(sessionId, head, status);
-  if (prevHash === hash) return { action: "silent", reason: "duplicate_hash" };
+  if (prevEntry?.hash === hash) return { action: "silent", reason: "duplicate_hash" };
 
-  return { action: "block", hash, sessionId, decision: buildDecision() };
+  const prevCount = prevEntry?.count ?? 0;
+  if (prevCount >= maxRuns) return { action: "silent", reason: "max_runs_reached" };
+
+  return {
+    action: "block",
+    hash,
+    sessionId,
+    nextCount: prevCount + 1,
+    decision: buildDecision(),
+  };
 }
 
 function main() {
@@ -162,13 +183,13 @@ function main() {
   const sessionId = input.session_id || "no-session";
   const state = readState();
 
-  const outcome = decide({ input, root, status, head, prevHash: state[sessionId] });
+  const outcome = decide({ input, root, status, head, prevEntry: readEntry(state, sessionId) });
 
   if (outcome.action === "silent") {
     process.exit(0);
   }
 
-  state[outcome.sessionId] = outcome.hash;
+  state[outcome.sessionId] = { hash: outcome.hash, count: outcome.nextCount };
   writeState(state);
   process.stdout.write(JSON.stringify(outcome.decision));
   process.exit(0);

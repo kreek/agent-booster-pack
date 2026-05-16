@@ -6,6 +6,30 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [9.12.0] (2026-05-16)
+
+### Changed
+
+- Cap the ABP self-review Stop hook at 3 firings per `session_id` to
+  prevent doom loops when the model addresses the reminder by editing more
+  files (changing the diff hash) without using an acknowledgement token.
+  Configurable via `ABP_SELF_REVIEW_MAX_RUNS` (default `3`). State file
+  shape extended from `{ sessionId: "hash" }` to
+  `{ sessionId: { hash, count } }`; legacy string entries are read
+  transparently and migrate on the next write.
+- Foreground component handoffs as the primary proof target in the
+  `proof` skill. New Core Idea names parser → validator → domain →
+  persistence, service → service, producer → queue → consumer, and
+  functional-core → imperative-shell seams as where production defects
+  concentrate. The outermost caller boundary is reframed as the outermost
+  handoff. A new Core Idea makes the TDD departure explicit: when data,
+  logic, and I/O are separated and units stay pure, unit tests stay slim
+  by design — internal helpers are exercised by handoff tests above them.
+  `references/data-shape-boundaries.md` is now named as the canonical
+  handoff reference. `contract-first`, `architecture`, `async-systems`,
+  `domain-modeling`, and `api` Handoffs sections now route handoff-proof
+  in caller language.
+
 ## [9.11.0] (2026-05-16)
 
 ### Changed

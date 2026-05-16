@@ -28,7 +28,7 @@ description: Use for databases, schemas, migrations, indexes, transactions, quer
 2. Expand, migrate, verify, switch, then contract in separate
    deployable steps.
 3. Review SQL and lock behavior, not just ORM code.
-4. Backfills are batched, resumable, observable, and rollback-aware.
+4. Backfills are batched, resumable, observable, and reversible.
 5. Constraints enforce invariants. Every uniqueness invariant needs a DB-level
    `UNIQUE`, `EXCLUDE`, composite, or partial equivalent. Application-layer
    checks race under concurrency.

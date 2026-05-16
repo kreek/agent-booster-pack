@@ -72,4 +72,5 @@ Some ABP installations include the manual Interface Design Gate runtime. Use
 - `workflow`: broad routing.
 - `specify`: unsettled contract shape.
 - `api`, `database`, `async-systems`, `security`: domain boundary risks.
-- `proof`: executable checks for the approved contract.
+- `proof`: prove the approved interface at the handoff where callers cross
+  it; an approved contract without seam proof is unproven.

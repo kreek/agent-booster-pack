@@ -55,6 +55,13 @@ description: Use to review diffs and PRs for bugs, regressions, edge cases, proo
   claims marked unproven.
 - Dead surface: unused exports, old routes, stale flags, orphaned jobs, removed
   files still referenced, and duplicated rules with divergent meaning.
+- Reuse & composition: duplicated logic with shared meaning and rules,
+  inheritance where composition fits, deep inheritance chains, parallel
+  implementations of existing behavior, and second wrappers for cross-cutting
+  concerns already covered.
+- Build-vs-adopt: hand-rolled HTTP clients, ORMs/query builders, parsers,
+  retry/backoff loops, validators, serializers, format builders, date/time
+  math, schedulers, templating, crypto, and migration runners.
 - AI-generated risk: speculative abstraction, unnecessary compatibility shims,
   dead defensive code, test theater, fabricated APIs, scope creep, refactor
   drift, and comprehension debt.
@@ -65,8 +72,8 @@ description: Use to review diffs and PRs for bugs, regressions, edge cases, proo
    review threads, fetch thread state only when resolution or line context
    matters. Never run `gh` without explicit permission.
 2. **Pre-flight the review.** Identify intent, impact, CI status, and changed
-   surface. Missing PR intent on a non-trivial diff is a finding. Red or absent
-   CI scopes the review as unproven, not blocked from inspection.
+   surface. Missing PR intent on a non-trivial diff is a finding. Red or
+   absent CI means the review is unproven, not blocked from inspection.
 3. **Bound the scope.** For oversized generated or durable diffs, declare the
    partial review scope and make split/scope a finding when the human cannot
    review it in one sitting.
@@ -106,12 +113,13 @@ blocks the finding or fix.
 
 ## Verification
 
-- [ ] The review target, intent, CI/proof status, and scoped review surface are
+- [ ] The review target, intent, CI/proof status, and scope of the review are
       explicit.
-- [ ] Runtime/toolchain constraints and relevant language references shaped the
-      advice.
-- [ ] Security, behavior, evidence, dead-surface, maintainability, and
-      AI-generated risk lenses were applied where relevant.
+- [ ] Runtime/toolchain constraints and relevant language references informed
+      the advice.
+- [ ] Security, behavior, evidence, dead-surface, reuse-&-composition,
+      build-vs-adopt, maintainability, and AI-generated risk lenses were
+      applied where relevant.
 - [ ] Findings are severity ordered, anchored, concrete, and focused on impact.
 - [ ] Missing evidence, residual risk, and unreviewed scope are named.
 - [ ] GitHub commands and writes had explicit permission.
@@ -127,10 +135,11 @@ Use these when the shortcut thought appears:
 - Fewer files is simpler only when behavior, data, effects, and lifecycles stay
   uncoupled.
 - Compatibility shims need owner, caller, removal condition, and proof.
-- Trust changes tone, not coverage.
+- Trusting the author changes how you write findings, not how thoroughly you
+  review.
 - Test theater is a finding; load `proof` for the detailed taxonomy.
 - Speculative abstraction waits for a real caller or requirement.
-- Dead defensive code should become a boundary assertion or leave.
+- Dead defensive code should become a boundary assertion or be removed.
 - A refactor with observable behavior change is a feature change.
 - Bundled reformatting or unrelated edits should be split before deep review.
 - Oversized durable generated code is comprehension debt.

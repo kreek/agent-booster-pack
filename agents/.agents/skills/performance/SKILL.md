@@ -31,7 +31,7 @@ description: Use for performance, profiling, latency, throughput, allocation, ca
 1. Name the target metric before changing code.
 2. Use a realistic workload and identical before/after conditions.
 3. Optimize the measured bottleneck, not the code that only looks suspicious.
-4. Tail latency matters; averages hide user pain.
+4. Tail latency matters; averages hide the slow requests users feel.
 5. CPU, off-CPU, memory, allocation, I/O, lock contention, and
    network wait are different problems.
 6. Micro-benchmarks prove local mechanics, not end-to-end wins.

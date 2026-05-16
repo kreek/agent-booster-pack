@@ -10,7 +10,7 @@ description: Use for async systems, concurrency, queues, streams, pub/sub, order
 `EVERY ASYNC BOUNDARY NAMES OWNERSHIP, LIFETIME, BACKPRESSURE, AND FAILURE SEMANTICS.`
 
 Async work fails when ownership, cancellation, retry, ordering, and
-failure signals are implicit.
+failure handling are left implicit.
 
 ## When to Use
 
@@ -127,6 +127,9 @@ Use these when the shortcut thought appears:
 - `observability`: dashboards, alerts, traces, runbooks.
 - `release`: worker draining, deploy compatibility, migrations, rollout gates.
 - `debugging`: existing races, deadlocks, stuck jobs, or lag.
+- `proof`: assert at every async handoff — producer → queue → consumer,
+  pub/sub seams, worker-pool boundaries — for ownership, ordering,
+  backpressure, and failure semantics.
 
 ## References
 

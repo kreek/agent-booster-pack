@@ -14,6 +14,8 @@ description: Use for requested/approved docs, READMEs, ADRs, runbooks, API docs,
 - The user asks for or approves writing/reviewing READMEs, ADRs, runbooks,
   tutorials, how-to guides, reference docs, module docs, requirements,
   acceptance criteria, user stories, or code comments.
+- Authoring or revising ABP SKILL.md files; skills are documentation for
+  agents and follow the same clarity rules.
 - Deciding whether prose is needed or whether a type, schema,
   generated reference, test, or command output should be the source of
   truth.
@@ -47,9 +49,9 @@ description: Use for requested/approved docs, READMEs, ADRs, runbooks, API docs,
    catch drift.
 6. Write the why, context, and tradeoffs; let code/tests/schemas prove
    mechanics.
-7. Write in short, direct sentences. Prefer concrete nouns and verbs. Split
-   long sentences. Cut adverbs, throat-clearing, ornate phrasing, and clever
-   style. Keep only words that earn their place.
+7. Write like Hemingway, not David Foster Wallace. Short, direct sentences.
+   Concrete nouns and verbs. No throat-clearing, no clever style, no
+   unexplained jargon. Keep only words that earn their place.
 8. Delete stale docs when you cannot fix them now.
 9. Comments explain why and how when names, types, schemas, tests, or
    local structure cannot. Encode the rule in code or tests first; add a
@@ -123,7 +125,6 @@ Use these when the shortcut thought appears:
 
 ## References
 
-- Hemingway-style prose: short sentences, concrete words, lean rhythm.
 - ADR template: status, date, context, decision, consequences.
 - Requirements and acceptance criteria:
   `references/requirements-and-acceptance.md`.

@@ -149,6 +149,9 @@ const config: ProjectEvalConfig = {
       reuseBaseline: true,
     },
   },
+  regressions: {
+    suites: ["regressionCheck"],
+  },
   defaultProfile: "codexWithAbpSkills",
   defaultPlugin: "engineering-maturity",
   runsDir: process.env["ABP_EVAL_RUNS_DIR"] ?? path.join(os.homedir(), ".cache", "agent-booster-pack", "eval", "runs"),

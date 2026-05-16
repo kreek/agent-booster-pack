@@ -2,10 +2,13 @@
 
 This reference expands `proof`'s boundary-testing Core Ideas. The shared rule across all
 examples: **a boundary worth testing is a point where data shape or values
-change observably**. HTTP, CLI, UI, and module facades are special cases of
-this — the shape change is "internal value -> external representation".
-Pipeline seams, parser edges, validator outputs, middleware boundaries, and
-sans-IO byte surfaces are the same kind of thing.
+change observably**. These shape-change points are component handoffs — the
+seams where production defects concentrate, and the primary proof target.
+"Boundary" and "handoff" are used interchangeably here. HTTP, CLI, UI, and
+module facades are special cases of this — the shape change is "internal
+value -> external representation". Pipeline seams, parser edges, validator
+outputs, middleware boundaries, and sans-IO byte surfaces are the same kind
+of thing.
 
 Test placement is also a code-organization signal. If a clean seam test is
 hard to write, the seam is wrong: simplify the code before piling on mocks.
