@@ -132,3 +132,53 @@ observed vs. expected outcome.
 
 Security disclosures go through the channel described in
 [`SECURITY.md`](SECURITY.md), not public issues.
+
+## After adding or renaming a skill
+
+Run:
+
+```sh
+./setup.sh
+```
+
+This refreshes the per-agent symlink fan-out for manual installs and regenerates
+the `plugin/skills/` mirror used by the Claude Code and Codex plugin builds. Pi
+npm packages rebuild their `skills/` directories at `npm pack` time via each
+package's `scripts/build-skills.mjs`; those bundles are gitignored.
+
+Then update, as relevant:
+
+- [`agents/AGENTS.md`](agents/AGENTS.md) — repo-maintainer skill index.
+- [`workflow`](agents/.agents/skills/workflow/SKILL.md) — when routing for broad
+  tasks changes.
+- [`README.md`](README.md) — the human-facing skill list.
+- Neighboring skills' `## Handoffs` sections — when the routing graph changes.
+- [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json) — per
+  the pack-versioning rules in [`AGENTS.md`](AGENTS.md#pack-versioning-marketplacejson--pluginjson).
+- [`.agents/plugins/marketplace.json`](.agents/plugins/marketplace.json) and
+  [`plugin/.codex-plugin/plugin.json`](plugin/.codex-plugin/plugin.json) —
+  when Codex plugin metadata or packaged skill content changes.
+- `agent-booster-pack*/package.json` — when Pi package metadata, composition,
+  or versions change.
+
+## Local plugin development
+
+For testing a local checkout as a plugin source. End users should use the
+marketplace install commands in the README.
+
+Claude Code:
+
+```sh
+/plugin install /path/to/agent-booster-pack/plugin
+```
+
+Codex:
+
+```sh
+codex plugin marketplace add /path/to/agent-booster-pack
+```
+
+The Claude Code plugin reads `plugin/.claude-plugin/plugin.json`; the Codex
+plugin reads `plugin/.codex-plugin/plugin.json`. Both load the generated skill
+mirror under `plugin/skills/`. Edit canonical skills under
+`agents/.agents/skills/`, then run `./setup.sh` to refresh the mirror.
