@@ -8,19 +8,27 @@ import { join } from "node:path";
 
 import { isProductionFile } from "../src/classify.mjs";
 
-export const REMINDER = `ABP proof reminder — before declaring this turn done, name the proof or mark the claim unproven with a blocker.
+export const REMINDER = `ABP self-review — before declaring this turn done, run a final-pass self-review of your diff against ABP engineering maturity.
 
-Apply the abp:proof skill (already installed) and answer in your next reply:
-  1. The claim, in caller language: what observable behaviour changed?
-  2. The executable proof: test name, command, and observed pass/fail. A
-     passing check that does not exercise the new behaviour is not proof.
-  3. If the proof cannot be run here (missing deps, no DB, etc.), say so
-     explicitly and name what would be needed. Do not silently ship
-     unverified code.
+Apply the abp:code-review skill (already installed) to your own changes.
+Report findings first, in severity order, anchored to file:line. Cover the
+lenses that apply to this diff:
 
-If the change is mechanical (rename, format, comment-only) and tooling or
-exact-artifact inspection covers it, say so and exit. Trivial moves do not
-need new tests.
+  - Correctness & behaviour: regressions, edge cases, ordering, error shape,
+    compatibility.
+  - Security: trust boundaries, auth, secrets, input handling, unsafe sinks.
+  - Evidence: for every behaviour-changing claim, name the proof (test +
+    command + observed result) or mark it unproven with a blocker. A passing
+    check that does not exercise the new behaviour is not proof. Hand off to
+    abp:proof if claims need new coverage.
+  - Dead surface & AI-risk: speculative abstraction, defensive code with no
+    real caller, unused exports, fabricated APIs, scope creep, comprehension
+    debt.
+  - Simplicity: hidden mutable state, tangled effects, premature abstraction.
+
+If no issues are found, say so explicitly and name residual risk / unreviewed
+scope. If the change is mechanical (rename, format, comment-only) and tooling
+covers it, say so and exit.
 
 This reminder fires once per task. Address it and finish.`;
 
@@ -79,11 +87,17 @@ export function parseChangedPaths(status) {
 export function alreadyAcknowledged(message) {
   if (!message || typeof message !== "string") return false;
   const lower = message.toLowerCase();
-  return lower.includes("proof:") || lower.includes("evidence:") || lower.includes("unproven");
+  return (
+    lower.includes("self-review:") ||
+    lower.includes("findings:") ||
+    lower.includes("proof:") ||
+    lower.includes("evidence:") ||
+    lower.includes("unproven")
+  );
 }
 
 export function stateFilePath() {
-  return process.env.ABP_PROOF_GATE_STATE_FILE || join(homedir(), ".abp-proof-gate-state.json");
+  return process.env.ABP_SELF_REVIEW_STATE_FILE || join(homedir(), ".abp-self-review-state.json");
 }
 
 export function readState() {

@@ -12,10 +12,10 @@ import {
   computeHash,
   decide,
   parseChangedPaths,
-} from "../scripts/proof-reminder.mjs";
+} from "../scripts/self-review.mjs";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
-const SCRIPT = resolve(__dirname, "..", "scripts", "proof-reminder.mjs");
+const SCRIPT = resolve(__dirname, "..", "scripts", "self-review.mjs");
 
 function baseInput(overrides = {}) {
   return {
@@ -75,6 +75,22 @@ test("decide: test-only diff is silent", () => {
   assert.equal(out.reason, "no_production_changes");
 });
 
+test("decide: last_assistant_message naming Self-review: is silent", () => {
+  const out = decide(baseArgs({
+    input: baseInput({ last_assistant_message: "Self-review: no findings, residual risk noted." }),
+  }));
+  assert.equal(out.action, "silent");
+  assert.equal(out.reason, "already_acknowledged");
+});
+
+test("decide: last_assistant_message naming Findings: is silent", () => {
+  const out = decide(baseArgs({
+    input: baseInput({ last_assistant_message: "Findings: H1 missing input validation in src/foo.ts:42" }),
+  }));
+  assert.equal(out.action, "silent");
+  assert.equal(out.reason, "already_acknowledged");
+});
+
 test("decide: last_assistant_message naming Proof: is silent", () => {
   const out = decide(baseArgs({
     input: baseInput({ last_assistant_message: "Done. Proof: tests/pagination.spec.ts passes." }),
@@ -95,7 +111,7 @@ test("decide: production diff, fresh hash → block", () => {
   const out = decide(baseArgs());
   assert.equal(out.action, "block");
   assert.equal(out.decision.decision, "block");
-  assert.match(out.decision.reason, /ABP proof reminder/);
+  assert.match(out.decision.reason, /ABP self-review/);
   assert.ok(!("hookSpecificOutput" in out.decision));
   assert.ok(out.hash);
   assert.equal(out.sessionId, "session-abc");
@@ -130,6 +146,8 @@ test("parseChangedPaths: handles modified, added, untracked, renamed", () => {
 });
 
 test("alreadyAcknowledged: case-insensitive substring match", () => {
+  assert.equal(alreadyAcknowledged("self-review: clean"), true);
+  assert.equal(alreadyAcknowledged("Findings: none, residual risk noted"), true);
   assert.equal(alreadyAcknowledged("proof: works"), true);
   assert.equal(alreadyAcknowledged("EVIDENCE: ran the test"), true);
   assert.equal(alreadyAcknowledged("This is Unproven."), true);
@@ -160,7 +178,7 @@ test("buildDecision: shape matches Claude Code Stop hook contract", () => {
 // End-to-end test against a real git repo.
 
 function makeTempRepo() {
-  const dir = mkdtempSync(join(tmpdir(), "abp-proof-gate-"));
+  const dir = mkdtempSync(join(tmpdir(), "abp-self-review-"));
   execFileSync("git", ["-C", dir, "init", "-q", "-b", "main"]);
   execFileSync("git", ["-C", dir, "config", "user.email", "t@t"]);
   execFileSync("git", ["-C", dir, "config", "user.name", "t"]);
@@ -180,7 +198,7 @@ function makeStateFile() {
   // State must live outside the repo: writing it inside would make
   // `git status` report it as untracked, changing the status hash between
   // invocations and defeating idempotency.
-  const dir = mkdtempSync(join(tmpdir(), "abp-proof-gate-state-"));
+  const dir = mkdtempSync(join(tmpdir(), "abp-self-review-state-"));
   return { path: join(dir, "state.json"), cleanup: () => rmSync(dir, { recursive: true, force: true }) };
 }
 
@@ -190,7 +208,7 @@ test("e2e: clean tree exits 0 silent", () => {
   try {
     const r = runScript(
       { session_id: "e2e-1", cwd: repo, hook_event_name: "Stop" },
-      { ABP_PROOF_GATE_STATE_FILE: state.path },
+      { ABP_SELF_REVIEW_STATE_FILE: state.path },
     );
     assert.equal(r.status, 0);
     assert.equal(r.stdout, "");
@@ -212,12 +230,12 @@ test("e2e: production change emits block JSON and writes state", () => {
         hook_event_name: "Stop",
         last_assistant_message: "Implemented x.",
       },
-      { ABP_PROOF_GATE_STATE_FILE: state.path },
+      { ABP_SELF_REVIEW_STATE_FILE: state.path },
     );
     assert.equal(r.status, 0);
     const parsed = JSON.parse(r.stdout);
     assert.equal(parsed.decision, "block");
-    assert.match(parsed.reason, /ABP proof reminder/);
+    assert.match(parsed.reason, /ABP self-review/);
     assert.ok(!("hookSpecificOutput" in parsed));
 
     const stored = JSON.parse(readFileSync(state.path, "utf8"));
@@ -235,14 +253,14 @@ test("e2e: second invocation with same state file is silent (idempotency)", () =
   try {
     const first = runScript(
       { session_id: "e2e-3", cwd: repo, hook_event_name: "Stop" },
-      { ABP_PROOF_GATE_STATE_FILE: state.path },
+      { ABP_SELF_REVIEW_STATE_FILE: state.path },
     );
     assert.equal(first.status, 0);
     assert.ok(first.stdout.length > 0);
 
     const second = runScript(
       { session_id: "e2e-3", cwd: repo, hook_event_name: "Stop" },
-      { ABP_PROOF_GATE_STATE_FILE: state.path },
+      { ABP_SELF_REVIEW_STATE_FILE: state.path },
     );
     assert.equal(second.status, 0);
     assert.equal(second.stdout, "");
@@ -264,7 +282,7 @@ test("e2e: stop_hook_active=true is silent even with dirty production tree", () 
         hook_event_name: "Stop",
         stop_hook_active: true,
       },
-      { ABP_PROOF_GATE_STATE_FILE: state.path },
+      { ABP_SELF_REVIEW_STATE_FILE: state.path },
     );
     assert.equal(r.status, 0);
     assert.equal(r.stdout, "");
@@ -275,12 +293,12 @@ test("e2e: stop_hook_active=true is silent even with dirty production tree", () 
 });
 
 test("e2e: not a git repo is silent", () => {
-  const dir = mkdtempSync(join(tmpdir(), "abp-proof-gate-nongit-"));
+  const dir = mkdtempSync(join(tmpdir(), "abp-self-review-nongit-"));
   const state = makeStateFile();
   try {
     const r = runScript(
       { session_id: "e2e-5", cwd: dir, hook_event_name: "Stop" },
-      { ABP_PROOF_GATE_STATE_FILE: state.path },
+      { ABP_SELF_REVIEW_STATE_FILE: state.path },
     );
     assert.equal(r.status, 0);
     assert.equal(r.stdout, "");

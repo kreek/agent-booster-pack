@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node ${CODEX_PLUGIN_ROOT}/scripts/proof-reminder.mjs",
+            "command": "node ${CODEX_PLUGIN_ROOT}/scripts/self-review.mjs",
             "timeout": 5
           }
         ]

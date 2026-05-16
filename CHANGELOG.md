@@ -6,6 +6,25 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [9.11.0] (2026-05-16)
+
+### Changed
+
+- Stop hook reframed from a narrow proof reminder into a final-pass
+  self-review. The injected message now routes the model into the
+  `abp:code-review` skill and asks for a findings-first severity pass
+  across correctness, security, evidence, dead-surface / AI-risk, and
+  simplicity lenses (with handoff to `abp:proof` for missing coverage).
+  Gating semantics (production-file-only, once-per-session-hash,
+  git-aware, Stop-only) are unchanged.
+- Hook script renamed `plugin/scripts/proof-reminder.mjs` →
+  `plugin/scripts/self-review.mjs`; test renamed in lockstep.
+  Acknowledgement tokens broadened: `self-review:` and `findings:` join
+  the existing `proof:`, `evidence:`, `unproven`. State file
+  `~/.abp-proof-gate-state.json` → `~/.abp-self-review-state.json`;
+  env override `ABP_PROOF_GATE_STATE_FILE` →
+  `ABP_SELF_REVIEW_STATE_FILE`.
+
 ## [9.10.3] (2026-05-15)
 
 ### Fixed
