@@ -126,6 +126,7 @@ engineering-pressure category each skill belongs to.
 |---|---|---|
 | [`workflow`](agents/.agents/skills/workflow/SKILL.md) | Always-on routing and proof | Choosing the working mode, scoped skill set, and proof plan. |
 | [`proof`](agents/.agents/skills/proof/SKILL.md) | Always-on routing and proof | Behavior, contracts, invariants, root causes, or completion claims need evidence. |
+| [`specify`](agents/.agents/skills/specify/SKILL.md) | Foundational design | Architecture or design decisions need human collaboration before code changes. |
 | [`code-review`](agents/.agents/skills/code-review/SKILL.md) | Correctness and change | Diffs, branches, PRs, requested changes, or generated code need review. |
 | [`debugging`](agents/.agents/skills/debugging/SKILL.md) | Correctness and change | Bugs, flakes, regressions, or symptoms need root-cause investigation. |
 | [`commit`](agents/.agents/skills/commit/SKILL.md) | Project and repo workflow | Reviewed work needs staging, logical commit grouping, or a right-sized commit message. |
@@ -142,7 +143,6 @@ engineering-pressure category each skill belongs to.
 | [`observability`](agents/.agents/skills/observability/SKILL.md) | Production quality | Logs, metrics, traces, health checks, dashboards, alerts, or telemetry need work. |
 | [`performance`](agents/.agents/skills/performance/SKILL.md) | Production quality | Latency, throughput, p99s, CPU, memory, I/O, caching, or resource saturation matters. |
 | [`documentation`](agents/.agents/skills/documentation/SKILL.md) | Public/user surfaces | READMEs, ADRs, runbooks, tutorials, reference docs, or comments are requested or approved. |
-| [`specify`](agents/.agents/skills/specify/SKILL.md) | Foundational design | Architecture or design decisions need human collaboration before code changes. |
 | [`ui-design`](agents/.agents/skills/ui-design/SKILL.md) | Public/user surfaces | Pages, components, interaction flows, responsive layout, or visual design need work. |
 | [`accessibility`](agents/.agents/skills/accessibility/SKILL.md) | Public/user surfaces | WCAG, semantic HTML, ARIA, keyboard, focus, contrast, forms, or inclusive UI are in scope. |
 | [`official-source-check`](agents/.agents/skills/official-source-check/SKILL.md) | Correctness and change | Current external framework, runtime, SDK, browser, cloud, or platform behavior matters. |
