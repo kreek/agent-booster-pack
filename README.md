@@ -8,15 +8,16 @@
   </picture>
 </p>
 
-Agent Booster Pack (ABP) is a portable skill library for coding agents. It
-works with Codex, Claude Code, Pi, Cursor, Gemini CLI, GitHub Copilot CLI,
-OpenCode, and Windsurf via the Agent Skills layout, and nudges agents toward
-simpler, evidence-backed, secure, accessible, production-grade work.
+Drawn from 25 years of software engineering across startups and large
+organizations, Agent Booster Pack (ABP) is a portable skill library for
+coding agents. It works with Codex, Claude Code, Pi, Cursor, Gemini CLI,
+GitHub Copilot CLI, OpenCode, and Windsurf via the Agent Skills layout, and
+nudges agents toward simpler, evidence-backed, secure, accessible,
+production-grade work.
 
 **ABP rides on the host harness; it does not replace it.** The skills name
 engineering risks and proof obligations. The harness uses its own browser,
-memory, planning, sub-agent, and tool surfaces to satisfy them. Drawn from 25
-years of software engineering across startups and large organizations.
+memory, planning, sub-agent, and tool surfaces to satisfy them.
 
 ## What ABP guides agents to do
 
@@ -107,36 +108,38 @@ its triggers, principles, workflow, and verification.
 
 | Skill | Group | Use when |
 |---|---|---|
-| [`workflow`][skill-workflow] | Always-on routing and proof | Choosing the working mode, scoped skill set, and proof plan. |
-| [`contract-first`][skill-contract-first] | Always-on routing and proof | Durable interfaces need approval before implementation lands. |
-| [`proof`][skill-proof] | Always-on routing and proof | Behavior, contracts, invariants, root causes, or completion claims need evidence. |
-| [`specify`][skill-specify] | Foundational design | Architecture or design decisions need human collaboration before code changes. |
-| [`domain-modeling`][skill-domain-modeling] | Foundational design | Data, states, invariants, allowed combinations, transitions, or effects need shaping. |
-| [`architecture`][skill-architecture] | Foundational design | Module boundaries, bounded contexts, or independently changing concerns need design. |
-| [`code-review`][skill-code-review] | Correctness and change | Diffs, branches, PRs, requested changes, or generated code need review. |
-| [`debugging`][skill-debugging] | Correctness and change | Bugs, flakes, regressions, or symptoms need root-cause investigation. |
-| [`refactoring`][skill-refactoring] | Correctness and change | Structure changes must preserve behavior while improving clarity. |
-| [`error-handling`][skill-error-handling] | Correctness and change | Error types, propagation, retries, timeouts, crash boundaries, or recovery need design. |
-| [`official-source-check`][skill-official-source-check] | Correctness and change | Current external framework, runtime, SDK, browser, cloud, or platform behavior matters. |
-| [`security`][skill-security] | Safety gates | Auth, secrets, crypto, input validation, dependency trust, or trust boundaries are in scope. |
-| [`database`][skill-database] | Safety gates | Schemas, migrations, indexes, queries, transactions, or production data access are in scope. |
-| [`release`][skill-release] | Safety gates | Approved release prep, versioning, changelogs, rollout, or rollback work is in scope. |
-| [`observability`][skill-observability] | Production quality | Logs, metrics, traces, health checks, dashboards, alerts, or telemetry need work. |
-| [`async-systems`][skill-async-systems] | Production quality | Async tasks, workers, queues, streams, ordering, delivery, or backpressure are in scope. |
-| [`performance`][skill-performance] | Production quality | Latency, throughput, p99s, CPU, memory, I/O, caching, or resource saturation matters. |
-| [`api`][skill-api] | Public/user surfaces | HTTP APIs, OpenAPI, status codes, pagination, idempotency, versioning, or webhooks are in scope. |
-| [`documentation`][skill-documentation] | Public/user surfaces | READMEs, ADRs, runbooks, tutorials, reference docs, or comments are requested or approved. |
-| [`ui-design`][skill-ui-design] | Public/user surfaces | Pages, components, interaction flows, responsive layout, or visual design need work. |
-| [`accessibility`][skill-accessibility] | Public/user surfaces | WCAG, semantic HTML, ARIA, keyboard, focus, contrast, forms, or inclusive UI are in scope. |
-| [`commit`][skill-commit] | Project and repo workflow | Reviewed work needs staging, logical commit grouping, or a right-sized commit message. |
-| [`git-workflow`][skill-git-workflow] | Project and repo workflow | Branch hygiene, rebases, conflicts, bisects, history recovery, force-push decisions, or GitHub CLI are in scope. |
-| [`scaffolding`][skill-scaffolding] | Project and repo workflow | New projects, baseline tooling, package-manager defaults, test runners, linting, or CI need setup. |
+| [`workflow`](agents/.agents/skills/workflow/SKILL.md) | Always-on routing and proof | Choosing the working mode, scoped skill set, and proof plan. |
+| [`contract-first`](agents/.agents/skills/contract-first/SKILL.md) | Always-on routing and proof | Durable interfaces need approval before implementation lands. |
+| [`proof`](agents/.agents/skills/proof/SKILL.md) | Always-on routing and proof | Behavior, contracts, invariants, root causes, or completion claims need evidence. |
+| [`specify`](agents/.agents/skills/specify/SKILL.md) | Foundational design | Architecture or design decisions need human collaboration before code changes. |
+| [`domain-modeling`](agents/.agents/skills/domain-modeling/SKILL.md) | Foundational design | Data, states, invariants, allowed combinations, transitions, or effects need shaping. |
+| [`architecture`](agents/.agents/skills/architecture/SKILL.md) | Foundational design | Module boundaries, bounded contexts, or independently changing concerns need design. |
+| [`code-review`](agents/.agents/skills/code-review/SKILL.md) | Correctness and change | Diffs, branches, PRs, requested changes, or generated code need review. |
+| [`debugging`](agents/.agents/skills/debugging/SKILL.md) | Correctness and change | Bugs, flakes, regressions, or symptoms need root-cause investigation. |
+| [`refactoring`](agents/.agents/skills/refactoring/SKILL.md) | Correctness and change | Structure changes must preserve behavior while improving clarity. |
+| [`error-handling`](agents/.agents/skills/error-handling/SKILL.md) | Correctness and change | Error types, propagation, retries, timeouts, crash boundaries, or recovery need design. |
+| [`official-source-check`](agents/.agents/skills/official-source-check/SKILL.md) | Correctness and change | Current external framework, runtime, SDK, browser, cloud, or platform behavior matters. |
+| [`security`](agents/.agents/skills/security/SKILL.md) | Safety gates | Auth, secrets, crypto, input validation, dependency trust, or trust boundaries are in scope. |
+| [`database`](agents/.agents/skills/database/SKILL.md) | Safety gates | Schemas, migrations, indexes, queries, transactions, or production data access are in scope. |
+| [`release`](agents/.agents/skills/release/SKILL.md) | Safety gates | Approved release prep, versioning, changelogs, rollout, or rollback work is in scope. |
+| [`observability`](agents/.agents/skills/observability/SKILL.md) | Production quality | Logs, metrics, traces, health checks, dashboards, alerts, or telemetry need work. |
+| [`async-systems`](agents/.agents/skills/async-systems/SKILL.md) | Production quality | Async tasks, workers, queues, streams, ordering, delivery, or backpressure are in scope. |
+| [`performance`](agents/.agents/skills/performance/SKILL.md) | Production quality | Latency, throughput, p99s, CPU, memory, I/O, caching, or resource saturation matters. |
+| [`api`](agents/.agents/skills/api/SKILL.md) | Public/user surfaces | HTTP APIs, OpenAPI, status codes, pagination, idempotency, versioning, or webhooks are in scope. |
+| [`documentation`](agents/.agents/skills/documentation/SKILL.md) | Public/user surfaces | READMEs, ADRs, runbooks, tutorials, reference docs, or comments are requested or approved. |
+| [`ui-design`](agents/.agents/skills/ui-design/SKILL.md) | Public/user surfaces | Pages, components, interaction flows, responsive layout, or visual design need work. |
+| [`accessibility`](agents/.agents/skills/accessibility/SKILL.md) | Public/user surfaces | WCAG, semantic HTML, ARIA, keyboard, focus, contrast, forms, or inclusive UI are in scope. |
+| [`commit`](agents/.agents/skills/commit/SKILL.md) | Project and repo workflow | Reviewed work needs staging, logical commit grouping, or a right-sized commit message. |
+| [`git-workflow`](agents/.agents/skills/git-workflow/SKILL.md) | Project and repo workflow | Branch hygiene, rebases, conflicts, bisects, history recovery, force-push decisions, or GitHub CLI are in scope. |
+| [`scaffolding`](agents/.agents/skills/scaffolding/SKILL.md) | Project and repo workflow | New projects, baseline tooling, package-manager defaults, test runners, linting, or CI need setup. |
 
 Greenfield stack picks live as editable
-[Backstage Software Templates][backstage-templates] YAML files under
-[`scaffolding/references/stacks/`][stacks-dir]. Edit them to match your
-preferred frameworks, databases, auth, jobs, and observability. Shared
-language defaults are in [`language-defaults.md`][language-defaults].
+[Backstage Software Templates](https://backstage.io/docs/features/software-templates/)
+YAML files under
+[`scaffolding/references/stacks/`](agents/.agents/skills/scaffolding/references/stacks/).
+Edit them to match your preferred frameworks, databases, auth, jobs, and
+observability. Shared language defaults are in
+[`language-defaults.md`](agents/.agents/skills/scaffolding/references/language-defaults.md).
 
 ## How routing works
 
@@ -152,8 +155,10 @@ edits). When a durable interface is in scope, the agent stops at the
 contract/API and high-level plan and asks for approval before implementation
 continues.
 
-See [`workflow`][skill-workflow] for the full routing model, durable-interface
-definition, and required sign-off artifacts.
+See [`workflow`](agents/.agents/skills/workflow/SKILL.md) for the full
+routing model and skill-loading table, and
+[`contract-first`](agents/.agents/skills/contract-first/SKILL.md) for the
+durable-interface definition and required sign-off artifacts.
 
 ## What makes ABP unique
 
@@ -216,31 +221,3 @@ If you installed the Claude Code plugin, run `/plugin uninstall abp@abp`
 (and optionally `/plugin marketplace remove abp`) from inside Claude Code.
 For the Codex plugin, remove it from Codex's plugin UI or marketplace
 commands.
-
-[skill-accessibility]: agents/.agents/skills/accessibility/SKILL.md
-[skill-api]: agents/.agents/skills/api/SKILL.md
-[skill-specify]: agents/.agents/skills/specify/SKILL.md
-[skill-contract-first]: agents/.agents/skills/contract-first/SKILL.md
-[skill-async-systems]: agents/.agents/skills/async-systems/SKILL.md
-[skill-architecture]: agents/.agents/skills/architecture/SKILL.md
-[skill-domain-modeling]: agents/.agents/skills/domain-modeling/SKILL.md
-[skill-database]: agents/.agents/skills/database/SKILL.md
-[skill-debugging]: agents/.agents/skills/debugging/SKILL.md
-[skill-documentation]: agents/.agents/skills/documentation/SKILL.md
-[skill-error-handling]: agents/.agents/skills/error-handling/SKILL.md
-[skill-ui-design]: agents/.agents/skills/ui-design/SKILL.md
-[skill-commit]: agents/.agents/skills/commit/SKILL.md
-[skill-git-workflow]: agents/.agents/skills/git-workflow/SKILL.md
-[skill-observability]: agents/.agents/skills/observability/SKILL.md
-[skill-performance]: agents/.agents/skills/performance/SKILL.md
-[skill-proof]: agents/.agents/skills/proof/SKILL.md
-[skill-release]: agents/.agents/skills/release/SKILL.md
-[skill-refactoring]: agents/.agents/skills/refactoring/SKILL.md
-[skill-official-source-check]: agents/.agents/skills/official-source-check/SKILL.md
-[skill-code-review]: agents/.agents/skills/code-review/SKILL.md
-[skill-scaffolding]: agents/.agents/skills/scaffolding/SKILL.md
-[skill-security]: agents/.agents/skills/security/SKILL.md
-[skill-workflow]: agents/.agents/skills/workflow/SKILL.md
-[backstage-templates]: https://backstage.io/docs/features/software-templates/
-[stacks-dir]: agents/.agents/skills/scaffolding/references/stacks/
-[language-defaults]: agents/.agents/skills/scaffolding/references/language-defaults.md
