@@ -6,6 +6,23 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [9.10.0] (2026-05-15)
+
+### Added
+
+- Light-touch end-of-turn proof reminder hook on the Claude Code and Codex
+  plugin (`Stop` event). Interrupts once per task when production code
+  changed and the agent has not named proof, pointing at the `abp:proof`
+  skill. Honors `stop_hook_active` to avoid infinite loops; idempotent per
+  session via a state file at `~/.abp-proof-gate-state.json`
+  (override with `ABP_PROOF_GATE_STATE_FILE`). Skips silently on
+  docs/config-only diffs, clean trees, non-git directories, and when the
+  agent has already named proof in its last message. Codex users must
+  enable `[features] hooks = true` in `~/.codex/config.toml`.
+- Narrow `agents/AGENTS.md` carve-out permitting completion-gate hooks
+  that ride on the host's native turn-end event and inject skill-aligned
+  reminders only.
+
 ## [9.9.0] (2026-05-15)
 
 ### Changed

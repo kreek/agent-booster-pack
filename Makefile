@@ -12,6 +12,7 @@ test:
 	cd agent-booster-pack && npm test
 	cd agent-booster-pack-contract-first && npm test
 	cd agent-booster-pack-proof && npm test
+	node --test plugin/test/proof-reminder.test.mjs
 	cd agent-booster-pack-specify && npm test
 	cd eval && npm test
 	cd eval && npm run typecheck
