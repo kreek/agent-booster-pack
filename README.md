@@ -58,6 +58,15 @@ Then open `/plugins` in Codex, select **Agent Booster Pack**, and install. To
 update later, run `codex plugin marketplace upgrade abp` and reinstall from
 `/plugins`.
 
+The ABP self-review pass uses a Codex plugin Stop hook. Enable hooks in
+`~/.codex/config.toml`:
+
+```toml
+[features]
+hooks = true
+plugin_hooks = true
+```
+
 ### Pi
 
 Pi is modular: ABP for Pi ships as a meta package plus four separable
@@ -66,9 +75,15 @@ runtimes install manual commands and stay quiet until you start them.
 
 ```sh
 # Everything: skills + proof runtime + manual workflow commands
-pi install npm:agent-booster-pack
+pi install github:kreek/agent-booster-pack
 
-# Or pick parts:
+# ABP is still changing quickly, so GitHub is the preferred Pi install source
+# for now. Once the package surface settles, npm releases will become the
+# stable channel again.
+#
+# Published npm packages are still available when you need a registry-pinned
+# install, or when you want only one part:
+pi install npm:agent-booster-pack
 pi install npm:agent-booster-pack-skills            # general skills only
 pi install npm:agent-booster-pack-proof             # proof runtime + skill
 pi install npm:agent-booster-pack-contract-first    # Interface Design Gate

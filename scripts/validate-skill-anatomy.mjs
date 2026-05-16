@@ -282,6 +282,9 @@ export function validateCodexPluginPackage(skillsDir) {
   const problems = [];
   const marketplacePath = join(root, ".agents/plugins/marketplace.json");
   const manifestPath = join(root, "plugin/.codex-plugin/plugin.json");
+  const hooksPath = join(root, "plugin/.codex-plugin/hooks.json");
+  const claudeMarketplacePath = join(root, ".claude-plugin/marketplace.json");
+  const claudeManifestPath = join(root, "plugin/.claude-plugin/plugin.json");
 
   const [marketplace, marketplaceProblem] = readJsonObject(marketplacePath);
   if (marketplaceProblem) problems.push(marketplaceProblem);
@@ -323,6 +326,7 @@ export function validateCodexPluginPackage(skillsDir) {
   else if (manifest) {
     if (manifest.name !== "abp") problems.push(`${manifestPath} name must be 'abp'`);
     if (manifest.skills !== "./skills/") problems.push(`${manifestPath} skills must be './skills/'`);
+    if (manifest.hooks !== "./hooks.json") problems.push(`${manifestPath} hooks must be './hooks.json'`);
 
     const iface = manifest.interface;
     if (!iface || typeof iface !== "object") {
@@ -340,17 +344,52 @@ export function validateCodexPluginPackage(skillsDir) {
       }
     }
 
-    const [claudeMarketplace, claudeProblem] = readJsonObject(join(root, ".claude-plugin/marketplace.json"));
+    const [hooks, hooksProblem] = readJsonObject(hooksPath);
+    if (hooksProblem) {
+      problems.push(hooksProblem);
+    } else {
+      const stopGroups = hooks.hooks?.Stop;
+      const stopCommands = Array.isArray(stopGroups)
+        ? stopGroups.flatMap((group) => (Array.isArray(group?.hooks) ? group.hooks : []))
+        : [];
+      const hasSelfReviewStopHook = stopCommands.some(
+        (hook) =>
+          hook?.type === "command" &&
+          hook.command === "node ${PLUGIN_ROOT}/scripts/self-review.mjs" &&
+          hook.timeout === 5,
+      );
+      if (!hasSelfReviewStopHook) {
+        problems.push(`${hooksPath} must register the ABP self-review Stop hook`);
+      }
+    }
+
+    const [claudeMarketplace, claudeProblem] = readJsonObject(claudeMarketplacePath);
     if (!claudeProblem && claudeMarketplace) {
       const claudeVersion = claudeMarketplace.metadata?.version;
       if (manifest.version !== claudeVersion) {
-        problems.push(`${manifestPath} version must match .claude-plugin/marketplace.json metadata.version`);
+        problems.push(`${manifestPath} version must match ${claudeMarketplacePath} metadata.version`);
       }
       const claudeEntry = firstPluginEntry(claudeMarketplace);
       if (!claudeEntry) {
-        problems.push(".claude-plugin/marketplace.json must include an 'abp' plugin entry");
-      } else if (claudeEntry.source !== "./plugin") {
-        problems.push(".claude-plugin/marketplace.json abp.source must be './plugin'");
+        problems.push(`${claudeMarketplacePath} must include an 'abp' plugin entry`);
+      } else {
+        if (claudeEntry.source !== "./plugin") {
+          problems.push(`${claudeMarketplacePath} abp.source must be './plugin'`);
+        }
+        if (claudeEntry.version !== claudeVersion) {
+          problems.push(`${claudeMarketplacePath} abp.version must match metadata.version`);
+        }
+      }
+    }
+
+    const [claudeManifest, claudeManifestProblem] = readJsonObject(claudeManifestPath);
+    if (!claudeManifestProblem && claudeManifest && claudeMarketplace) {
+      const claudeVersion = claudeMarketplace.metadata?.version;
+      if (claudeManifest.version !== claudeVersion) {
+        problems.push(`${claudeManifestPath} version must match ${claudeMarketplacePath} metadata.version`);
+      }
+      if (manifest.version !== claudeManifest.version) {
+        problems.push(`${manifestPath} version must match ${claudeManifestPath} version`);
       }
     }
   }

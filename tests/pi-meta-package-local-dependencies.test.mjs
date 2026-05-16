@@ -17,6 +17,33 @@ function readPackage(packageDir) {
 }
 
 describe("Pi meta-package local dependencies", () => {
+  it("makes the repo root installable from GitHub for Pi during active ABP development", () => {
+    const pkg = readPackage(ROOT);
+
+    expect(pkg.private).toBe(true);
+    expect(pkg.name).toBe("agent-booster-pack-github");
+    expect(pkg.scripts.prepare).toBe("npm run build:pi-github");
+    for (const name of SIBLING_PACKAGES) {
+      expect(pkg.scripts["build:pi-github"]).toContain(`npm --prefix ${name} run build`);
+    }
+    expect(pkg.pi.extensions).toEqual([
+      "./agent-booster-pack-contract-first/extensions",
+      "./agent-booster-pack-proof/src/index.ts",
+      "./agent-booster-pack-specify/extensions",
+      "./agent-booster-pack/extensions",
+    ]);
+    expect(pkg.pi.skills).toEqual([
+      "./agent-booster-pack-skills/skills",
+      "./agent-booster-pack-contract-first/skills/contract-first",
+      "./agent-booster-pack-proof/skills/proof",
+      "./agent-booster-pack-specify/skills/specify",
+    ]);
+    expect(pkg.files).toContain("agent-booster-pack-proof/src");
+    expect(pkg.files).toContain("agent-booster-pack-skills/skills");
+    expect(pkg.files).not.toContain("agent-booster-pack");
+    expect(pkg.files.some((path) => path.includes("node_modules"))).toBe(false);
+  });
+
   it("depends on local sibling directories", () => {
     const pkg = readPackage(META_PACKAGE);
 
